@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Answer;
 use App\Models\Question;
 use App\Models\Quiz;
 use Illuminate\Http\Request;
@@ -31,9 +32,15 @@ class QuestionController extends Controller
     {
         $quiz = Quiz::findOrFail($quiz);
 
-        return view('admin.questions.create', compact('quiz'));
-    }
+        // Ordini già occupati
+        $usedOrders = $quiz->questions()->pluck('order')->toArray();
 
+        // Ultimo ordine
+        $lastOrder = $quiz->questions()->max('order');
+        $nextOrder = $lastOrder ? $lastOrder + 1 : 1;
+
+        return view('admin.questions.create', compact('quiz', 'nextOrder', 'usedOrders'));
+    }
     /**
      * Store a newly created resource in storage.
      */
@@ -44,7 +51,25 @@ class QuestionController extends Controller
         $request->validate([
             'question_text' => 'required|string',
             'time_limit_seconds' => 'required|integer|min:5',
-            'order' => 'required|integer|min:1',
+            'order' => [
+                'required',
+                'integer',
+                'min:1',
+                function ($attribute, $value, $fail) use ($quiz) {
+
+                    $exists = $quiz->questions()
+                        ->where('order', $value)
+                        ->exists();
+
+                    if ($exists) {
+                        $fail('Questo numero di ordine è già utilizzato per questo quiz.');
+                    }
+                },
+            ],
+            'answers' => 'required|array|size:4',
+            'answers.*' => 'required|string|max:255',
+            'correct_answer' => 'required|integer|min:0|max:3',
+
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'audio' => 'nullable|mimes:mp3,wav,ogg|max:5120',
             'video' => 'nullable|mimes:mp4,mov,webm|max:20000',
@@ -58,21 +83,28 @@ class QuestionController extends Controller
         ];
 
         if ($request->hasFile('image')) {
-            $data['image_path'] = $request->file('image')
-                ->store('questions', 'public');
+            $data['image_path'] = $request->file('image')->store('questions', 'public');
         }
 
         if ($request->hasFile('audio')) {
-            $data['audio_path'] = $request->file('audio')
-                ->store('questions', 'public');
+            $data['audio_path'] = $request->file('audio')->store('questions', 'public');
         }
 
         if ($request->hasFile('video')) {
-            $data['video_path'] = $request->file('video')
-                ->store('questions', 'public');
+            $data['video_path'] = $request->file('video')->store('questions', 'public');
         }
 
-        Question::create($data);
+        $question = Question::create($data);
+
+        // 🔥 SALVATAGGIO RISPOSTE
+        foreach ($request->answers as $index => $answerText) {
+
+            Answer::create([
+                'question_id' => $question->id,
+                'answer_text' => $answerText,
+                'is_correct' => $request->correct_answer == $index,
+            ]);
+        }
 
         return redirect()
             ->route('admin.quizzes.questions.index', $quiz->id)
@@ -89,7 +121,13 @@ class QuestionController extends Controller
         $question = Question::where('quiz_id', $quiz->id)
             ->findOrFail($question);
 
-        return view('admin.questions.edit', compact('quiz', 'question'));
+        // Ordini occupati esclusa la domanda corrente
+        $usedOrders = $quiz->questions()
+            ->where('id', '!=', $question->id)
+            ->pluck('order')
+            ->toArray();
+
+        return view('admin.questions.edit', compact('quiz', 'question', 'usedOrders'));
     }
 
     /**
@@ -105,7 +143,26 @@ class QuestionController extends Controller
         $request->validate([
             'question_text' => 'required|string',
             'time_limit_seconds' => 'required|integer|min:5',
-            'order' => 'required|integer|min:1',
+            'order' => [
+                'required',
+                'integer',
+                'min:1',
+                function ($attribute, $value, $fail) use ($quiz, $question) {
+
+                    $exists = $quiz->questions()
+                        ->where('order', $value)
+                        ->where('id', '!=', $question->id)
+                        ->exists();
+
+                    if ($exists) {
+                        $fail('Questo numero di ordine è già utilizzato per questo quiz.');
+                    }
+                },
+            ],
+            'answers' => 'required|array|size:4',
+            'answers.*' => 'required|string|max:255',
+            'correct_answer' => 'required|integer|min:0|max:3',
+
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'audio' => 'nullable|mimes:mp3,wav,ogg|max:5120',
             'video' => 'nullable|mimes:mp4,mov,webm|max:20000',
@@ -117,7 +174,14 @@ class QuestionController extends Controller
             'order' => $request->order,
         ];
 
+        // =====================
         // IMAGE
+        // =====================
+        if ($request->has('remove_image') && $question->image_path) {
+            Storage::disk('public')->delete($question->image_path);
+            $data['image_path'] = null;
+        }
+
         if ($request->hasFile('image')) {
             if ($question->image_path) {
                 Storage::disk('public')->delete($question->image_path);
@@ -127,7 +191,14 @@ class QuestionController extends Controller
                 ->store('questions', 'public');
         }
 
+        // =====================
         // AUDIO
+        // =====================
+        if ($request->has('remove_audio') && $question->audio_path) {
+            Storage::disk('public')->delete($question->audio_path);
+            $data['audio_path'] = null;
+        }
+
         if ($request->hasFile('audio')) {
             if ($question->audio_path) {
                 Storage::disk('public')->delete($question->audio_path);
@@ -137,7 +208,14 @@ class QuestionController extends Controller
                 ->store('questions', 'public');
         }
 
+        // =====================
         // VIDEO
+        // =====================
+        if ($request->has('remove_video') && $question->video_path) {
+            Storage::disk('public')->delete($question->video_path);
+            $data['video_path'] = null;
+        }
+
         if ($request->hasFile('video')) {
             if ($question->video_path) {
                 Storage::disk('public')->delete($question->video_path);
@@ -148,6 +226,18 @@ class QuestionController extends Controller
         }
 
         $question->update($data);
+
+        // 🔥 RESET RISPOSTE
+        $question->answers()->delete();
+
+        foreach ($request->answers as $index => $answerText) {
+
+            Answer::create([
+                'question_id' => $question->id,
+                'answer_text' => $answerText,
+                'is_correct' => $request->correct_answer == $index,
+            ]);
+        }
 
         return redirect()
             ->route('admin.quizzes.questions.index', $quiz->id)

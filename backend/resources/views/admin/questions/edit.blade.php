@@ -17,6 +17,7 @@
 
         <form action="{{ route('admin.quizzes.questions.update', [$quiz->id, $question->id]) }}" method="POST"
             enctype="multipart/form-data">
+
             @csrf
             @method('PUT')
 
@@ -28,10 +29,45 @@
                     📝 Contenuto Domanda
                 </div>
                 <div class="card-body">
-
                     <div class="mb-3">
                         <label class="form-label">Testo</label>
                         <textarea name="question_text" class="form-control" rows="4" required>{{ old('question_text', $question->question_text) }}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===================== -->
+            <!-- RISPOSTE -->
+            <!-- ===================== -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header fw-bold">
+                    🎯 Risposte
+                </div>
+                <div class="card-body">
+
+                    @php
+                        $answers = $question->answers()->orderBy('id')->get();
+                        $correctIndex = $answers->search(fn($a) => $a->is_correct);
+                    @endphp
+
+                    @for ($i = 0; $i < 4; $i++)
+                        <div class="mb-3">
+                            <label class="form-label">Risposta {{ $i + 1 }}</label>
+                            <input type="text" name="answers[]" class="form-control"
+                                value="{{ old('answers.' . $i, $answers[$i]->answer_text ?? '') }}" required>
+                        </div>
+                    @endfor
+
+                    <div class="mb-3">
+                        <label class="form-label">Qual è la risposta corretta?</label>
+                        <select name="correct_answer" class="form-control" required>
+                            <option value="">Seleziona...</option>
+                            @for ($i = 0; $i < 4; $i++)
+                                <option value="{{ $i }}" @if (old('correct_answer', $correctIndex) == $i) selected @endif>
+                                    Risposta {{ $i + 1 }}
+                                </option>
+                            @endfor
+                        </select>
                     </div>
 
                 </div>
@@ -54,14 +90,27 @@
 
                             @if ($question->image_path)
                                 <img src="{{ asset('storage/' . $question->image_path) }}" class="img-fluid rounded mb-2"
-                                    style="max-width: 50%">
+                                    style="max-height:200px;">
                             @else
                                 <p class="text-muted small">Nessuna immagine</p>
                             @endif
 
                             <input type="file" name="image" class="form-control form-control-sm"
                                 accept=".jpg,.jpeg,.png,image/*">
-                            <small class="text-muted">JPG, PNG – Max 2MB</small>
+
+                            <small class="text-muted d-block mt-1">
+                                JPG, PNG – Max 2MB
+                            </small>
+
+                            @if ($question->image_path)
+                                <div class="form-check mt-2">
+                                    <input type="checkbox" name="remove_image" value="1" class="form-check-input"
+                                        id="remove_image">
+                                    <label class="form-check-label text-danger" for="remove_image">
+                                        Elimina immagine
+                                    </label>
+                                </div>
+                            @endif
                         </div>
 
                         <!-- AUDIO -->
@@ -78,7 +127,20 @@
 
                             <input type="file" name="audio" class="form-control form-control-sm"
                                 accept=".mp3,.wav,.ogg,audio/*">
-                            <small class="text-muted">MP3, WAV, OGG – Max 5MB</small>
+
+                            <small class="text-muted d-block mt-1">
+                                MP3, WAV, OGG – Max 5MB
+                            </small>
+
+                            @if ($question->audio_path)
+                                <div class="form-check mt-2">
+                                    <input type="checkbox" name="remove_audio" value="1" class="form-check-input"
+                                        id="remove_audio">
+                                    <label class="form-check-label text-danger" for="remove_audio">
+                                        Elimina audio
+                                    </label>
+                                </div>
+                            @endif
                         </div>
 
                         <!-- VIDEO -->
@@ -95,7 +157,20 @@
 
                             <input type="file" name="video" class="form-control form-control-sm"
                                 accept=".mp4,.mov,.webm,video/*">
-                            <small class="text-muted">MP4, MOV, WEBM – Max 20MB</small>
+
+                            <small class="text-muted d-block mt-1">
+                                MP4, MOV, WEBM – Max 20MB
+                            </small>
+
+                            @if ($question->video_path)
+                                <div class="form-check mt-2">
+                                    <input type="checkbox" name="remove_video" value="1" class="form-check-input"
+                                        id="remove_video">
+                                    <label class="form-check-label text-danger" for="remove_video">
+                                        Elimina video
+                                    </label>
+                                </div>
+                            @endif
                         </div>
 
                     </div>
@@ -121,9 +196,32 @@
 
                         <div class="col-md-6 mb-3">
                             <label class="form-label">Ordine</label>
-                            <input type="number" name="order" value="{{ old('order', $question->order) }}"
-                                class="form-control" min="1" required>
+
+                            <input type="number" name="order" id="orderInput"
+                                value="{{ old('order', $question->order) }}" class="form-control" min="1"
+                                required>
+
+                            <small class="text-muted">
+                                Numeri già utilizzati: {{ implode(', ', $usedOrders) ?: 'nessuno' }}
+                            </small>
                         </div>
+
+                        <script>
+                            const usedOrders = @json($usedOrders);
+                            const input = document.getElementById('orderInput');
+
+                            input.addEventListener('input', function() {
+
+                                const value = parseInt(this.value);
+
+                                if (usedOrders.includes(value)) {
+                                    this.setCustomValidity('Numero già utilizzato per questo quiz');
+                                } else {
+                                    this.setCustomValidity('');
+                                }
+
+                            });
+                        </script>
                     </div>
 
                 </div>

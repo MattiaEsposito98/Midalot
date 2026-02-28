@@ -1,8 +1,9 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="container">
-        <h1>Aggiungi Domanda - {{ $quiz->title }}</h1>
+    <div class="container py-4">
+
+        <h2 class="mb-4">Aggiungi Domanda - {{ $quiz->title }}</h2>
 
         @if ($errors->any())
             <div class="alert alert-danger">
@@ -15,62 +16,172 @@
         @endif
 
         <form action="{{ route('admin.quizzes.questions.store', $quiz->id) }}" method="POST" enctype="multipart/form-data">
+
             @csrf
 
-            <div class="mb-3">
-                <label class="form-label">Testo Domanda</label>
-                <textarea name="question_text" class="form-control" required>{{ old('question_text') }}</textarea>
+            <!-- ===================== -->
+            <!-- CONTENUTO DOMANDA -->
+            <!-- ===================== -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header fw-bold">
+                    📝 Contenuto Domanda
+                </div>
+                <div class="card-body">
+
+                    <div class="mb-3">
+                        <label class="form-label">Testo Domanda</label>
+                        <textarea name="question_text" class="form-control" rows="4" required>{{ old('question_text') }}</textarea>
+                    </div>
+
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">
-                    Immagine (opzionale)
-                    <small class="text-muted">
-                        JPG, PNG – Max 2MB
-                    </small>
-                </label>
-                <input type="file" name="image" class="form-control" accept=".jpg,.jpeg,.png,image/*">
+            <!-- ===================== -->
+            <!-- RISPOSTE -->
+            <!-- ===================== -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header fw-bold">
+                    🎯 Risposte
+                </div>
+                <div class="card-body">
+
+                    @for ($i = 0; $i < 4; $i++)
+                        <div class="mb-3">
+                            <label class="form-label">Risposta {{ $i + 1 }}</label>
+                            <input type="text" name="answers[]" class="form-control" value="{{ old('answers.' . $i) }}"
+                                required>
+                        </div>
+                    @endfor
+
+                    <div class="mb-3">
+                        <label class="form-label">Qual è la risposta corretta?</label>
+                        <select name="correct_answer" class="form-control" required>
+                            <option value="">Seleziona...</option>
+
+                            @for ($i = 0; $i < 4; $i++)
+                                <option value="{{ $i }}" @if (old('correct_answer') == $i) selected @endif>
+                                    Risposta {{ $i + 1 }}
+                                </option>
+                            @endfor
+                        </select>
+                    </div>
+
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">
-                    Audio (opzionale)
-                    <small class="text-muted">
-                        MP3, WAV, OGG – Max 5MB
-                    </small>
-                </label>
-                <input type="file" name="audio" class="form-control" accept=".mp3,.wav,.ogg,audio/*">
+            <!-- ===================== -->
+            <!-- MEDIA -->
+            <!-- ===================== -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header fw-bold">
+                    🎬 Media (opzionali)
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <!-- IMMAGINE -->
+                        <div class="col-md-4 mb-4">
+                            <h6 class="fw-bold">🖼 Immagine</h6>
+
+                            <input type="file" name="image" class="form-control form-control-sm"
+                                accept=".jpg,.jpeg,.png,image/*">
+
+                            <small class="text-muted d-block mt-1">
+                                JPG, PNG – Max 2MB
+                            </small>
+                        </div>
+
+                        <!-- AUDIO -->
+                        <div class="col-md-4 mb-4">
+                            <h6 class="fw-bold">🎧 Audio</h6>
+
+                            <input type="file" name="audio" class="form-control form-control-sm"
+                                accept=".mp3,.wav,.ogg,audio/*">
+
+                            <small class="text-muted d-block mt-1">
+                                MP3, WAV, OGG – Max 5MB
+                            </small>
+                        </div>
+
+                        <!-- VIDEO -->
+                        <div class="col-md-4 mb-4">
+                            <h6 class="fw-bold">🎥 Video</h6>
+
+                            <input type="file" name="video" class="form-control form-control-sm"
+                                accept=".mp4,.mov,.webm,video/*">
+
+                            <small class="text-muted d-block mt-1">
+                                MP4, MOV, WEBM – Max 20MB
+                            </small>
+                        </div>
+
+                    </div>
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">
-                    Video (opzionale)
-                    <small class="text-muted">
-                        MP4, MOV, WEBM – Max 20MB
-                    </small>
-                </label>
-                <input type="file" name="video" class="form-control" accept=".mp4,.mov,.webm,video/*">
+            <!-- ===================== -->
+            <!-- IMPOSTAZIONI -->
+            <!-- ===================== -->
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header fw-bold">
+                    ⚙️ Impostazioni
+                </div>
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <!-- TIMER -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Tempo limite (secondi)</label>
+                            <input type="number" name="time_limit_seconds" class="form-control"
+                                value="{{ old('time_limit_seconds', 30) }}" min="5" required>
+                        </div>
+
+                        <!-- ORDINE -->
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Ordine</label>
+                            <input type="number" name="order" id="orderInput" class="form-control"
+                                value="{{ old('order', $nextOrder) }}" min="1" required>
+
+                            <small class="text-muted d-block mt-1">
+                                Numeri già utilizzati: {{ implode(', ', $usedOrders) ?: 'nessuno' }}
+                            </small>
+                        </div>
+
+                    </div>
+
+                </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Tempo limite (secondi)</label>
-                <input type="number" name="time_limit_seconds" class="form-control"
-                    value="{{ old('time_limit_seconds', 30) }}" min="5" required>
+            <script>
+                const usedOrders = @json($usedOrders);
+                const input = document.getElementById('orderInput');
+
+                input.addEventListener('input', function() {
+
+                    const value = parseInt(this.value);
+
+                    if (usedOrders.includes(value)) {
+                        this.setCustomValidity('Numero già utilizzato per questo quiz');
+                    } else {
+                        this.setCustomValidity('');
+                    }
+
+                });
+            </script>
+
+            <!-- BOTTONI -->
+            <div class="d-flex justify-content-between">
+                <a href="{{ route('admin.quizzes.questions.index', $quiz->id) }}" class="btn btn-outline-secondary">
+                    ← Torna alle Domande
+                </a>
+
+                <button type="submit" class="btn btn-success px-4">
+                    💾 Salva Domanda
+                </button>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Ordine</label>
-                <input type="number" name="order" class="form-control" value="{{ old('order', 1) }}" min="1"
-                    required>
-            </div>
-
-            <button type="submit" class="btn btn-success">
-                Salva Domanda
-            </button>
         </form>
-
-        <a href="{{ route('admin.quizzes.questions.index', $quiz->id) }}" class="btn btn-secondary mt-3">
-            ← Torna alle Domande
-        </a>
     </div>
 @endsection

@@ -39,9 +39,15 @@
                                 <a href="{{ route('admin.quizzes.questions.index', $quiz->id) }}" class="btn btn-sm btn-info">
                                     Domande
                                 </a>
+
                                 <a href="{{ route('admin.quizzes.edit', $quiz->id) }}" class="btn btn-sm btn-warning">
                                     Modifica
                                 </a>
+
+                                <a href="{{ route('admin.quizzes.users', $quiz->id) }}" class="btn btn-sm btn-secondary">
+                                    Associa Utenti
+                                </a>
+
                                 <form action="{{ route('admin.quizzes.destroy', $quiz->id) }}" method="POST"
                                     style="display:inline;">
                                     @csrf

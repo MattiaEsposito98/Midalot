@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\UserLogin;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -22,13 +24,40 @@ class AuthenticatedSessionController extends Controller
     /**
      * Handle an incoming authentication request.
      */
-    public function store(LoginRequest $request): RedirectResponse
+    public function store(Request $request): RedirectResponse
     {
-        $request->authenticate();
+        $request->validate([
+            'login' => ['required', 'string'],
+            'password' => ['required', 'string'],
+        ]);
 
+        $login = strtolower(trim($request->login));
+
+        // Capisce se è email o nickname
+        $fieldType = filter_var($login, FILTER_VALIDATE_EMAIL)
+            ? 'email'
+            : 'nickname';
+
+        $user = \App\Models\User::where($fieldType, $login)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return back()->withErrors([
+                'login' => 'Credenziali non valide.',
+            ]);
+        }
+
+        Auth::login($user);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        // 🔥 LOG DEL LOGIN
+        UserLogin::create([
+            'user_id' => $user->id,
+            'ip_address' => $request->ip(),
+            'user_agent' => substr($request->userAgent(), 0, 255),
+            'logged_in_at' => now(),
+        ]);
+
+        return redirect()->intended(route('dashboard'));
     }
 
     /**

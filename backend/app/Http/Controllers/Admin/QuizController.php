@@ -104,4 +104,46 @@ class QuizController extends Controller
             ->route('admin.quizzes.index')
             ->with('success', 'Quiz eliminato con successo!');
     }
+
+    public function searchUsers(Request $request, Quiz $quiz)
+    {
+        $query = $request->get('q');
+
+        return \App\Models\User::where(function ($q) use ($query) {
+            $q->where('nickname', 'like', "%{$query}%")
+                ->orWhere('email', 'like', "%{$query}%");
+        })
+            ->whereNotIn('id', $quiz->users()->pluck('users.id'))
+            ->select('id', 'nickname', 'email')
+            ->limit(20)
+            ->get();
+    }
+
+    public function attachUsers(Request $request, \App\Models\Quiz $quiz)
+    {
+        $request->validate([
+            'users' => 'required|array',
+            'users.*' => 'exists:users,id'
+        ]);
+
+        $quiz->users()->syncWithoutDetaching($request->users);
+
+        return back()->with('success', 'Utenti associati correttamente.');
+    }
+
+    public function manageUsers(Quiz $quiz)
+    {
+        $attachedUsers = $quiz->users()
+            ->select('users.id', 'nickname', 'email')
+            ->get();
+
+        return view('admin.quizzes.users', compact('quiz', 'attachedUsers'));
+    }
+
+    public function detachUser(Quiz $quiz, \App\Models\User $user)
+    {
+        $quiz->users()->detach($user->id);
+
+        return back()->with('success', 'Utente rimosso dal quiz.');
+    }
 }
