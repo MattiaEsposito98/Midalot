@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\QuestionController;
+use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,6 +26,9 @@ Route::middleware(['auth', 'admin'])
     ->group(function () {
         Route::get('/', [DashboardController::class, 'index'])
             ->name('index');
+
+        Route::resource('quizzes', QuizController::class);
+        Route::resource('quizzes.questions', QuestionController::class);
     });
 
 require __DIR__ . '/auth.php';
