@@ -22,7 +22,10 @@ class User extends Authenticatable
         'nickname',
         'email',
         'password',
+        'birth_date',
+        'city_id',
     ];
+
 
     /**
      * The attributes that should be hidden for serialization.
@@ -44,11 +47,17 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'birth_date' => 'date',
         ];
     }
 
     public function quizzes()
     {
         return $this->belongsToMany(Quiz::class)->withTimestamps();
+    }
+
+    public function city()
+    {
+        return $this->belongsTo(City::class);
     }
 }

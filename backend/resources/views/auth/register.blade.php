@@ -32,6 +32,49 @@
                                 </div>
                             </div>
 
+                            <!-- ✅ DATA DI NASCITA -->
+                            <div class="mb-4 row">
+                                <label for="birth_date" class="col-md-4 col-form-label text-md-end">
+                                    Data di nascita
+                                </label>
+
+                                <div class="col-md-6">
+                                    <input id="birth_date" type="date"
+                                        class="form-control @error('birth_date') is-invalid @enderror" name="birth_date"
+                                        value="{{ old('birth_date') }}" required>
+
+                                    @error('birth_date')
+                                        <span class="invalid-feedback">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- ✅ CITTÀ -->
+                            <div class="mb-4 row position-relative">
+                                <label class="col-md-4 col-form-label text-md-end">
+                                    Città
+                                </label>
+
+                                <div class="col-md-6">
+                                    <input type="text" id="city_search"
+                                        class="form-control @error('city_id') is-invalid @enderror"
+                                        placeholder="Scrivi la tua città" autocomplete="off" required autocomplete="off">
+
+                                    <input type="hidden" name="city_id" id="city_id" value="{{ old('city_id') }}">
+
+                                    <div id="city_results" class="list-group position-absolute w-100" style="z-index:1000;">
+                                    </div>
+
+                                    @error('city_id')
+                                        <span class="invalid-feedback d-block">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+                                </div>
+                            </div>
+
                             <!-- NICKNAME -->
                             <div class="mb-4 row">
                                 <label for="nickname" class="col-md-4 col-form-label text-md-end">
@@ -128,4 +171,59 @@
             </div>
         </div>
     </div>
+
+    {{-- SCRIPT AUTOCOMPLETE --}}
+    <script>
+        const input = document.getElementById('city_search');
+        const resultsBox = document.getElementById('city_results');
+        const hiddenCity = document.getElementById('city_id');
+
+        let debounce;
+
+        input.addEventListener('input', function() {
+
+            hiddenCity.value = '';
+
+            clearTimeout(debounce);
+
+            debounce = setTimeout(async () => {
+
+                const q = this.value;
+
+                if (q.length < 2) {
+                    resultsBox.innerHTML = '';
+                    return;
+                }
+
+                const response = await fetch(`/cities/search?q=${q}`);
+                const cities = await response.json();
+
+                resultsBox.innerHTML = '';
+
+                cities.forEach(city => {
+
+                    const item = document.createElement('button');
+                    item.type = "button";
+                    item.classList.add('list-group-item', 'list-group-item-action');
+                    item.textContent = city.name;
+
+                    item.onclick = () => {
+                        input.value = city.name;
+                        hiddenCity.value = city.id;
+                        resultsBox.innerHTML = '';
+                    };
+
+                    resultsBox.appendChild(item);
+                });
+
+            }, 300);
+        });
+
+        document.querySelector("form").addEventListener("submit", function(e) {
+            if (!hiddenCity.value) {
+                e.preventDefault();
+                alert("Seleziona una città valida dalla lista.");
+            }
+        });
+    </script>
 @endsection

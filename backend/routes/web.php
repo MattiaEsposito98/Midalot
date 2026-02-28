@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\QuizController;
+use App\Http\Controllers\CityController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -64,5 +65,8 @@ Route::middleware(['auth', 'admin'])
             [QuizController::class, 'detachUser']
         )->name('quizzes.detachUser');
     });
+
+Route::get('/cities/search', [CityController::class, 'search'])
+    ->name('cities.search');
 
 require __DIR__ . '/auth.php';

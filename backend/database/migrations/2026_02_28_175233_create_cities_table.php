@@ -13,18 +13,14 @@ return new class extends Migration
     {
         Schema::create('cities', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('province');
-            $table->string('region');
+            $table->string('name')->unique();
+            $table->decimal('latitude', 10, 7);
+            $table->decimal('longitude', 10, 7);
             $table->string('country')->default('Italia');
             $table->string('country_code', 2)->default('IT');
-            $table->decimal('latitude', 10, 7)->nullable();
-            $table->decimal('longitude', 10, 7)->nullable();
-            $table->string('istat_code')->nullable();
             $table->timestamps();
 
             $table->index('name');
-            $table->index('province');
         });
     }
 

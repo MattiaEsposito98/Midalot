@@ -14,24 +14,17 @@ use Illuminate\View\View;
 
 class RegisteredUserController extends Controller
 {
-    /**
-     * Display the registration view.
-     */
     public function create(): View
     {
         return view('auth.register');
     }
 
-    /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function store(Request $request): RedirectResponse
     {
         $request->merge([
             'nickname' => strtolower(trim($request->nickname))
         ]);
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
 
@@ -58,6 +51,10 @@ class RegisteredUserController extends Controller
                 'confirmed',
                 Rules\Password::defaults()
             ],
+
+            // ✅ NUOVI CAMPI
+            'birth_date' => ['required', 'date', 'before:today'],
+            'city_id' => ['required', 'exists:cities,id'],
         ]);
 
         $user = User::create([
@@ -65,6 +62,10 @@ class RegisteredUserController extends Controller
             'nickname' => $request->nickname,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+
+            // ✅ NUOVI CAMPI
+            'birth_date' => $request->birth_date,
+            'city_id' => $request->city_id,
         ]);
 
         event(new Registered($user));
