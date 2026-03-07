@@ -1,0 +1,12 @@
+.loginCard {
+  border-radius: 12px;
+}
+
+.loginCard input {
+  padding: 10px 12px;
+}
+
+.loginCard button {
+  margin-top: 10px;
+  font-weight: 500;
+}

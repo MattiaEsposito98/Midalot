@@ -1,0 +1,14 @@
+.logo {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+  transition: transform .2s ease;
+}
+
+.logo:hover {
+  transform: scale(1.05);
+}
+
+.footerLogo {
+  height: 32px;
+}
