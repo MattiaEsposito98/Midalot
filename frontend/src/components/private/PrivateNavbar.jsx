@@ -16,7 +16,7 @@ function PrivateNavbar() {
       <div className="container">
         <Link className="navbar-brand fw-bold" to="/dashboard">
           <img
-            src="/Midalot.jpg"
+            src="/Midalot.png"
             alt="logo Midalot"
             className={css.logo}
           />
@@ -36,11 +36,6 @@ function PrivateNavbar() {
             <li className="nav-item">
               <Link className="nav-link" to="/dashboard">
                 Dashboard
-              </Link>
-            </li>
-            <li className="nav-item">
-              <Link className="nav-link" to="/quiz">
-                Quiz
               </Link>
             </li>
             <li className="nav-item">

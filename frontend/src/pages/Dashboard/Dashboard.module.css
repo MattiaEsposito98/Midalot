@@ -1,0 +1,151 @@
+.page {
+  padding-top: 32px;
+  padding-bottom: 40px;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+  color: #1f2937;
+}
+
+.subtitle {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.loadingWrap {
+  padding-top: 80px;
+  text-align: center;
+}
+
+.loadingText {
+  margin-top: 12px;
+  color: #6b7280;
+}
+
+.emptyBox {
+  border-radius: 18px;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 22px;
+  height: 100%;
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
+  border: 1px solid #eef2f7;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+}
+
+.cardTop {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 14px;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.statusAvailable {
+  background: #ecfdf3;
+  color: #027a48;
+}
+
+.statusInProgress {
+  background: #fff7e6;
+  color: #b54708;
+}
+
+.statusCompleted {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.cardTitle {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.cardDescription {
+  color: #6b7280;
+  min-height: 48px;
+  margin-bottom: 18px;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 22px;
+}
+
+.infoItem {
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.infoLabel {
+  display: block;
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin-bottom: 6px;
+}
+
+.infoValue {
+  color: #111827;
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.footer {
+  margin-top: auto;
+}
+
+.startBtn {
+  border-radius: 14px;
+  font-weight: 700;
+  min-height: 46px;
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding-top: 20px;
+  }
+
+  .title {
+    font-size: 1.6rem;
+  }
+
+  .infoGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.statusExpired {
+  background: #fee2e2;
+  color: #b91c1c;
+}

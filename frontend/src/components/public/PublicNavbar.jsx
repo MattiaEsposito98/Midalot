@@ -8,7 +8,7 @@ function PublicNavbar() {
 
         <Link className="navbar-brand fw-bold" to="/">
           <img
-            src="/Midalot.jpg"
+            src="/Midalot.png"
             alt="logo Midalot"
             className={css.logo}
           />

@@ -7,8 +7,8 @@ import ProtectedRoute from "./routes/ProtectedRoute"
 import Home from "./pages/Home"
 import Login from "./pages/Login/Login"
 import Register from "./pages/Register/Register"
-import Dashboard from "./pages/Dashboard"
-import Quiz from "./pages/Quiz"
+import Dashboard from "./pages/Dashboard/Dashboard"
+import Quiz from "./pages/Quiz/Quiz"
 import Profilo from "./pages/Profilo"
 
 function App() {

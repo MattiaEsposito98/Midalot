@@ -43,4 +43,9 @@ class User extends Authenticatable
     {
         return $this->belongsTo(City::class);
     }
+
+    public function quizAttempts()
+    {
+        return $this->hasMany(\App\Models\QuizAttempt::class);
+    }
 }

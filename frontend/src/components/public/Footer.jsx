@@ -11,7 +11,7 @@ function Footer() {
         <div className="d-flex justify-content-center align-items-center gap-2 mb-2">
           <Link className="navbar-brand fw-bold m-0" to="/">
             <img
-              src="/Midalot-footer.jpeg"
+              src="/Midalot.png"
               alt="logo Midalot"
               className={css.logo}
             />

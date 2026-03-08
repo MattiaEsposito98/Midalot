@@ -34,4 +34,9 @@ class Quiz extends Model
     {
         return $this->belongsToMany(User::class)->withTimestamps();
     }
+
+    public function attempts()
+    {
+        return $this->hasMany(QuizAttempt::class);
+    }
 }
