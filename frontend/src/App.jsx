@@ -10,6 +10,7 @@ import Register from "./pages/Register/Register"
 import Dashboard from "./pages/Dashboard/Dashboard"
 import Quiz from "./pages/Quiz/Quiz"
 import Profilo from "./pages/Profilo"
+import ForgotPassword from "./pages/ForgotPassword/ForgotPassword"
 
 function App() {
 
@@ -23,6 +24,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
       </Route>
 

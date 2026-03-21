@@ -70,8 +70,6 @@ class RegisteredUserController extends Controller
 
         event(new Registered($user));
 
-        Auth::login($user);
-
-        return redirect(route('dashboard', absolute: false));
+        return redirect()->route('login')->with('status', 'Registrazione completata! Controlla la tua email per verificare l’account.');
     }
 }

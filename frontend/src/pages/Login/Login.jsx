@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom"
 import axios from "axios"
 import css from "./Login.module.css"
 import { useAuth } from "../../context/AuthContext"
+import LoaderButton from "../../components/LoaderButton"
 
 function Login() {
   const navigate = useNavigate()
@@ -17,10 +18,10 @@ function Login() {
   const [loading, setLoading] = useState(false)
 
   const handleChange = (e) => {
-    setForm({
-      ...form,
+    setForm((prev) => ({
+      ...prev,
       [e.target.name]: e.target.value
-    })
+    }))
   }
 
   const handleSubmit = async (e) => {
@@ -36,7 +37,7 @@ function Login() {
     try {
       setLoading(true)
 
-      const res = await axios.post("api/login", form)
+      const res = await axios.post("/api/login", form)
 
       const { token, user } = res.data
 
@@ -48,6 +49,8 @@ function Login() {
 
       if (err.response?.status === 401) {
         setError("Credenziali non valide")
+      } else if (err.response?.status === 403) {
+        setError("Devi verificare la tua email prima di accedere")
       } else if (err.response?.status === 422) {
         setError("Controlla i dati inseriti")
       } else {
@@ -81,10 +84,11 @@ function Login() {
                     onChange={handleChange}
                     placeholder="email o nickname"
                     autoComplete="username"
+                    disabled={loading}
                   />
                 </div>
 
-                <div className="mb-3">
+                <div className="mb-2">
                   <label className="form-label">
                     Password
                   </label>
@@ -96,7 +100,14 @@ function Login() {
                     value={form.password}
                     onChange={handleChange}
                     autoComplete="current-password"
+                    disabled={loading}
                   />
+                </div>
+
+                <div className="text-end mb-3">
+                  <Link to="/forgot-password" className={css.forgotLink}>
+                    Password dimenticata?
+                  </Link>
                 </div>
 
                 {error && (
@@ -105,19 +116,18 @@ function Login() {
                   </div>
                 )}
 
-                <button
+                <LoaderButton
                   type="submit"
+                  loading={loading}
                   className="btn btn-primary w-100"
-                  disabled={loading}
                 >
-                  {loading ? "Accesso..." : "Accedi"}
-                </button>
+                  Accedi
+                </LoaderButton>
 
                 <div className="text-center mt-3">
                   Non hai un account? <Link to="/register">Registrati</Link>
                 </div>
               </form>
-
             </div>
           </div>
         </div>
