@@ -59,6 +59,13 @@ Route::middleware(['auth', 'admin'])
             [QuizController::class, 'attachUsers']
         )->name('quizzes.attachUsers');
 
+        // Classifica utenti
+        Route::get('quizzes/{quiz}/leaderboard', [QuizController::class, 'leaderboard'])
+            ->name('quizzes.leaderboard');
+
+        Route::patch('quizzes/{quiz}/toggle-leaderboard', [QuizController::class, 'toggleLeaderboard'])
+            ->name('quizzes.toggleLeaderboard');
+
         // Rimuovi utente dal quiz
         Route::delete(
             'quizzes/{quiz}/users/{user}',

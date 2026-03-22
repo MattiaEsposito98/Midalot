@@ -52,6 +52,7 @@ class UserQuizController extends Controller
                     'score' => $attempt?->score,
                     'attempt_id' => $attempt?->id,
                     'finished_at' => $attempt?->finished_at,
+                    'leaderboard_visible' => (bool) $quiz->leaderboard_visible,
                 ];
             });
 
@@ -132,6 +133,78 @@ class UserQuizController extends Controller
                     ];
                 }),
             ]
+        ]);
+    }
+
+    public function leaderboard(Request $request, Quiz $quiz)
+    {
+        $user = $request->user();
+
+        if (!$user->quizzes()->where('quiz_id', $quiz->id)->exists()) {
+            return response()->json([
+                'message' => 'Quiz non assegnato'
+            ], 403);
+        }
+
+        if (!$quiz->leaderboard_visible) {
+            return response()->json([
+                'message' => 'Classifica non disponibile'
+            ], 403);
+        }
+
+        $totalQuestions = $quiz->questions()->count();
+
+        $attempts = QuizAttempt::with(['user', 'answers'])
+            ->where('quiz_id', $quiz->id)
+            ->get();
+
+        $results = $attempts->map(function ($attempt) use ($totalQuestions) {
+            $correct = $attempt->answers?->where('is_correct', true)->count() ?? 0;
+
+            return [
+                'user' => [
+                    'nickname' => $attempt->user->nickname ?? 'Utente',
+                ],
+                'score' => $attempt->score ?? 0,
+                'correct_answers' => $correct,
+                'total_questions' => $totalQuestions,
+                'total_time' => $attempt->total_time,
+                'completed' => (bool) $attempt->completed,
+                'finished_at' => $attempt->finished_at?->toISOString(),
+                'attempt_id' => $attempt->id,
+            ];
+        })
+            ->sort(function ($a, $b) {
+                if ($a['completed'] !== $b['completed']) {
+                    return $a['completed'] ? -1 : 1;
+                }
+
+                if ($a['completed'] && $b['completed']) {
+                    if ($a['score'] !== $b['score']) {
+                        return $b['score'] <=> $a['score'];
+                    }
+
+                    if (($a['total_time'] ?? PHP_INT_MAX) !== ($b['total_time'] ?? PHP_INT_MAX)) {
+                        return ($a['total_time'] ?? PHP_INT_MAX) <=> ($b['total_time'] ?? PHP_INT_MAX);
+                    }
+
+                    if (($a['finished_at'] ?? '') !== ($b['finished_at'] ?? '')) {
+                        return strcmp($a['finished_at'] ?? '', $b['finished_at'] ?? '');
+                    }
+
+                    return ($a['attempt_id'] ?? PHP_INT_MAX) <=> ($b['attempt_id'] ?? PHP_INT_MAX);
+                }
+
+                return 0;
+            })
+            ->values();
+
+        return response()->json([
+            'quiz' => [
+                'id' => $quiz->id,
+                'title' => $quiz->title,
+            ],
+            'results' => $results
         ]);
     }
 }

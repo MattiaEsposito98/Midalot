@@ -8,9 +8,16 @@
                 {{ session('success') }}
             </div>
         @endif
-        <a href="{{ route('admin.quizzes.questions.create', $quiz->id) }}" class="btn btn-primary mb-3">
-            + Aggiungi Domanda
-        </a>
+        <div class="d-flex justify-content-between align-center mt-3">
+            <a href="{{ route('admin.quizzes.questions.create', $quiz->id) }}" class="btn btn-primary ">
+                + Aggiungi Domanda
+            </a>
+
+            <a href="{{ route('admin.quizzes.index') }}" class="btn btn-secondary ">
+                ← Torna ai Quiz
+            </a>
+        </div>
+
 
         @if ($questions->isEmpty())
             <p>Nessuna domanda ancora inserita.</p>
@@ -93,8 +100,5 @@
             </table>
         @endif
 
-        <a href="{{ route('admin.quizzes.index') }}" class="btn btn-secondary mt-3">
-            ← Torna ai Quiz
-        </a>
     </div>
 @endsection

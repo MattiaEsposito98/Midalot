@@ -4,6 +4,14 @@
     <div class="container">
         <h1>Modifica Quiz</h1>
 
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2>Associa utenti al quiz: {{ $quiz->title }}</h2>
+
+            <a href="{{ route('admin.quizzes.index') }}" class="btn btn-outline-secondary">
+                ← Torna ai Quiz
+            </a>
+        </div>
+
         <form action="{{ route('admin.quizzes.update', $quiz->id) }}" method="POST">
             @csrf
             @method('PUT')

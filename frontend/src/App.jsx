@@ -14,6 +14,7 @@ import ForgotPassword from "./pages/ForgotPassword/ForgotPassword"
 import ResetPassword from "./pages/ResetPassword/ResetPassword"
 import Storico from "./pages/Storico/Storico"
 import CambiaPassword from "./pages/CambiaPassword/CambiaPassword"
+import Leaderboard from "./pages/Leaderboard/Leaderboard"
 
 function App() {
   return (
@@ -40,6 +41,7 @@ function App() {
         <Route path="/storico" element={<Storico />} />
         <Route path="/profilo" element={<Profilo />} />
         <Route path="/cambia-password" element={<CambiaPassword />} />
+        <Route path="/quiz/:id/leaderboard" element={<Leaderboard />} />
       </Route>
     </Routes>
   )

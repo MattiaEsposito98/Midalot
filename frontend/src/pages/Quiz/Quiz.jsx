@@ -3,6 +3,17 @@ import { useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
 import styles from "./Quiz.module.css"
 
+function shuffleArray(array) {
+  const copy = [...array]
+
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+
+  return copy
+}
+
 function Quiz() {
   const { id } = useParams()
   const navigate = useNavigate()
@@ -34,6 +45,11 @@ function Quiz() {
   const currentQuestion = useMemo(() => {
     return quiz?.questions?.[currentIndex] || null
   }, [quiz, currentIndex])
+
+  const shuffledAnswers = useMemo(() => {
+    if (!currentQuestion?.answers) return []
+    return shuffleArray(currentQuestion.answers)
+  }, [currentQuestion?.id])
 
   function setSubmittingSafe(value) {
     submittingRef.current = value
@@ -487,7 +503,7 @@ function Quiz() {
           )}
 
           <div className={styles.answersGrid}>
-            {currentQuestion.answers.map((answer, index) => (
+            {shuffledAnswers.map((answer, index) => (
               <button
                 key={answer.id}
                 type="button"

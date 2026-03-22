@@ -48,6 +48,10 @@
                                     Associa Utenti
                                 </a>
 
+                                <a href="{{ route('admin.quizzes.leaderboard', $quiz->id) }}" class="btn btn-sm btn-dark">
+                                    Classifica
+                                </a>
+
                                 <form action="{{ route('admin.quizzes.destroy', $quiz->id) }}" method="POST"
                                     style="display:inline;">
                                     @csrf

@@ -13,12 +13,14 @@ class QuizAttempt extends Model
         'finished_at',
         'score',
         'completed',
+        'total_time',
     ];
 
     protected $casts = [
         'completed' => 'boolean',
         'started_at' => 'datetime',
         'finished_at' => 'datetime',
+        'total_time' => 'integer',
     ];
 
     public function quiz()
@@ -29,5 +31,10 @@ class QuizAttempt extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function answers()
+    {
+        return $this->hasMany(\App\Models\QuizAnswer::class, 'attempt_id');
     }
 }

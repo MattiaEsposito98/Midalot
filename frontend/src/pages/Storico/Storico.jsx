@@ -50,16 +50,42 @@ function Storico() {
   function getFooterContent(q) {
     if (q.status === "completed") {
       return (
-        <button className="btn btn-outline-secondary w-100" disabled>
-          Quiz completato
-        </button>
+        <div className="d-flex flex-column gap-2 w-100">
+          <button className="btn btn-outline-secondary w-100" disabled>
+            Quiz completato
+          </button>
+
+          {q.leaderboard_visible && (
+            <button
+              className="btn btn-primary w-100"
+              onClick={() => {
+                window.location.href = `/quiz/${q.id}/leaderboard`
+              }}
+            >
+              🏆 Vedi classifica
+            </button>
+          )}
+        </div>
       )
     }
 
     return (
-      <button className="btn btn-outline-danger w-100" disabled>
-        Quiz scaduto
-      </button>
+      <div className="d-flex flex-column gap-2 w-100">
+        <button className="btn btn-outline-danger w-100" disabled>
+          Quiz scaduto
+        </button>
+
+        {q.leaderboard_visible && (
+          <button
+            className="btn btn-primary w-100"
+            onClick={() => {
+              window.location.href = `/quiz/${q.id}/leaderboard`
+            }}
+          >
+            🏆 Vedi classifica
+          </button>
+        )}
+      </div>
     )
   }
 

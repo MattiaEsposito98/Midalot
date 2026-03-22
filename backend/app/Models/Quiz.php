@@ -12,10 +12,12 @@ class Quiz extends Model
         'description',
         'created_by',
         'is_active',
+        'leaderboard_visible'
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'leaderboard_visible' => 'boolean',
     ];
 
     // Relazione: chi ha creato il quiz (admin)

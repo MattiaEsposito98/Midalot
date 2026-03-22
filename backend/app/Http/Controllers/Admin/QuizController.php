@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Quiz;
+use App\Models\QuizAttempt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -145,5 +146,57 @@ class QuizController extends Controller
         $quiz->users()->detach($user->id);
 
         return back()->with('success', 'Utente rimosso dal quiz.');
+    }
+
+    public function leaderboard(Quiz $quiz)
+    {
+        $attempts = QuizAttempt::with(['user', 'answers'])
+            ->where('quiz_id', $quiz->id)
+            ->get();
+
+        $results = $attempts->map(function ($attempt) use ($quiz) {
+
+            $correct = $attempt->answers?->where('is_correct', true)->count() ?? 0;
+            $total   = $quiz->questions()->count();
+
+            $time = $attempt->total_time
+                ?? $attempt->answers->sum('time_taken');
+
+            $attempt->correct_answers = $correct;
+            $attempt->total_questions = $total;
+            $attempt->total_time = $time;
+
+            return $attempt;
+        })
+            ->sort(function ($a, $b) {
+
+                if ($a->completed !== $b->completed) {
+                    return $a->completed ? -1 : 1;
+                }
+
+                if ($a->completed && $b->completed) {
+
+                    if ($a->score !== $b->score) {
+                        return $b->score <=> $a->score;
+                    }
+
+                    return ($a->total_time ?? PHP_INT_MAX) <=> ($b->total_time ?? PHP_INT_MAX);
+                }
+
+                return 0;
+            })
+            ->values();
+
+        return view('admin.quizzes.leaderboard', compact('quiz', 'results'));
+    }
+
+
+    public function toggleLeaderboard(Quiz $quiz)
+    {
+        $quiz->update([
+            'leaderboard_visible' => !$quiz->leaderboard_visible,
+        ]);
+
+        return back()->with('success', 'Visibilità classifica aggiornata con successo.');
     }
 }

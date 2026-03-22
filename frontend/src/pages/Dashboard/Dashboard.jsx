@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useAuth } from "../../context/AuthContext"
 import { Link } from "react-router-dom"
 import styles from "./Dashboard.module.css"
@@ -7,10 +7,14 @@ function Dashboard() {
   const { token } = useAuth()
   const [quizzes, setQuizzes] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
   useEffect(() => {
     async function loadQuizzes() {
       try {
+        setLoading(true)
+        setError("")
+
         const res = await fetch("http://localhost:8000/api/my-quizzes", {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -20,14 +24,18 @@ function Dashboard() {
 
         const data = await res.json()
 
+        if (!res.ok) {
+          setError(data.message || "Errore nel caricamento dei quiz")
+          return
+        }
+
         const allQuizzes = data.quizzes || []
-        const activeQuizzes = allQuizzes.filter(
-          (q) => q.status === "available" || q.status === "in_progress"
-        )
+        const activeQuizzes = allQuizzes.filter((q) => q.is_active)
 
         setQuizzes(activeQuizzes)
-      } catch (error) {
-        console.error("Errore caricamento quiz", error)
+      } catch (err) {
+        console.error("Errore caricamento quiz", err)
+        setError("Errore di connessione durante il caricamento dei quiz")
       } finally {
         setLoading(false)
       }
@@ -36,21 +44,87 @@ function Dashboard() {
     loadQuizzes()
   }, [token])
 
+  const sortedQuizzes = useMemo(() => {
+    const priority = {
+      in_progress: 0,
+      available: 1,
+      completed: 2,
+    }
+
+    return [...quizzes].sort((a, b) => {
+      const aPriority = priority[a.status] ?? 99
+      const bPriority = priority[b.status] ?? 99
+
+      if (aPriority !== bPriority) {
+        return aPriority - bPriority
+      }
+
+      return (a.title || "").localeCompare(b.title || "")
+    })
+  }, [quizzes])
+
   function getStatusLabel(status) {
+    if (status === "completed") return "Completato"
     if (status === "in_progress") return "In corso"
     return "Disponibile"
   }
 
   function getStatusClass(status) {
+    if (status === "completed") return styles.statusCompleted
     if (status === "in_progress") return styles.statusInProgress
     return styles.statusAvailable
   }
 
+  function getCardClass(status) {
+    if (status === "completed") return styles.cardCompleted
+    if (status === "in_progress") return styles.cardInProgress
+    return ""
+  }
+
+  function getStatusText(status) {
+    if (status === "completed") return "Completato"
+    if (status === "in_progress") return "Da completare"
+    return "Pronto"
+  }
+
   function getFooterContent(q) {
+    if (q.status === "completed") {
+      return (
+        <div className="d-flex flex-column gap-2 w-100">
+          <button className="btn btn-outline-success w-100" disabled>
+            ✅ Quiz completato
+          </button>
+
+          {q.leaderboard_visible && (
+            <Link
+              to={`/quiz/${q.id}/leaderboard`}
+              className={`btn btn-warning w-100 ${styles.leaderboardBtn}`}
+            >
+              🏆 Vedi classifica
+            </Link>
+          )}
+        </div>
+      )
+    }
+
     return (
-      <Link to={`/quiz/${q.id}`} className={`btn btn-primary w-100 ${styles.startBtn}`}>
-        {q.status === "in_progress" ? "Riprendi quiz" : "Inizia quiz"}
-      </Link>
+      <div className="d-flex flex-column gap-2 w-100">
+        <Link
+          to={`/quiz/${q.id}`}
+          className={`btn btn-primary w-100 ${styles.startBtn}`}
+        >
+          {q.status === "in_progress" ? "Riprendi quiz" : "Inizia quiz"}
+        </Link>
+
+        {q.leaderboard_visible && (
+          <Link
+            to={`/quiz/${q.id}/leaderboard`}
+            className="btn btn-outline-warning w-100"
+          >
+            🏆 Classifica
+          </Link>
+        )}
+      </div>
     )
   }
 
@@ -63,31 +137,47 @@ function Dashboard() {
     )
   }
 
+  if (error) {
+    return (
+      <div className={`container ${styles.page}`}>
+        <div className={`alert alert-danger ${styles.emptyBox}`}>
+          {error}
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className={`container ${styles.page}`}>
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>Quiz attivi</h1>
           <p className={styles.subtitle}>
-            Qui trovi solo i quiz disponibili o già iniziati.
+            Qui trovi i quiz attivi: disponibili, in corso o già completati.
           </p>
         </div>
       </div>
 
-      {quizzes.length === 0 && (
+      {sortedQuizzes.length === 0 && (
         <div className={`alert alert-info ${styles.emptyBox}`}>
           Nessun quiz attivo al momento.
         </div>
       )}
 
       <div className="row">
-        {quizzes.map((q) => (
+        {sortedQuizzes.map((q) => (
           <div className="col-md-6 col-xl-4 mb-4" key={q.id}>
-            <div className={styles.card}>
+            <div className={`${styles.card} ${getCardClass(q.status)}`}>
               <div className={styles.cardTop}>
                 <span className={`${styles.statusBadge} ${getStatusClass(q.status)}`}>
                   {getStatusLabel(q.status)}
                 </span>
+
+                {q.leaderboard_visible && (
+                  <span className={styles.leaderboardBadge}>
+                    🏆 Classifica
+                  </span>
+                )}
               </div>
 
               <h3 className={styles.cardTitle}>{q.title}</h3>
@@ -119,7 +209,21 @@ function Dashboard() {
                 <div className={styles.infoItem}>
                   <span className={styles.infoLabel}>Stato</span>
                   <strong className={styles.infoValue}>
-                    {q.status === "in_progress" ? "Da completare" : "Pronto"}
+                    {getStatusText(q.status)}
+                  </strong>
+                </div>
+
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>Punteggio</span>
+                  <strong className={styles.infoValue}>
+                    {q.status === "completed" ? (q.score ?? "-") : "-"}
+                  </strong>
+                </div>
+
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>Classifica</span>
+                  <strong className={styles.infoValue}>
+                    {q.leaderboard_visible ? "Disponibile" : "Nascosta"}
                   </strong>
                 </div>
               </div>
