@@ -91,6 +91,12 @@ class AuthController extends Controller
             ], 401);
         }
 
+        if (!$user->hasVerifiedEmail()) {
+            return response()->json([
+                'message' => 'Devi verificare la tua email prima di accedere'
+            ], 403);
+        }
+
         // crea token Sanctum
         $token = $user->createToken('react')->plainTextToken;
 

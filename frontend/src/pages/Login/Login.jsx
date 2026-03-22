@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
+import { useEffect } from "react"
 import axios from "axios"
 import css from "./Login.module.css"
 import { useAuth } from "../../context/AuthContext"
@@ -13,6 +14,18 @@ function Login() {
     login: "",
     password: ""
   })
+
+  const [searchParams] = useSearchParams()
+  const [success, setSuccess] = useState(null)
+
+  useEffect(() => {
+    if (searchParams.get("verified")) {
+      setSuccess("Email verificata con successo 🎉 Ora puoi accedere.")
+
+      // 🔥 pulisci URL
+      window.history.replaceState({}, document.title, "/login")
+    }
+  }, [searchParams])
 
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -58,6 +71,7 @@ function Login() {
       }
     } finally {
       setLoading(false)
+
     }
   }
 
@@ -113,6 +127,12 @@ function Login() {
                 {error && (
                   <div className="alert alert-danger mb-3">
                     {error}
+                  </div>
+                )}
+
+                {success && (
+                  <div className="alert alert-success mb-3">
+                    {success}
                   </div>
                 )}
 

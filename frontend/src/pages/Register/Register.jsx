@@ -118,7 +118,7 @@ function Register() {
     try {
       await axios.post("/api/register", form)
 
-      alert("Registrazione completata! Controlla la tua email per verificare l’account.")
+      alert("Registrazione completata! Controlla la tua email anche nella cartella di spam per verificare l’account.")
       navigate("/")
     } catch (err) {
       console.error(err)
