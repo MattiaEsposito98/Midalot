@@ -11,6 +11,7 @@ import Dashboard from "./pages/Dashboard/Dashboard"
 import Quiz from "./pages/Quiz/Quiz"
 import Profilo from "./pages/Profilo"
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword"
+import ResetPassword from "./pages/ResetPassword/ResetPassword"
 
 function App() {
 
@@ -25,6 +26,7 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
       </Route>
 
