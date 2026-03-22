@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react"
 import { useAuth } from "../../context/AuthContext"
-import { Link } from "react-router-dom"
-import styles from "./Dashboard.module.css"
+import styles from "./Storico.module.css"
 
-function Dashboard() {
+function Storico() {
   const { token } = useAuth()
   const [quizzes, setQuizzes] = useState([])
   const [loading, setLoading] = useState(true)
@@ -21,13 +20,13 @@ function Dashboard() {
         const data = await res.json()
 
         const allQuizzes = data.quizzes || []
-        const activeQuizzes = allQuizzes.filter(
-          (q) => q.status === "available" || q.status === "in_progress"
+        const historyQuizzes = allQuizzes.filter(
+          (q) => q.status === "completed" || q.status === "expired"
         )
 
-        setQuizzes(activeQuizzes)
+        setQuizzes(historyQuizzes)
       } catch (error) {
-        console.error("Errore caricamento quiz", error)
+        console.error("Errore caricamento storico quiz", error)
       } finally {
         setLoading(false)
       }
@@ -37,20 +36,30 @@ function Dashboard() {
   }, [token])
 
   function getStatusLabel(status) {
-    if (status === "in_progress") return "In corso"
-    return "Disponibile"
+    if (status === "completed") return "Completato"
+    if (status === "expired") return "Scaduto"
+    return "Storico"
   }
 
   function getStatusClass(status) {
-    if (status === "in_progress") return styles.statusInProgress
+    if (status === "completed") return styles.statusCompleted
+    if (status === "expired") return styles.statusExpired
     return styles.statusAvailable
   }
 
   function getFooterContent(q) {
+    if (q.status === "completed") {
+      return (
+        <button className="btn btn-outline-secondary w-100" disabled>
+          Quiz completato
+        </button>
+      )
+    }
+
     return (
-      <Link to={`/quiz/${q.id}`} className={`btn btn-primary w-100 ${styles.startBtn}`}>
-        {q.status === "in_progress" ? "Riprendi quiz" : "Inizia quiz"}
-      </Link>
+      <button className="btn btn-outline-danger w-100" disabled>
+        Quiz scaduto
+      </button>
     )
   }
 
@@ -58,7 +67,7 @@ function Dashboard() {
     return (
       <div className={`container ${styles.loadingWrap}`}>
         <div className="spinner-border text-primary"></div>
-        <p className={styles.loadingText}>Caricamento quiz...</p>
+        <p className={styles.loadingText}>Caricamento storico...</p>
       </div>
     )
   }
@@ -67,16 +76,16 @@ function Dashboard() {
     <div className={`container ${styles.page}`}>
       <div className={styles.header}>
         <div>
-          <h1 className={styles.title}>Quiz attivi</h1>
+          <h1 className={styles.title}>Storico quiz</h1>
           <p className={styles.subtitle}>
-            Qui trovi solo i quiz disponibili o già iniziati.
+            Qui trovi i quiz completati o scaduti.
           </p>
         </div>
       </div>
 
       {quizzes.length === 0 && (
         <div className={`alert alert-info ${styles.emptyBox}`}>
-          Nessun quiz attivo al momento.
+          Nessun quiz nello storico.
         </div>
       )}
 
@@ -117,9 +126,9 @@ function Dashboard() {
                 </div>
 
                 <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>Stato</span>
+                  <span className={styles.infoLabel}>Punteggio</span>
                   <strong className={styles.infoValue}>
-                    {q.status === "in_progress" ? "Da completare" : "Pronto"}
+                    {q.status === "completed" ? q.score ?? "-" : "-"}
                   </strong>
                 </div>
               </div>
@@ -135,4 +144,4 @@ function Dashboard() {
   )
 }
 
-export default Dashboard
+export default Storico

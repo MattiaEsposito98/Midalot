@@ -3,7 +3,7 @@ import { useAuth } from "../../context/AuthContext"
 import css from "../public/PublicNavbarFooter.module.css"
 
 function PrivateNavbar() {
-  const { logout } = useAuth()
+  const { logout, user } = useAuth()
   const navigate = useNavigate()
 
   const handleLogout = () => {
@@ -27,6 +27,9 @@ function PrivateNavbar() {
           type="button"
           data-bs-toggle="collapse"
           data-bs-target="#privateNavbar"
+          aria-controls="privateNavbar"
+          aria-expanded="false"
+          aria-label="Apri menu"
         >
           <span className="navbar-toggler-icon"></span>
         </button>
@@ -38,20 +41,52 @@ function PrivateNavbar() {
                 Dashboard
               </Link>
             </li>
+
             <li className="nav-item">
-              <Link className="nav-link" to="/profilo">
-                Profilo
+              <Link className="nav-link" to="/storico">
+                Storico
               </Link>
             </li>
-            <li className="nav-item ms-lg-3">
-              <button onClick={handleLogout} className="btn btn-outline-danger btn-sm">
-                Logout
-              </button>
+
+            <li className="nav-item dropdown ms-lg-3">
+              <a
+                className="nav-link dropdown-toggle"
+                href="#"
+                role="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                {user?.name || user?.username || "Profilo"}
+              </a>
+
+              <ul className="dropdown-menu dropdown-menu-end shadow-sm border-0">
+                <li>
+                  <Link className="dropdown-item" to="/profilo">
+                    Il mio profilo
+                  </Link>
+                </li>
+                <li>
+                  <Link className="dropdown-item" to="/cambia-password">
+                    Cambia password
+                  </Link>
+                </li>
+                <li>
+                  <hr className="dropdown-divider" />
+                </li>
+                <li>
+                  <button
+                    onClick={handleLogout}
+                    className="dropdown-item text-danger"
+                  >
+                    Logout
+                  </button>
+                </li>
+              </ul>
             </li>
           </ul>
         </div>
       </div>
-    </nav >
+    </nav>
   )
 }
 
