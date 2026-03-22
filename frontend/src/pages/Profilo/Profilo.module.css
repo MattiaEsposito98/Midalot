@@ -1,0 +1,155 @@
+.page {
+  padding-top: 32px;
+  padding-bottom: 40px;
+}
+
+.header {
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 800;
+  margin: 0;
+  color: #1f2937;
+}
+
+.subtitle {
+  margin-top: 8px;
+  color: #6b7280;
+  font-size: 1rem;
+}
+
+.card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 22px;
+  height: 100%;
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
+  border: 1px solid #eef2f7;
+}
+
+.cardTitle {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: #111827;
+  margin-bottom: 18px;
+}
+
+.infoList {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.infoRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 18px;
+}
+
+.infoLabel {
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.infoValue {
+  color: #111827;
+  font-size: 1rem;
+  font-weight: 700;
+  text-align: right;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.statItem {
+  background: #f8fafc;
+  border: 1px solid #edf2f7;
+  border-radius: 18px;
+  padding: 16px;
+}
+
+.statLabel {
+  display: block;
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-bottom: 6px;
+}
+
+.statValue {
+  color: #111827;
+  font-size: 1.4rem;
+  font-weight: 800;
+}
+
+.loadingBox {
+  text-align: center;
+  padding: 24px 0;
+}
+
+.loadingText {
+  margin-top: 12px;
+  color: #6b7280;
+}
+
+.securityWrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.securityText {
+  margin: 0;
+  color: #6b7280;
+}
+
+.passwordBtn {
+  border-radius: 14px;
+  font-weight: 700;
+  min-height: 46px;
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding-top: 20px;
+  }
+
+  .title {
+    font-size: 1.6rem;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .infoRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .infoValue {
+    text-align: left;
+  }
+
+  .securityWrap {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .passwordBtn {
+    width: 100%;
+  }
+}

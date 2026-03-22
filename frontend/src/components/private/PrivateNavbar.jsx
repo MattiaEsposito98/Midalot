@@ -66,11 +66,6 @@ function PrivateNavbar() {
                   </Link>
                 </li>
                 <li>
-                  <Link className="dropdown-item" to="/cambia-password">
-                    Cambia password
-                  </Link>
-                </li>
-                <li>
                   <hr className="dropdown-divider" />
                 </li>
                 <li>

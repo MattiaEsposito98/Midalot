@@ -61,4 +61,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/quiz/{quiz}/start', [QuizPlayController::class, 'start']);
     Route::post('/quiz/answer', [QuizPlayController::class, 'submitAnswer']);
     Route::post('/quiz/finish', [QuizPlayController::class, 'finishQuiz']);
+
+    Route::post('/change-password', [AuthController::class, 'changePassword']);
 });
