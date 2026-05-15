@@ -55,6 +55,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::get('/user', [AuthController::class, 'user']);
 
+    // ✅ AGGIORNAMENTO PROFILO
+    Route::put('/user/profile', [AuthController::class, 'updateProfile']);
+
     Route::get('/my-quizzes', [UserQuizController::class, 'index']);
     Route::get('/quizzes/{quiz}', [UserQuizController::class, 'show']);
 

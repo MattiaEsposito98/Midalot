@@ -46,6 +46,12 @@ class RegisteredUserController extends Controller
                 'unique:users,email'
             ],
 
+            'phone' => [
+                'nullable',
+                'string',
+                'max:30',
+            ],
+
             'password' => [
                 'required',
                 'confirmed',
@@ -61,9 +67,8 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'nickname' => $request->nickname,
             'email' => $request->email,
+            'phone' => $request->phone,
             'password' => Hash::make($request->password),
-
-            // ✅ NUOVI CAMPI
             'birth_date' => $request->birth_date,
             'city_id' => $request->city_id,
         ]);

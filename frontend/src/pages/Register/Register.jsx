@@ -11,6 +11,7 @@ function Register() {
     name: "",
     nickname: "",
     email: "",
+    phone: "",
     password: "",
     password_confirmation: "",
     birth_date: "",
@@ -32,6 +33,10 @@ function Register() {
 
     if (e.target.name === "nickname") {
       value = value.replace(/\s/g, "").toLowerCase()
+    }
+
+    if (e.target.name === "phone") {
+      value = value.replace(/[^\d+\s]/g, "")
     }
 
     setForm((prev) => ({
@@ -190,6 +195,23 @@ function Register() {
                     {errors.email && <div className="text-danger">{errors.email}</div>}
                   </div>
 
+                  <div className="col-md-6 mb-3">
+                    <label className="form-label">Cellulare <span className="text-muted">(opzionale)</span></label>
+                    <input
+                      className="form-control"
+                      name="phone"
+                      type="tel"
+                      value={form.phone}
+                      placeholder="es. +39 333 1234567"
+                      onChange={handleChange}
+                      disabled={loading}
+                      autoComplete="tel"
+                    />
+                    {errors.phone && <div className="text-danger">{errors.phone}</div>}
+                  </div>
+                </div>
+
+                <div className="row">
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Data di nascita</label>
                     <input

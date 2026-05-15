@@ -9,7 +9,6 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
-use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
@@ -39,6 +38,12 @@ class AuthController extends Controller
                 'unique:users,email'
             ],
 
+            'phone' => [
+                'nullable',
+                'string',
+                'max:30',
+            ],
+
             'password' => [
                 'required',
                 'confirmed',
@@ -53,6 +58,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'nickname' => $request->nickname,
             'email' => $request->email,
+            'phone' => $request->phone,
             'password' => Hash::make($request->password),
             'birth_date' => $request->birth_date,
             'city_id' => $request->city_id,
@@ -64,7 +70,7 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Utente registrato correttamente',
-            'user' => $user,
+            'user' => $user->load('city'),
             'token' => $token
         ], 201);
     }
@@ -82,10 +88,9 @@ class AuthController extends Controller
             ? 'email'
             : 'nickname';
 
-        $user = \App\Models\User::where($fieldType, $login)->first();
+        $user = User::where($fieldType, $login)->first();
 
         if (!$user || !Hash::check($request->password, $user->password)) {
-
             return response()->json([
                 'message' => 'Credenziali non valide'
             ], 401);
@@ -97,10 +102,8 @@ class AuthController extends Controller
             ], 403);
         }
 
-        // crea token Sanctum
         $token = $user->createToken('react')->plainTextToken;
 
-        // 🔥 LOG LOGIN API
         UserLogin::create([
             'user_id' => $user->id,
             'ip_address' => $request->ip(),
@@ -109,39 +112,57 @@ class AuthController extends Controller
         ]);
 
         return response()->json([
-            'user' => $user,
+            'user' => $user->load('city'),
             'token' => $token
         ]);
     }
 
     public function user(Request $request)
     {
-        return response()->json($request->user());
+        return response()->json(
+            $request->user()->load('city')
+        );
     }
 
     public function changePassword(Request $request)
     {
         $user = $request->user();
 
-        // ✅ VALIDAZIONE
         $request->validate([
             'current_password' => ['required'],
             'password' => ['required', 'min:8', 'confirmed'],
         ]);
 
-        // 🔐 CONTROLLO PASSWORD ATTUALE
         if (!Hash::check($request->current_password, $user->password)) {
             return response()->json([
                 'message' => 'La password attuale non è corretta.'
             ], 422);
         }
 
-        // ✅ AGGIORNA PASSWORD
         $user->password = Hash::make($request->password);
         $user->save();
 
         return response()->json([
             'message' => 'Password aggiornata con successo.'
+        ]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:30'],
+            'birth_date' => ['required', 'date', 'before:today'],
+            'city_id' => ['required', 'exists:cities,id'],
+        ]);
+
+        $user->update($validated);
+
+        return response()->json([
+            'message' => 'Profilo aggiornato correttamente',
+            'user' => $user->fresh()->load('city'),
         ]);
     }
 }
