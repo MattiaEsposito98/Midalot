@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/AuthContext"
-import css from "../public/PublicNavbarFooter.module.css"
+import css from "./PrivateNavbar.module.css"
 
 function PrivateNavbar() {
   const { logout, user } = useAuth()
@@ -12,14 +12,18 @@ function PrivateNavbar() {
   }
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm">
+    <nav className={`navbar navbar-expand-lg navbar-light border-bottom shadow-sm ${css.navbar}`}>
       <div className="container">
-        <Link className="navbar-brand fw-bold" to="/dashboard">
+        <Link className={`navbar-brand fw-bold ${css.brand}`} to="/dashboard">
           <img
             src="/Midalot.png"
             alt="logo Midalot"
             className={css.logo}
           />
+
+          <span className={css.brandName}>
+            Midalot
+          </span>
         </Link>
 
         <button
@@ -35,22 +39,22 @@ function PrivateNavbar() {
         </button>
 
         <div className="collapse navbar-collapse" id="privateNavbar">
-          <ul className="navbar-nav ms-auto align-items-lg-center">
+          <ul className="navbar-nav ms-auto align-items-lg-center gap-lg-2">
             <li className="nav-item">
-              <Link className="nav-link" to="/dashboard">
+              <Link className={css.navLink} to="/dashboard">
                 Dashboard
               </Link>
             </li>
 
             <li className="nav-item">
-              <Link className="nav-link" to="/storico">
+              <Link className={css.navLink} to="/storico">
                 Storico
               </Link>
             </li>
 
             <li className="nav-item dropdown ms-lg-3">
               <a
-                className="nav-link dropdown-toggle"
+                className={`${css.profileBtn} dropdown-toggle`}
                 href="#"
                 role="button"
                 data-bs-toggle="dropdown"
@@ -59,15 +63,17 @@ function PrivateNavbar() {
                 {user?.name || user?.username || "Profilo"}
               </a>
 
-              <ul className="dropdown-menu dropdown-menu-end shadow-sm border-0">
+              <ul className={`dropdown-menu dropdown-menu-end shadow-sm border-0 ${css.profileMenu}`}>
                 <li>
                   <Link className="dropdown-item" to="/profilo">
                     Il mio profilo
                   </Link>
                 </li>
+
                 <li>
                   <hr className="dropdown-divider" />
                 </li>
+
                 <li>
                   <button
                     onClick={handleLogout}

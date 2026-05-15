@@ -12,3 +12,151 @@
 .footerLogo {
   height: 32px;
 }
+
+.footer {
+  background: #111827;
+  color: white;
+  padding: 32px 0;
+  margin-top: auto;
+}
+
+.footerInner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+
+.footerBrand {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.footerLogoWrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.footerLogo {
+  height: 42px;
+  width: auto;
+  object-fit: contain;
+}
+
+.footerBrandName {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.footerCopy {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.footerContacts {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.footerContactText {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.footerLinks {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.footerLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  color: white;
+  text-decoration: none;
+
+  font-size: 14px;
+  transition: opacity 0.2s ease;
+}
+
+.footerLink:hover {
+  opacity: 0.75;
+}
+
+@media (max-width: 768px) {
+  .footerInner {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .footerContacts {
+    align-items: center;
+  }
+
+  .footerLogoWrap {
+    justify-content: center;
+  }
+
+  .footerLinks {
+    justify-content: center;
+  }
+}
+
+.loginBtn {
+  border: 1px solid #1f2937;
+  color: #1f2937;
+  background: transparent;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.loginBtn:hover {
+  background: #1f2937;
+  color: white;
+}
+
+.registerBtn {
+  background: #111827;
+  border: 1px solid #111827;
+  color: white;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.registerBtn:hover {
+  background: #000000;
+  border-color: white;
+  color: white;
+  /* <- aggiungi questo */
+}
+
+.registerBtn:focus,
+.registerBtn:active {
+  color: white;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  text-decoration: none;
+}
+
+.midalot {
+  font-size: 22px;
+  font-weight: 800;
+
+  color: #111827;
+
+  line-height: 1;
+}

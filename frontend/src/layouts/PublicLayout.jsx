@@ -6,9 +6,11 @@ function PublicLayout() {
   return (
     <div className="d-flex flex-column min-vh-100">
       <PublicNavbar />
-      <main className="flex-grow-1">
+
+      <main className="flex-grow-1 d-flex">
         <Outlet />
       </main>
+
       <Footer />
     </div>
   )

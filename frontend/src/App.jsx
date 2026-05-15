@@ -4,7 +4,7 @@ import PublicLayout from "./layouts/PublicLayout"
 import PrivateLayout from "./layouts/PrivateLayout"
 import ProtectedRoute from "./routes/ProtectedRoute"
 
-import Home from "./pages/Home"
+import Home from "./pages/Home/Home"
 import Login from "./pages/Login/Login"
 import Register from "./pages/Register/Register"
 import Dashboard from "./pages/Dashboard/Dashboard"

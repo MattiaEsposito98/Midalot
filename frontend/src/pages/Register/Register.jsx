@@ -136,8 +136,9 @@ function Register() {
     }
   }
 
+
   return (
-    <div className="container mt-5">
+    <div className={`${css.registerPage} container`}>
       <div className="row justify-content-center">
         <div className="col-lg-7 col-md-9">
           <div className="card shadow">
