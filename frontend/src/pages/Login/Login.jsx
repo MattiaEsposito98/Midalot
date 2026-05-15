@@ -30,6 +30,8 @@ function Login() {
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
 
+  const [showPassword, setShowPassword] = useState(false)
+
   const handleChange = (e) => {
     setForm((prev) => ({
       ...prev,
@@ -107,15 +109,27 @@ function Login() {
                     Password
                   </label>
 
-                  <input
-                    type="password"
-                    className="form-control"
-                    name="password"
-                    value={form.password}
-                    onChange={handleChange}
-                    autoComplete="current-password"
-                    disabled={loading}
-                  />
+                  <div className={css.passwordWrapper}>
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      className="form-control"
+                      name="password"
+                      value={form.password}
+                      onChange={handleChange}
+                      autoComplete="current-password"
+                      disabled={loading}
+                    />
+
+                    <button
+                      type="button"
+                      className={css.passwordToggle}
+                      onClick={() => setShowPassword((prev) => !prev)}
+                      disabled={loading}
+                      aria-label={showPassword ? "Nascondi password" : "Mostra password"}
+                    >
+                      <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
+                    </button>
+                  </div>
                 </div>
 
                 <div className="text-end mb-3">

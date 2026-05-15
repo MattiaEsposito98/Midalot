@@ -15,7 +15,7 @@ function Dashboard() {
         setLoading(true)
         setError("")
 
-        const res = await fetch("http://localhost:8000/api/my-quizzes", {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/my-quizzes`, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",

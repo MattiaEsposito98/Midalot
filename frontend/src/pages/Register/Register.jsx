@@ -22,6 +22,9 @@ function Register() {
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
 
+  const [showPassword, setShowPassword] = useState(false)
+  const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false)
+
   const nicknameRegex = /^(?!.*\.\.)(?!.*\.$)(?!^\.)[a-z0-9._]+$/
 
   const handleChange = (e) => {
@@ -231,29 +234,61 @@ function Register() {
                 <div className="row">
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Password</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      name="password"
-                      value={form.password}
-                      onChange={handleChange}
-                      disabled={loading}
-                      autoComplete="new-password"
-                    />
+
+                    <div className={css.passwordWrapper}>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        className="form-control"
+                        name="password"
+                        value={form.password}
+                        onChange={handleChange}
+                        disabled={loading}
+                        autoComplete="new-password"
+                      />
+
+                      <button
+                        type="button"
+                        className={css.passwordToggle}
+                        onClick={() => setShowPassword((prev) => !prev)}
+                        disabled={loading}
+                        aria-label={showPassword ? "Nascondi password" : "Mostra password"}
+                      >
+                        <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
+                      </button>
+                    </div>
+
                     {errors.password && <div className="text-danger">{errors.password}</div>}
                   </div>
 
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Conferma password</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      name="password_confirmation"
-                      value={form.password_confirmation}
-                      onChange={handleChange}
-                      disabled={loading}
-                      autoComplete="new-password"
-                    />
+
+                    <div className={css.passwordWrapper}>
+                      <input
+                        type={showPasswordConfirmation ? "text" : "password"}
+                        className="form-control"
+                        name="password_confirmation"
+                        value={form.password_confirmation}
+                        onChange={handleChange}
+                        disabled={loading}
+                        autoComplete="new-password"
+                      />
+
+                      <button
+                        type="button"
+                        className={css.passwordToggle}
+                        onClick={() => setShowPasswordConfirmation((prev) => !prev)}
+                        disabled={loading}
+                        aria-label={
+                          showPasswordConfirmation
+                            ? "Nascondi conferma password"
+                            : "Mostra conferma password"
+                        }
+                      >
+                        <i className={`bi ${showPasswordConfirmation ? "bi-eye-slash" : "bi-eye"}`}></i>
+                      </button>
+                    </div>
+
                     {errors.password_confirmation && (
                       <div className="text-danger">{errors.password_confirmation}</div>
                     )}

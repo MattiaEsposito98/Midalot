@@ -80,7 +80,7 @@ function Quiz() {
         setCurrentIndex(0)
         setResult(null)
 
-        const quizRes = await fetch(`http://localhost:8000/api/quizzes/${id}`, {
+        const quizRes = await fetch(`${import.meta.env.VITE_API_URL}/api/quizzes/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
