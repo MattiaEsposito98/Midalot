@@ -12,4 +12,13 @@ class UserLogin extends Model
         'user_agent',
         'logged_in_at',
     ];
+
+    protected $casts = [
+        'logged_in_at' => 'datetime',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

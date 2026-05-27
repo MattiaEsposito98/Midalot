@@ -1,77 +1,60 @@
 <section>
-    <header>
-        <h2 class="text-secondary">
-            {{ __('Profile Information') }}
-        </h2>
-
-        <p class="mt-1 text-muted">
-            {{ __("Update your account's profile information and email address.") }}
-        </p>
+    <header class="mb-4">
+        <h2 class="admin-section-title">Informazioni profilo</h2>
+        <p class="admin-muted mb-0">Aggiorna nome ed email dell'account amministratore.</p>
     </header>
 
     <form id="send-verification" method="post" action="{{ route('verification.send') }}">
         @csrf
     </form>
 
-    <form method="post" action="{{ route('profile.update') }}" class="mt-6 space-y-6">
+    <form method="post" action="{{ route('profile.update') }}">
         @csrf
         @method('patch')
 
-        <div class="mb-2">
-            <label for="name">{{__('Name')}}</label>
-            <input class="form-control" type="text" name="name" id="name" autocomplete="name" value="{{old('name', $user->name)}}" required autofocus>
-            @error('name')
-            <span class="invalid-feedback" role="alert">
-                <strong>{{ $errors->get('name')}}</strong>
-            </span>
-            @enderror
+        <div class="admin-form-grid">
+            <div>
+                <label for="name" class="form-label">Nome</label>
+                <input class="form-control @error('name') is-invalid @enderror" type="text" name="name" id="name"
+                    autocomplete="name" value="{{ old('name', $user->name) }}" required autofocus>
+                @error('name')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
+
+            <div>
+                <label for="email" class="form-label">Email</label>
+                <input id="email" name="email" type="email" class="form-control @error('email') is-invalid @enderror"
+                    value="{{ old('email', $user->email) }}" required autocomplete="username">
+                @error('email')
+                    <div class="invalid-feedback">{{ $message }}</div>
+                @enderror
+            </div>
         </div>
 
-        <div class="mb-2">
-            <label for="email">
-                {{__('Email') }}
-            </label>
-
-            <input id="email" name="email" type="email" class="form-control" value="{{ old('email', $user->email)}}" required autocomplete="username" />
-
-            @error('email')
-            <span class="alert alert-danger mt-2" role="alert">
-                <strong>{{ $errors->get('email')}}</strong>
-            </span>
-            @enderror
-
-            @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
-            <div>
-                <p class="text-sm mt-2 text-muted">
-                    {{ __('Your email address is unverified.') }}
-
-                    <button form="send-verification" class="btn btn-outline-dark">
-                        {{ __('Click here to re-send the verification email.') }}
+        @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
+            <div class="alert alert-warning mt-3 mb-0">
+                <div class="d-flex flex-wrap align-items-center gap-2">
+                    <span>Il tuo indirizzo email non e verificato.</span>
+                    <button form="send-verification" class="btn btn-outline-dark btn-sm">
+                        Invia di nuovo la verifica
                     </button>
-                </p>
+                </div>
 
                 @if (session('status') === 'verification-link-sent')
-                <p class="mt-2 text-success">
-                    {{ __('A new verification link has been sent to your email address.') }}
-                </p>
+                    <p class="text-success mb-0 mt-2">Nuovo link di verifica inviato.</p>
                 @endif
             </div>
-            @endif
-        </div>
+        @endif
 
-        <div class="d-flex align-items-center gap-4">
-            <button class="btn btn-primary" type="submit">{{ __('Save') }}</button>
+        <div class="d-flex align-items-center gap-3 mt-4">
+            <button class="btn btn-primary" type="submit">
+                <i class="bi bi-check-lg"></i>
+                Salva profilo
+            </button>
 
             @if (session('status') === 'profile-updated')
-            <script>
-                const show = true;
-                setTimeout(() => show = false, 2000)
-                const el = document.getElementById('profile-status')
-                if (show) {
-                    el.style.display = 'block';
-                }
-            </script>
-            <p id='profile-status' class="fs-5 text-muted">{{ __('Saved.') }}</p>
+                <span class="text-success fw-semibold">Salvato.</span>
             @endif
         </div>
     </form>

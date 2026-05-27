@@ -1,104 +1,101 @@
-@extends('layouts.app')
+@extends('layouts.admin')
+
+@section('title', 'Domande quiz')
+@section('kicker', 'Gestione domande')
+@section('page-title', 'Domande')
 
 @section('content')
-    <div class="container">
-        <h1>Domande Quiz: {{ $quiz->title }}</h1>
-        @if (session('success'))
-            <div class="alert alert-success">
-                {{ session('success') }}
+    <section class="admin-card">
+        <div class="admin-card-header">
+            <div>
+                <h2 class="admin-section-title">{{ $quiz->title }}</h2>
+                <p class="admin-muted mb-0">Ordina e modifica le domande del quiz.</p>
             </div>
-        @endif
-        <div class="d-flex justify-content-between align-center mt-3">
-            <a href="{{ route('admin.quizzes.questions.create', $quiz->id) }}" class="btn btn-primary ">
-                + Aggiungi Domanda
-            </a>
-
-            <a href="{{ route('admin.quizzes.index') }}" class="btn btn-secondary ">
-                ← Torna ai Quiz
-            </a>
+            <div class="admin-page-actions">
+                <a href="{{ route('admin.quizzes.questions.create', $quiz->id) }}" class="btn btn-primary btn-sm">
+                    <i class="bi bi-plus-lg"></i>
+                    Aggiungi domanda
+                </a>
+                <a href="{{ route('admin.quizzes.index') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left"></i>
+                    Torna ai quiz
+                </a>
+            </div>
         </div>
 
-
         @if ($questions->isEmpty())
-            <p>Nessuna domanda ancora inserita.</p>
+            <div class="admin-empty">
+                <div>
+                    <i class="bi bi-question-square fs-1 d-block mb-2"></i>
+                    <p class="mb-3">Nessuna domanda ancora inserita.</p>
+                    <a href="{{ route('admin.quizzes.questions.create', $quiz->id) }}" class="btn btn-primary">Aggiungi domanda</a>
+                </div>
+            </div>
         @else
-            <table class="table">
-                <thead>
+            <div class="table-responsive">
+                <table class="table admin-table">
                     <thead>
                         <tr>
                             <th>Ordine</th>
                             <th>Testo</th>
-                            <th>Immagine</th>
-                            <th>Audio</th>
-                            <th>Video</th>
-                            <th>Timer (sec)</th>
+                            <th>Media</th>
+                            <th>Timer</th>
                             <th>Azioni</th>
                         </tr>
                     </thead>
-                </thead>
-                <tbody>
-                    @foreach ($questions as $question)
-                        <tr>
-                            <td>{{ $question->order }}</td>
-
-                            <td>
-                                {{ \Illuminate\Support\Str::limit($question->question_text, 50) }}
-                            </td>
-
-                            <td>
-                                @if ($question->image_path)
-                                    <a href="{{ asset('storage/' . $question->image_path) }}" target="_blank">
-
-                                        <img src="{{ asset('storage/' . $question->image_path) }}" width="80"
-                                            class="border rounded" style="cursor:pointer;">
-                                    </a>
-                                @else
-                                    —
-                                @endif
-                            </td>
-                            <td>
-                                @if ($question->audio_path)
-                                    <a href="{{ asset('storage/' . $question->audio_path) }}" target="_blank">
-                                        🎧 Audio
-                                    </a>
-                                @else
-                                    —
-                                @endif
-                            </td>
-
-                            <td>
-                                @if ($question->video_path)
-                                    <a href="{{ asset('storage/' . $question->video_path) }}" target="_blank">
-                                        🎬 Video
-                                    </a>
-                                @else
-                                    —
-                                @endif
-                            </td>
-
-                            <td>{{ $question->time_limit_seconds }}</td>
-                            <td>
-                                <a href="{{ route('admin.quizzes.questions.edit', [$quiz->id, $question->id]) }}"
-                                    class="btn btn-sm btn-warning">
-                                    Modifica
-                                </a>
-
-                                <form action="{{ route('admin.quizzes.questions.destroy', [$quiz->id, $question->id]) }}"
-                                    method="POST" style="display:inline;">
-                                    @csrf
-                                    @method('DELETE')
-
-                                    <button type="submit" class="btn btn-sm btn-danger"
-                                        onclick="return confirm('Sei sicuro di voler eliminare questa domanda?')">
-                                        Elimina
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    <tbody>
+                        @foreach ($questions as $question)
+                            <tr>
+                                <td><span class="badge bg-primary">{{ $question->order }}</span></td>
+                                <td>{{ \Illuminate\Support\Str::limit($question->question_text, 90) }}</td>
+                                <td>
+                                    <div class="admin-actions">
+                                        @if ($question->image_path)
+                                            <a href="{{ asset('storage/' . $question->image_path) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                                <i class="bi bi-image"></i>
+                                                Immagine
+                                            </a>
+                                        @endif
+                                        @if ($question->audio_path)
+                                            <a href="{{ asset('storage/' . $question->audio_path) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                                <i class="bi bi-volume-up"></i>
+                                                Audio
+                                            </a>
+                                        @endif
+                                        @if ($question->video_path)
+                                            <a href="{{ asset('storage/' . $question->video_path) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                                <i class="bi bi-camera-video"></i>
+                                                Video
+                                            </a>
+                                        @endif
+                                        @if (!$question->image_path && !$question->audio_path && !$question->video_path)
+                                            <span class="admin-muted">Nessun media</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td>{{ $question->time_limit_seconds }} sec</td>
+                                <td>
+                                    <div class="admin-actions">
+                                        <a href="{{ route('admin.quizzes.questions.edit', [$quiz->id, $question->id]) }}" class="btn btn-sm btn-warning">
+                                            <i class="bi bi-pencil"></i>
+                                            Modifica
+                                        </a>
+                                        <form action="{{ route('admin.quizzes.questions.destroy', [$quiz->id, $question->id]) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger"
+                                                onclick="return confirm('Sei sicuro di voler eliminare questa domanda?')">
+                                                <i class="bi bi-trash"></i>
+                                                Elimina
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         @endif
-
-    </div>
+    </section>
 @endsection

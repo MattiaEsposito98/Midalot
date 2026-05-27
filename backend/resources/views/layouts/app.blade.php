@@ -65,14 +65,14 @@
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ url('dashboard') }}">{{ __('Dashboard') }}</a>
-                                    <a class="dropdown-item" href="{{ url('profile') }}">{{ __('Profile') }}</a>
-
                                     @if (Auth::user()->is_admin)
-                                        <a class="dropdown-item" href="{{ url('admin') }}">
-                                            {{ __('Admin') }}
+                                        <a class="dropdown-item" href="{{ route('admin.index') }}">
+                                            Area admin
                                         </a>
+                                    @else
+                                        <a class="dropdown-item" href="{{ url('dashboard') }}">{{ __('Dashboard') }}</a>
                                     @endif
+                                    <a class="dropdown-item" href="{{ url('profile') }}">{{ __('Profile') }}</a>
 
                                     <form action="{{ route('logout') }}" method="POST">
                                         @csrf

@@ -15,7 +15,7 @@ class QuizController extends Controller
      */
     public function index()
     {
-        $quizzes = Quiz::latest()->get();
+        $quizzes = Quiz::withCount(['questions', 'users', 'attempts'])->latest()->get();
 
         return view('admin.quizzes.index', compact('quizzes'));
     }

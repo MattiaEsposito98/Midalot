@@ -57,6 +57,10 @@ class AuthenticatedSessionController extends Controller
             'logged_in_at' => now(),
         ]);
 
+        if ($user->is_admin) {
+            return redirect()->intended(route('admin.index'));
+        }
+
         return redirect()->intended(route('dashboard'));
     }
 
