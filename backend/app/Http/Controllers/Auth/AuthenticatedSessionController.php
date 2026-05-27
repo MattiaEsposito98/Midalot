@@ -46,6 +46,14 @@ class AuthenticatedSessionController extends Controller
             ]);
         }
 
+        if (!$user->is_admin) {
+            return back()
+                ->withInput($request->only('login'))
+                ->withErrors([
+                    'login' => 'Accesso riservato agli amministratori. Se sei un utente, accedi dal sito utenti.',
+                ]);
+        }
+
         Auth::login($user);
         $request->session()->regenerate();
 
@@ -57,11 +65,7 @@ class AuthenticatedSessionController extends Controller
             'logged_in_at' => now(),
         ]);
 
-        if ($user->is_admin) {
-            return redirect()->intended(route('admin.index'));
-        }
-
-        return redirect()->intended(route('dashboard'));
+        return redirect()->intended(route('admin.index'));
     }
 
     /**

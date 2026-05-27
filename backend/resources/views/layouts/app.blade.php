@@ -24,7 +24,7 @@
 
         <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
             <div class="container">
-                <a class="navbar-brand d-flex align-items-center" href="{{ url('/') }}">
+                <a class="navbar-brand d-flex align-items-center" href="{{ Auth::check() && Auth::user()->is_admin ? route('admin.index') : route('login') }}">
                     <div class="logo_laravel">
                         <img src="{{ asset('images/Midalot.png') }}" alt="Midalot" style="height:40px;">
                     </div>
@@ -41,7 +41,9 @@
                     <!-- Left Side Of Navbar -->
                     <ul class="navbar-nav me-auto">
                         <li class="nav-item">
-                            <a class="nav-link" href="{{ url('/') }}">{{ __('Home') }}</a>
+                            <a class="nav-link" href="{{ Auth::check() && Auth::user()->is_admin ? route('admin.index') : route('login') }}">
+                                {{ Auth::check() && Auth::user()->is_admin ? 'Admin' : 'Login admin' }}
+                            </a>
                         </li>
                     </ul>
 
@@ -52,11 +54,6 @@
                             <li class="nav-item">
                                 <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
                             </li>
-                            @if (Route::has('register'))
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
-                                </li>
-                            @endif
                         @else
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button"
