@@ -171,7 +171,6 @@ class UserQuizController extends Controller
                 'total_time' => $attempt->total_time,
                 'completed' => (bool) $attempt->completed,
                 'finished_at' => $attempt->finished_at?->toISOString(),
-                'attempt_id' => $attempt->id,
             ];
         })
             ->sort(function ($a, $b) {

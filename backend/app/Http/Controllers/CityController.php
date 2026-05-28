@@ -9,9 +9,13 @@ class CityController extends Controller
 {
     public function search(Request $request)
     {
-        $q = $request->query('q');
+        $validated = $request->validate([
+            'q' => ['nullable', 'string', 'min:2', 'max:80'],
+        ]);
 
-        if (!$q || strlen($q) < 2) {
+        $q = trim($validated['q'] ?? '');
+
+        if ($q === '') {
             return response()->json([]);
         }
 

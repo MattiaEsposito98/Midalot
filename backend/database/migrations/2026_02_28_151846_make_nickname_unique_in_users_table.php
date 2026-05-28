@@ -11,8 +11,21 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (!Schema::hasColumn('users', 'nickname')) {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('nickname')->unique();
+            });
+
+            return;
+        }
+
+        if (Schema::getConnection()->getDriverName() !== 'sqlite') {
+            Schema::table('users', function (Blueprint $table) {
+                $table->string('nickname')->nullable(false)->change();
+            });
+        }
+
         Schema::table('users', function (Blueprint $table) {
-            $table->string('nickname')->nullable(false)->change();
             $table->unique('nickname');
         });
     }

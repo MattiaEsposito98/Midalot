@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         // 👇 abilita CORS
         $middleware->prepend(HandleCors::class);
+        $middleware->append(\App\Http\Middleware\SecurityHeaders::class);
 
         $middleware->alias([
             'admin' => \App\Http\Middleware\AdminMiddleware::class,

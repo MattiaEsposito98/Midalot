@@ -101,6 +101,7 @@ Route::middleware(['auth', 'admin'])
     });
 
 Route::get('/cities/search', [CityController::class, 'search'])
+    ->middleware('throttle:60,1')
     ->name('cities.search');
 
 require __DIR__ . '/auth.php';

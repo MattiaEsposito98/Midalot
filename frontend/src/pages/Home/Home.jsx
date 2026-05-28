@@ -12,7 +12,7 @@ function Home() {
           </span>
 
           <h1 className={css.title}>
-            Benvenuto su Midalot
+            Benvenuti al Midalario
           </h1>
 
           <p className={css.subtitle}>

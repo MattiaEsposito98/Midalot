@@ -15,18 +15,27 @@ use App\Models\User;
 |--------------------------------------------------------------------------
 */
 
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register'])
+    ->middleware('throttle:5,1');
 
-Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
-Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
+Route::post('/login', [AuthController::class, 'login'])
+    ->middleware('throttle:5,1');
+
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink'])
+    ->middleware('throttle:3,1');
+
+Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
+    ->middleware('throttle:5,1');
 
 Route::get('/training/categories', [TrainingController::class, 'categories']);
 Route::get('/training/categories/{categorySlug}/quizzes', [TrainingController::class, 'categoryQuizzes']);
 Route::get('/training/quizzes/{quiz}', [TrainingController::class, 'show']);
-Route::post('/training/quizzes/{quiz}/guest-start', [TrainingController::class, 'guestStart']);
-Route::post('/training/guest-answer', [TrainingController::class, 'guestAnswer']);
-Route::post('/training/guest-finish', [TrainingController::class, 'guestFinish']);
+Route::post('/training/quizzes/{quiz}/guest-start', [TrainingController::class, 'guestStart'])
+    ->middleware('throttle:20,1');
+Route::post('/training/guest-answer', [TrainingController::class, 'guestAnswer'])
+    ->middleware('throttle:120,1');
+Route::post('/training/guest-finish', [TrainingController::class, 'guestFinish'])
+    ->middleware('throttle:60,1');
 
 
 /*
@@ -59,7 +68,7 @@ Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     Route::get('/user', [AuthController::class, 'user']);
 

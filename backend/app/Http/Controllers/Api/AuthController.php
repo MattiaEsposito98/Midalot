@@ -66,12 +66,9 @@ class AuthController extends Controller
 
         event(new Registered($user));
 
-        $token = $user->createToken('react')->plainTextToken;
-
         return response()->json([
             'message' => 'Utente registrato correttamente',
             'user' => $user->load('city'),
-            'token' => $token
         ], 201);
     }
 
@@ -141,6 +138,7 @@ class AuthController extends Controller
 
         $user->password = Hash::make($request->password);
         $user->save();
+        $user->tokens()->delete();
 
         return response()->json([
             'message' => 'Password aggiornata con successo.'
