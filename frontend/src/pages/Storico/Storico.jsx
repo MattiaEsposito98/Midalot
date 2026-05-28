@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react"
 import { useAuth } from "../../context/useAuth"
 import styles from "./Storico.module.css"
+import { logError } from "../../utils/logger"
 
 function Storico() {
   const { token } = useAuth()
@@ -26,7 +27,7 @@ function Storico() {
 
         setQuizzes(historyQuizzes)
       } catch (error) {
-        console.error("Errore caricamento storico quiz", error)
+        logError("Errore caricamento storico quiz", error)
       } finally {
         setLoading(false)
       }

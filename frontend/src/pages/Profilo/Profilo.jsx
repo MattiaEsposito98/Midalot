@@ -3,6 +3,7 @@ import axios from "axios"
 import { Link } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "./Profilo.module.css"
+import { logError } from "../../utils/logger"
 
 function Profilo() {
   const { token, user } = useAuth()
@@ -69,7 +70,7 @@ function Profilo() {
           expired,
         })
       } catch (error) {
-        console.error("Errore caricamento statistiche profilo", error)
+        logError("Errore caricamento statistiche profilo", error)
       } finally {
         setLoading(false)
       }
@@ -117,11 +118,9 @@ function Profilo() {
     try {
       const res = await axios.get("/cities/search?q=" + encodeURIComponent(value))
 
-      console.log("COMUNI TROVATI:", res.data)
-
       setCities(res.data)
     } catch (error) {
-      console.error("Errore ricerca comuni", error)
+      logError("Errore ricerca comuni", error)
       setCities([])
     }
   }
@@ -189,7 +188,7 @@ function Profilo() {
         setUser(data.user)
       */
     } catch (error) {
-      console.error("Errore salvataggio profilo", error)
+      logError("Errore salvataggio profilo", error)
       alert("Si è verificato un errore durante il salvataggio.")
     } finally {
       setSaving(false)

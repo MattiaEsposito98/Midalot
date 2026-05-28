@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "./Quiz.module.css"
+import { logError } from "../../utils/logger"
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -120,7 +121,7 @@ function Quiz() {
 
         setAttemptId(startData.attempt_id)
       } catch (err) {
-        console.error(err)
+        logError(err)
         setError("Errore di connessione")
       } finally {
         setLoading(false)
@@ -278,7 +279,7 @@ function Quiz() {
 
       await goNextOrFinish()
     } catch (err) {
-      console.error(err)
+      logError(err)
       setError("Errore di connessione")
     } finally {
       setSubmittingSafe(false)
@@ -325,7 +326,7 @@ function Quiz() {
       await new Promise((resolve) => setTimeout(resolve, 250))
       await goNextOrFinish()
     } catch (err) {
-      console.error(err)
+      logError(err)
       setError("Errore di connessione")
     } finally {
       setSubmittingSafe(false)
@@ -362,7 +363,7 @@ function Quiz() {
         score: data.score,
       })
     } catch (err) {
-      console.error(err)
+      logError(err)
       setError("Errore di connessione durante la chiusura del quiz")
     } finally {
       finishingRef.current = false

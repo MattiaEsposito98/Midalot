@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Link, useParams } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "./Training.module.css"
+import { logError } from "../../utils/logger"
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -44,7 +45,7 @@ function Training() {
           if (progressRes.ok) setProgress(progressData)
         }
       } catch (err) {
-        console.error(err)
+        logError(err)
         setError("Errore di connessione")
       } finally {
         setLoading(false)
@@ -88,7 +89,7 @@ function Training() {
           if (leaderboardRes.ok) setLeaderboard(leaderboardData)
         }
       } catch (err) {
-        console.error(err)
+        logError(err)
         setError("Errore di connessione")
       }
     }

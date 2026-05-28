@@ -2,6 +2,7 @@ import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "./Leaderboard.module.css"
+import { logError } from "../../utils/logger"
 
 function Leaderboard() {
   const { id } = useParams()
@@ -33,7 +34,7 @@ function Leaderboard() {
 
         setData(json)
       } catch (err) {
-        console.error(err)
+        logError(err)
         setError("Errore di connessione")
       } finally {
         setLoading(false)

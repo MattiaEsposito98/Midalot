@@ -4,6 +4,7 @@ import axios from "axios"
 import css from "./Login.module.css"
 import { useAuth } from "../../context/useAuth"
 import LoaderButton from "../../components/LoaderButton"
+import { logError } from "../../utils/logger"
 
 function Login() {
   const navigate = useNavigate()
@@ -52,7 +53,7 @@ function Login() {
       authLogin(user, token)
       navigate("/dashboard")
     } catch (err) {
-      console.log("ERRORE LOGIN:", err)
+      logError("ERRORE LOGIN:", err)
 
       if (err.response?.status === 401) {
         setError("Credenziali non valide")

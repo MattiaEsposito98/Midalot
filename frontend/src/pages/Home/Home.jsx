@@ -35,15 +35,11 @@ function Home() {
 
         <div className={css.visual}>
           <img
-            src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop"
-            alt="Persona che usa una piattaforma quiz online"
+            src="/Midalot.png"
+            alt="Logo Midalot"
             className={css.heroImage}
           />
 
-          <div className={css.scoreCard}>
-            <span>Score</span>
-            <strong>980</strong>
-          </div>
         </div>
       </div>
 
@@ -52,7 +48,7 @@ function Home() {
           <span className={css.featureIcon}>
             <i className="bi bi-ui-checks-grid"></i>
           </span>
-          <h2>Quiz assegnati</h2>
+          <h2>Quiz</h2>
           <p>Trovi subito le sfide disponibili, quelle in corso e quelle completate.</p>
         </div>
 

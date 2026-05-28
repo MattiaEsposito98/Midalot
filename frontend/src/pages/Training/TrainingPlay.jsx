@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "../Quiz/Quiz.module.css"
+import { logError } from "../../utils/logger"
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -101,7 +102,7 @@ function TrainingPlay() {
         setAttemptId(data.attempt_id || null)
         setSessionToken(data.session_token || null)
       } catch (err) {
-        console.error(err)
+        logError(err)
         setError("Errore di connessione")
       } finally {
         setLoading(false)
@@ -202,7 +203,7 @@ function TrainingPlay() {
       await new Promise((resolve) => setTimeout(resolve, 200))
       await goNextOrFinish()
     } catch (err) {
-      console.error(err)
+      logError(err)
       setError("Errore di connessione")
     } finally {
       setSubmittingSafe(false)
@@ -253,7 +254,7 @@ function TrainingPlay() {
 
       setResult(data)
     } catch (err) {
-      console.error(err)
+      logError(err)
       setError("Errore di connessione")
     } finally {
       finishingRef.current = false

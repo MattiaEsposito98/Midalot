@@ -3,6 +3,7 @@ import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import axios from "axios"
 import LoaderButton from "../../components/LoaderButton"
 import css from "../Login/Login.module.css"
+import { logError } from "../../utils/logger"
 
 function ResetPassword() {
   const [searchParams] = useSearchParams()
@@ -59,7 +60,7 @@ function ResetPassword() {
         navigate("/login")
       }, 2000)
     } catch (err) {
-      console.log(err)
+      logError(err)
       setError(err.response?.data?.message || "Errore durante il reset della password")
     } finally {
       setLoading(false)

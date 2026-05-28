@@ -3,6 +3,7 @@ import axios from "axios"
 import { Link } from "react-router-dom"
 import LoaderButton from "../../components/LoaderButton"
 import css from "../Login/Login.module.css"
+import { logError } from "../../utils/logger"
 
 function ForgotPassword() {
   const [email, setEmail] = useState("")
@@ -27,7 +28,7 @@ function ForgotPassword() {
       setSuccess("Se l'email esiste, ti abbiamo inviato le istruzioni per reimpostare la password.")
       setEmail("")
     } catch (err) {
-      console.log("ERRORE FORGOT PASSWORD:", err)
+      logError("ERRORE FORGOT PASSWORD:", err)
       setError("Errore del server. Riprova piu' tardi.")
     } finally {
       setLoading(false)

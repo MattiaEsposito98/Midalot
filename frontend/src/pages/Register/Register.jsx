@@ -3,6 +3,7 @@ import axios from "axios"
 import { Link, useNavigate } from "react-router-dom"
 import css from "./Register.module.css"
 import LoaderButton from "../../components/LoaderButton"
+import { logError } from "../../utils/logger"
 
 function Register() {
   const navigate = useNavigate()
@@ -57,7 +58,7 @@ function Register() {
       const res = await axios.get("/cities/search?q=" + encodeURIComponent(value))
       setCities(res.data)
     } catch (err) {
-      console.error(err)
+      logError(err)
     }
   }
 
@@ -124,7 +125,7 @@ function Register() {
       alert("Registrazione completata! Controlla la tua email, anche nella cartella spam, per verificare l'account.")
       navigate("/")
     } catch (err) {
-      console.error(err)
+      logError(err)
 
       if (err.response?.status === 422) {
         setErrors(err.response.data.errors || {})

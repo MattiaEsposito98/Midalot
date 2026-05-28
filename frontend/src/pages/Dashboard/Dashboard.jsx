@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "./Dashboard.module.css"
+import { logError } from "../../utils/logger"
 
 function Dashboard() {
   const { token } = useAuth()
@@ -34,7 +35,7 @@ function Dashboard() {
 
         setQuizzes(activeQuizzes)
       } catch (err) {
-        console.error("Errore caricamento quiz", err)
+        logError("Errore caricamento quiz", err)
         setError("Errore di connessione durante il caricamento dei quiz")
       } finally {
         setLoading(false)
