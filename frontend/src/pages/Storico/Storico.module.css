@@ -9,14 +9,14 @@
 
 .title {
   font-size: 2rem;
-  font-weight: 800;
+  font-weight: 950;
   margin: 0;
-  color: #1f2937;
+  color: #182033;
 }
 
 .subtitle {
   margin-top: 8px;
-  color: #6b7280;
+  color: #647084;
   font-size: 1rem;
 }
 
@@ -27,28 +27,28 @@
 
 .loadingText {
   margin-top: 12px;
-  color: #6b7280;
+  color: #647084;
 }
 
 .emptyBox {
-  border-radius: 18px;
+  border-radius: 8px;
 }
 
 .card {
   background: #ffffff;
-  border-radius: 24px;
-  padding: 22px;
+  border-radius: 8px;
+  padding: 20px;
   height: 100%;
-  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.08);
-  border: 1px solid #eef2f7;
+  box-shadow: 0 14px 34px rgba(24, 32, 51, 0.08);
+  border: 1px solid #dce5ee;
   transition: transform 0.18s ease, box-shadow 0.18s ease;
   display: flex;
   flex-direction: column;
 }
 
 .card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.12);
+  transform: translateY(-3px);
+  box-shadow: 0 18px 42px rgba(24, 32, 51, 0.12);
 }
 
 .cardTop {
@@ -61,26 +61,26 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 32px;
-  padding: 0 12px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 700;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 900;
 }
 
 .statusAvailable {
-  background: #ecfdf3;
-  color: #027a48;
+  background: #e9f8f0;
+  color: #1f7a4b;
 }
 
 .statusInProgress {
-  background: #fff7e6;
+  background: #fff0e8;
   color: #b54708;
 }
 
 .statusCompleted {
-  background: #eff6ff;
-  color: #1d4ed8;
+  background: #eaf5ff;
+  color: #1d55c7;
 }
 
 .statusExpired {
@@ -89,14 +89,14 @@
 }
 
 .cardTitle {
-  font-size: 1.3rem;
-  font-weight: 800;
-  color: #111827;
+  font-size: 1.25rem;
+  font-weight: 950;
+  color: #182033;
   margin-bottom: 8px;
 }
 
 .cardDescription {
-  color: #6b7280;
+  color: #647084;
   min-height: 48px;
   margin-bottom: 18px;
 }
@@ -104,28 +104,28 @@
 .infoGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  margin-bottom: 22px;
+  gap: 12px;
+  margin-bottom: 20px;
 }
 
 .infoItem {
-  background: #f8fafc;
-  border: 1px solid #edf2f7;
-  border-radius: 18px;
-  padding: 14px;
+  background: #f7f8fb;
+  border: 1px solid #dce5ee;
+  border-radius: 8px;
+  padding: 12px;
 }
 
 .infoLabel {
   display: block;
-  color: #6b7280;
-  font-size: 0.85rem;
+  color: #647084;
+  font-size: 0.82rem;
   margin-bottom: 6px;
 }
 
 .infoValue {
-  color: #111827;
-  font-size: 1.05rem;
-  font-weight: 800;
+  color: #182033;
+  font-size: 1rem;
+  font-weight: 900;
 }
 
 .footer {
@@ -133,8 +133,6 @@
 }
 
 .startBtn {
-  border-radius: 14px;
-  font-weight: 700;
   min-height: 46px;
 }
 

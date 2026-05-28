@@ -5,7 +5,6 @@ function Footer() {
   return (
     <footer className={css.footer}>
       <div className={`container ${css.footerInner}`}>
-
         <div className={css.footerBrand}>
           <div className={css.footerLogoWrap}>
             <Link className="navbar-brand fw-bold m-0" to="/">
@@ -22,7 +21,7 @@ function Footer() {
           </div>
 
           <p className={css.footerCopy}>
-            © {new Date().getFullYear()} Midalot. Tutti i diritti riservati.
+            Copyright {new Date().getFullYear()} Midalot. Tutti i diritti riservati.
           </p>
         </div>
 
@@ -32,7 +31,6 @@ function Footer() {
           </p>
 
           <div className={css.footerLinks}>
-
             <a
               href="https://www.instagram.com/mida.lot/"
               target="_blank"
@@ -50,10 +48,8 @@ function Footer() {
               <i className="bi bi-envelope"></i>
               <span>midalot@libero.it</span>
             </a>
-
           </div>
         </div>
-
       </div>
     </footer>
   )

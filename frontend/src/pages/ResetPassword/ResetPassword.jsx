@@ -1,7 +1,8 @@
 import { useState } from "react"
-import { useSearchParams, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import axios from "axios"
 import LoaderButton from "../../components/LoaderButton"
+import css from "../Login/Login.module.css"
 
 function ResetPassword() {
   const [searchParams] = useSearchParams()
@@ -57,37 +58,29 @@ function ResetPassword() {
       setTimeout(() => {
         navigate("/login")
       }, 2000)
-
     } catch (err) {
       console.log(err)
-
-      setError(
-        err.response?.data?.message ||
-        "Errore durante il reset della password"
-      )
+      setError(err.response?.data?.message || "Errore durante il reset della password")
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="container mt-5">
+    <div className={`${css.loginPage} container`}>
       <div className="row justify-content-center">
-        <div className="col-md-5">
-
-          <div className="card shadow">
+        <div className="col-md-6 col-lg-5">
+          <div className={`card ${css.loginCard}`}>
             <div className="card-body">
-
-              <h3 className="text-center mb-3">
-                Reimposta password 🔐
-              </h3>
-
-              <p className="text-muted text-center">
-                Inserisci una nuova password per il tuo account
-              </p>
+              <div className={css.header}>
+                <span className={css.iconBadge}>
+                  <i className="bi bi-shield-lock-fill"></i>
+                </span>
+                <h1>Reimposta password</h1>
+                <p>Inserisci una nuova password per il tuo account.</p>
+              </div>
 
               <form onSubmit={handleSubmit}>
-
                 <div className="mb-3">
                   <label className="form-label">Nuova password</label>
                   <input
@@ -112,35 +105,23 @@ function ResetPassword() {
                   />
                 </div>
 
-                {error && (
-                  <div className="alert alert-danger">
-                    {error}
-                  </div>
-                )}
-
-                {success && (
-                  <div className="alert alert-success">
-                    {success}
-                  </div>
-                )}
+                {error && <div className="alert alert-danger">{error}</div>}
+                {success && <div className="alert alert-success">{success}</div>}
 
                 <LoaderButton
                   type="submit"
                   loading={loading}
-                  className="btn btn-primary w-100"
+                  className={`btn btn-primary w-100 ${css.submitBtn}`}
                 >
                   Salva nuova password
                 </LoaderButton>
 
-                <div className="text-center mt-3">
-                  <a href="/login">Torna al login</a>
+                <div className={css.switchText}>
+                  <Link to="/login">Torna al login</Link>
                 </div>
-
               </form>
-
             </div>
           </div>
-
         </div>
       </div>
     </div>

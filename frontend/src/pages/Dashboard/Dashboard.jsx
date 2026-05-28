@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
-import { useAuth } from "../../context/AuthContext"
 import { Link } from "react-router-dom"
+import { useAuth } from "../../context/useAuth"
 import styles from "./Dashboard.module.css"
 
 function Dashboard() {
@@ -92,7 +92,8 @@ function Dashboard() {
       return (
         <div className="d-flex flex-column gap-2 w-100">
           <button className="btn btn-outline-success w-100" disabled>
-            ✅ Quiz completato
+            <i className="bi bi-check-circle-fill"></i>
+            Quiz completato
           </button>
 
           {q.leaderboard_visible && (
@@ -100,7 +101,8 @@ function Dashboard() {
               to={`/quiz/${q.id}/leaderboard`}
               className={`btn btn-warning w-100 ${styles.leaderboardBtn}`}
             >
-              🏆 Vedi classifica
+              <i className="bi bi-trophy-fill"></i>
+              Vedi classifica
             </Link>
           )}
         </div>
@@ -113,6 +115,7 @@ function Dashboard() {
           to={`/quiz/${q.id}`}
           className={`btn btn-primary w-100 ${styles.startBtn}`}
         >
+          <i className="bi bi-play-fill"></i>
           {q.status === "in_progress" ? "Riprendi quiz" : "Inizia quiz"}
         </Link>
 
@@ -121,7 +124,8 @@ function Dashboard() {
             to={`/quiz/${q.id}/leaderboard`}
             className="btn btn-outline-warning w-100"
           >
-            🏆 Classifica
+            <i className="bi bi-trophy-fill"></i>
+            Classifica
           </Link>
         )}
       </div>
@@ -131,7 +135,7 @@ function Dashboard() {
   if (loading) {
     return (
       <div className={`container ${styles.loadingWrap}`}>
-        <div className="spinner-border text-primary"></div>
+        <div className="spinner-border"></div>
         <p className={styles.loadingText}>Caricamento quiz...</p>
       </div>
     )
@@ -151,9 +155,13 @@ function Dashboard() {
     <div className={`container ${styles.page}`}>
       <div className={styles.header}>
         <div>
+          <span className={styles.eyebrow}>
+            <i className="bi bi-grid-1x2-fill"></i>
+            Area quiz
+          </span>
           <h1 className={styles.title}>Quiz attivi</h1>
           <p className={styles.subtitle}>
-            Qui trovi i quiz attivi: disponibili, in corso o già completati.
+            Qui trovi i quiz attivi: disponibili, in corso o gia' completati.
           </p>
         </div>
       </div>
@@ -175,7 +183,8 @@ function Dashboard() {
 
                 {q.leaderboard_visible && (
                   <span className={styles.leaderboardBadge}>
-                    🏆 Classifica
+                    <i className="bi bi-trophy-fill"></i>
+                    Classifica
                   </span>
                 )}
               </div>

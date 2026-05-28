@@ -1,6 +1,6 @@
 import { useState } from "react"
 import axios from "axios"
-import { useNavigate } from "react-router-dom"
+import { Link, useNavigate } from "react-router-dom"
 import css from "./Register.module.css"
 import LoaderButton from "../../components/LoaderButton"
 
@@ -22,7 +22,6 @@ function Register() {
   const [cities, setCities] = useState([])
   const [loading, setLoading] = useState(false)
   const [errors, setErrors] = useState({})
-
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false)
 
@@ -47,11 +46,7 @@ function Register() {
 
   const searchCities = async (value) => {
     setCitySearch(value)
-
-    setForm((prev) => ({
-      ...prev,
-      city_id: ""
-    }))
+    setForm((prev) => ({ ...prev, city_id: "" }))
 
     if (value.length < 2) {
       setCities([])
@@ -80,11 +75,11 @@ function Register() {
     const newErrors = {}
 
     if (!form.name.trim()) {
-      newErrors.name = "Il nome è obbligatorio"
+      newErrors.name = "Il nome e' obbligatorio"
     }
 
     if (!form.nickname.trim()) {
-      newErrors.nickname = "Il nickname è obbligatorio"
+      newErrors.nickname = "Il nickname e' obbligatorio"
     } else if (form.nickname.length < 3 || form.nickname.length > 30) {
       newErrors.nickname = "Il nickname deve essere tra 3 e 30 caratteri"
     } else if (!nicknameRegex.test(form.nickname)) {
@@ -108,7 +103,7 @@ function Register() {
     }
 
     if (!form.city_id) {
-      newErrors.city_id = "Seleziona una città valida"
+      newErrors.city_id = "Seleziona una citta' valida"
     }
 
     setErrors(newErrors)
@@ -126,7 +121,7 @@ function Register() {
     try {
       await axios.post("/api/register", form)
 
-      alert("Registrazione completata! Controlla la tua email anche nella cartella di spam per verificare l’account.")
+      alert("Registrazione completata! Controlla la tua email, anche nella cartella spam, per verificare l'account.")
       navigate("/")
     } catch (err) {
       console.error(err)
@@ -134,21 +129,26 @@ function Register() {
       if (err.response?.status === 422) {
         setErrors(err.response.data.errors || {})
       } else {
-        alert("Si è verificato un errore durante la registrazione.")
+        alert("Si e' verificato un errore durante la registrazione.")
       }
     } finally {
       setLoading(false)
     }
   }
 
-
   return (
     <div className={`${css.registerPage} container`}>
       <div className="row justify-content-center">
-        <div className="col-lg-7 col-md-9">
-          <div className="card shadow">
+        <div className="col-lg-8 col-md-10">
+          <div className={`card ${css.registerCard}`}>
             <div className="card-body">
-              <h3 className="mb-4 text-center">Registrazione</h3>
+              <div className={css.header}>
+                <span className={css.iconBadge}>
+                  <i className="bi bi-person-plus-fill"></i>
+                </span>
+                <h1>Registrazione</h1>
+                <p>Crea il tuo account per salvare progressi, storico e training.</p>
+              </div>
 
               <form onSubmit={handleSubmit}>
                 <div className="row">
@@ -162,7 +162,7 @@ function Register() {
                       disabled={loading}
                       autoComplete="name"
                     />
-                    {errors.name && <div className="text-danger">{errors.name}</div>}
+                    {errors.name && <div className="text-danger small mt-1">{errors.name}</div>}
                   </div>
 
                   <div className="col-md-6 mb-3">
@@ -176,7 +176,7 @@ function Register() {
                       disabled={loading}
                       autoComplete="username"
                     />
-                    {errors.nickname && <div className="text-danger">{errors.nickname}</div>}
+                    {errors.nickname && <div className="text-danger small mt-1">{errors.nickname}</div>}
                   </div>
                 </div>
 
@@ -192,7 +192,7 @@ function Register() {
                       disabled={loading}
                       autoComplete="email"
                     />
-                    {errors.email && <div className="text-danger">{errors.email}</div>}
+                    {errors.email && <div className="text-danger small mt-1">{errors.email}</div>}
                   </div>
 
                   <div className="col-md-6 mb-3">
@@ -207,7 +207,7 @@ function Register() {
                       disabled={loading}
                       autoComplete="tel"
                     />
-                    {errors.phone && <div className="text-danger">{errors.phone}</div>}
+                    {errors.phone && <div className="text-danger small mt-1">{errors.phone}</div>}
                   </div>
                 </div>
 
@@ -222,42 +222,42 @@ function Register() {
                       onChange={handleChange}
                       disabled={loading}
                     />
-                    {errors.birth_date && <div className="text-danger">{errors.birth_date}</div>}
+                    {errors.birth_date && <div className="text-danger small mt-1">{errors.birth_date}</div>}
                   </div>
-                </div>
 
-                <div className={`mb-3 ${css.cityWrapper}`}>
-                  <label className="form-label">Comune</label>
-                  <input
-                    className="form-control"
-                    placeholder="Cerca comune"
-                    value={citySearch}
-                    onChange={(e) => searchCities(e.target.value)}
-                    disabled={loading}
-                    autoComplete="address-level2"
-                  />
+                  <div className={`col-md-6 mb-3 ${css.cityWrapper}`}>
+                    <label className="form-label">Comune</label>
+                    <input
+                      className="form-control"
+                      placeholder="Cerca comune"
+                      value={citySearch}
+                      onChange={(e) => searchCities(e.target.value)}
+                      disabled={loading}
+                      autoComplete="address-level2"
+                    />
 
-                  {cities.length > 0 && (
-                    <div className={css.cityDropdown}>
-                      {cities.map((city) => (
-                        <div
-                          key={city.id}
-                          className={css.cityItem}
-                          onClick={() => selectCity(city)}
-                        >
-                          {city.name}
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                    {cities.length > 0 && (
+                      <div className={css.cityDropdown}>
+                        {cities.map((city) => (
+                          <button
+                            type="button"
+                            key={city.id}
+                            className={css.cityItem}
+                            onClick={() => selectCity(city)}
+                          >
+                            {city.name}
+                          </button>
+                        ))}
+                      </div>
+                    )}
 
-                  {errors.city_id && <div className="text-danger">{errors.city_id}</div>}
+                    {errors.city_id && <div className="text-danger small mt-1">{errors.city_id}</div>}
+                  </div>
                 </div>
 
                 <div className="row">
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Password</label>
-
                     <div className={css.passwordWrapper}>
                       <input
                         type={showPassword ? "text" : "password"}
@@ -279,13 +279,11 @@ function Register() {
                         <i className={`bi ${showPassword ? "bi-eye-slash" : "bi-eye"}`}></i>
                       </button>
                     </div>
-
-                    {errors.password && <div className="text-danger">{errors.password}</div>}
+                    {errors.password && <div className="text-danger small mt-1">{errors.password}</div>}
                   </div>
 
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Conferma password</label>
-
                     <div className={css.passwordWrapper}>
                       <input
                         type={showPasswordConfirmation ? "text" : "password"}
@@ -302,18 +300,13 @@ function Register() {
                         className={css.passwordToggle}
                         onClick={() => setShowPasswordConfirmation((prev) => !prev)}
                         disabled={loading}
-                        aria-label={
-                          showPasswordConfirmation
-                            ? "Nascondi conferma password"
-                            : "Mostra conferma password"
-                        }
+                        aria-label={showPasswordConfirmation ? "Nascondi conferma password" : "Mostra conferma password"}
                       >
                         <i className={`bi ${showPasswordConfirmation ? "bi-eye-slash" : "bi-eye"}`}></i>
                       </button>
                     </div>
-
                     {errors.password_confirmation && (
-                      <div className="text-danger">{errors.password_confirmation}</div>
+                      <div className="text-danger small mt-1">{errors.password_confirmation}</div>
                     )}
                   </div>
                 </div>
@@ -321,10 +314,14 @@ function Register() {
                 <LoaderButton
                   type="submit"
                   loading={loading}
-                  className="btn btn-primary w-100 mt-3"
+                  className={`btn btn-primary w-100 mt-3 ${css.submitBtn}`}
                 >
                   Registrati
                 </LoaderButton>
+
+                <div className={css.switchText}>
+                  Hai gia' un account? <Link to="/login">Accedi</Link>
+                </div>
               </form>
             </div>
           </div>

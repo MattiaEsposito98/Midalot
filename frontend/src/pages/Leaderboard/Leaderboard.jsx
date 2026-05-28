@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { useAuth } from "../../context/AuthContext"
+import { useAuth } from "../../context/useAuth"
 import styles from "./Leaderboard.module.css"
 
 function Leaderboard() {
@@ -56,9 +56,9 @@ function Leaderboard() {
   }
 
   function getRankBadge(position) {
-    if (position === 1) return "🥇"
-    if (position === 2) return "🥈"
-    if (position === 3) return "🥉"
+    if (position === 1) return "1"
+    if (position === 2) return "2"
+    if (position === 3) return "3"
     return `#${position}`
   }
 

@@ -1,10 +1,9 @@
-import { Link } from "react-router-dom"
+import { NavLink, Link } from "react-router-dom"
 import css from "./PublicNavbarFooter.module.css"
 
 function PublicNavbar() {
   return (
-    <nav className="navbar navbar-expand-lg navbar-light border-bottom shadow-sm"
-      style={{ backgroundColor: "#ffc107" }}>
+    <nav className={`navbar navbar-expand-lg navbar-light ${css.publicNavbar}`}>
       <div className="container">
 
         <Link className={`navbar-brand fw-bold ${css.brand}`} to="/">
@@ -19,20 +18,37 @@ function PublicNavbar() {
           </span>
         </Link>
 
-        <div className="ms-auto d-flex gap-2">
+        <button
+          className="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#publicNavbar"
+          aria-controls="publicNavbar"
+          aria-expanded="false"
+          aria-label="Apri menu"
+        >
+          <span className="navbar-toggler-icon"></span>
+        </button>
 
-          <Link to="/training" className={`btn ${css.loginBtn}`}>
-            Training
-          </Link>
+        <div className="collapse navbar-collapse" id="publicNavbar">
+          <div className={`ms-auto ${css.publicActions}`}>
 
-          <Link to="/login" className={`btn ${css.loginBtn}`}>
-            Accedi
-          </Link>
+            <NavLink to="/training" className={css.navPill}>
+              <i className="bi bi-lightning-charge-fill"></i>
+              Training
+            </NavLink>
 
-          <Link to="/register" className={`btn ${css.registerBtn}`}>
-            Registrati
-          </Link>
+            <Link to="/login" className={`btn ${css.loginBtn}`}>
+              <i className="bi bi-box-arrow-in-right"></i>
+              Accedi
+            </Link>
 
+            <Link to="/register" className={`btn ${css.registerBtn}`}>
+              <i className="bi bi-person-plus-fill"></i>
+              Registrati
+            </Link>
+
+          </div>
         </div>
 
       </div>

@@ -3,7 +3,7 @@ import PrivateNavbar from "../components/private/PrivateNavbar"
 
 function PrivateLayout() {
   return (
-    <div className="min-vh-100 bg-light">
+    <div className="min-vh-100">
       <PrivateNavbar />
       <main className="container py-4">
         <Outlet />

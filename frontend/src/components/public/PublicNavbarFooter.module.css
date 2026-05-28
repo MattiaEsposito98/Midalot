@@ -1,22 +1,103 @@
+.publicNavbar {
+  background: #ffc107;
+  border-bottom: 3px solid #182033;
+  box-shadow: 0 8px 0 rgba(24, 32, 51, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
+
 .logo {
-  height: 42px;
-  width: auto;
+  height: 44px;
+  width: 44px;
   object-fit: contain;
-  transition: transform .2s ease;
+  background: #ffffff;
+  border: 2px solid #182033;
+  border-radius: 8px;
+  padding: 3px;
+  transition: transform 0.2s ease;
 }
 
 .logo:hover {
-  transform: scale(1.05);
+  transform: rotate(-4deg) scale(1.03);
 }
 
-.footerLogo {
-  height: 32px;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.midalot {
+  font-size: 22px;
+  font-weight: 900;
+  color: #182033;
+  line-height: 1;
+}
+
+.publicActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.navPill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  color: #182033;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.navPill:hover {
+  background: rgba(24, 32, 51, 0.12);
+  color: #182033;
+}
+
+.loginBtn {
+  border: 2px solid #182033;
+  color: #182033;
+  background: #ffffff;
+  font-weight: 900;
+  box-shadow: 0 3px 0 #182033;
+}
+
+.loginBtn:hover {
+  background: #182033;
+  color: #ffffff;
+  transform: translateY(1px);
+  box-shadow: 0 2px 0 #182033;
+}
+
+.registerBtn {
+  background: #182033;
+  border: 2px solid #182033;
+  color: #ffffff;
+  font-weight: 900;
+  box-shadow: 0 3px 0 rgba(24, 32, 51, 0.45);
+}
+
+.registerBtn:hover,
+.registerBtn:focus,
+.registerBtn:active {
+  background: #0f1728;
+  border-color: #0f1728;
+  color: #ffffff;
+  transform: translateY(1px);
 }
 
 .footer {
-  background: #111827;
-  color: white;
-  padding: 32px 0;
+  background:
+    linear-gradient(135deg, rgba(255, 193, 7, 0.09), transparent 32%),
+    #182033;
+  color: #ffffff;
+  padding: 34px 0;
   margin-top: auto;
 }
 
@@ -44,17 +125,20 @@
   height: 42px;
   width: auto;
   object-fit: contain;
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 3px;
 }
 
 .footerBrandName {
   font-size: 20px;
-  font-weight: 700;
+  font-weight: 900;
 }
 
 .footerCopy {
   margin: 0;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.72);
 }
 
 .footerContacts {
@@ -67,12 +151,12 @@
 .footerContactText {
   margin: 0;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 800;
 }
 
 .footerLinks {
   display: flex;
-  gap: 16px;
+  gap: 14px;
   flex-wrap: wrap;
 }
 
@@ -80,16 +164,30 @@
   display: flex;
   align-items: center;
   gap: 8px;
-
-  color: white;
+  color: #ffffff;
   text-decoration: none;
-
   font-size: 14px;
   transition: opacity 0.2s ease;
 }
 
 .footerLink:hover {
-  opacity: 0.75;
+  color: #ffffff;
+  opacity: 0.78;
+}
+
+@media (max-width: 991px) {
+  .publicActions {
+    align-items: stretch;
+    flex-direction: column;
+    padding-top: 14px;
+  }
+
+  .navPill,
+  .loginBtn,
+  .registerBtn {
+    justify-content: center;
+    width: 100%;
+  }
 }
 
 @media (max-width: 768px) {
@@ -102,61 +200,8 @@
     align-items: center;
   }
 
-  .footerLogoWrap {
-    justify-content: center;
-  }
-
+  .footerLogoWrap,
   .footerLinks {
     justify-content: center;
   }
-}
-
-.loginBtn {
-  border: 1px solid #1f2937;
-  color: #1f2937;
-  background: transparent;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.loginBtn:hover {
-  background: #1f2937;
-  color: white;
-}
-
-.registerBtn {
-  background: #111827;
-  border: 1px solid #111827;
-  color: white;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.registerBtn:hover {
-  background: #000000;
-  border-color: white;
-  color: white;
-  /* <- aggiungi questo */
-}
-
-.registerBtn:focus,
-.registerBtn:active {
-  color: white;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-
-  text-decoration: none;
-}
-
-.midalot {
-  font-size: 22px;
-  font-weight: 800;
-
-  color: #111827;
-
-  line-height: 1;
 }

@@ -1,78 +1,90 @@
+.registerPage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 44px;
+  padding-bottom: 44px;
+}
+
+.registerPage > div {
+  width: 100%;
+}
+
+.registerCard {
+  border-radius: 8px;
+  border: 2px solid #182033;
+  box-shadow: 10px 10px 0 #ffc107, 0 18px 42px rgba(24, 32, 51, 0.12);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.iconBadge {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff4bf;
+  border: 2px solid #182033;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  color: #182033;
+  font-size: 1.2rem;
+}
+
+.header h1 {
+  font-size: 1.8rem;
+  font-weight: 950;
+  margin: 0 0 8px;
+}
+
+.header p {
+  color: #647084;
+  margin: 0;
+}
+
 .cityWrapper {
   position: relative;
 }
 
-.registerPage {
-  flex: 1;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding-top: 40px;
-  padding-bottom: 40px;
-}
-
-.registerPage>div {
-  width: 100%;
-}
-
-/* dropdown */
-
 .cityDropdown {
   position: absolute;
-  top: calc(100% + 6px);
-  left: 0;
-  width: 100%;
-
+  top: calc(100% - 2px);
+  left: 12px;
+  right: 12px;
   max-height: 240px;
   overflow-y: auto;
-
   background: #ffffff;
-
-  border-radius: 10px;
-  border: 1px solid #e6e8ec;
-
-  box-shadow:
-    0 8px 24px rgba(0, 0, 0, 0.08),
-    0 2px 6px rgba(0, 0, 0, 0.04);
-
+  border-radius: 8px;
+  border: 1px solid #dce5ee;
+  box-shadow: 0 14px 34px rgba(24, 32, 51, 0.14);
   z-index: 1000;
 }
 
-/* item */
-
 .cityItem {
-  padding: 11px 16px;
+  width: 100%;
+  padding: 11px 14px;
   font-size: 14.5px;
-
   cursor: pointer;
-
   display: flex;
   align-items: center;
-
-  transition: background 0.15s ease, color 0.15s ease;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #eef2f6;
+  color: #182033;
+  text-align: left;
+  min-height: auto;
+  border-radius: 0;
+  box-shadow: none;
 }
-
-/* separatore tra città */
-
-.cityItem+.cityItem {
-  border-top: 1px solid #f1f3f6;
-}
-
-/* hover stile Google */
 
 .cityItem:hover {
-  background: #f5f7fb;
+  background: #fff9dc;
 }
-
-/* focus (utile quando aggiungeremo frecce tastiera) */
-
-.cityItem:active {
-  background: #eef2ff;
-}
-
-/* scrollbar moderna */
 
 .cityDropdown::-webkit-scrollbar {
   width: 6px;
@@ -85,10 +97,6 @@
 .cityDropdown::-webkit-scrollbar-thumb {
   background: #d6d9de;
   border-radius: 6px;
-}
-
-.cityDropdown::-webkit-scrollbar-thumb:hover {
-  background: #bfc4ca;
 }
 
 .passwordWrapper {
@@ -110,14 +118,30 @@
   font-size: 18px;
   padding: 0;
   line-height: 1;
-  color: #6c757d;
+  color: #647084;
+  min-height: auto;
+  box-shadow: none;
 }
 
 .passwordToggle:hover {
-  color: #212529;
+  color: #182033;
 }
 
 .passwordToggle:disabled {
   cursor: not-allowed;
   opacity: 0.5;
+}
+
+.submitBtn {
+  min-height: 48px;
+}
+
+.switchText {
+  text-align: center;
+  margin-top: 16px;
+  color: #647084;
+}
+
+.switchText a {
+  font-weight: 900;
 }

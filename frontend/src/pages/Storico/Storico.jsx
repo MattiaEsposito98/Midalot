@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useAuth } from "../../context/AuthContext"
+import { useAuth } from "../../context/useAuth"
 import styles from "./Storico.module.css"
 
 function Storico() {
@@ -62,7 +62,8 @@ function Storico() {
                 window.location.href = `/quiz/${q.id}/leaderboard`
               }}
             >
-              🏆 Vedi classifica
+              <i className="bi bi-trophy-fill"></i>
+              Vedi classifica
             </button>
           )}
         </div>
@@ -82,7 +83,8 @@ function Storico() {
               window.location.href = `/quiz/${q.id}/leaderboard`
             }}
           >
-            🏆 Vedi classifica
+            <i className="bi bi-trophy-fill"></i>
+            Vedi classifica
           </button>
         )}
       </div>

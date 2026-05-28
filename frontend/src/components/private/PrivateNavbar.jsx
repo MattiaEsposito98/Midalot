@@ -1,5 +1,5 @@
-import { Link, useNavigate } from "react-router-dom"
-import { useAuth } from "../../context/AuthContext"
+import { Link, NavLink, useNavigate } from "react-router-dom"
+import { useAuth } from "../../context/useAuth"
 import css from "./PrivateNavbar.module.css"
 
 function PrivateNavbar() {
@@ -41,21 +41,24 @@ function PrivateNavbar() {
         <div className="collapse navbar-collapse" id="privateNavbar">
           <ul className="navbar-nav ms-auto align-items-lg-center gap-lg-2">
             <li className="nav-item">
-              <Link className={css.navLink} to="/dashboard">
+              <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/dashboard">
+                <i className="bi bi-grid-1x2-fill"></i>
                 Dashboard
-              </Link>
+              </NavLink>
             </li>
 
             <li className="nav-item">
-              <Link className={css.navLink} to="/training">
+              <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/training">
+                <i className="bi bi-lightning-charge-fill"></i>
                 Training
-              </Link>
+              </NavLink>
             </li>
 
             <li className="nav-item">
-              <Link className={css.navLink} to="/storico">
+              <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/storico">
+                <i className="bi bi-clock-history"></i>
                 Storico
-              </Link>
+              </NavLink>
             </li>
 
             <li className="nav-item dropdown ms-lg-3">
@@ -66,12 +69,14 @@ function PrivateNavbar() {
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
+                <i className="bi bi-person-circle"></i>
                 {user?.name || user?.username || "Profilo"}
               </a>
 
               <ul className={`dropdown-menu dropdown-menu-end shadow-sm border-0 ${css.profileMenu}`}>
                 <li>
                   <Link className="dropdown-item" to="/profilo">
+                    <i className="bi bi-person-lines-fill me-2"></i>
                     Il mio profilo
                   </Link>
                 </li>
@@ -85,6 +90,7 @@ function PrivateNavbar() {
                     onClick={handleLogout}
                     className="dropdown-item text-danger"
                   >
+                    <i className="bi bi-box-arrow-right me-2"></i>
                     Logout
                   </button>
                 </li>

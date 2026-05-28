@@ -1,13 +1,51 @@
+.loginPage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 44px;
+  padding-bottom: 44px;
+}
+
+.loginPage > div {
+  width: 100%;
+}
+
 .loginCard {
-  border-radius: 12px;
+  border-radius: 8px;
+  border: 2px solid #182033;
+  box-shadow: 10px 10px 0 #ffc107, 0 18px 42px rgba(24, 32, 51, 0.12);
 }
 
-.loginCard input {
-  padding: 10px 12px;
+.header {
+  text-align: center;
+  margin-bottom: 24px;
 }
 
-.loginCard button {
-  font-weight: 500;
+.iconBadge {
+  width: 48px;
+  height: 48px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff4bf;
+  border: 2px solid #182033;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  color: #182033;
+  font-size: 1.2rem;
+}
+
+.header h1 {
+  font-size: 1.8rem;
+  font-weight: 950;
+  margin: 0 0 8px;
+}
+
+.header p {
+  color: #647084;
+  margin: 0;
+  line-height: 1.6;
 }
 
 .passwordWrapper {
@@ -29,11 +67,11 @@
   font-size: 18px;
   padding: 0;
   line-height: 1;
-  color: #6c757d;
+  color: #647084;
 }
 
 .passwordToggle:hover {
-  color: #212529;
+  color: #182033;
 }
 
 .passwordToggle:disabled {
@@ -41,17 +79,20 @@
   opacity: 0.5;
 }
 
-.loginPage {
-  flex: 1;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  padding-top: 40px;
-  padding-bottom: 40px;
+.forgotLink {
+  font-weight: 800;
 }
 
-.loginPage>div {
-  width: 100%;
+.submitBtn {
+  min-height: 48px;
+}
+
+.switchText {
+  text-align: center;
+  margin-top: 16px;
+  color: #647084;
+}
+
+.switchText a {
+  font-weight: 900;
 }

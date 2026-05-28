@@ -1,5 +1,10 @@
 .navbar {
   background-color: #ffc107;
+  border-bottom: 3px solid #182033;
+  box-shadow: 0 8px 0 rgba(24, 32, 51, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 50;
 }
 
 .brand {
@@ -11,58 +16,67 @@
 
 .logo {
   height: 42px;
-  width: auto;
+  width: 42px;
   object-fit: contain;
+  background: #ffffff;
+  border: 2px solid #182033;
+  border-radius: 8px;
+  padding: 3px;
   transition: transform 0.2s ease;
 }
 
 .logo:hover {
-  transform: scale(1.05);
+  transform: rotate(-4deg) scale(1.03);
 }
 
 .brandName {
   font-size: 22px;
-  font-weight: 800;
-  color: #111827;
+  font-weight: 900;
+  color: #182033;
   line-height: 1;
 }
 
 .navLink {
   display: inline-flex;
   align-items: center;
-  padding: 8px 14px;
-  color: #111827;
+  gap: 7px;
+  padding: 8px 13px;
+  color: #182033;
   text-decoration: none;
-  font-weight: 600;
-  border-radius: 10px;
-  transition: all 0.2s ease;
+  font-weight: 900;
+  border-radius: 8px;
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
-.navLink:hover {
-  background: rgba(17, 24, 39, 0.12);
-  color: #111827;
+.navLink:hover,
+.activeLink {
+  background: rgba(24, 32, 51, 0.12);
+  color: #182033;
 }
 
 .profileBtn {
   display: inline-flex;
   align-items: center;
-  padding: 8px 16px;
-  background: #111827;
-  color: white;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #182033;
+  color: #ffffff;
   text-decoration: none;
-  font-weight: 600;
-  border-radius: 12px;
+  font-weight: 900;
+  border-radius: 8px;
+  box-shadow: 0 3px 0 rgba(24, 32, 51, 0.45);
   transition: all 0.2s ease;
 }
 
 .profileBtn:hover,
 .profileBtn:focus {
-  background: #000;
-  color: white;
+  background: #0f1728;
+  color: #ffffff;
+  transform: translateY(1px);
 }
 
 .profileMenu {
-  border-radius: 14px;
+  border-radius: 8px;
   overflow: hidden;
   margin-top: 10px;
 }

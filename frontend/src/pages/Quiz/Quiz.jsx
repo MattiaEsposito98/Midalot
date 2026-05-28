@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import { useAuth } from "../../context/AuthContext"
+import { useAuth } from "../../context/useAuth"
 import styles from "./Quiz.module.css"
+
+const API_URL = import.meta.env.VITE_API_URL
 
 function shuffleArray(array) {
   const copy = [...array]
@@ -96,7 +98,7 @@ function Quiz() {
 
         setQuiz(quizData.quiz)
 
-        const startRes = await fetch(`http://localhost:8000/api/quiz/${id}/start`, {
+        const startRes = await fetch(`${API_URL}/api/quiz/${id}/start`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -252,7 +254,7 @@ function Quiz() {
     try {
       const maxTimeMs = Number(question.time_limit_seconds || 0) * 1000
 
-      const res = await fetch(`http://localhost:8000/api/quiz/answer`, {
+      const res = await fetch(`${API_URL}/api/quiz/answer`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -298,7 +300,7 @@ function Quiz() {
       const maxTimeMs = Number(question.time_limit_seconds || 0) * 1000
       const elapsedMs = Math.min(Date.now() - questionStartedAt, maxTimeMs)
 
-      const res = await fetch(`http://localhost:8000/api/quiz/answer`, {
+      const res = await fetch(`${API_URL}/api/quiz/answer`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -337,7 +339,7 @@ function Quiz() {
     clearInterval(timerRef.current)
 
     try {
-      const res = await fetch(`http://localhost:8000/api/quiz/finish`, {
+      const res = await fetch(`${API_URL}/api/quiz/finish`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -403,7 +405,9 @@ function Quiz() {
     return (
       <div className={styles.centerBox}>
         <div className={styles.resultCard}>
-          <div className={styles.resultIcon}>🏆</div>
+          <div className={styles.resultIcon}>
+            <i className="bi bi-trophy-fill"></i>
+          </div>
           <h1 className={styles.resultTitle}>Quiz completato</h1>
           <p className={styles.resultSubtitle}>
             Hai terminato tutte le domande del quiz.

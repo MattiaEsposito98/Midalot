@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useAuth } from "../../context/AuthContext"
+import { useAuth } from "../../context/useAuth"
 import styles from "./CambiaPassword.module.css"
 
 function CambiaPassword() {
@@ -135,8 +135,9 @@ function CambiaPassword() {
                     type="button"
                     className={styles.eyeBtn}
                     onClick={() => togglePassword("current")}
+                    aria-label={showPasswords.current ? "Nascondi password attuale" : "Mostra password attuale"}
                   >
-                    {showPasswords.current ? "Nascondi" : "Mostra"}
+                    <i className={`bi ${showPasswords.current ? "bi-eye-slash" : "bi-eye"}`}></i>
                   </button>
                 </div>
               </div>
@@ -159,8 +160,9 @@ function CambiaPassword() {
                     type="button"
                     className={styles.eyeBtn}
                     onClick={() => togglePassword("new")}
+                    aria-label={showPasswords.new ? "Nascondi nuova password" : "Mostra nuova password"}
                   >
-                    {showPasswords.new ? "Nascondi" : "Mostra"}
+                    <i className={`bi ${showPasswords.new ? "bi-eye-slash" : "bi-eye"}`}></i>
                   </button>
                 </div>
               </div>
@@ -183,8 +185,9 @@ function CambiaPassword() {
                     type="button"
                     className={styles.eyeBtn}
                     onClick={() => togglePassword("confirm")}
+                    aria-label={showPasswords.confirm ? "Nascondi conferma password" : "Mostra conferma password"}
                   >
-                    {showPasswords.confirm ? "Nascondi" : "Mostra"}
+                    <i className={`bi ${showPasswords.confirm ? "bi-eye-slash" : "bi-eye"}`}></i>
                   </button>
                 </div>
               </div>

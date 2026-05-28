@@ -1,9 +1,8 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Link, useNavigate, useSearchParams } from "react-router-dom"
-import { useEffect } from "react"
 import axios from "axios"
 import css from "./Login.module.css"
-import { useAuth } from "../../context/AuthContext"
+import { useAuth } from "../../context/useAuth"
 import LoaderButton from "../../components/LoaderButton"
 
 function Login() {
@@ -17,20 +16,16 @@ function Login() {
 
   const [searchParams] = useSearchParams()
   const [success, setSuccess] = useState(null)
+  const [error, setError] = useState(null)
+  const [loading, setLoading] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
     if (searchParams.get("verified")) {
-      setSuccess("Email verificata con successo 🎉 Ora puoi accedere.")
-
-      // 🔥 pulisci URL
+      setSuccess("Email verificata con successo. Ora puoi accedere.")
       window.history.replaceState({}, document.title, "/login")
     }
   }, [searchParams])
-
-  const [error, setError] = useState(null)
-  const [loading, setLoading] = useState(false)
-
-  const [showPassword, setShowPassword] = useState(false)
 
   const handleChange = (e) => {
     setForm((prev) => ({
@@ -41,7 +36,6 @@ function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-
     setError(null)
 
     if (!form.login.trim() || !form.password.trim()) {
@@ -53,11 +47,9 @@ function Login() {
       setLoading(true)
 
       const res = await axios.post("/api/login", form)
-
       const { token, user } = res.data
 
       authLogin(user, token)
-
       navigate("/dashboard")
     } catch (err) {
       console.log("ERRORE LOGIN:", err)
@@ -69,23 +61,26 @@ function Login() {
       } else if (err.response?.status === 422) {
         setError("Controlla i dati inseriti")
       } else {
-        setError("Errore del server. Riprova più tardi.")
+        setError("Errore del server. Riprova piu' tardi.")
       }
     } finally {
       setLoading(false)
-
     }
   }
 
   return (
     <div className={`${css.loginPage} container`}>
       <div className="row justify-content-center">
-        <div className="col-md-5">
-          <div className={`card shadow ${css.loginCard}`}>
+        <div className="col-md-6 col-lg-5">
+          <div className={`card ${css.loginCard}`}>
             <div className="card-body">
-              <h3 className="mb-4 text-center">
-                Accedi
-              </h3>
+              <div className={css.header}>
+                <span className={css.iconBadge}>
+                  <i className="bi bi-box-arrow-in-right"></i>
+                </span>
+                <h1>Accedi</h1>
+                <p>Entra su Midalot per giocare i quiz assegnati e seguire i progressi.</p>
+              </div>
 
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
@@ -153,12 +148,12 @@ function Login() {
                 <LoaderButton
                   type="submit"
                   loading={loading}
-                  className="btn btn-primary w-100"
+                  className={`btn btn-primary w-100 ${css.submitBtn}`}
                 >
                   Accedi
                 </LoaderButton>
 
-                <div className="text-center mt-3">
+                <div className={css.switchText}>
                   Non hai un account? <Link to="/register">Registrati</Link>
                 </div>
               </form>

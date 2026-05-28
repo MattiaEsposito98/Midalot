@@ -1,110 +1,194 @@
-.hero {
+.page {
   flex: 1;
+  width: 100%;
+  padding: 56px 0;
+}
 
-  display: flex;
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.02fr) minmax(320px, 0.98fr);
   align-items: center;
+  gap: 44px;
+}
 
-  padding: 60px 0;
+.copy {
+  max-width: 640px;
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
-
-  background: rgba(255, 193, 7, 0.15);
-  color: #b7791f;
-
-  padding: 8px 14px;
-  border-radius: 999px;
-
+  gap: 8px;
+  background: #fff4bf;
+  color: #7a5400;
+  border: 1px solid rgba(255, 193, 7, 0.5);
+  padding: 8px 12px;
+  border-radius: 8px;
   font-size: 14px;
-  font-weight: 600;
-
-  margin-bottom: 20px;
+  font-weight: 900;
+  margin-bottom: 18px;
 }
 
 .title {
-  font-size: clamp(2.5rem, 5vw, 4.2rem);
-  font-weight: 800;
-  line-height: 1.05;
-
-  margin-bottom: 24px;
-
-  color: #111827;
+  font-size: clamp(2.45rem, 5vw, 4.6rem);
+  font-weight: 950;
+  line-height: 1.02;
+  margin-bottom: 22px;
+  color: #182033;
 }
 
 .subtitle {
-  font-size: 1.1rem;
-  line-height: 1.8;
+  font-size: 1.08rem;
+  line-height: 1.75;
+  color: #647084;
+  margin-bottom: 28px;
+  max-width: 600px;
+}
 
-  color: #6b7280;
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
 
-  margin-bottom: 36px;
+.trainingBtn {
+  background: #182033;
+  border: 2px solid #182033;
+  color: #ffffff;
+  box-shadow: 0 4px 0 rgba(24, 32, 51, 0.4);
+}
 
-  max-width: 560px;
+.trainingBtn:hover {
+  background: #0f1728;
+  color: #ffffff;
+  transform: translateY(1px);
+}
+
+.loginBtn {
+  border: 2px solid #182033;
+  color: #182033;
+  background: #ffffff;
+  box-shadow: 0 4px 0 rgba(24, 32, 51, 0.18);
+}
+
+.loginBtn:hover {
+  background: #ffc107;
+  color: #182033;
+  transform: translateY(1px);
+}
+
+.visual {
+  position: relative;
 }
 
 .heroImage {
   width: 100%;
-  max-width: 520px;
-
-  border-radius: 24px;
-
-  box-shadow:
-    0 20px 40px rgba(0, 0, 0, 0.12),
-    0 8px 18px rgba(0, 0, 0, 0.08);
-
+  aspect-ratio: 4 / 3;
+  border-radius: 8px;
+  border: 3px solid #182033;
+  box-shadow: 12px 12px 0 #ffc107, 0 18px 42px rgba(24, 32, 51, 0.15);
   object-fit: cover;
 }
 
-.loginBtn {
-  border: 1px solid #1f2937;
-  color: #1f2937;
-  background: transparent;
-
-  font-weight: 600;
-
-  padding: 12px 24px;
-  border-radius: 12px;
-
-  transition: all 0.2s ease;
+.scoreCard {
+  position: absolute;
+  right: -12px;
+  bottom: 20px;
+  min-width: 116px;
+  background: #ffffff;
+  border: 2px solid #182033;
+  border-radius: 8px;
+  padding: 12px 14px;
+  box-shadow: 0 8px 0 rgba(24, 32, 51, 0.15);
 }
 
-.loginBtn:hover {
-  background: #1f2937;
-  color: white;
+.scoreCard span {
+  display: block;
+  color: #647084;
+  font-weight: 900;
+  font-size: 13px;
 }
 
-.registerBtn {
-  background: #111827;
-  border: 1px solid #111827;
-  color: white;
-
-  font-weight: 600;
-
-  padding: 12px 24px;
-  border-radius: 12px;
-
-  transition: all 0.2s ease;
+.scoreCard strong {
+  color: #0f8b8d;
+  font-size: 1.8rem;
+  line-height: 1;
 }
 
-.registerBtn:hover {
-  background: black;
-  border-color: black;
-  color: white;
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 48px;
+}
+
+.featureCard {
+  background: #ffffff;
+  border: 1px solid #dce5ee;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 14px 34px rgba(24, 32, 51, 0.08);
+}
+
+.featureIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff4bf;
+  color: #182033;
+  margin-bottom: 12px;
+}
+
+.featureCard h2 {
+  font-size: 1.15rem;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.featureCard p {
+  color: #647084;
+  margin: 0;
+  line-height: 1.6;
 }
 
 @media (max-width: 991px) {
+  .page {
+    padding: 38px 0;
+  }
+
   .hero {
+    grid-template-columns: 1fr;
     text-align: center;
   }
 
+  .copy,
   .subtitle {
     margin-left: auto;
     margin-right: auto;
   }
 
-  .badge {
+  .actions {
     justify-content: center;
+  }
+
+  .featureGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 575px) {
+  .actions {
+    flex-direction: column;
+  }
+
+  .actions a {
+    width: 100%;
+  }
+
+  .scoreCard {
+    right: 10px;
   }
 }

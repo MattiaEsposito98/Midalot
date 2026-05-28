@@ -3,43 +3,73 @@ import css from "./Home.module.css"
 
 function Home() {
   return (
-    <section className={css.hero}>
-      <div className="container">
-        <div className="row align-items-center justify-content-center g-5">
+    <section className={css.page}>
+      <div className={`container ${css.hero}`}>
+        <div className={css.copy}>
+          <span className={css.badge}>
+            <i className="bi bi-lightning-charge-fill"></i>
+            Piattaforma quiz
+          </span>
 
-          <div className="col-lg-6">
-            <span className={css.badge}>
-              🚀 Piattaforma Quiz
-            </span>
+          <h1 className={css.title}>
+            Benvenuto su Midalot
+          </h1>
 
-            <h1 className={css.title}>
-              Benvenuto su Midalot
-            </h1>
+          <p className={css.subtitle}>
+            Quiz assegnati, training per categoria e classifiche: un posto piu'
+            vivace dove allenarti, giocare e seguire i tuoi progressi.
+          </p>
 
-            <p className={css.subtitle}>
-              Accedi, completa i quiz assegnati e monitora i tuoi risultati
-              in modo semplice, moderno e veloce.
-            </p>
+          <div className={css.actions}>
+            <Link to="/training" className={`btn ${css.trainingBtn}`}>
+              <i className="bi bi-play-fill"></i>
+              Prova training
+            </Link>
 
-            <div className="d-flex flex-wrap gap-3">
-              <Link to="/login" className={`btn ${css.loginBtn}`}>
-                Accedi
-              </Link>
-
-              <Link to="/register" className={`btn ${css.registerBtn}`}>
-                Registrati
-              </Link>
-            </div>
+            <Link to="/login" className={`btn ${css.loginBtn}`}>
+              <i className="bi bi-box-arrow-in-right"></i>
+              Accedi
+            </Link>
           </div>
+        </div>
 
-          <div className="col-lg-5 text-center">
-            <img
-              src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop"
-              alt="Quiz platform"
-              className={css.heroImage}
-            />
+        <div className={css.visual}>
+          <img
+            src="https://images.unsplash.com/photo-1516321318423-f06f85e504b3?q=80&w=1200&auto=format&fit=crop"
+            alt="Persona che usa una piattaforma quiz online"
+            className={css.heroImage}
+          />
+
+          <div className={css.scoreCard}>
+            <span>Score</span>
+            <strong>980</strong>
           </div>
+        </div>
+      </div>
 
+      <div className={`container ${css.featureGrid}`}>
+        <div className={css.featureCard}>
+          <span className={css.featureIcon}>
+            <i className="bi bi-ui-checks-grid"></i>
+          </span>
+          <h2>Quiz assegnati</h2>
+          <p>Trovi subito le sfide disponibili, quelle in corso e quelle completate.</p>
+        </div>
+
+        <div className={css.featureCard}>
+          <span className={css.featureIcon}>
+            <i className="bi bi-lightning-charge-fill"></i>
+          </span>
+          <h2>Training libero</h2>
+          <p>Allenati per categoria anche senza account, con domande estratte a caso.</p>
+        </div>
+
+        <div className={css.featureCard}>
+          <span className={css.featureIcon}>
+            <i className="bi bi-trophy-fill"></i>
+          </span>
+          <h2>Classifiche</h2>
+          <p>Segui i risultati e confronta i punteggi quando la classifica e' attiva.</p>
         </div>
       </div>
     </section>

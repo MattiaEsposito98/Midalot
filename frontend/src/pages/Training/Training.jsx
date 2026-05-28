@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link, useParams } from "react-router-dom"
-import { useAuth } from "../../context/AuthContext"
+import { useAuth } from "../../context/useAuth"
 import styles from "./Training.module.css"
 
 const API_URL = import.meta.env.VITE_API_URL
@@ -123,6 +123,10 @@ function Training() {
   return (
     <div className={`container ${styles.page}`}>
       <div className={styles.hero}>
+        <span className={styles.eyebrow}>
+          <i className="bi bi-lightning-charge-fill"></i>
+          Allenamento
+        </span>
         <h1 className={styles.title}>Training</h1>
         <p className={styles.subtitle}>
           Allenati per categoria con quiz casuali. Gli ospiti possono provare liberamente; gli utenti registrati salvano progressi e classifiche.
