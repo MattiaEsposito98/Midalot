@@ -47,6 +47,12 @@ function PrivateNavbar() {
             </li>
 
             <li className="nav-item">
+              <Link className={css.navLink} to="/training">
+                Training
+              </Link>
+            </li>
+
+            <li className="nav-item">
               <Link className={css.navLink} to="/storico">
                 Storico
               </Link>

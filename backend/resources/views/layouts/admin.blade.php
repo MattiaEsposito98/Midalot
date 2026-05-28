@@ -31,6 +31,10 @@
                     <i class="bi bi-ui-checks-grid"></i>
                     <span>Quiz</span>
                 </a>
+                <a href="{{ route('admin.training.quizzes.index') }}" class="admin-nav-link {{ Route::is('admin.training.*') ? 'active' : '' }}">
+                    <i class="bi bi-lightning-charge"></i>
+                    <span>Training</span>
+                </a>
                 <a href="{{ route('profile.edit') }}" class="admin-nav-link">
                     <i class="bi bi-person-circle"></i>
                     <span>Profilo</span>

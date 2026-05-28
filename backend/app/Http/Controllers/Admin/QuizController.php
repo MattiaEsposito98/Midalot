@@ -15,7 +15,10 @@ class QuizController extends Controller
      */
     public function index()
     {
-        $quizzes = Quiz::withCount(['questions', 'users', 'attempts'])->latest()->get();
+        $quizzes = Quiz::where('type', 'assigned')
+            ->withCount(['questions', 'users', 'attempts'])
+            ->latest()
+            ->get();
 
         return view('admin.quizzes.index', compact('quizzes'));
     }
@@ -41,6 +44,7 @@ class QuizController extends Controller
         Quiz::create([
             'title' => $request->title,
             'description' => $request->description,
+            'type' => 'assigned',
             'created_by' => Auth::id(),
             'is_active' => false,
         ]);

@@ -21,6 +21,10 @@ function PublicNavbar() {
 
         <div className="ms-auto d-flex gap-2">
 
+          <Link to="/training" className={`btn ${css.loginBtn}`}>
+            Training
+          </Link>
+
           <Link to="/login" className={`btn ${css.loginBtn}`}>
             Accedi
           </Link>

@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\QuizController;
+use App\Http\Controllers\Admin\TrainingCategoryController;
+use App\Http\Controllers\Admin\TrainingQuizController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
@@ -40,6 +42,19 @@ Route::middleware(['auth', 'admin'])
 
         Route::get('/', [DashboardController::class, 'index'])
             ->name('index');
+
+        Route::get('training/categories', [TrainingCategoryController::class, 'index'])
+            ->name('training.categories.index');
+        Route::post('training/categories', [TrainingCategoryController::class, 'store'])
+            ->name('training.categories.store');
+        Route::put('training/categories/{category}', [TrainingCategoryController::class, 'update'])
+            ->name('training.categories.update');
+        Route::delete('training/categories/{category}', [TrainingCategoryController::class, 'destroy'])
+            ->name('training.categories.destroy');
+
+        Route::resource('training/quizzes', TrainingQuizController::class)
+            ->names('training.quizzes')
+            ->parameters(['quizzes' => 'quiz']);
 
         // CRUD Quiz
         Route::resource('quizzes', QuizController::class);

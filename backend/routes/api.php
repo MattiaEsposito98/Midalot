@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\QuizPlayController;
 use App\Http\Controllers\Api\UserQuizController;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\ResetPasswordController;
+use App\Http\Controllers\Api\TrainingController;
 use App\Models\User;
 
 /*
@@ -19,6 +20,13 @@ Route::post('/login', [AuthController::class, 'login']);
 
 Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLink']);
 Route::post('/reset-password', [ResetPasswordController::class, 'reset']);
+
+Route::get('/training/categories', [TrainingController::class, 'categories']);
+Route::get('/training/categories/{categorySlug}/quizzes', [TrainingController::class, 'categoryQuizzes']);
+Route::get('/training/quizzes/{quiz}', [TrainingController::class, 'show']);
+Route::post('/training/quizzes/{quiz}/guest-start', [TrainingController::class, 'guestStart']);
+Route::post('/training/guest-answer', [TrainingController::class, 'guestAnswer']);
+Route::post('/training/guest-finish', [TrainingController::class, 'guestFinish']);
 
 
 /*
@@ -68,4 +76,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/quiz/finish', [QuizPlayController::class, 'finishQuiz']);
 
     Route::post('/change-password', [AuthController::class, 'changePassword']);
+
+    Route::post('/training/quizzes/{quiz}/start', [TrainingController::class, 'start']);
+    Route::post('/training/answer', [TrainingController::class, 'answer']);
+    Route::post('/training/finish', [TrainingController::class, 'finish']);
+    Route::get('/training/progress', [TrainingController::class, 'progress']);
+    Route::get('/training/categories/{categorySlug}/leaderboard', [TrainingController::class, 'leaderboard']);
 });

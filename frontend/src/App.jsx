@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom"
 
 import PublicLayout from "./layouts/PublicLayout"
 import PrivateLayout from "./layouts/PrivateLayout"
+import TrainingLayout from "./layouts/TrainingLayout"
 import ProtectedRoute from "./routes/ProtectedRoute"
 
 import Home from "./pages/Home/Home"
@@ -15,6 +16,8 @@ import ResetPassword from "./pages/ResetPassword/ResetPassword"
 import Storico from "./pages/Storico/Storico"
 import CambiaPassword from "./pages/CambiaPassword/CambiaPassword"
 import Leaderboard from "./pages/Leaderboard/Leaderboard"
+import Training from "./pages/Training/Training"
+import TrainingPlay from "./pages/Training/TrainingPlay"
 
 function App() {
   return (
@@ -26,6 +29,13 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+      </Route>
+
+      {/* TRAINING PUBBLICO / UTENTI */}
+      <Route element={<TrainingLayout />}>
+        <Route path="/training" element={<Training />} />
+        <Route path="/training/:categorySlug" element={<Training />} />
+        <Route path="/training/play/:id" element={<TrainingPlay />} />
       </Route>
 
       {/* AREA PRIVATA */}
