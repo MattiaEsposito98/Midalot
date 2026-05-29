@@ -7,7 +7,7 @@
   padding-bottom: 44px;
 }
 
-.registerPage > div {
+.registerPage>div {
   width: 100%;
 }
 
@@ -134,6 +134,10 @@
 
 .submitBtn {
   min-height: 48px;
+}
+
+.registerPage :global(.form-check-input) {
+  cursor: pointer;
 }
 
 .legalCheck {
