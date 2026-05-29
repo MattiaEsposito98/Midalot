@@ -2,50 +2,47 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Tests\Support\CreatesQuizData;
 use Tests\TestCase;
 
 class PasswordUpdateTest extends TestCase
 {
+    use CreatesQuizData;
     use RefreshDatabase;
 
-    public function test_password_can_be_updated(): void
+    public function test_api_password_can_be_updated_and_existing_tokens_are_revoked(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createUser();
+        $token = $user->createToken('test')->plainTextToken;
 
         $response = $this
-            ->actingAs($user)
-            ->from('/profile')
-            ->put('/password', [
+            ->withHeader('Authorization', 'Bearer ' . $token)
+            ->postJson('/api/change-password', [
                 'current_password' => 'password',
                 'password' => 'new-password',
                 'password_confirmation' => 'new-password',
             ]);
 
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+        $response->assertOk();
 
         $this->assertTrue(Hash::check('new-password', $user->refresh()->password));
+        $this->assertSame(0, $user->tokens()->count());
     }
 
-    public function test_correct_password_must_be_provided_to_update_password(): void
+    public function test_api_current_password_must_be_correct(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createUser();
 
         $response = $this
-            ->actingAs($user)
-            ->from('/profile')
-            ->put('/password', [
+            ->actingAs($user, 'sanctum')
+            ->postJson('/api/change-password', [
                 'current_password' => 'wrong-password',
                 'password' => 'new-password',
                 'password_confirmation' => 'new-password',
             ]);
 
-        $response
-            ->assertSessionHasErrorsIn('updatePassword', 'current_password')
-            ->assertRedirect('/profile');
+        $response->assertUnprocessable();
     }
 }

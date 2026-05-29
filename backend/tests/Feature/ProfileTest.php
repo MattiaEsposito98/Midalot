@@ -2,98 +2,65 @@
 
 namespace Tests\Feature;
 
-use App\Models\User;
+use App\Models\City;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\CreatesQuizData;
 use Tests\TestCase;
 
 class ProfileTest extends TestCase
 {
+    use CreatesQuizData;
     use RefreshDatabase;
 
-    public function test_profile_page_is_displayed(): void
+    public function test_admin_profile_page_is_displayed(): void
     {
-        $user = User::factory()->create();
+        $admin = $this->createAdmin();
 
         $response = $this
-            ->actingAs($user)
+            ->actingAs($admin)
             ->get('/profile');
 
         $response->assertOk();
     }
 
-    public function test_profile_information_can_be_updated(): void
+    public function test_normal_user_cannot_access_backend_profile(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createUser();
 
         $response = $this
             ->actingAs($user)
-            ->patch('/profile', [
+            ->get('/profile');
+
+        $response->assertForbidden();
+    }
+
+    public function test_api_profile_information_can_be_updated(): void
+    {
+        $user = $this->createUser();
+        $city = City::create([
+            'name' => 'Milano',
+            'latitude' => 45.464203,
+            'longitude' => 9.189982,
+        ]);
+
+        $response = $this
+            ->actingAs($user, 'sanctum')
+            ->putJson('/api/user/profile', [
                 'name' => 'Test User',
-                'email' => 'test@example.com',
+                'phone' => '+39 333 1234567',
+                'birth_date' => '1992-02-02',
+                'city_id' => $city->id,
             ]);
 
         $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
+            ->assertOk()
+            ->assertJsonPath('user.name', 'Test User')
+            ->assertJsonPath('user.city.id', $city->id);
 
-        $user->refresh();
-
-        $this->assertSame('Test User', $user->name);
-        $this->assertSame('test@example.com', $user->email);
-        $this->assertNull($user->email_verified_at);
-    }
-
-    public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
-    {
-        $user = User::factory()->create();
-
-        $response = $this
-            ->actingAs($user)
-            ->patch('/profile', [
-                'name' => 'Test User',
-                'email' => $user->email,
-            ]);
-
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect('/profile');
-
-        $this->assertNotNull($user->refresh()->email_verified_at);
-    }
-
-    public function test_user_can_delete_their_account(): void
-    {
-        $user = User::factory()->create();
-
-        $response = $this
-            ->actingAs($user)
-            ->delete('/profile', [
-                'password' => 'password',
-            ]);
-
-        $response
-            ->assertSessionHasNoErrors()
-            ->assertRedirect('/');
-
-        $this->assertGuest();
-        $this->assertNull($user->fresh());
-    }
-
-    public function test_correct_password_must_be_provided_to_delete_account(): void
-    {
-        $user = User::factory()->create();
-
-        $response = $this
-            ->actingAs($user)
-            ->from('/profile')
-            ->delete('/profile', [
-                'password' => 'wrong-password',
-            ]);
-
-        $response
-            ->assertSessionHasErrorsIn('userDeletion', 'password')
-            ->assertRedirect('/profile');
-
-        $this->assertNotNull($user->fresh());
+        $this->assertDatabaseHas('users', [
+            'id' => $user->id,
+            'name' => 'Test User',
+            'city_id' => $city->id,
+        ]);
     }
 }

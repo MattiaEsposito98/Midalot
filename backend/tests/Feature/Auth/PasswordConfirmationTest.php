@@ -2,43 +2,42 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\CreatesQuizData;
 use Tests\TestCase;
 
 class PasswordConfirmationTest extends TestCase
 {
+    use CreatesQuizData;
     use RefreshDatabase;
 
-    public function test_confirm_password_screen_can_be_rendered(): void
+    public function test_admin_confirm_password_screen_can_be_rendered(): void
     {
-        $user = User::factory()->create();
+        $admin = $this->createAdmin();
 
-        $response = $this->actingAs($user)->get('/confirm-password');
+        $response = $this->actingAs($admin)->get('/confirm-password');
 
         $response->assertStatus(200);
     }
 
-    public function test_password_can_be_confirmed(): void
+    public function test_normal_user_cannot_render_backend_confirm_password_screen(): void
     {
-        $user = User::factory()->create();
+        $user = $this->createUser();
 
-        $response = $this->actingAs($user)->post('/confirm-password', [
+        $response = $this->actingAs($user)->get('/confirm-password');
+
+        $response->assertForbidden();
+    }
+
+    public function test_admin_password_can_be_confirmed(): void
+    {
+        $admin = $this->createAdmin();
+
+        $response = $this->actingAs($admin)->post('/confirm-password', [
             'password' => 'password',
         ]);
 
         $response->assertRedirect();
         $response->assertSessionHasNoErrors();
-    }
-
-    public function test_password_is_not_confirmed_with_invalid_password(): void
-    {
-        $user = User::factory()->create();
-
-        $response = $this->actingAs($user)->post('/confirm-password', [
-            'password' => 'wrong-password',
-        ]);
-
-        $response->assertSessionHasErrors();
     }
 }

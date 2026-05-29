@@ -52,7 +52,7 @@ function TrainingPlay() {
   const shuffledAnswers = useMemo(() => {
     if (!currentQuestion?.answers) return []
     return shuffleArray(currentQuestion.answers)
-  }, [currentQuestion?.id])
+  }, [currentQuestion?.answers])
 
   function setSubmittingSafe(value) {
     submittingRef.current = value
@@ -147,6 +147,8 @@ function TrainingPlay() {
     }, 250)
 
     return () => clearInterval(timerRef.current)
+    // handleTimeout reads the latest question/session state from refs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentQuestion, result])
 
   async function goNextOrFinish() {
@@ -326,7 +328,7 @@ function TrainingPlay() {
           <div>
             <h1 className={styles.quizTitle}>{quiz.title}</h1>
             <p className={styles.quizSubtitle}>
-              Training · {quiz.category.name} · Domanda {currentIndex + 1} di {quiz.total_questions}
+              Training / {quiz.category.name} / Domanda {currentIndex + 1} di {quiz.total_questions}
             </p>
           </div>
 

@@ -25,7 +25,7 @@ class UserFactory extends Factory
     {
         return [
             'name' => fake()->name(),
-            'nickname' => fake()->unique()->userName(),
+            'nickname' => Str::lower(fake()->unique()->bothify('user_##??')),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),

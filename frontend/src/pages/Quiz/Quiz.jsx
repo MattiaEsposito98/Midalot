@@ -52,7 +52,7 @@ function Quiz() {
   const shuffledAnswers = useMemo(() => {
     if (!currentQuestion?.answers) return []
     return shuffleArray(currentQuestion.answers)
-  }, [currentQuestion?.id])
+  }, [currentQuestion?.answers])
 
   function setSubmittingSafe(value) {
     submittingRef.current = value
@@ -168,6 +168,8 @@ function Quiz() {
     }, 250)
 
     return () => clearInterval(timerRef.current)
+    // handleTimeout reads the latest question/attempt state from refs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentQuestion, attemptId, result])
 
   useEffect(() => {
