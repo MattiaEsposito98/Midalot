@@ -1,0 +1,19 @@
+{
+  "name": "Midalot",
+  "short_name": "Midalot",
+  "description": "Quiz, training per categoria e classifiche.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f7f8fb",
+  "theme_color": "#ffc107",
+  "lang": "it",
+  "icons": [
+    {
+      "src": "/Midalot.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
