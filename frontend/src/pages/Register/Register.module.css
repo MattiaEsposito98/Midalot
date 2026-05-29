@@ -136,6 +136,15 @@
   min-height: 48px;
 }
 
+.legalCheck {
+  color: #647084;
+  line-height: 1.55;
+}
+
+.legalCheck a {
+  font-weight: 900;
+}
+
 .switchText {
   text-align: center;
   margin-top: 16px;

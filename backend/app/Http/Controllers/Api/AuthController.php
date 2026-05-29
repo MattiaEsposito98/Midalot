@@ -52,6 +52,7 @@ class AuthController extends Controller
 
             'birth_date' => ['required', 'date', 'before:today'],
             'city_id' => ['required', 'exists:cities,id'],
+            'privacy_accepted' => ['accepted'],
         ]);
 
         $user = User::create([
@@ -62,6 +63,8 @@ class AuthController extends Controller
             'password' => Hash::make($request->password),
             'birth_date' => $request->birth_date,
             'city_id' => $request->city_id,
+            'privacy_accepted_at' => now(),
+            'terms_accepted_at' => now(),
         ]);
 
         event(new Registered($user));

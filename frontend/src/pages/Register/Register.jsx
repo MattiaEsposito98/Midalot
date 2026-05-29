@@ -16,7 +16,8 @@ function Register() {
     password: "",
     password_confirmation: "",
     birth_date: "",
-    city_id: ""
+    city_id: "",
+    privacy_accepted: false
   })
 
   const [citySearch, setCitySearch] = useState("")
@@ -41,7 +42,7 @@ function Register() {
 
     setForm((prev) => ({
       ...prev,
-      [e.target.name]: value
+      [e.target.name]: e.target.type === "checkbox" ? e.target.checked : value
     }))
   }
 
@@ -105,6 +106,10 @@ function Register() {
 
     if (!form.city_id) {
       newErrors.city_id = "Seleziona una citta' valida"
+    }
+
+    if (!form.privacy_accepted) {
+      newErrors.privacy_accepted = "Devi accettare Privacy Policy e Termini"
     }
 
     setErrors(newErrors)
@@ -319,6 +324,25 @@ function Register() {
                 >
                   Registrati
                 </LoaderButton>
+
+                <div className={`form-check mt-3 ${css.legalCheck}`}>
+                  <input
+                    id="privacy_accepted"
+                    className="form-check-input"
+                    name="privacy_accepted"
+                    type="checkbox"
+                    checked={form.privacy_accepted}
+                    onChange={handleChange}
+                    disabled={loading}
+                  />
+                  <label className="form-check-label" htmlFor="privacy_accepted">
+                    Ho letto e accetto la <Link to="/privacy">Privacy Policy</Link>, i{" "}
+                    <Link to="/termini">Termini</Link> e la <Link to="/cookie">Cookie Policy</Link>.
+                  </label>
+                  {errors.privacy_accepted && (
+                    <div className="text-danger small mt-1">{errors.privacy_accepted}</div>
+                  )}
+                </div>
 
                 <div className={css.switchText}>
                   Hai gia' un account? <Link to="/login">Accedi</Link>

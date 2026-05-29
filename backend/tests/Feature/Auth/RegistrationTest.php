@@ -39,6 +39,7 @@ class RegistrationTest extends TestCase
             'password_confirmation' => 'password',
             'birth_date' => '1990-01-01',
             'city_id' => $city->id,
+            'privacy_accepted' => true,
         ]);
 
         $response
@@ -51,7 +52,30 @@ class RegistrationTest extends TestCase
         ]);
 
         $user = User::where('email', 'test@example.com')->firstOrFail();
+        $this->assertNotNull($user->privacy_accepted_at);
+        $this->assertNotNull($user->terms_accepted_at);
         $this->assertSame(0, $user->tokens()->count());
         Mail::assertSent(VerifyEmailMail::class);
+    }
+
+    public function test_api_registration_requires_legal_acceptance(): void
+    {
+        $city = City::create([
+            'name' => 'Torino',
+            'latitude' => 45.070312,
+            'longitude' => 7.686856,
+        ]);
+
+        $this->postJson('/api/register', [
+            'name' => 'Test User',
+            'nickname' => 'test.user',
+            'email' => 'test@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+            'birth_date' => '1990-01-01',
+            'city_id' => $city->id,
+        ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('privacy_accepted');
     }
 }

@@ -160,6 +160,12 @@
   flex-wrap: wrap;
 }
 
+.legalLinks {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .footerLink {
   display: flex;
   align-items: center;

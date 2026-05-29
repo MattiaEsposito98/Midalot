@@ -18,6 +18,7 @@ import CambiaPassword from "./pages/CambiaPassword/CambiaPassword"
 import Leaderboard from "./pages/Leaderboard/Leaderboard"
 import Training from "./pages/Training/Training"
 import TrainingPlay from "./pages/Training/TrainingPlay"
+import LegalPage from "./pages/Legal/LegalPage"
 
 function App() {
   return (
@@ -29,6 +30,9 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/privacy" element={<LegalPage type="privacy" />} />
+        <Route path="/termini" element={<LegalPage type="terms" />} />
+        <Route path="/cookie" element={<LegalPage type="cookies" />} />
       </Route>
 
       {/* TRAINING PUBBLICO / UTENTI */}

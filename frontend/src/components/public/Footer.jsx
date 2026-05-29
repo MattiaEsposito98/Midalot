@@ -23,6 +23,12 @@ function Footer() {
           <p className={css.footerCopy}>
             Copyright {new Date().getFullYear()} Midalot. Tutti i diritti riservati.
           </p>
+
+          <div className={css.legalLinks}>
+            <Link to="/privacy" className={css.footerLink}>Privacy</Link>
+            <Link to="/termini" className={css.footerLink}>Termini</Link>
+            <Link to="/cookie" className={css.footerLink}>Cookie</Link>
+          </div>
         </div>
 
         <div className={css.footerContacts}>
