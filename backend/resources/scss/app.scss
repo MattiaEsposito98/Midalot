@@ -81,6 +81,21 @@
   font-size: 1.05rem;
 }
 
+.admin-nav-count {
+  align-items: center;
+  background: var(--admin-danger);
+  border-radius: 999px;
+  color: #ffffff;
+  display: inline-flex;
+  font-size: .72rem;
+  font-weight: 800;
+  height: 1.4rem;
+  justify-content: center;
+  margin-left: auto;
+  min-width: 1.4rem;
+  padding: 0 .35rem;
+}
+
 .admin-nav-link:hover,
 .admin-nav-link.active {
   background: #17394a;

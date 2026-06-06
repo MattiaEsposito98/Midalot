@@ -35,6 +35,13 @@
                     <i class="bi bi-lightning-charge"></i>
                     <span>Training</span>
                 </a>
+                <a href="{{ route('admin.reports.index') }}" class="admin-nav-link {{ Route::is('admin.reports.*') ? 'active' : '' }}">
+                    <i class="bi bi-flag"></i>
+                    <span>Segnalazioni</span>
+                    @if ($openReportsCount > 0)
+                        <span class="admin-nav-count">{{ $openReportsCount }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('profile.edit') }}" class="admin-nav-link">
                     <i class="bi bi-person-circle"></i>
                     <span>Profilo</span>

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\TrainingQuestionReportMail;
 use App\Models\Question;
 use App\Models\Quiz;
+use App\Models\TrainingQuestionReport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -40,6 +41,19 @@ class TrainingReportController extends Controller
             'quiz_id' => $quiz->id,
             'question_id' => $question->id,
         ];
+
+        TrainingQuestionReport::create([
+            'user_id' => $user?->id,
+            'quiz_id' => $quiz->id,
+            'question_id' => $question->id,
+            'status' => TrainingQuestionReport::STATUS_OPEN,
+            'reporter_nickname' => $report['nickname'],
+            'reporter_email' => $report['user_email'],
+            'category_name' => $report['category_name'],
+            'quiz_title' => $report['quiz_title'],
+            'question_text' => $report['question_text'],
+            'message' => $report['message'],
+        ]);
 
         Mail::to(config('mail.reports_to'))->send(new TrainingQuestionReportMail($report));
 

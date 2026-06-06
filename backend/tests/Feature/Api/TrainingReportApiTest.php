@@ -34,6 +34,14 @@ class TrainingReportApiTest extends TestCase
                 && $mail->report['nickname'] === 'Ospite'
                 && $mail->report['question_id'] === $question->id;
         });
+
+        $this->assertDatabaseHas('training_question_reports', [
+            'quiz_id' => $quiz->id,
+            'question_id' => $question->id,
+            'status' => 'open',
+            'reporter_nickname' => 'Ospite',
+            'message' => 'La risposta corretta sembra non aggiornata.',
+        ]);
     }
 
     public function test_authenticated_report_includes_user_nickname(): void
@@ -57,6 +65,12 @@ class TrainingReportApiTest extends TestCase
             return $mail->report['nickname'] === $user->nickname
                 && $mail->report['user_email'] === $user->email;
         });
+
+        $this->assertDatabaseHas('training_question_reports', [
+            'user_id' => $user->id,
+            'reporter_nickname' => $user->nickname,
+            'reporter_email' => $user->email,
+        ]);
     }
 
     public function test_question_must_belong_to_reported_training(): void

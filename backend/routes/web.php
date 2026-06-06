@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\TrainingCategoryController;
+use App\Http\Controllers\Admin\TrainingQuestionReportController;
 use App\Http\Controllers\Admin\TrainingQuizController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\ProfileController;
@@ -36,8 +37,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
 });
 
 Route::middleware(['auth', 'admin'])
-    ->name("admin.")
-    ->prefix("admin")
+    ->name('admin.')
+    ->prefix('admin')
     ->group(function () {
 
         Route::get('/', [DashboardController::class, 'index'])
@@ -55,6 +56,13 @@ Route::middleware(['auth', 'admin'])
         Route::resource('training/quizzes', TrainingQuizController::class)
             ->names('training.quizzes')
             ->parameters(['quizzes' => 'quiz']);
+
+        Route::get('reports', [TrainingQuestionReportController::class, 'index'])
+            ->name('reports.index');
+        Route::patch('reports/{report}', [TrainingQuestionReportController::class, 'update'])
+            ->name('reports.update');
+        Route::delete('reports/{report}', [TrainingQuestionReportController::class, 'destroy'])
+            ->name('reports.destroy');
 
         // CRUD Quiz
         Route::resource('quizzes', QuizController::class);
@@ -104,4 +112,4 @@ Route::get('/cities/search', [CityController::class, 'search'])
     ->middleware('throttle:60,1')
     ->name('cities.search');
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
