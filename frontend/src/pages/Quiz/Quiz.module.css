@@ -312,6 +312,68 @@
   word-break: break-word;
 }
 
+.reportAction {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.reportOverlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(24, 32, 51, 0.58);
+}
+
+.reportModal {
+  width: min(100%, 580px);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  border: 2px solid #182033;
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 24px;
+  box-shadow: 10px 10px 0 #ffc107;
+}
+
+.reportModalHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.reportModalTitle {
+  margin: 0 0 6px;
+  color: #182033;
+  font-size: 1.45rem;
+  font-weight: 950;
+}
+
+.reportQuestionText {
+  margin: 0;
+  color: #647084;
+  font-weight: 700;
+}
+
+.reportMeta {
+  margin: 6px 0 16px;
+  color: #647084;
+  font-size: 0.85rem;
+  text-align: right;
+}
+
+.reportModalActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
 @media (max-width: 991px) {
   .answersGrid {
     grid-template-columns: 1fr;

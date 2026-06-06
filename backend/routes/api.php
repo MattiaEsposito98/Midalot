@@ -1,13 +1,14 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\QuizPlayController;
-use App\Http\Controllers\Api\UserQuizController;
 use App\Http\Controllers\Api\ForgotPasswordController;
+use App\Http\Controllers\Api\QuizPlayController;
 use App\Http\Controllers\Api\ResetPasswordController;
 use App\Http\Controllers\Api\TrainingController;
+use App\Http\Controllers\Api\TrainingReportController;
+use App\Http\Controllers\Api\UserQuizController;
 use App\Models\User;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -36,7 +37,8 @@ Route::post('/training/guest-answer', [TrainingController::class, 'guestAnswer']
     ->middleware('throttle:120,1');
 Route::post('/training/guest-finish', [TrainingController::class, 'guestFinish'])
     ->middleware('throttle:60,1');
-
+Route::post('/training/report-question', [TrainingReportController::class, 'store'])
+    ->middleware('throttle:3,1');
 
 /*
 |--------------------------------------------------------------------------
@@ -49,18 +51,17 @@ Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
     $user = User::findOrFail($id);
 
     // 🔐 verifica hash email
-    if (!hash_equals((string) $hash, sha1($user->email))) {
+    if (! hash_equals((string) $hash, sha1($user->email))) {
         abort(403, 'Link non valido');
     }
 
     // ✅ verifica email (solo se non già verificata)
-    if (!$user->hasVerifiedEmail()) {
+    if (! $user->hasVerifiedEmail()) {
         $user->markEmailAsVerified();
     }
 
-    return redirect(config('app.frontend_url') . '/login?verified=1');
+    return redirect(config('app.frontend_url').'/login?verified=1');
 })->middleware(['signed'])->name('verification.verify');
-
 
 /*
 |--------------------------------------------------------------------------

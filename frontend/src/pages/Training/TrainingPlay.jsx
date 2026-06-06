@@ -36,6 +36,10 @@ function TrainingPlay() {
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState(null)
   const [questionLocked, setQuestionLocked] = useState(false)
+  const [reportQuestion, setReportQuestion] = useState(null)
+  const [reportText, setReportText] = useState("")
+  const [reportSending, setReportSending] = useState(false)
+  const [reportMessage, setReportMessage] = useState("")
 
   const timerRef = useRef(null)
   const timeoutTriggeredRef = useRef(false)
@@ -257,6 +261,60 @@ function TrainingPlay() {
     return "Risposta sbagliata. La risposta corretta è evidenziata in verde."
   }
 
+  function openReport() {
+    setReportQuestion(currentQuestion)
+    setReportText("")
+    setReportMessage("")
+  }
+
+  function closeReport() {
+    if (reportSending) return
+
+    setReportQuestion(null)
+    setReportText("")
+    setReportMessage("")
+  }
+
+  async function submitReport(event) {
+    event.preventDefault()
+
+    if (!reportQuestion || reportText.trim().length < 5 || reportSending) return
+
+    setReportSending(true)
+    setReportMessage("")
+
+    try {
+      const res = await fetch(`${API_URL}/api/training/report-question`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          quiz_id: quiz.id,
+          question_id: reportQuestion.id,
+          message: reportText.trim(),
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setReportMessage(data.message || "Impossibile inviare la segnalazione.")
+        return
+      }
+
+      setReportMessage(data.message)
+      setReportText("")
+    } catch (err) {
+      logError(err)
+      setReportMessage("Errore di connessione durante l'invio.")
+    } finally {
+      setReportSending(false)
+    }
+  }
+
   async function finishTraining() {
     if (finishingRef.current) return
 
@@ -432,8 +490,64 @@ function TrainingPlay() {
               </button>
             ))}
           </div>
+
+          <div className={styles.reportAction}>
+            <button type="button" className="btn btn-outline-secondary btn-sm" onClick={openReport}>
+              <i className="bi bi-flag"></i>
+              Segnala questa domanda
+            </button>
+          </div>
         </div>
       </div>
+
+      {reportQuestion && (
+        <div className={styles.reportOverlay} role="presentation" onMouseDown={closeReport}>
+          <div
+            className={styles.reportModal}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="training-report-title"
+            onMouseDown={(event) => event.stopPropagation()}
+          >
+            <div className={styles.reportModalHeader}>
+              <div>
+                <h2 id="training-report-title" className={styles.reportModalTitle}>Segnala domanda</h2>
+                <p className={styles.reportQuestionText}>{reportQuestion.question_text}</p>
+              </div>
+              <button type="button" className="btn-close" aria-label="Chiudi" onClick={closeReport}></button>
+            </div>
+
+            <form onSubmit={submitReport}>
+              <label className="form-label" htmlFor="trainingReportText">
+                Descrivi brevemente il problema
+              </label>
+              <textarea
+                id="trainingReportText"
+                className="form-control"
+                rows="5"
+                maxLength="2000"
+                placeholder="Esempio: la risposta indicata come corretta non è aggiornata..."
+                value={reportText}
+                onChange={(event) => setReportText(event.target.value)}
+                disabled={reportSending}
+                required
+              ></textarea>
+              <div className={styles.reportMeta}>{reportText.length}/2000 caratteri</div>
+
+              {reportMessage && <div className="alert alert-info py-2">{reportMessage}</div>}
+
+              <div className={styles.reportModalActions}>
+                <button type="button" className="btn btn-outline-secondary" onClick={closeReport} disabled={reportSending}>
+                  Chiudi
+                </button>
+                <button type="submit" className="btn btn-primary" disabled={reportSending || reportText.trim().length < 5}>
+                  {reportSending ? "Invio..." : "Invia segnalazione"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
