@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "./Leaderboard.module.css"
 import { logError } from "../../utils/logger"
+import { formatQuizScore } from "../../utils/quizScore"
 
 function Leaderboard() {
   const { id } = useParams()
@@ -151,7 +152,7 @@ function Leaderboard() {
                 <div className={styles.statsGrid}>
                   <div className={styles.statBox}>
                     <span className={styles.statLabel}>Punteggio</span>
-                    <strong className={styles.statValue}>{r.score}</strong>
+                    <strong className={styles.statValue}>{formatQuizScore(r.score)}</strong>
                   </div>
 
                   <div className={styles.statBox}>

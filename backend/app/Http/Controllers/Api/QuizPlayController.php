@@ -12,13 +12,21 @@ use Illuminate\Http\Request;
 
 class QuizPlayController extends Controller
 {
+    private const CORRECT_ANSWER_BASE_SCORE = 7000;
+
+    private const MAX_SPEED_BONUS = 3000;
+
+    private const WRONG_ANSWER_PENALTY_RATE = 0.10;
+
+    private const TIMEOUT_PENALTY_RATE = 0.05;
+
     public function start(Request $request, Quiz $quiz)
     {
         $user = $request->user();
 
-        if (!$user->quizzes()->where('quiz_id', $quiz->id)->exists()) {
+        if (! $user->quizzes()->where('quiz_id', $quiz->id)->exists()) {
             return response()->json([
-                'message' => 'Quiz non assegnato'
+                'message' => 'Quiz non assegnato',
             ], 403);
         }
 
@@ -34,9 +42,9 @@ class QuizPlayController extends Controller
             ], 403);
         }
 
-        if (!$quiz->is_active) {
+        if (! $quiz->is_active) {
             return response()->json([
-                'message' => 'Questo quiz è scaduto e non è stato completato'
+                'message' => 'Questo quiz è scaduto e non è stato completato',
             ], 403);
         }
 
@@ -69,7 +77,7 @@ class QuizPlayController extends Controller
             'attempt_id' => 'required|exists:quiz_attempts,id',
             'question_id' => 'required|exists:questions,id',
             'answer_id' => 'nullable|exists:answers,id',
-            'time_taken' => 'required|integer|min:0'
+            'time_taken' => 'required|integer|min:0',
         ]);
 
         $user = $request->user();
@@ -78,13 +86,13 @@ class QuizPlayController extends Controller
 
         if ((int) $attempt->user_id !== (int) $user->id) {
             return response()->json([
-                'message' => 'Tentativo non valido'
+                'message' => 'Tentativo non valido',
             ], 403);
         }
 
         if ((bool) $attempt->completed === true) {
             return response()->json([
-                'message' => 'Quiz già completato'
+                'message' => 'Quiz già completato',
             ], 403);
         }
 
@@ -92,7 +100,7 @@ class QuizPlayController extends Controller
 
         if ((int) $question->quiz_id !== (int) $attempt->quiz_id) {
             return response()->json([
-                'message' => 'Domanda non valida per questo quiz'
+                'message' => 'Domanda non valida per questo quiz',
             ], 422);
         }
 
@@ -102,7 +110,7 @@ class QuizPlayController extends Controller
 
         if ($alreadyAnswered) {
             return response()->json([
-                'message' => 'Hai già risposto a questa domanda'
+                'message' => 'Hai già risposto a questa domanda',
             ], 403);
         }
 
@@ -114,17 +122,22 @@ class QuizPlayController extends Controller
         $isTimeout = false;
         $isWrong = false;
         $score = 0;
+        $currentScore = max(
+            0,
+            (int) QuizAnswer::where('attempt_id', $attempt->id)->sum('score')
+        );
 
         if ($request->answer_id === null) {
             $isTimeout = true;
+            $score = -$this->calculatePenalty($currentScore, self::TIMEOUT_PENALTY_RATE);
         } else {
             $answer = Answer::where('id', $request->answer_id)
                 ->where('question_id', $question->id)
                 ->first();
 
-            if (!$answer) {
+            if (! $answer) {
                 return response()->json([
-                    'message' => 'Risposta non valida'
+                    'message' => 'Risposta non valida',
                 ], 422);
             }
 
@@ -132,10 +145,11 @@ class QuizPlayController extends Controller
             $isCorrect = (bool) $answer->is_correct;
 
             if ($isCorrect) {
-                $speedScore = (int) round((($maxTimeMs - $timeTaken) / $maxTimeMs) * 100000);
-                $score = 100000 + $speedScore;
+                $speedBonus = (int) round((($maxTimeMs - $timeTaken) / $maxTimeMs) * self::MAX_SPEED_BONUS);
+                $score = self::CORRECT_ANSWER_BASE_SCORE + $speedBonus;
             } else {
                 $isWrong = true;
+                $score = -$this->calculatePenalty($currentScore, self::WRONG_ANSWER_PENALTY_RATE);
             }
         }
 
@@ -161,21 +175,21 @@ class QuizPlayController extends Controller
     public function finishQuiz(Request $request)
     {
         $request->validate([
-            'attempt_id' => 'required|exists:quiz_attempts,id'
+            'attempt_id' => 'required|exists:quiz_attempts,id',
         ]);
 
         $user = $request->user();
         $attempt = QuizAttempt::findOrFail($request->attempt_id);
 
-        if ((int)$attempt->user_id !== (int)$user->id) {
+        if ((int) $attempt->user_id !== (int) $user->id) {
             return response()->json([
-                'message' => 'Tentativo non valido'
+                'message' => 'Tentativo non valido',
             ], 403);
         }
 
         if ($attempt->completed) {
             return response()->json([
-                'message' => 'Quiz già completato'
+                'message' => 'Quiz già completato',
             ], 403);
         }
 
@@ -186,11 +200,16 @@ class QuizPlayController extends Controller
             'score' => $totalScore,
             'total_time' => $totalTime,
             'completed' => true,
-            'finished_at' => now()
+            'finished_at' => now(),
         ]);
 
         return response()->json([
-            'score' => $totalScore
+            'score' => $totalScore,
         ]);
+    }
+
+    private function calculatePenalty(int $currentScore, float $penaltyRate): int
+    {
+        return min($currentScore, (int) round($currentScore * $penaltyRate));
     }
 }

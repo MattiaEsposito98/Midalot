@@ -87,4 +87,112 @@ class UserQuizApiTest extends TestCase
             ->postJson("/api/quiz/{$quiz->id}/start")
             ->assertForbidden();
     }
+
+    public function test_wrong_answers_and_timeouts_apply_progressive_penalties(): void
+    {
+        $user = $this->createUser();
+        $quiz = $this->createAssignedQuiz();
+        $this->addQuestions($quiz, 3);
+        $user->quizzes()->attach($quiz);
+
+        $attemptId = $this
+            ->actingAs($user, 'sanctum')
+            ->postJson("/api/quiz/{$quiz->id}/start")
+            ->assertCreated()
+            ->json('attempt_id');
+
+        $questions = $quiz->questions()->with('answers')->orderBy('order')->get();
+
+        $correctScore = $this
+            ->actingAs($user, 'sanctum')
+            ->postJson('/api/quiz/answer', [
+                'attempt_id' => $attemptId,
+                'question_id' => $questions[0]->id,
+                'answer_id' => $questions[0]->answers->firstWhere('is_correct', true)->id,
+                'time_taken' => 5000,
+            ])
+            ->assertOk()
+            ->json('score');
+
+        $wrongPenalty = $this
+            ->actingAs($user, 'sanctum')
+            ->postJson('/api/quiz/answer', [
+                'attempt_id' => $attemptId,
+                'question_id' => $questions[1]->id,
+                'answer_id' => $questions[1]->answers->firstWhere('is_correct', false)->id,
+                'time_taken' => 5000,
+            ])
+            ->assertOk()
+            ->assertJsonPath('wrong', true)
+            ->json('score');
+
+        $scoreAfterWrongAnswer = $correctScore + $wrongPenalty;
+
+        $timeoutPenalty = $this
+            ->actingAs($user, 'sanctum')
+            ->postJson('/api/quiz/answer', [
+                'attempt_id' => $attemptId,
+                'question_id' => $questions[2]->id,
+                'answer_id' => null,
+                'time_taken' => 30000,
+            ])
+            ->assertOk()
+            ->assertJsonPath('timeout', true)
+            ->json('score');
+
+        $this->assertSame(-(int) round($correctScore * 0.10), $wrongPenalty);
+        $this->assertSame(-(int) round($scoreAfterWrongAnswer * 0.05), $timeoutPenalty);
+        $this->assertGreaterThan(abs($timeoutPenalty), abs($wrongPenalty));
+
+        $this
+            ->actingAs($user, 'sanctum')
+            ->postJson('/api/quiz/finish', [
+                'attempt_id' => $attemptId,
+            ])
+            ->assertOk()
+            ->assertJsonPath('score', $scoreAfterWrongAnswer + $timeoutPenalty);
+    }
+
+    public function test_correct_answer_score_preserves_speed_differences_in_hundredths(): void
+    {
+        $user = $this->createUser();
+        $quiz = $this->createAssignedQuiz();
+        $this->addQuestions($quiz, 2);
+        $quiz->questions()->update(['time_limit_seconds' => 10]);
+        $user->quizzes()->attach($quiz);
+
+        $attemptId = $this
+            ->actingAs($user, 'sanctum')
+            ->postJson("/api/quiz/{$quiz->id}/start")
+            ->assertCreated()
+            ->json('attempt_id');
+
+        $questions = $quiz->questions()->with('answers')->orderBy('order')->get();
+
+        $fasterScore = $this
+            ->actingAs($user, 'sanctum')
+            ->postJson('/api/quiz/answer', [
+                'attempt_id' => $attemptId,
+                'question_id' => $questions[0]->id,
+                'answer_id' => $questions[0]->answers->firstWhere('is_correct', true)->id,
+                'time_taken' => 4200,
+            ])
+            ->assertOk()
+            ->json('score');
+
+        $slowerScore = $this
+            ->actingAs($user, 'sanctum')
+            ->postJson('/api/quiz/answer', [
+                'attempt_id' => $attemptId,
+                'question_id' => $questions[1]->id,
+                'answer_id' => $questions[1]->answers->firstWhere('is_correct', true)->id,
+                'time_taken' => 4900,
+            ])
+            ->assertOk()
+            ->json('score');
+
+        $this->assertSame(8740, $fasterScore);
+        $this->assertSame(8530, $slowerScore);
+        $this->assertGreaterThan($slowerScore, $fasterScore);
+    }
 }

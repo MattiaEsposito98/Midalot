@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "./Dashboard.module.css"
 import { logError } from "../../utils/logger"
+import { formatQuizScore } from "../../utils/quizScore"
 
 function Dashboard() {
   const { token } = useAuth()
@@ -226,7 +227,7 @@ function Dashboard() {
                 <div className={styles.infoItem}>
                   <span className={styles.infoLabel}>Punteggio</span>
                   <strong className={styles.infoValue}>
-                    {q.status === "completed" ? (q.score ?? "-") : "-"}
+                    {q.status === "completed" ? formatQuizScore(q.score) : "-"}
                   </strong>
                 </div>
 

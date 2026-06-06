@@ -58,7 +58,7 @@
                                 <td><span class="badge bg-primary">{{ $index + 1 }}</span></td>
                                 <td class="fw-bold">{{ $r->user->nickname ?? ($r->user->name ?? '-') }}</td>
                                 <td>{{ $r->user->email ?? '-' }}</td>
-                                <td><strong>{{ $r->score ?? 0 }}</strong></td>
+                                <td><strong>{{ number_format(($r->score ?? 0) / 100, 2, ',', '.') }}</strong></td>
                                 <td>{{ $r->correct_answers ?? 0 }} / {{ $r->total_questions ?? 0 }}</td>
                                 <td>
                                     @if (!is_null($r->total_time))
