@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "./Training.module.css"
 import { logError } from "../../utils/logger"
+import { formatQuizScore } from "../../utils/quizScore"
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -152,7 +153,7 @@ function Training() {
           </div>
           <div className={styles.statCard}>
             <span>Miglior punteggio</span>
-            <strong>{Math.max(0, ...(progress.categories || []).map((item) => item.best_score || 0))}</strong>
+            <strong>{formatQuizScore(Math.max(0, ...(progress.categories || []).map((item) => item.best_score || 0)))}</strong>
           </div>
         </div>
       )}
@@ -172,7 +173,7 @@ function Training() {
                   <div className="d-grid gap-2">
                     {stats && (
                       <small className={styles.muted}>
-                        Miglior punteggio: <strong>{stats.best_score}</strong>
+                        Miglior punteggio: <strong>{formatQuizScore(stats.best_score)}</strong>
                       </small>
                     )}
                     <Link to={`/training/${category.slug}`} className="btn btn-primary">
@@ -233,7 +234,7 @@ function Training() {
                     <strong>#{row.position}</strong> {row.nickname}
                   </span>
                   <span>
-                    {row.score} punti · {row.correct_answers}/{row.total_questions}
+                    {formatQuizScore(row.score)} punti · {row.correct_answers}/{row.total_questions}
                   </span>
                 </div>
               ))}
@@ -257,7 +258,7 @@ function Training() {
                 <strong>{attempt.category_name}</strong> · {attempt.quiz_title}
               </span>
               <span>
-                {attempt.score} punti · {attempt.correct_answers}/{attempt.total_questions}
+                {formatQuizScore(attempt.score)} punti · {attempt.correct_answers}/{attempt.total_questions}
               </span>
             </div>
           ))}

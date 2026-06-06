@@ -9,21 +9,29 @@ use App\Models\Quiz;
 use App\Models\TrainingAnswer;
 use App\Models\TrainingAttempt;
 use App\Models\TrainingCategory;
-use Illuminate\Http\Request;
 use Illuminate\Http\Exceptions\HttpResponseException;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class TrainingController extends Controller
 {
+    private const CORRECT_ANSWER_BASE_SCORE = 7000;
+
+    private const MAX_SPEED_BONUS = 3000;
+
+    private const WRONG_ANSWER_PENALTY_RATE = 0.10;
+
+    private const TIMEOUT_PENALTY_RATE = 0.05;
+
     public function categories()
     {
         $categories = TrainingCategory::where('is_active', true)
-            ->whereHas('quizzes', fn($query) => $query->where('type', 'training')->where('is_active', true))
-            ->withCount(['quizzes' => fn($query) => $query->where('type', 'training')->where('is_active', true)])
+            ->whereHas('quizzes', fn ($query) => $query->where('type', 'training')->where('is_active', true))
+            ->withCount(['quizzes' => fn ($query) => $query->where('type', 'training')->where('is_active', true)])
             ->orderBy('name')
             ->get()
-            ->map(fn($category) => [
+            ->map(fn ($category) => [
                 'id' => $category->id,
                 'name' => $category->name,
                 'slug' => $category->slug,
@@ -46,9 +54,9 @@ class TrainingController extends Controller
             ->withCount('questions')
             ->latest()
             ->get()
-            ->filter(fn($quiz) => $this->isPlayable($quiz))
+            ->filter(fn ($quiz) => $this->isPlayable($quiz))
             ->values()
-            ->map(fn($quiz) => $this->quizSummary($quiz));
+            ->map(fn ($quiz) => $this->quizSummary($quiz));
 
         return response()->json([
             'category' => [
@@ -103,7 +111,7 @@ class TrainingController extends Controller
 
         $state = Cache::get($this->guestCacheKey($validated['session_token']));
 
-        if (!$state) {
+        if (! $state) {
             return response()->json(['message' => 'Sessione training scaduta'], 404);
         }
 
@@ -123,7 +131,7 @@ class TrainingController extends Controller
 
         $state = Cache::pull($this->guestCacheKey($validated['session_token']));
 
-        if (!$state) {
+        if (! $state) {
             return response()->json(['message' => 'Sessione training scaduta'], 404);
         }
 
@@ -173,7 +181,7 @@ class TrainingController extends Controller
 
         $existingAnswers = $attempt->answers()
             ->pluck('score', 'question_id')
-            ->map(fn($score) => ['score' => $score])
+            ->map(fn ($score) => ['score' => $score])
             ->toArray();
 
         $result = $this->scoreAnswer($attempt->quiz_id, $attempt->question_ids, $existingAnswers, $validated);
@@ -252,7 +260,7 @@ class TrainingController extends Controller
 
         return response()->json([
             'categories' => $categories,
-            'recent_attempts' => $attempts->take(8)->map(fn($attempt) => $this->attemptPayload($attempt))->values(),
+            'recent_attempts' => $attempts->take(8)->map(fn ($attempt) => $this->attemptPayload($attempt))->values(),
         ]);
     }
 
@@ -274,7 +282,7 @@ class TrainingController extends Controller
                 'name' => $category->name,
                 'slug' => $category->slug,
             ],
-            'results' => $attempts->map(fn($attempt, $index) => [
+            'results' => $attempts->map(fn ($attempt, $index) => [
                 'position' => $index + 1,
                 'nickname' => $attempt->user->nickname ?? $attempt->user->name,
                 'score' => $attempt->score,
@@ -290,7 +298,7 @@ class TrainingController extends Controller
     {
         $questionsCount = $quiz->questions_count ?? $quiz->questions()->count();
 
-        if (!$quiz->is_active || $quiz->type !== 'training' || !$quiz->trainingCategory?->is_active) {
+        if (! $quiz->is_active || $quiz->type !== 'training' || ! $quiz->trainingCategory?->is_active) {
             return false;
         }
 
@@ -345,14 +353,14 @@ class TrainingController extends Controller
         return [
             ...$this->quizSummary($quiz->loadMissing('trainingCategory')->loadCount('questions')),
             'total_questions' => $questions->count(),
-            'questions' => $questions->map(fn($question) => [
+            'questions' => $questions->map(fn ($question) => [
                 'id' => $question->id,
                 'question_text' => $question->question_text,
-                'image' => $question->image_path ? asset('storage/' . $question->image_path) : null,
-                'audio' => $question->audio_path ? asset('storage/' . $question->audio_path) : null,
-                'video' => $question->video_path ? asset('storage/' . $question->video_path) : null,
+                'image' => $question->image_path ? asset('storage/'.$question->image_path) : null,
+                'audio' => $question->audio_path ? asset('storage/'.$question->audio_path) : null,
+                'video' => $question->video_path ? asset('storage/'.$question->video_path) : null,
                 'time_limit_seconds' => $question->time_limit_seconds,
-                'answers' => $question->answers->map(fn($answer) => [
+                'answers' => $question->answers->map(fn ($answer) => [
                     'id' => $answer->id,
                     'answer_text' => $answer->answer_text,
                 ])->values(),
@@ -362,7 +370,7 @@ class TrainingController extends Controller
 
     private function scoreAnswer(int $quizId, array $questionIds, array $existingAnswers, array $data): array
     {
-        if (!in_array((int) $data['question_id'], array_map('intval', $questionIds), true)) {
+        if (! in_array((int) $data['question_id'], array_map('intval', $questionIds), true)) {
             throw new HttpResponseException(response()->json(['message' => 'Domanda non valida per questo training'], 422));
         }
 
@@ -378,15 +386,17 @@ class TrainingController extends Controller
         $isTimeout = false;
         $isWrong = false;
         $score = 0;
+        $currentScore = max(0, (int) collect($existingAnswers)->sum('score'));
 
         if (($data['answer_id'] ?? null) === null) {
             $isTimeout = true;
+            $score = -$this->calculatePenalty($currentScore, self::TIMEOUT_PENALTY_RATE);
         } else {
             $answer = Answer::where('id', $data['answer_id'])
                 ->where('question_id', $question->id)
                 ->first();
 
-            if (!$answer) {
+            if (! $answer) {
                 throw new HttpResponseException(response()->json(['message' => 'Risposta non valida'], 422));
             }
 
@@ -394,10 +404,11 @@ class TrainingController extends Controller
             $isCorrect = (bool) $answer->is_correct;
 
             if ($isCorrect) {
-                $speedScore = (int) round((($maxTimeMs - $timeTaken) / $maxTimeMs) * 100000);
-                $score = 100000 + $speedScore;
+                $speedBonus = (int) round((($maxTimeMs - $timeTaken) / $maxTimeMs) * self::MAX_SPEED_BONUS);
+                $score = self::CORRECT_ANSWER_BASE_SCORE + $speedBonus;
             } else {
                 $isWrong = true;
+                $score = -$this->calculatePenalty($currentScore, self::WRONG_ANSWER_PENALTY_RATE);
             }
         }
 
@@ -432,6 +443,11 @@ class TrainingController extends Controller
         ];
     }
 
+    private function calculatePenalty(int $currentScore, float $penaltyRate): int
+    {
+        return min($currentScore, (int) round($currentScore * $penaltyRate));
+    }
+
     private function attemptPayload(TrainingAttempt $attempt): array
     {
         return [
@@ -449,6 +465,6 @@ class TrainingController extends Controller
 
     private function guestCacheKey(string $token): string
     {
-        return 'training_guest_attempt:' . $token;
+        return 'training_guest_attempt:'.$token;
     }
 }

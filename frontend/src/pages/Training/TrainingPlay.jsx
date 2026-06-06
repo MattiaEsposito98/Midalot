@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "../Quiz/Quiz.module.css"
 import { logError } from "../../utils/logger"
+import { formatQuizScore } from "../../utils/quizScore"
 
 const API_URL = import.meta.env.VITE_API_URL
 
@@ -295,7 +296,7 @@ function TrainingPlay() {
           </p>
           <div className={styles.scoreBox}>
             <span className={styles.scoreLabel}>Punteggio finale</span>
-            <strong className={styles.scoreValue}>{result.score}</strong>
+            <strong className={styles.scoreValue}>{formatQuizScore(result.score)}</strong>
           </div>
           {!token && (
             <div className="alert alert-info">

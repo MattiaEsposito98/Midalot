@@ -95,4 +95,96 @@ class TrainingApiTest extends TestCase
         $this->postJson("/api/training/quizzes/{$quiz->id}/guest-start")
             ->assertNotFound();
     }
+
+    public function test_training_correct_answer_score_preserves_speed_differences_in_hundredths(): void
+    {
+        $quiz = $this->createTrainingQuiz(5);
+        $quiz->questions()->update(['time_limit_seconds' => 10]);
+
+        $start = $this->postJson("/api/training/quizzes/{$quiz->id}/guest-start")
+            ->assertOk();
+
+        $questions = collect($start->json('quiz.questions'));
+        $firstQuestion = $quiz->questions()->with('answers')->findOrFail($questions[0]['id']);
+        $secondQuestion = $quiz->questions()->with('answers')->findOrFail($questions[1]['id']);
+
+        $fasterScore = $this->postJson('/api/training/guest-answer', [
+            'session_token' => $start->json('session_token'),
+            'question_id' => $firstQuestion->id,
+            'answer_id' => $firstQuestion->answers->firstWhere('is_correct', true)->id,
+            'time_taken' => 4200,
+        ])
+            ->assertOk()
+            ->json('score');
+
+        $slowerScore = $this->postJson('/api/training/guest-answer', [
+            'session_token' => $start->json('session_token'),
+            'question_id' => $secondQuestion->id,
+            'answer_id' => $secondQuestion->answers->firstWhere('is_correct', true)->id,
+            'time_taken' => 4900,
+        ])
+            ->assertOk()
+            ->json('score');
+
+        $this->assertSame(8740, $fasterScore);
+        $this->assertSame(8530, $slowerScore);
+        $this->assertGreaterThan($slowerScore, $fasterScore);
+    }
+
+    public function test_training_wrong_answers_and_timeouts_apply_progressive_penalties(): void
+    {
+        $user = $this->createUser();
+        $quiz = $this->createTrainingQuiz(5);
+
+        $start = $this
+            ->actingAs($user, 'sanctum')
+            ->postJson("/api/training/quizzes/{$quiz->id}/start")
+            ->assertCreated();
+
+        $questions = collect($start->json('quiz.questions'));
+        $firstQuestion = $quiz->questions()->with('answers')->findOrFail($questions[0]['id']);
+        $secondQuestion = $quiz->questions()->with('answers')->findOrFail($questions[1]['id']);
+        $thirdQuestion = $quiz->questions()->with('answers')->findOrFail($questions[2]['id']);
+
+        $correctScore = $this
+            ->actingAs($user, 'sanctum')
+            ->postJson('/api/training/answer', [
+                'attempt_id' => $start->json('attempt_id'),
+                'question_id' => $firstQuestion->id,
+                'answer_id' => $firstQuestion->answers->firstWhere('is_correct', true)->id,
+                'time_taken' => 5000,
+            ])
+            ->assertOk()
+            ->json('score');
+
+        $wrongPenalty = $this
+            ->actingAs($user, 'sanctum')
+            ->postJson('/api/training/answer', [
+                'attempt_id' => $start->json('attempt_id'),
+                'question_id' => $secondQuestion->id,
+                'answer_id' => $secondQuestion->answers->firstWhere('is_correct', false)->id,
+                'time_taken' => 5000,
+            ])
+            ->assertOk()
+            ->assertJsonPath('wrong', true)
+            ->json('score');
+
+        $scoreAfterWrongAnswer = $correctScore + $wrongPenalty;
+
+        $timeoutPenalty = $this
+            ->actingAs($user, 'sanctum')
+            ->postJson('/api/training/answer', [
+                'attempt_id' => $start->json('attempt_id'),
+                'question_id' => $thirdQuestion->id,
+                'answer_id' => null,
+                'time_taken' => 30000,
+            ])
+            ->assertOk()
+            ->assertJsonPath('timeout', true)
+            ->json('score');
+
+        $this->assertSame(-(int) round($correctScore * 0.10), $wrongPenalty);
+        $this->assertSame(-(int) round($scoreAfterWrongAnswer * 0.05), $timeoutPenalty);
+        $this->assertGreaterThan(abs($timeoutPenalty), abs($wrongPenalty));
+    }
 }
