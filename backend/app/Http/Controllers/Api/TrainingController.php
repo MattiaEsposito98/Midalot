@@ -379,6 +379,9 @@ class TrainingController extends Controller
         }
 
         $question = Question::where('quiz_id', $quizId)->findOrFail($data['question_id']);
+        $correctAnswerId = (int) $question->answers()
+            ->where('is_correct', true)
+            ->value('id');
         $maxTimeMs = (int) $question->time_limit_seconds * 1000;
         $timeTaken = min((int) $data['time_taken'], $maxTimeMs);
         $answerId = null;
@@ -428,6 +431,7 @@ class TrainingController extends Controller
                 'correct' => $isCorrect,
                 'wrong' => $isWrong,
                 'timeout' => $isTimeout,
+                'correct_answer_id' => $correctAnswerId,
                 'score' => $score,
             ],
         ];

@@ -250,6 +250,48 @@
   background: #e9f8f0;
 }
 
+.answerBtn.answerCorrect,
+.answerBtn.answerCorrect:hover {
+  border-color: #198754;
+  background: #dff3e7;
+  transform: none;
+}
+
+.answerBtn.answerWrong,
+.answerBtn.answerWrong:hover {
+  border-color: #dc3545;
+  background: #fbe3e5;
+  transform: none;
+}
+
+.answerCorrect .answerIndex {
+  background: #198754;
+}
+
+.answerWrong .answerIndex {
+  background: #dc3545;
+}
+
+.answerFeedback {
+  margin-bottom: 16px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-weight: 800;
+}
+
+.feedbackCorrect {
+  border-color: #9fd5b5;
+  background: #e8f7ee;
+  color: #146c43;
+}
+
+.feedbackWrong {
+  border-color: #efb3b9;
+  background: #fcebed;
+  color: #a52834;
+}
+
 .answerIndex {
   width: 36px;
   height: 36px;

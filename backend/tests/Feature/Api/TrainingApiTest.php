@@ -167,6 +167,7 @@ class TrainingApiTest extends TestCase
             ])
             ->assertOk()
             ->assertJsonPath('wrong', true)
+            ->assertJsonPath('correct_answer_id', $secondQuestion->answers->firstWhere('is_correct', true)->id)
             ->json('score');
 
         $scoreAfterWrongAnswer = $correctScore + $wrongPenalty;
@@ -181,6 +182,7 @@ class TrainingApiTest extends TestCase
             ])
             ->assertOk()
             ->assertJsonPath('timeout', true)
+            ->assertJsonPath('correct_answer_id', $thirdQuestion->answers->firstWhere('is_correct', true)->id)
             ->json('score');
 
         $this->assertSame(-(int) round($correctScore * 0.10), $wrongPenalty);

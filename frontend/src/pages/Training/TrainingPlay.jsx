@@ -32,6 +32,7 @@ function TrainingPlay() {
   const [timeLeft, setTimeLeft] = useState(0)
   const [questionStartedAt, setQuestionStartedAt] = useState(null)
   const [selectedAnswerId, setSelectedAnswerId] = useState(null)
+  const [answerFeedback, setAnswerFeedback] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [result, setResult] = useState(null)
   const [questionLocked, setQuestionLocked] = useState(false)
@@ -126,6 +127,7 @@ function TrainingPlay() {
 
     setTimeLeft(maxTime)
     setSelectedAnswerId(null)
+    setAnswerFeedback(null)
     setQuestionStartedAt(startedAt)
     setQuestionLockedSafe(false)
     setSubmittingSafe(false)
@@ -203,7 +205,8 @@ function TrainingPlay() {
         return
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 200))
+      setAnswerFeedback(data)
+      await new Promise((resolve) => setTimeout(resolve, 1500))
       await goNextOrFinish()
     } catch (err) {
       logError(err)
@@ -229,6 +232,29 @@ function TrainingPlay() {
     const maxTimeMs = Number(question.time_limit_seconds || 0) * 1000
     const elapsedMs = Math.min(Date.now() - questionStartedAt, maxTimeMs)
     await submitAnswer(answerId, elapsedMs)
+  }
+
+  function getAnswerClassName(answerId) {
+    if (!answerFeedback) {
+      return selectedAnswerId === answerId ? styles.answerSelected : ""
+    }
+
+    if (Number(answerFeedback.correct_answer_id) === Number(answerId)) {
+      return styles.answerCorrect
+    }
+
+    if (Number(selectedAnswerId) === Number(answerId) && answerFeedback.wrong) {
+      return styles.answerWrong
+    }
+
+    return ""
+  }
+
+  function getFeedbackMessage() {
+    if (!answerFeedback) return null
+    if (answerFeedback.correct) return "Risposta corretta!"
+    if (answerFeedback.timeout) return "Tempo scaduto. La risposta corretta è evidenziata in verde."
+    return "Risposta sbagliata. La risposta corretta è evidenziata in verde."
   }
 
   async function finishTraining() {
@@ -382,12 +408,22 @@ function TrainingPlay() {
             </div>
           )}
 
+          {answerFeedback && (
+            <div
+              className={`${styles.answerFeedback} ${
+                answerFeedback.correct ? styles.feedbackCorrect : styles.feedbackWrong
+              }`}
+            >
+              {getFeedbackMessage()}
+            </div>
+          )}
+
           <div className={styles.answersGrid}>
             {shuffledAnswers.map((answer, index) => (
               <button
                 key={answer.id}
                 type="button"
-                className={`${styles.answerBtn} ${selectedAnswerId === answer.id ? styles.answerSelected : ""}`}
+                className={`${styles.answerBtn} ${getAnswerClassName(answer.id)}`}
                 onClick={() => handleAnswer(answer.id)}
                 disabled={submitting || !!selectedAnswerId || questionLocked}
               >
