@@ -82,6 +82,13 @@ function PrivateNavbar() {
                 </li>
 
                 <li>
+                  <Link className="dropdown-item" to="/regolamento">
+                    <i className="bi bi-journal-check me-2"></i>
+                    Regolamento
+                  </Link>
+                </li>
+
+                <li>
                   <hr className="dropdown-divider" />
                 </li>
 

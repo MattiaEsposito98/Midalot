@@ -1,0 +1,186 @@
+.page {
+  width: 100%;
+  padding: 42px 0 58px;
+}
+
+.wrap {
+  max-width: 1040px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  color: #182033;
+  font-weight: 900;
+}
+
+.header {
+  margin-bottom: 22px;
+  border: 2px solid #182033;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 28px;
+  box-shadow: 10px 10px 0 #ffc107, 0 18px 42px rgba(24, 32, 51, 0.12);
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  border: 1px solid rgba(255, 193, 7, 0.5);
+  border-radius: 8px;
+  background: #fff4bf;
+  color: #7a5400;
+  padding: 7px 10px;
+  font-weight: 900;
+}
+
+.header h1 {
+  margin: 0 0 10px;
+  color: #182033;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 950;
+}
+
+.header p {
+  max-width: 800px;
+  margin: 0;
+  color: #647084;
+  line-height: 1.7;
+}
+
+.formulaCard {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.formulaCard > div {
+  border: 1px solid #dce5ee;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 18px;
+  box-shadow: 0 12px 28px rgba(24, 32, 51, 0.07);
+}
+
+.formulaLabel {
+  display: block;
+  margin-bottom: 5px;
+  color: #647084;
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.formulaCard strong {
+  color: #182033;
+}
+
+.example {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 18px;
+  border: 1px solid rgba(15, 139, 141, 0.35);
+  border-radius: 8px;
+  background: #e9f8f0;
+  padding: 20px;
+}
+
+.exampleIcon,
+.sectionIcon {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: #182033;
+  color: #ffffff;
+}
+
+.example h2,
+.section h2 {
+  margin: 0 0 8px;
+  color: #182033;
+  font-size: 1.2rem;
+  font-weight: 950;
+}
+
+.example p,
+.section p,
+.reportNotice p {
+  margin: 0;
+  color: #647084;
+  line-height: 1.7;
+}
+
+.sections {
+  display: grid;
+  gap: 14px;
+}
+
+.section {
+  border: 1px solid #dce5ee;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 20px;
+  box-shadow: 0 14px 34px rgba(24, 32, 51, 0.08);
+}
+
+.sectionHeading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.sectionHeading h2 {
+  margin: 0;
+}
+
+.section p {
+  margin-bottom: 10px;
+}
+
+.section p:last-child {
+  margin-bottom: 0;
+}
+
+.reportNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 18px;
+  border: 1px solid rgba(255, 193, 7, 0.55);
+  border-radius: 8px;
+  background: #fff9dc;
+  padding: 16px;
+}
+
+.reportNotice i {
+  color: #7a5400;
+  font-size: 1.2rem;
+}
+
+@media (max-width: 767px) {
+  .page {
+    padding: 24px 0 40px;
+  }
+
+  .header {
+    padding: 22px;
+  }
+
+  .formulaCard {
+    grid-template-columns: 1fr;
+  }
+
+  .example {
+    flex-direction: column;
+  }
+}

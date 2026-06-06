@@ -19,6 +19,7 @@ import Leaderboard from "./pages/Leaderboard/Leaderboard"
 import Training from "./pages/Training/Training"
 import TrainingPlay from "./pages/Training/TrainingPlay"
 import LegalPage from "./pages/Legal/LegalPage"
+import Regolamento from "./pages/Regolamento/Regolamento"
 
 function App() {
   return (
@@ -54,6 +55,7 @@ function App() {
         <Route path="/quiz/:id" element={<Quiz />} />
         <Route path="/storico" element={<Storico />} />
         <Route path="/profilo" element={<Profilo />} />
+        <Route path="/regolamento" element={<Regolamento />} />
         <Route path="/cambia-password" element={<CambiaPassword />} />
         <Route path="/quiz/:id/leaderboard" element={<Leaderboard />} />
       </Route>
