@@ -10,7 +10,7 @@
             <div class="admin-card-header">
                 <div>
                     <h2 class="admin-section-title">{{ $quiz->title }}</h2>
-                    <p class="admin-muted mb-0">Cerca utenti e associali al quiz selezionato.</p>
+                    <p class="admin-muted mb-0">Cerca gli utenti oppure mostra l'elenco completo e seleziona chi associare.</p>
                 </div>
                 <a href="{{ route('admin.quizzes.index') }}" class="btn btn-outline-secondary btn-sm">
                     <i class="bi bi-arrow-left"></i>
@@ -21,9 +21,16 @@
             <div class="admin-card-body">
                 <div class="mb-3">
                     <label class="form-label">Cerca utente</label>
-                    <input type="text" id="userSearch" class="form-control" placeholder="Scrivi nickname o email..." autocomplete="off">
+                    <div class="d-flex flex-column flex-md-row gap-2">
+                        <input type="text" id="userSearch" class="form-control" placeholder="Scrivi nickname o email..." autocomplete="off">
+                        <button type="button" id="showAllUsers" class="btn btn-outline-primary text-nowrap">
+                            <i class="bi bi-people"></i>
+                            Mostra tutti gli utenti
+                        </button>
+                    </div>
                 </div>
 
+                <div id="resultsSummary" class="small admin-muted mb-2"></div>
                 <div id="searchResults" class="list-group mb-4"></div>
 
                 <h3 class="admin-section-title mb-3">Utenti da associare</h3>
@@ -72,32 +79,75 @@
     <script>
         let selected = {};
         let lastResults = [];
+        let showingAllUsers = false;
 
         const searchInput = document.getElementById('userSearch');
         const resultsContainer = document.getElementById('searchResults');
+        const resultsSummary = document.getElementById('resultsSummary');
+        const showAllButton = document.getElementById('showAllUsers');
 
         searchInput.addEventListener('input', function() {
             const query = this.value.trim();
 
             if (query.length < 2) {
+                if (showingAllUsers) return;
+
+                lastResults = [];
                 resultsContainer.innerHTML = '';
+                resultsSummary.innerHTML = '';
                 return;
             }
 
-            fetch(`{{ route('admin.quizzes.users.search', $quiz->id) }}?q=${encodeURIComponent(query)}`)
+            showingAllUsers = false;
+            updateShowAllButton();
+            loadUsers(`q=${encodeURIComponent(query)}`);
+        });
+
+        showAllButton.addEventListener('click', function() {
+            showingAllUsers = !showingAllUsers;
+            searchInput.value = '';
+            updateShowAllButton();
+
+            if (!showingAllUsers) {
+                lastResults = [];
+                resultsContainer.innerHTML = '';
+                resultsSummary.innerHTML = '';
+                return;
+            }
+
+            loadUsers('all=1');
+        });
+
+        function loadUsers(parameters) {
+            resultsContainer.innerHTML = '<div class="list-group-item admin-muted">Caricamento utenti...</div>';
+            resultsSummary.innerHTML = '';
+
+            fetch(`{{ route('admin.quizzes.users.search', $quiz->id) }}?${parameters}`)
                 .then(res => res.json())
                 .then(data => {
                     lastResults = data;
                     renderResults();
+                })
+                .catch(() => {
+                    lastResults = [];
+                    resultsContainer.innerHTML = '<div class="list-group-item text-danger">Impossibile caricare gli utenti.</div>';
                 });
-        });
+        }
+
+        function updateShowAllButton() {
+            showAllButton.innerHTML = showingAllUsers
+                ? '<i class="bi bi-eye-slash"></i> Nascondi elenco utenti'
+                : '<i class="bi bi-people"></i> Mostra tutti gli utenti';
+        }
 
         function renderResults() {
             let html = '';
+            let visibleUsers = 0;
 
             lastResults.forEach(user => {
                 if (selected[user.id]) return;
 
+                visibleUsers++;
                 html += `
                     <button type="button"
                         class="list-group-item list-group-item-action"
@@ -108,7 +158,10 @@
                 `;
             });
 
-            resultsContainer.innerHTML = html || '<div class="list-group-item admin-muted">Nessun utente trovato.</div>';
+            resultsSummary.textContent = visibleUsers > 0
+                ? `${visibleUsers} ${visibleUsers === 1 ? 'utente disponibile' : 'utenti disponibili'}`
+                : '';
+            resultsContainer.innerHTML = html || '<div class="list-group-item admin-muted">Nessun utente disponibile.</div>';
         }
 
         function addUserById(id) {

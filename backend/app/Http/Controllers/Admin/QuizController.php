@@ -112,15 +112,22 @@ class QuizController extends Controller
 
     public function searchUsers(Request $request, Quiz $quiz)
     {
-        $query = $request->get('q');
+        $query = trim((string) $request->get('q', ''));
+        $showAll = $request->boolean('all');
 
-        return \App\Models\User::where(function ($q) use ($query) {
-            $q->where('nickname', 'like', "%{$query}%")
-                ->orWhere('email', 'like', "%{$query}%");
-        })
+        return \App\Models\User::query()
+            ->where('is_admin', false)
+            ->when(! $showAll, function ($users) use ($query) {
+                $users->where(function ($q) use ($query) {
+                    $q->where('nickname', 'like', "%{$query}%")
+                        ->orWhere('email', 'like', "%{$query}%");
+                });
+            })
             ->whereNotIn('id', $quiz->users()->pluck('users.id'))
             ->select('id', 'nickname', 'email')
-            ->limit(20)
+            ->orderBy('nickname')
+            ->orderBy('email')
+            ->when(! $showAll, fn ($users) => $users->limit(20))
             ->get();
     }
 
@@ -128,7 +135,7 @@ class QuizController extends Controller
     {
         $request->validate([
             'users' => 'required|array',
-            'users.*' => 'exists:users,id'
+            'users.*' => 'exists:users,id',
         ]);
 
         $quiz->users()->syncWithoutDetaching($request->users);
@@ -161,7 +168,7 @@ class QuizController extends Controller
         $results = $attempts->map(function ($attempt) use ($quiz) {
 
             $correct = $attempt->answers?->where('is_correct', true)->count() ?? 0;
-            $total   = $quiz->questions()->count();
+            $total = $quiz->questions()->count();
 
             $time = $attempt->total_time
                 ?? $attempt->answers->sum('time_taken');
@@ -194,11 +201,10 @@ class QuizController extends Controller
         return view('admin.quizzes.leaderboard', compact('quiz', 'results'));
     }
 
-
     public function toggleLeaderboard(Quiz $quiz)
     {
         $quiz->update([
-            'leaderboard_visible' => !$quiz->leaderboard_visible,
+            'leaderboard_visible' => ! $quiz->leaderboard_visible,
         ]);
 
         return back()->with('success', 'Visibilità classifica aggiornata con successo.');
