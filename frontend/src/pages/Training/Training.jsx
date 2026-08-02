@@ -5,8 +5,6 @@ import styles from "./Training.module.css"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 
-const API_URL = import.meta.env.VITE_API_URL
-
 function Training() {
   const { categorySlug } = useParams()
   const { token } = useAuth()
@@ -23,7 +21,7 @@ function Training() {
         setLoading(true)
         setError("")
 
-        const res = await fetch(`${API_URL}/api/training/categories`, {
+        const res = await fetch(`/api/training/categories`, {
           headers: { Accept: "application/json" },
         })
         const data = await res.json()
@@ -36,7 +34,7 @@ function Training() {
         setCategories(data.categories || [])
 
         if (token) {
-          const progressRes = await fetch(`${API_URL}/api/training/progress`, {
+          const progressRes = await fetch(`/api/training/progress`, {
             headers: {
               Accept: "application/json",
               Authorization: `Bearer ${token}`,
@@ -67,7 +65,7 @@ function Training() {
       try {
         setError("")
 
-        const res = await fetch(`${API_URL}/api/training/categories/${categorySlug}/quizzes`, {
+        const res = await fetch(`/api/training/categories/${categorySlug}/quizzes`, {
           headers: { Accept: "application/json" },
         })
         const data = await res.json()
@@ -80,7 +78,7 @@ function Training() {
         setCategoryData(data)
 
         if (token) {
-          const leaderboardRes = await fetch(`${API_URL}/api/training/categories/${categorySlug}/leaderboard`, {
+          const leaderboardRes = await fetch(`/api/training/categories/${categorySlug}/leaderboard`, {
             headers: {
               Accept: "application/json",
               Authorization: `Bearer ${token}`,

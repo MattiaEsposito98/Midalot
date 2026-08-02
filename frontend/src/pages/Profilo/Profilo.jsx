@@ -46,7 +46,7 @@ function Profilo() {
   useEffect(() => {
     async function loadStats() {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/my-quizzes`, {
+        const res = await fetch(`/api/my-quizzes`, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
@@ -155,7 +155,7 @@ function Profilo() {
     setErrors({})
 
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/user/profile`, {
+      const res = await fetch(`/api/user/profile`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,

@@ -5,8 +5,6 @@ import styles from "./Quiz.module.css"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 
-const API_URL = import.meta.env.VITE_API_URL
-
 function shuffleArray(array) {
   const copy = [...array]
 
@@ -84,7 +82,7 @@ function Quiz() {
         setCurrentIndex(0)
         setResult(null)
 
-        const quizRes = await fetch(`${import.meta.env.VITE_API_URL}/api/quizzes/${id}`, {
+        const quizRes = await fetch(`/api/quizzes/${id}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
@@ -100,7 +98,7 @@ function Quiz() {
 
         setQuiz(quizData.quiz)
 
-        const startRes = await fetch(`${API_URL}/api/quiz/${id}/start`, {
+        const startRes = await fetch(`/api/quiz/${id}/start`, {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -258,7 +256,7 @@ function Quiz() {
     try {
       const maxTimeMs = Number(question.time_limit_seconds || 0) * 1000
 
-      const res = await fetch(`${API_URL}/api/quiz/answer`, {
+      const res = await fetch(`/api/quiz/answer`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -304,7 +302,7 @@ function Quiz() {
       const maxTimeMs = Number(question.time_limit_seconds || 0) * 1000
       const elapsedMs = Math.min(Date.now() - questionStartedAt, maxTimeMs)
 
-      const res = await fetch(`${API_URL}/api/quiz/answer`, {
+      const res = await fetch(`/api/quiz/answer`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -343,7 +341,7 @@ function Quiz() {
     clearInterval(timerRef.current)
 
     try {
-      const res = await fetch(`${API_URL}/api/quiz/finish`, {
+      const res = await fetch(`/api/quiz/finish`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

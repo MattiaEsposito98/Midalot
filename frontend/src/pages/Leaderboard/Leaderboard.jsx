@@ -19,7 +19,7 @@ function Leaderboard() {
         setLoading(true)
         setError("")
 
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/api/quizzes/${id}/leaderboard`, {
+        const res = await fetch(`/api/quizzes/${id}/leaderboard`, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",

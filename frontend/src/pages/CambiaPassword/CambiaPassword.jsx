@@ -63,7 +63,7 @@ function CambiaPassword() {
     try {
       setLoading(true)
 
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/change-password`, {
+      const res = await fetch(`/api/change-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

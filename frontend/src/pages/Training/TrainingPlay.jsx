@@ -5,8 +5,6 @@ import styles from "../Quiz/Quiz.module.css"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 
-const API_URL = import.meta.env.VITE_API_URL
-
 function shuffleArray(array) {
   const copy = [...array]
 
@@ -86,8 +84,8 @@ function TrainingPlay() {
         setError("")
 
         const url = token
-          ? `${API_URL}/api/training/quizzes/${id}/start`
-          : `${API_URL}/api/training/quizzes/${id}/guest-start`
+          ? `/api/training/quizzes/${id}/start`
+          : `/api/training/quizzes/${id}/guest-start`
 
         const res = await fetch(url, {
           method: "POST",
@@ -187,7 +185,7 @@ function TrainingPlay() {
     clearInterval(timerRef.current)
 
     try {
-      const res = await fetch(token ? `${API_URL}/api/training/answer` : `${API_URL}/api/training/guest-answer`, {
+      const res = await fetch(token ? `/api/training/answer` : `/api/training/guest-answer`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -284,7 +282,7 @@ function TrainingPlay() {
     setReportMessage("")
 
     try {
-      const res = await fetch(`${API_URL}/api/training/report-question`, {
+      const res = await fetch(`/api/training/report-question`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -322,7 +320,7 @@ function TrainingPlay() {
     clearInterval(timerRef.current)
 
     try {
-      const res = await fetch(token ? `${API_URL}/api/training/finish` : `${API_URL}/api/training/guest-finish`, {
+      const res = await fetch(token ? `/api/training/finish` : `/api/training/guest-finish`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
