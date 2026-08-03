@@ -4,6 +4,7 @@ import { Link } from "react-router-dom"
 import LoaderButton from "../../components/LoaderButton"
 import css from "../Login/Login.module.css"
 import { logError } from "../../utils/logger"
+import { API_BASE } from "../../service/api"
 
 function ForgotPassword() {
   const [email, setEmail] = useState("")
@@ -24,7 +25,7 @@ function ForgotPassword() {
 
     try {
       setLoading(true)
-      await axios.post("/api/forgot-password", { email })
+      await axios.post(`${API_BASE}/api/forgot-password`, { email })
       setSuccess("Se l'email esiste, ti abbiamo inviato le istruzioni per reimpostare la password.")
       setEmail("")
     } catch (err) {

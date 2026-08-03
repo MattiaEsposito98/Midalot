@@ -5,6 +5,7 @@ import css from "./Login.module.css"
 import { useAuth } from "../../context/useAuth"
 import LoaderButton from "../../components/LoaderButton"
 import { logError } from "../../utils/logger"
+import { API_BASE } from "../../service/api"
 
 function Login() {
   const navigate = useNavigate()
@@ -47,7 +48,7 @@ function Login() {
     try {
       setLoading(true)
 
-      const res = await axios.post("/api/login", form)
+      const res = await axios.post(`${API_BASE}/api/login`, form)
       const { token, user } = res.data
 
       authLogin(user, token)

@@ -4,6 +4,7 @@ import { Link } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "./Profilo.module.css"
 import { logError } from "../../utils/logger"
+import { API_BASE } from "../../service/api"
 
 function Profilo() {
   const { token, user } = useAuth()
@@ -46,7 +47,7 @@ function Profilo() {
   useEffect(() => {
     async function loadStats() {
       try {
-        const res = await fetch(`/api/my-quizzes`, {
+        const res = await fetch(`${API_BASE}/api/my-quizzes`, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
@@ -116,7 +117,7 @@ function Profilo() {
     }
 
     try {
-      const res = await axios.get("/cities/search?q=" + encodeURIComponent(value))
+      const res = await axios.get(`${API_BASE}/cities/search?q=` + encodeURIComponent(value))
 
       setCities(res.data)
     } catch (error) {
@@ -155,7 +156,7 @@ function Profilo() {
     setErrors({})
 
     try {
-      const res = await fetch(`/api/user/profile`, {
+      const res = await fetch(`${API_BASE}/api/user/profile`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`,

@@ -4,6 +4,7 @@ import { useAuth } from "../../context/useAuth"
 import styles from "./Leaderboard.module.css"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
+import { API_BASE } from "../../service/api"
 
 function Leaderboard() {
   const { id } = useParams()
@@ -19,7 +20,7 @@ function Leaderboard() {
         setLoading(true)
         setError("")
 
-        const res = await fetch(`/api/quizzes/${id}/leaderboard`, {
+        const res = await fetch(`${API_BASE}/api/quizzes/${id}/leaderboard`, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",

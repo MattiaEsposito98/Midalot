@@ -4,6 +4,7 @@ import axios from "axios"
 import LoaderButton from "../../components/LoaderButton"
 import css from "../Login/Login.module.css"
 import { logError } from "../../utils/logger"
+import { API_BASE } from "../../service/api"
 
 function ResetPassword() {
   const [searchParams] = useSearchParams()
@@ -47,7 +48,7 @@ function ResetPassword() {
     try {
       setLoading(true)
 
-      await axios.post("/api/reset-password", {
+      await axios.post(`${API_BASE}/api/reset-password`, {
         token,
         email,
         password: form.password,

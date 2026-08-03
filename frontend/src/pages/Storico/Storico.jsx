@@ -3,6 +3,7 @@ import { useAuth } from "../../context/useAuth"
 import styles from "./Storico.module.css"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
+import { API_BASE } from "../../service/api"
 
 function Storico() {
   const { token } = useAuth()
@@ -12,7 +13,7 @@ function Storico() {
   useEffect(() => {
     async function loadQuizzes() {
       try {
-        const res = await fetch(`/api/my-quizzes`, {
+        const res = await fetch(`${API_BASE}/api/my-quizzes`, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",

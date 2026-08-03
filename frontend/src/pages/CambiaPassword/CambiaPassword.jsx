@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { useAuth } from "../../context/useAuth"
 import styles from "./CambiaPassword.module.css"
+import { API_BASE } from "../../service/api"
 
 function CambiaPassword() {
   const { token } = useAuth()
@@ -63,7 +64,7 @@ function CambiaPassword() {
     try {
       setLoading(true)
 
-      const res = await fetch(`/api/change-password`, {
+      const res = await fetch(`${API_BASE}/api/change-password`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
