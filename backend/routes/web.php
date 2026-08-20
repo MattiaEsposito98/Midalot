@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\TrainingCategoryController;
 use App\Http\Controllers\Admin\TrainingQuestionReportController;
 use App\Http\Controllers\Admin\TrainingQuizController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\CityController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
@@ -43,6 +44,9 @@ Route::middleware(['auth', 'admin'])
 
         Route::get('/', [DashboardController::class, 'index'])
             ->name('index');
+
+        Route::get('users', [UserController::class, 'index'])
+            ->name('users.index');
 
         Route::get('training/categories', [TrainingCategoryController::class, 'index'])
             ->name('training.categories.index');

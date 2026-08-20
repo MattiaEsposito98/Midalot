@@ -6,11 +6,11 @@
 
 @section('content')
     <div class="admin-stat-grid">
-        <div class="admin-stat-card">
+        <a href="{{ route('admin.users.index') }}" class="admin-stat-card admin-stat-card-link">
             <i class="bi bi-people"></i>
-            <span>Utenti normali</span>
+            <span>Utenti</span>
             <strong>{{ $stats['users'] }}</strong>
-        </div>
+        </a>
         <div class="admin-stat-card">
             <i class="bi bi-ui-checks-grid"></i>
             <span>Quiz totali</span>
@@ -20,6 +20,16 @@
             <i class="bi bi-check-circle"></i>
             <span>Quiz attivi</span>
             <strong>{{ $stats['active_quizzes'] }}</strong>
+        </div>
+        <div class="admin-stat-card">
+            <i class="bi bi-lightning-charge"></i>
+            <span>Training totali</span>
+            <strong>{{ $stats['trainings'] }}</strong>
+        </div>
+        <div class="admin-stat-card">
+            <i class="bi bi-lightning-charge-fill"></i>
+            <span>Training attivi</span>
+            <strong>{{ $stats['active_trainings'] }}</strong>
         </div>
         <div class="admin-stat-card">
             <i class="bi bi-question-circle"></i>

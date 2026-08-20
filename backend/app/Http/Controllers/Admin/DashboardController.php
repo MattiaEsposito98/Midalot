@@ -16,8 +16,10 @@ class DashboardController extends Controller
     {
         $stats = [
             'users' => User::where('is_admin', false)->count(),
-            'quizzes' => Quiz::count(),
-            'active_quizzes' => Quiz::where('is_active', true)->count(),
+            'quizzes' => Quiz::where('type', 'assigned')->count(),
+            'active_quizzes' => Quiz::where('type', 'assigned')->where('is_active', true)->count(),
+            'trainings' => Quiz::where('type', 'training')->count(),
+            'active_trainings' => Quiz::where('type', 'training')->where('is_active', true)->count(),
             'questions' => Question::count(),
             'logins_today' => UserLogin::whereDate('logged_in_at', today())->count(),
             'logins_week' => UserLogin::where('logged_in_at', '>=', now()->subDays(7))->count(),
