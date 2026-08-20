@@ -27,4 +27,40 @@ class UserController extends Controller
 
         return view('admin.users.index', compact('users', 'search'));
     }
+
+    public function show(User $user)
+    {
+        abort_if($user->is_admin, 404);
+
+        $user->load('city');
+
+        $quizAttempts = $user->quizAttempts()
+            ->with('quiz')
+            ->latest('started_at')
+            ->get();
+
+        $trainingAttempts = $user->trainingAttempts()
+            ->with(['quiz', 'category'])
+            ->latest('started_at')
+            ->get();
+
+        $logins = $user->logins()
+            ->latest('logged_in_at')
+            ->limit(20)
+            ->get();
+
+        $stats = [
+            'assigned_quizzes' => $user->quizzes()->count(),
+            'quiz_attempts' => $quizAttempts->count(),
+            'quiz_completed' => $quizAttempts->where('completed', true)->count(),
+            'quiz_avg_score' => round($quizAttempts->where('completed', true)->avg('score'), 1),
+            'training_attempts' => $trainingAttempts->count(),
+            'training_completed' => $trainingAttempts->where('completed', true)->count(),
+            'training_avg_score' => round($trainingAttempts->where('completed', true)->avg('score'), 1),
+            'logins_count' => $user->logins()->count(),
+            'last_login' => $user->logins()->latest('logged_in_at')->first()?->logged_in_at,
+        ];
+
+        return view('admin.users.show', compact('user', 'quizAttempts', 'trainingAttempts', 'logins', 'stats'));
+    }
 }

@@ -58,6 +58,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(\App\Models\QuizAttempt::class);
     }
 
+    public function trainingAttempts()
+    {
+        return $this->hasMany(\App\Models\TrainingAttempt::class);
+    }
+
+    public function logins()
+    {
+        return $this->hasMany(\App\Models\UserLogin::class);
+    }
+
     public function sendEmailVerificationNotification()
     {
         $url = URL::temporarySignedRoute(

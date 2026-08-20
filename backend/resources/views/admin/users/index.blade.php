@@ -64,7 +64,11 @@
                     <tbody>
                         @foreach ($users as $user)
                             <tr>
-                                <td class="fw-bold">{{ $user->name }}</td>
+                                <td class="fw-bold">
+                                    <a href="{{ route('admin.users.show', $user) }}" class="text-decoration-none">
+                                        {{ $user->name }}
+                                    </a>
+                                </td>
                                 <td>{{ $user->nickname }}</td>
                                 <td>{{ $user->email }}</td>
                                 <td>{{ $user->phone ?: '-' }}</td>
