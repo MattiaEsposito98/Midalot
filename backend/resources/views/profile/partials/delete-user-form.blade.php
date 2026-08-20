@@ -2,16 +2,16 @@
     <header class="mb-4">
         <h2 class="admin-section-title text-danger">Elimina account</h2>
         <p class="admin-muted mb-0">
-            L'eliminazione dell'account e permanente e rimuove i dati collegati.
+            Funzione disabilitata per l'account admin.
         </p>
     </header>
 
-    <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-account">
+    <button type="button" class="btn btn-danger" disabled>
         <i class="bi bi-trash"></i>
         Elimina account
     </button>
 
-    <div class="modal fade" id="delete-account" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false"
+    <div class="modal fade d-none" id="delete-account" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false"
         role="dialog" aria-labelledby="delete-account-title" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
             <div class="modal-content">
