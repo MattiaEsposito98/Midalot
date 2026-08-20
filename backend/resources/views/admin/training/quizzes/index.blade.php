@@ -22,12 +22,38 @@
             </div>
         </div>
 
+        <div class="admin-card-body">
+            <form method="GET" action="{{ route('admin.training.quizzes.index') }}" class="row g-2 align-items-center mb-3">
+                <div class="col-auto flex-grow-1">
+                    <input type="search" name="search" value="{{ $search }}" class="form-control"
+                        placeholder="Cerca per titolo o categoria...">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-search"></i>
+                        Cerca
+                    </button>
+                </div>
+                @if ($search)
+                    <div class="col-auto">
+                        <a href="{{ route('admin.training.quizzes.index') }}" class="btn btn-outline-secondary">
+                            Azzera
+                        </a>
+                    </div>
+                @endif
+            </form>
+        </div>
+
         @if ($quizzes->isEmpty())
             <div class="admin-empty">
                 <div>
                     <i class="bi bi-lightning-charge fs-1 d-block mb-2"></i>
-                    <p class="mb-3">Nessun training quiz creato.</p>
-                    <a href="{{ route('admin.training.quizzes.create') }}" class="btn btn-primary">Crea training</a>
+                    @if ($search)
+                        <p class="mb-3">Nessun training trovato per "{{ $search }}".</p>
+                    @else
+                        <p class="mb-3">Nessun training quiz creato.</p>
+                        <a href="{{ route('admin.training.quizzes.create') }}" class="btn btn-primary">Crea training</a>
+                    @endif
                 </div>
             </div>
         @else
@@ -90,6 +116,12 @@
                     </tbody>
                 </table>
             </div>
+
+            @if ($quizzes->hasPages())
+                <div class="mt-3">
+                    {{ $quizzes->links() }}
+                </div>
+            @endif
         @endif
     </section>
 @endsection

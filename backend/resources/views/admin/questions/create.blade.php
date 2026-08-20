@@ -15,7 +15,8 @@
                         <h2 class="admin-section-title">{{ $quiz->title }}</h2>
                         <p class="admin-muted mb-0">Inserisci testo, risposte, media e impostazioni della domanda.</p>
                     </div>
-                    <a href="{{ route('admin.quizzes.questions.index', $quiz->id) }}" class="btn btn-outline-secondary btn-sm">
+                    <a href="{{ route('admin.quizzes.questions.index', $quiz->id) }}"
+                        class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-arrow-left"></i>
                         Torna alle domande
                     </a>
@@ -35,7 +36,8 @@
                         @for ($i = 0; $i < 4; $i++)
                             <div>
                                 <label class="form-label">Risposta {{ $i + 1 }}</label>
-                                <input type="text" name="answers[]" class="form-control" value="{{ old('answers.' . $i) }}" required>
+                                <input type="text" name="answers[]" class="form-control"
+                                    value="{{ old('answers.' . $i) }}" required>
                             </div>
                         @endfor
 
@@ -88,13 +90,14 @@
                         <div>
                             <label class="form-label">Tempo limite (secondi)</label>
                             <input type="number" name="time_limit_seconds" class="form-control"
-                                value="{{ old('time_limit_seconds', 30) }}" min="5" required>
+                                value="{{ old('time_limit_seconds', 10) }}" min="5" required>
                         </div>
                         <div>
                             <label class="form-label">Ordine</label>
                             <input type="number" name="order" id="orderInput" class="form-control"
                                 value="{{ old('order', $nextOrder) }}" min="1" required>
-                            <small class="admin-muted">Numeri gia utilizzati: {{ implode(', ', $usedOrders) ?: 'nessuno' }}</small>
+                            <small class="admin-muted">Numeri gia utilizzati:
+                                {{ implode(', ', $usedOrders) ?: 'nessuno' }}</small>
                         </div>
                     </div>
                 </div>

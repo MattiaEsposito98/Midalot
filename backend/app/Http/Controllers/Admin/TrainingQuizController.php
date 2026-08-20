@@ -10,17 +10,28 @@ use Illuminate\Support\Facades\Auth;
 
 class TrainingQuizController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $search = $request->get('search');
+
         $quizzes = Quiz::where('type', 'training')
             ->with('trainingCategory')
             ->withCount('questions')
+            ->when($search, function ($query) use ($search) {
+                $query->where(function ($query) use ($search) {
+                    $query->where('title', 'like', "%{$search}%")
+                        ->orWhereHas('trainingCategory', function ($query) use ($search) {
+                            $query->where('name', 'like', "%{$search}%");
+                        });
+                });
+            })
             ->latest()
-            ->get();
+            ->paginate(20)
+            ->withQueryString();
 
         $categories = TrainingCategory::orderBy('name')->get();
 
-        return view('admin.training.quizzes.index', compact('quizzes', 'categories'));
+        return view('admin.training.quizzes.index', compact('quizzes', 'categories', 'search'));
     }
 
     public function create()
