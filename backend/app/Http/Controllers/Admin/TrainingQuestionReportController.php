@@ -13,11 +13,11 @@ class TrainingQuestionReportController extends Controller
         $status = $request->get('status', 'active');
 
         $reports = TrainingQuestionReport::with(['question', 'quiz', 'resolver'])
-            ->when($status === 'active', fn ($query) => $query->whereIn('status', [
+            ->when($status === 'active', fn($query) => $query->whereIn('status', [
                 TrainingQuestionReport::STATUS_OPEN,
                 TrainingQuestionReport::STATUS_IN_PROGRESS,
             ]))
-            ->when(in_array($status, TrainingQuestionReport::statuses(), true), fn ($query) => $query->where('status', $status))
+            ->when(in_array($status, TrainingQuestionReport::statuses(), true), fn($query) => $query->where('status', $status))
             ->orderByRaw("CASE status WHEN 'open' THEN 1 WHEN 'in_progress' THEN 2 ELSE 3 END")
             ->latest()
             ->paginate(20)
@@ -39,7 +39,7 @@ class TrainingQuestionReportController extends Controller
     public function update(Request $request, TrainingQuestionReport $report)
     {
         $validated = $request->validate([
-            'status' => ['required', 'in:'.implode(',', TrainingQuestionReport::statuses())],
+            'status' => ['required', 'in:' . implode(',', TrainingQuestionReport::statuses())],
             'admin_note' => ['nullable', 'string', 'max:3000'],
         ]);
 

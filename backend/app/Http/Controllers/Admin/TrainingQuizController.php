@@ -26,7 +26,7 @@ class TrainingQuizController extends Controller
                 });
             })
             ->latest()
-            ->paginate(20)
+            ->paginate(10)
             ->withQueryString();
 
         $categories = TrainingCategory::orderBy('name')->get();
