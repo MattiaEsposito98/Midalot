@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-# Prima della pubblicazione aggiungi qui la sitemap con il dominio reale.
+Sitemap: https://midalot.live/sitemap.xml

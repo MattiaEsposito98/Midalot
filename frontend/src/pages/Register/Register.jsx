@@ -18,7 +18,8 @@ function Register() {
     password_confirmation: "",
     birth_date: "",
     city_id: "",
-    privacy_accepted: false
+    privacy_accepted: false,
+    website: ""
   })
 
   const [citySearch, setCitySearch] = useState("")
@@ -158,6 +159,19 @@ function Register() {
               </div>
 
               <form onSubmit={handleSubmit}>
+                <div className={css.honeypot} aria-hidden="true">
+                  <label htmlFor="website">Non compilare questo campo</label>
+                  <input
+                    id="website"
+                    name="website"
+                    type="text"
+                    value={form.website}
+                    onChange={handleChange}
+                    tabIndex={-1}
+                    autoComplete="off"
+                  />
+                </div>
+
                 <div className="row">
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Nome</label>

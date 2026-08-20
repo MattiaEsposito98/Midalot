@@ -14,6 +14,13 @@ class AuthController extends Controller
 {
     public function register(Request $request)
     {
+        // Honeypot: campo invisibile per gli utenti reali, spesso compilato dai bot.
+        if ($request->filled('website')) {
+            return response()->json([
+                'message' => 'Utente registrato correttamente',
+            ], 201);
+        }
+
         $request->merge([
             'nickname' => strtolower(trim($request->nickname))
         ]);
