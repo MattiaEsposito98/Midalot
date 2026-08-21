@@ -1,0 +1,273 @@
+.page {
+  width: 100%;
+  padding: 42px 0 58px;
+}
+
+.wrap {
+  max-width: 1080px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  color: #182033;
+  font-weight: 900;
+}
+
+.header {
+  background: #ffffff;
+  border: 2px solid #182033;
+  border-radius: 8px;
+  padding: 26px;
+  box-shadow: 10px 10px 0 #ffc107, 0 18px 42px rgba(24, 32, 51, 0.12);
+  margin-bottom: 22px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  background: #fff4bf;
+  border: 1px solid rgba(255, 193, 7, 0.5);
+  color: #7a5400;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.header h1 {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 950;
+  margin: 0 0 10px;
+}
+
+.header p {
+  color: #647084;
+  line-height: 1.7;
+  margin: 0 0 16px;
+  max-width: 720px;
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.primaryBtn,
+.secondaryBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: 900;
+  text-decoration: none;
+  border: 2px solid #182033;
+  transition: transform .15s ease;
+}
+
+.primaryBtn {
+  background: #ffc107;
+  color: #182033;
+}
+
+.secondaryBtn {
+  background: #ffffff;
+  color: #182033;
+}
+
+.primaryBtn:hover,
+.secondaryBtn:hover {
+  color: #182033;
+  transform: translateY(-2px);
+}
+
+.section {
+  background: #ffffff;
+  border: 1px solid #dce5ee;
+  border-radius: 8px;
+  padding: 26px;
+  box-shadow: 0 14px 34px rgba(24, 32, 51, 0.08);
+  margin-bottom: 18px;
+  scroll-margin-top: 90px;
+}
+
+.sectionBadge {
+  display: inline-flex;
+  background: #eef4f7;
+  color: #176b87;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-weight: 900;
+  font-size: .8rem;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.section h2 {
+  font-size: 1.5rem;
+  font-weight: 950;
+  margin-bottom: 18px;
+}
+
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.serviceCard {
+  border: 1px solid #dce5ee;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.serviceBadge {
+  display: inline-flex;
+  background: #fff4bf;
+  color: #7a5400;
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-weight: 900;
+  font-size: .75rem;
+  margin-bottom: 10px;
+}
+
+.serviceCard h3 {
+  font-weight: 950;
+  margin-bottom: 10px;
+}
+
+.serviceCard p {
+  color: #647084;
+  line-height: 1.6;
+  margin-bottom: 10px;
+}
+
+.marqueeWrap {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+}
+
+.marqueeTrack {
+  display: flex;
+  gap: 12px;
+  width: max-content;
+  animation: scroll-marquee calc(var(--items, 6) * 4.5s) linear infinite;
+}
+
+.marqueeWrap:hover .marqueeTrack {
+  animation-play-state: paused;
+}
+
+.marqueeStatic {
+  animation: none;
+}
+
+@keyframes scroll-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.imageCard {
+  position: relative;
+  flex: 0 0 auto;
+  width: 200px;
+  height: 200px;
+  border: 1px solid #dce5ee;
+  border-radius: 8px;
+  padding: 0;
+  overflow: hidden;
+  background: none;
+  cursor: pointer;
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform .2s ease;
+}
+
+.imageCard:hover .image {
+  transform: scale(1.04);
+}
+
+.imageCaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to top, rgba(24, 32, 51, 0.85), transparent);
+  color: #ffffff;
+  font-size: .75rem;
+  font-weight: 700;
+  padding: 16px 8px 6px;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.emptyState {
+  color: #647084;
+  font-style: italic;
+}
+
+.lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(24, 32, 51, 0.82);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 1050;
+}
+
+.lightboxContent {
+  position: relative;
+  max-width: 900px;
+  width: 100%;
+}
+
+.lightboxImage {
+  width: 100%;
+  max-height: 82vh;
+  object-fit: contain;
+  border-radius: 8px;
+  display: block;
+}
+
+.lightboxClose {
+  position: absolute;
+  top: -42px;
+  right: 0;
+  background: #ffc107;
+  border: 2px solid #182033;
+  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+@media (max-width: 767.98px) {
+  .servicesGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .imageCard {
+    width: 150px;
+    height: 150px;
+  }
+}

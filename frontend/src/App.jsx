@@ -20,6 +20,7 @@ import Training from "./pages/Training/Training"
 import TrainingPlay from "./pages/Training/TrainingPlay"
 import LegalPage from "./pages/Legal/LegalPage"
 import Regolamento from "./pages/Regolamento/Regolamento"
+import ChiSiamo from "./pages/ChiSiamo/ChiSiamo"
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
       {/* AREA PUBBLICA */}
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
+        <Route path="/chi-siamo" element={<ChiSiamo />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

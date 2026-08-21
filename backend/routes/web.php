@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\QuizController;
+use App\Http\Controllers\Admin\ShowcaseImageController;
 use App\Http\Controllers\Admin\TrainingCategoryController;
 use App\Http\Controllers\Admin\TrainingQuestionReportController;
 use App\Http\Controllers\Admin\TrainingQuizController;
@@ -62,6 +63,13 @@ Route::middleware(['auth', 'admin'])
         Route::resource('training/quizzes', TrainingQuizController::class)
             ->names('training.quizzes')
             ->parameters(['quizzes' => 'quiz']);
+
+        Route::get('showcase', [ShowcaseImageController::class, 'index'])
+            ->name('showcase.index');
+        Route::post('showcase', [ShowcaseImageController::class, 'store'])
+            ->name('showcase.store');
+        Route::delete('showcase/{showcase}', [ShowcaseImageController::class, 'destroy'])
+            ->name('showcase.destroy');
 
         Route::get('reports', [TrainingQuestionReportController::class, 'index'])
             ->name('reports.index');

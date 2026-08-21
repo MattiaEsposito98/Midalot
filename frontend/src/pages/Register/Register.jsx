@@ -136,6 +136,8 @@ function Register() {
 
       if (err.response?.status === 422) {
         setErrors(err.response.data.errors || {})
+      } else if (err.response?.status === 429) {
+        alert("Troppi tentativi di registrazione. Attendi un minuto e riprova.")
       } else {
         alert("Si e' verificato un errore durante la registrazione.")
       }

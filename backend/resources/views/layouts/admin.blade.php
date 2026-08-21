@@ -42,6 +42,10 @@
                         <span class="admin-nav-count">{{ $openReportsCount }}</span>
                     @endif
                 </a>
+                <a href="{{ route('admin.showcase.index') }}" class="admin-nav-link {{ Route::is('admin.showcase.*') ? 'active' : '' }}">
+                    <i class="bi bi-images"></i>
+                    <span>Vetrina</span>
+                </a>
                 <a href="{{ route('profile.edit') }}" class="admin-nav-link">
                     <i class="bi bi-person-circle"></i>
                     <span>Profilo</span>

@@ -62,6 +62,8 @@ function Login() {
         setError("Devi verificare la tua email prima di accedere")
       } else if (err.response?.status === 422) {
         setError("Controlla i dati inseriti")
+      } else if (err.response?.status === 429) {
+        setError("Troppi tentativi di accesso. Attendi un minuto e riprova.")
       } else {
         setError("Errore del server. Riprova piu' tardi.")
       }

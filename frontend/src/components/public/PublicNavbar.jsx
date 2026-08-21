@@ -38,6 +38,11 @@ function PublicNavbar() {
               Training
             </NavLink>
 
+            <NavLink to="/chi-siamo" className={css.navPill}>
+              <i className="bi bi-info-circle-fill"></i>
+              Chi siamo
+            </NavLink>
+
             <Link to="/login" className={`btn ${css.loginBtn}`}>
               <i className="bi bi-box-arrow-in-right"></i>
               Accedi

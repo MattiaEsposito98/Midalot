@@ -25,6 +25,7 @@ function Footer() {
           </p>
 
           <div className={css.legalLinks}>
+            <Link to="/chi-siamo" className={css.footerLink}>Chi siamo</Link>
             <Link to="/privacy" className={css.footerLink}>Privacy</Link>
             <Link to="/termini" className={css.footerLink}>Termini</Link>
             <Link to="/cookie" className={css.footerLink}>Cookie</Link>
