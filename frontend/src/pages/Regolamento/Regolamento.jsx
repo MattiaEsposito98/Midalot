@@ -64,7 +64,7 @@ function Regolamento() {
       <div className={`container ${styles.wrap}`}>
         <Link to="/dashboard" className={styles.backLink}>
           <i className="bi bi-arrow-left"></i>
-          Torna alla dashboard
+          Torna ai Quiz One Shot
         </Link>
 
         <header className={styles.header}>

@@ -20,6 +20,13 @@
                 'description' => 'Screenshot di collaborazioni con pagine, creator e progetti.',
                 'images' => $collabs,
             ])
+
+            @include('admin.showcase.partials.gallery', [
+                'type' => 'feedback',
+                'title' => 'Feedback',
+                'description' => 'Screenshot di feedback da mostrare nella home page del sito.',
+                'images' => $feedbacks,
+            ])
         </div>
 
         <section class="admin-card">
@@ -34,6 +41,7 @@
                         <select class="form-select" name="type" required>
                             <option value="testimonial">Testimonianze</option>
                             <option value="collab">Collaborazioni</option>
+                            <option value="feedback">Feedback</option>
                         </select>
                         @error('type')
                             <div class="text-danger small mt-1">{{ $message }}</div>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Quiz;
+use App\Models\QuizAnswer;
 use App\Models\QuizAttempt;
 use Illuminate\Http\Request;
 
@@ -133,6 +134,83 @@ class UserQuizController extends Controller
                     ];
                 }),
             ]
+        ]);
+    }
+
+    public function review(Request $request, Quiz $quiz)
+    {
+        $user = $request->user();
+
+        if (!$user->quizzes()->where('quiz_id', $quiz->id)->exists()) {
+            return response()->json([
+                'message' => 'Quiz non assegnato'
+            ], 403);
+        }
+
+        $attempt = QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('user_id', $user->id)
+            ->where('completed', true)
+            ->first();
+
+        if (!$attempt) {
+            return response()->json([
+                'message' => 'Devi completare il quiz prima di poter vedere il riepilogo'
+            ], 403);
+        }
+
+        $quiz->load([
+            'questions' => function ($q) {
+                $q->orderBy('order')
+                    ->select(
+                        'id',
+                        'quiz_id',
+                        'question_text',
+                        'image_path',
+                        'audio_path',
+                        'video_path',
+                        'time_limit_seconds'
+                    );
+            },
+            'questions.answers:id,question_id,answer_text,is_correct',
+        ]);
+
+        $givenAnswers = QuizAnswer::where('attempt_id', $attempt->id)
+            ->get()
+            ->keyBy('question_id');
+
+        $questions = $quiz->questions->map(function ($question) use ($givenAnswers) {
+            $given = $givenAnswers->get($question->id);
+            $correctAnswer = $question->answers->firstWhere('is_correct', true);
+            $givenAnswer = $given?->answer_id
+                ? $question->answers->firstWhere('id', $given->answer_id)
+                : null;
+
+            return [
+                'id' => $question->id,
+                'question_text' => $question->question_text,
+                'image' => $question->image_path ? asset('storage/' . $question->image_path) : null,
+                'audio' => $question->audio_path ? asset('storage/' . $question->audio_path) : null,
+                'video' => $question->video_path ? asset('storage/' . $question->video_path) : null,
+                'time_limit_seconds' => $question->time_limit_seconds,
+                'given_answer_text' => $givenAnswer?->answer_text,
+                'correct_answer_text' => $correctAnswer?->answer_text,
+                'is_correct' => (bool) ($given?->is_correct ?? false),
+                'is_wrong' => (bool) ($given?->is_wrong ?? false),
+                'is_timeout' => (bool) ($given?->is_timeout ?? false),
+                'time_taken' => $given?->time_taken,
+                'score' => $given?->score ?? 0,
+            ];
+        });
+
+        return response()->json([
+            'quiz' => [
+                'id' => $quiz->id,
+                'title' => $quiz->title,
+            ],
+            'score' => $attempt->score,
+            'total_time' => $attempt->total_time,
+            'finished_at' => $attempt->finished_at,
+            'questions' => $questions,
         ]);
     }
 

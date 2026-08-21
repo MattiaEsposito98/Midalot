@@ -19,13 +19,17 @@ class ShowcaseImageController extends Controller
             ->latest()
             ->get();
 
-        return view('admin.showcase.index', compact('testimonials', 'collabs'));
+        $feedbacks = ShowcaseImage::where('type', 'feedback')
+            ->latest()
+            ->get();
+
+        return view('admin.showcase.index', compact('testimonials', 'collabs', 'feedbacks'));
     }
 
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'type' => ['required', 'in:testimonial,collab'],
+            'type' => ['required', 'in:testimonial,collab,feedback'],
             'caption' => ['nullable', 'string', 'max:120'],
             'image' => ['required', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ]);

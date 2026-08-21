@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
-import { useNavigate, useParams } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "./Quiz.module.css"
 import { logError } from "../../utils/logger"
@@ -397,7 +397,7 @@ function Quiz() {
           <h2 className={styles.errorTitle}>Attenzione</h2>
           <p className={styles.errorText}>{error}</p>
           <button className="btn btn-primary" onClick={handleBackToDashboard}>
-            Torna alla dashboard
+            Torna ai Quiz One Shot
           </button>
         </div>
       </div>
@@ -420,8 +420,12 @@ function Quiz() {
             <strong className={styles.scoreValue}>{formatQuizScore(result.score)}</strong>
           </div>
           <button className="btn btn-primary" onClick={handleBackToDashboard}>
-            Torna alla dashboard
+            Torna ai Quiz One Shot
           </button>
+          <Link to={`/quiz/${id}/review`} className="btn btn-outline-primary">
+            <i className="bi bi-clipboard-check"></i>
+            Rivedi il quiz
+          </Link>
         </div>
       </div>
     )

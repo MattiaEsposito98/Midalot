@@ -99,6 +99,14 @@ function Dashboard() {
             Quiz completato
           </button>
 
+          <Link
+            to={`/quiz/${q.id}/review`}
+            className="btn btn-outline-primary w-100"
+          >
+            <i className="bi bi-clipboard-check"></i>
+            Rivedi quiz
+          </Link>
+
           {q.leaderboard_visible && (
             <Link
               to={`/quiz/${q.id}/leaderboard`}
@@ -160,9 +168,9 @@ function Dashboard() {
         <div>
           <span className={styles.eyebrow}>
             <i className="bi bi-grid-1x2-fill"></i>
-            Area quiz
+            Quiz One Shot
           </span>
-          <h1 className={styles.title}>Quiz attivi</h1>
+          <h1 className={styles.title}>Quiz One Shot</h1>
           <p className={styles.subtitle}>
             Qui trovi i quiz attivi: disponibili, in corso o gia' completati.
           </p>

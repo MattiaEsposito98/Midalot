@@ -12,6 +12,7 @@ class ShowcaseController extends Controller
         return response()->json([
             'testimonials' => $this->images('testimonial'),
             'collabs' => $this->images('collab'),
+            'feedbacks' => $this->images('feedback'),
         ]);
     }
 

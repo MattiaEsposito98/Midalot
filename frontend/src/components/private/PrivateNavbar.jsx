@@ -43,7 +43,7 @@ function PrivateNavbar() {
             <li className="nav-item">
               <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/dashboard">
                 <i className="bi bi-grid-1x2-fill"></i>
-                Dashboard
+                Quiz One Shot
               </NavLink>
             </li>
 
@@ -51,13 +51,6 @@ function PrivateNavbar() {
               <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/training">
                 <i className="bi bi-lightning-charge-fill"></i>
                 Training
-              </NavLink>
-            </li>
-
-            <li className="nav-item">
-              <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/storico">
-                <i className="bi bi-clock-history"></i>
-                Storico
               </NavLink>
             </li>
 
@@ -78,6 +71,20 @@ function PrivateNavbar() {
                   <Link className="dropdown-item" to="/profilo">
                     <i className="bi bi-person-lines-fill me-2"></i>
                     Il mio profilo
+                  </Link>
+                </li>
+
+                <li>
+                  <Link className="dropdown-item" to="/storico">
+                    <i className="bi bi-clock-history me-2"></i>
+                    Storico
+                  </Link>
+                </li>
+
+                <li>
+                  <Link className="dropdown-item" to="/chi-siamo">
+                    <i className="bi bi-info-circle-fill me-2"></i>
+                    Chi siamo
                   </Link>
                 </li>
 

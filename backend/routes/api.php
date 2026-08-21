@@ -83,6 +83,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/quizzes/{quiz}', [UserQuizController::class, 'show']);
 
     Route::get('/quizzes/{quiz}/leaderboard', [UserQuizController::class, 'leaderboard']);
+    Route::get('/quizzes/{quiz}/review', [UserQuizController::class, 'review']);
 
     Route::post('/quiz/{quiz}/start', [QuizPlayController::class, 'start']);
     Route::post('/quiz/answer', [QuizPlayController::class, 'submitAnswer']);

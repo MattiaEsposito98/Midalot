@@ -10,6 +10,7 @@ import Login from "./pages/Login/Login"
 import Register from "./pages/Register/Register"
 import Dashboard from "./pages/Dashboard/Dashboard"
 import Quiz from "./pages/Quiz/Quiz"
+import QuizReview from "./pages/QuizReview/QuizReview"
 import Profilo from "./pages/Profilo/Profilo"
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword"
 import ResetPassword from "./pages/ResetPassword/ResetPassword"
@@ -60,6 +61,7 @@ function App() {
         <Route path="/regolamento" element={<Regolamento />} />
         <Route path="/cambia-password" element={<CambiaPassword />} />
         <Route path="/quiz/:id/leaderboard" element={<Leaderboard />} />
+        <Route path="/quiz/:id/review" element={<QuizReview />} />
       </Route>
     </Routes>
   )
