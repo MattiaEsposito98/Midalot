@@ -9,7 +9,7 @@ import { API_BASE } from "../../service/api"
 function QuizReview({ kind = "quiz" }) {
   const { id } = useParams()
   const { token } = useAuth()
-  const backTo = kind === "midalario" ? "/midalario" : "/dashboard"
+  const backTo = kind === "midalario" ? "/midalario" : "/quiz-one-shot"
   const backLabel = kind === "midalario" ? "Torna a Il Midalario" : "Torna ai Quiz One Shot"
   const apiPath = kind === "midalario" ? `midalario/quizzes/${id}/review` : `quizzes/${id}/review`
 
@@ -85,6 +85,8 @@ function QuizReview({ kind = "quiz" }) {
   if (!data) return null
 
   const questions = data.questions || []
+  const leaderboardPath = kind === "midalario" ? `/midalario/${id}/leaderboard` : `/quiz/${id}/leaderboard`
+  const showLeaderboardLink = kind === "midalario" || data.leaderboard_visible
 
   return (
     <div className={`container ${styles.page}`}>
@@ -94,9 +96,18 @@ function QuizReview({ kind = "quiz" }) {
           <p className={styles.subtitle}>{data.quiz.title}</p>
         </div>
 
-        <div className={styles.summaryBox}>
-          <span className={styles.summaryLabel}>Punteggio finale</span>
-          <strong className={styles.summaryValue}>{formatQuizScore(data.score)}</strong>
+        <div className={styles.headerRight}>
+          <div className={styles.summaryBox}>
+            <span className={styles.summaryLabel}>Punteggio finale</span>
+            <strong className={styles.summaryValue}>{formatQuizScore(data.score)}</strong>
+          </div>
+
+          {showLeaderboardLink && (
+            <Link to={leaderboardPath} className="btn btn-warning">
+              <i className="bi bi-trophy-fill"></i>
+              Vedi classifica
+            </Link>
+          )}
         </div>
       </div>
 
@@ -149,10 +160,12 @@ function QuizReview({ kind = "quiz" }) {
         })}
       </div>
 
-      <Link to={backTo} className={`btn btn-primary ${styles.backBtn}`}>
-        <i className="bi bi-arrow-left"></i>
-        {backLabel}
-      </Link>
+      <div className={styles.footerActions}>
+        <Link to={backTo} className={`btn btn-primary ${styles.backBtn}`}>
+          <i className="bi bi-arrow-left"></i>
+          {backLabel}
+        </Link>
+      </div>
     </div>
   )
 }

@@ -5,6 +5,7 @@ import css from "./Home.module.css"
 import api from "../../service/api"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
+import WeeklyLeaderboardBox from "../../components/WeeklyLeaderboardBox/WeeklyLeaderboardBox"
 
 const PLACEHOLDER_QUIZZES = [
   { id: "p1", title: "Quiz assegnato" },
@@ -73,7 +74,6 @@ function Home() {
   const [feedbacks, setFeedbacks] = useState([])
   const [rawQuizzes, setRawQuizzes] = useState([])
   const [trainingCategories, setTrainingCategories] = useState([])
-  const [weeklyTop, setWeeklyTop] = useState([])
   const [midalarioAnnouncement, setMidalarioAnnouncement] = useState(null)
   const [selectedImage, setSelectedImage] = useState(null)
   const [showAuthModal, setShowAuthModal] = useState(false)
@@ -85,10 +85,6 @@ function Home() {
 
     api.get("/training/categories")
       .then((res) => setTrainingCategories(res.data.categories || []))
-      .catch((err) => logError(err))
-
-    api.get("/leaderboard/weekly")
-      .then((res) => setWeeklyTop((res.data.results || []).slice(0, 5)))
       .catch((err) => logError(err))
 
     api.get("/midalario/announcement")
@@ -178,7 +174,7 @@ function Home() {
           <div className={css.actions}>
             {isLoggedIn ? (
               <>
-                <Link to="/dashboard" className={`btn ${css.trainingBtn}`}>
+                <Link to="/quiz-one-shot" className={`btn ${css.trainingBtn}`}>
                   <i className="bi bi-grid-1x2-fill"></i>
                   Vai ai Quiz One Shot
                 </Link>
@@ -205,37 +201,7 @@ function Home() {
         </div>
 
         <div className={css.heroLeaderboard}>
-          <div className={css.leaderboardBox}>
-            <div className={css.leaderboardBoxHeader}>
-              <span className={css.sectionBadge}>Classifiche</span>
-              <h2 className={css.leaderboardBoxTitle}>Top 5 della settimana</h2>
-            </div>
-
-            {weeklyTop.length > 0 ? (
-              <ol className={css.leaderboardList}>
-                {weeklyTop.map((r) => (
-                  <li key={r.position} className={css.leaderboardRow}>
-                    <span className={css.leaderboardRank}>#{r.position}</span>
-                    <span className={css.leaderboardName}>{r.nickname}</span>
-                    <span className={css.leaderboardScore}>{formatQuizScore(r.total_score)}</span>
-                  </li>
-                ))}
-              </ol>
-            ) : (
-              <div className={css.emptyCarousel}>Nessun risultato per questa settimana.</div>
-            )}
-
-            <div className={css.leaderboardLinks}>
-              <Link to="/classifiche?tab=weekly" className={css.seeMoreLink}>
-                Settimanale
-                <i className="bi bi-arrow-right"></i>
-              </Link>
-              <Link to="/classifiche?tab=monthly" className={css.seeMoreLink}>
-                Mensile
-                <i className="bi bi-arrow-right"></i>
-              </Link>
-            </div>
-          </div>
+          <WeeklyLeaderboardBox />
         </div>
       </div>
 
@@ -247,7 +213,7 @@ function Home() {
           </div>
 
           {isLoggedIn ? (
-            <Link to="/dashboard" className={css.seeMoreLink}>
+            <Link to="/quiz-one-shot" className={css.seeMoreLink}>
               Vedi altro
               <i className="bi bi-arrow-right"></i>
             </Link>

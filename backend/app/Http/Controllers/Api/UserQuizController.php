@@ -211,6 +211,7 @@ class UserQuizController extends Controller
             'score' => $attempt->score,
             'total_time' => $attempt->total_time,
             'finished_at' => $attempt->finished_at,
+            'leaderboard_visible' => (bool) $quiz->leaderboard_visible,
             'questions' => $questions,
         ]);
     }

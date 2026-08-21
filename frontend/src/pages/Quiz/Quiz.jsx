@@ -376,9 +376,9 @@ function Quiz() {
     return `${seconds}s`
   }
 
-  function handleBackToDashboard() {
+  function handleBackToQuizOneShot() {
     clearInterval(timerRef.current)
-    navigate("/dashboard")
+    navigate("/quiz-one-shot")
   }
 
   if (loading) {
@@ -396,7 +396,7 @@ function Quiz() {
         <div className={styles.errorCard}>
           <h2 className={styles.errorTitle}>Attenzione</h2>
           <p className={styles.errorText}>{error}</p>
-          <button className="btn btn-primary" onClick={handleBackToDashboard}>
+          <button className="btn btn-primary" onClick={handleBackToQuizOneShot}>
             Torna ai Quiz One Shot
           </button>
         </div>
@@ -419,7 +419,7 @@ function Quiz() {
             <span className={styles.scoreLabel}>Punteggio finale</span>
             <strong className={styles.scoreValue}>{formatQuizScore(result.score)}</strong>
           </div>
-          <button className="btn btn-primary" onClick={handleBackToDashboard}>
+          <button className="btn btn-primary" onClick={handleBackToQuizOneShot}>
             Torna ai Quiz One Shot
           </button>
           <Link to={`/quiz/${id}/review`} className="btn btn-outline-primary">

@@ -50,7 +50,7 @@ function PublicNavbar() {
                   Il Midalario
                 </NavLink>
 
-                <NavLink to="/dashboard" className={css.navPill}>
+                <NavLink to="/quiz-one-shot" className={css.navPill}>
                   <i className="bi bi-grid-1x2-fill"></i>
                   Quiz One Shot
                 </NavLink>

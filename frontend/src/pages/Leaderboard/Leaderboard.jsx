@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
+import { Link, useParams } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "./Leaderboard.module.css"
 import { logError } from "../../utils/logger"
@@ -96,6 +96,8 @@ function Leaderboard({ kind = "quiz" }) {
   }
 
   const results = data.results || []
+  const myResult = results.find((r) => r.user.nickname === user?.nickname)
+  const reviewPath = kind === "midalario" ? `/midalario/${id}/review` : `/quiz/${id}/review`
 
   return (
     <div className={`container ${styles.page}`}>
@@ -105,9 +107,18 @@ function Leaderboard({ kind = "quiz" }) {
           <p className={styles.subtitle}>{data.quiz.title}</p>
         </div>
 
-        <div className={styles.summaryBox}>
-          <span className={styles.summaryLabel}>Partecipanti</span>
-          <strong className={styles.summaryValue}>{results.length}</strong>
+        <div className={styles.headerRight}>
+          <div className={styles.summaryBox}>
+            <span className={styles.summaryLabel}>Partecipanti</span>
+            <strong className={styles.summaryValue}>{results.length}</strong>
+          </div>
+
+          {myResult?.completed && (
+            <Link to={reviewPath} className="btn btn-outline-primary">
+              <i className="bi bi-clipboard-check"></i>
+              Rivedi il mio quiz
+            </Link>
+          )}
         </div>
       </div>
 

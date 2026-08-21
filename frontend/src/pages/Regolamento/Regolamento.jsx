@@ -62,7 +62,7 @@ function Regolamento() {
   return (
     <section className={styles.page}>
       <div className={`container ${styles.wrap}`}>
-        <Link to="/dashboard" className={styles.backLink}>
+        <Link to="/quiz-one-shot" className={styles.backLink}>
           <i className="bi bi-arrow-left"></i>
           Torna ai Quiz One Shot
         </Link>

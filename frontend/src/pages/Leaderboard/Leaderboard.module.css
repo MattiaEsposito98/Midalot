@@ -29,6 +29,13 @@
   margin-bottom: 24px;
 }
 
+.headerRight {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
 .title {
   margin: 0;
   font-size: 32px;
@@ -211,6 +218,11 @@
 @media (max-width: 768px) {
   .header {
     flex-direction: column;
+  }
+
+  .headerRight {
+    width: 100%;
+    align-items: stretch;
   }
 
   .summaryBox {

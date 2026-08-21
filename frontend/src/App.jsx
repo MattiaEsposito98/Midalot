@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom"
+import { Routes, Route, Navigate } from "react-router-dom"
 
 import PublicLayout from "./layouts/PublicLayout"
 import PrivateLayout from "./layouts/PrivateLayout"
@@ -8,7 +8,7 @@ import ProtectedRoute from "./routes/ProtectedRoute"
 import Home from "./pages/Home/Home"
 import Login from "./pages/Login/Login"
 import Register from "./pages/Register/Register"
-import Dashboard from "./pages/Dashboard/Dashboard"
+import QuizOneShot from "./pages/QuizOneShot/QuizOneShot"
 import Quiz from "./pages/Quiz/Quiz"
 import QuizReview from "./pages/QuizReview/QuizReview"
 import Profilo from "./pages/Profilo/Profilo"
@@ -58,7 +58,8 @@ function App() {
           </ProtectedRoute>
         }
       >
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/quiz-one-shot" element={<QuizOneShot />} />
+        <Route path="/dashboard" element={<Navigate to="/quiz-one-shot" replace />} />
         <Route path="/quiz/:id" element={<Quiz />} />
         <Route path="/storico" element={<Storico />} />
         <Route path="/profilo" element={<Profilo />} />

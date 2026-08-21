@@ -4,7 +4,18 @@
 }
 
 .header {
-  margin-bottom: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 28px;
+}
+
+.leaderboardSection {
+  width: 100%;
+  max-width: 320px;
+  flex-shrink: 0;
 }
 
 .eyebrow {
@@ -187,6 +198,10 @@
 
   .title {
     font-size: 1.6rem;
+  }
+
+  .leaderboardSection {
+    max-width: 100%;
   }
 
   .infoGrid {

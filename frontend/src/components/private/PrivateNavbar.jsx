@@ -48,7 +48,7 @@ function PrivateNavbar() {
             </li>
 
             <li className="nav-item">
-              <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/dashboard">
+              <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/quiz-one-shot">
                 <i className="bi bi-grid-1x2-fill"></i>
                 Quiz One Shot
               </NavLink>

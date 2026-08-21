@@ -1,0 +1,100 @@
+.leaderboardBox {
+  width: 100%;
+  background: #ffffff;
+  border: 3px solid #182033;
+  border-radius: 8px;
+  padding: 22px 24px 18px;
+  box-shadow: 12px 12px 0 #ffc107, 0 18px 42px rgba(24, 32, 51, 0.15);
+}
+
+.leaderboardBoxHeader {
+  margin-bottom: 6px;
+}
+
+.sectionBadge {
+  display: inline-flex;
+  background: #eef4f7;
+  color: #176b87;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-weight: 900;
+  font-size: .8rem;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.leaderboardBoxTitle {
+  font-size: 1.3rem;
+  font-weight: 950;
+  margin: 0;
+  color: #182033;
+}
+
+.leaderboardList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.leaderboardRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid #eef1f5;
+}
+
+.leaderboardRow:last-child {
+  border-bottom: none;
+}
+
+.leaderboardRank {
+  min-width: 34px;
+  font-weight: 950;
+  color: #7a5400;
+}
+
+.leaderboardName {
+  flex: 1;
+  font-weight: 900;
+  color: #182033;
+}
+
+.leaderboardScore {
+  font-weight: 950;
+  color: #0f8b8d;
+}
+
+.emptyBox {
+  color: #647084;
+  font-style: italic;
+  padding: 12px 0;
+}
+
+.leaderboardLinks {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #eef1f5;
+}
+
+.seeMoreLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  color: #0f8b8d;
+  font-weight: 900;
+  font-size: .95rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.seeMoreLink:hover {
+  color: #0b6a6b;
+  text-decoration: underline;
+}

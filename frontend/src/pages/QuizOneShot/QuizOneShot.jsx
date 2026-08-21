@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
-import styles from "./Dashboard.module.css"
+import styles from "./QuizOneShot.module.css"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import { API_BASE } from "../../service/api"
+import WeeklyLeaderboardBox from "../../components/WeeklyLeaderboardBox/WeeklyLeaderboardBox"
 
-function Dashboard() {
+function QuizOneShot() {
   const { token } = useAuth()
   const [quizzes, setQuizzes] = useState([])
   const [loading, setLoading] = useState(true)
@@ -175,6 +176,10 @@ function Dashboard() {
             Qui trovi i quiz attivi: disponibili, in corso o gia' completati.
           </p>
         </div>
+
+        <div className={styles.leaderboardSection}>
+          <WeeklyLeaderboardBox />
+        </div>
       </div>
 
       {sortedQuizzes.length === 0 && (
@@ -259,4 +264,4 @@ function Dashboard() {
   )
 }
 
-export default Dashboard
+export default QuizOneShot
