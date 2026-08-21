@@ -15,8 +15,8 @@
 @endphp
 
 @section('content')
-    @if ($quiz->midalario_status === 'running')
-        <meta http-equiv="refresh" content="4">
+    @if (in_array($quiz->midalario_status, ['open', 'closed', 'running']))
+        <meta http-equiv="refresh" content="3">
     @endif
 
     <section class="admin-card mb-3">
@@ -29,7 +29,7 @@
                 <p class="admin-muted mb-0">
                     {{ $participants->count() }} partecipanti in sala &middot; {{ $totalQuestions }} domande
                     @if ($quiz->midalario_status === 'running' && $currentQuestionIndex !== null)
-                        &middot; Domanda {{ $currentQuestionIndex + 1 }} di {{ $totalQuestions }}: "{{ \Illuminate\Support\Str::limit($currentQuestionText, 60) }}"
+                        &middot; Domanda {{ $currentQuestionIndex + 1 }} di {{ $totalQuestions }} (ogni partecipante ha un ordine diverso)
                     @endif
                 </p>
             </div>

@@ -22,20 +22,24 @@
                 <span>Midalot Admin</span>
             </a>
 
+            @php
+                $activeNav = trim($__env->yieldContent('activeNav'));
+            @endphp
+
             <nav class="admin-nav" aria-label="Menu amministrazione">
                 <a href="{{ route('admin.index') }}" class="admin-nav-link {{ Route::is('admin.index') ? 'active' : '' }}">
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="{{ route('admin.midalario.index') }}" class="admin-nav-link {{ Route::is('admin.midalario.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.midalario.index') }}" class="admin-nav-link {{ Route::is('admin.midalario.*') || $activeNav === 'midalario' ? 'active' : '' }}">
                     <i class="bi bi-broadcast"></i>
                     <span>Il Midalario</span>
                 </a>
-                <a href="{{ route('admin.quizzes.index') }}" class="admin-nav-link {{ Route::is('admin.quizzes.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.quizzes.index') }}" class="admin-nav-link {{ Route::is('admin.quizzes.*') && $activeNav !== 'midalario' && $activeNav !== 'training' ? 'active' : '' }}">
                     <i class="bi bi-ui-checks-grid"></i>
                     <span>Quiz</span>
                 </a>
-                <a href="{{ route('admin.training.quizzes.index') }}" class="admin-nav-link {{ Route::is('admin.training.*') ? 'active' : '' }}">
+                <a href="{{ route('admin.training.quizzes.index') }}" class="admin-nav-link {{ Route::is('admin.training.*') || $activeNav === 'training' ? 'active' : '' }}">
                     <i class="bi bi-lightning-charge"></i>
                     <span>Training</span>
                 </a>

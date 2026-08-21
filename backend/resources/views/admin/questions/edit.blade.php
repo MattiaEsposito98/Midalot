@@ -3,6 +3,11 @@
 @section('title', 'Modifica domanda')
 @section('kicker', 'Gestione domande')
 @section('page-title', 'Modifica domanda')
+@section('activeNav', match ($quiz->type) {
+    'midalario' => 'midalario',
+    'training' => 'training',
+    default => 'quizzes',
+})
 
 @section('content')
     @php

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Answer;
+use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\QuizAnswer;
 use App\Models\QuizAttempt;
@@ -139,7 +140,7 @@ class MidalarioController extends Controller
             $window = $timeline->currentWindow();
 
             if ($window) {
-                $question = $window['question'];
+                $question = $this->resolveQuestionForAttempt($attempt, $window, $timeline);
 
                 $payload['question'] = [
                     'index' => $window['index'],
@@ -189,11 +190,15 @@ class MidalarioController extends Controller
         $timeline = new MidalarioTimeline($quiz);
         $window = $timeline->currentWindow();
 
-        if (! $window || (int) $window['question']->id !== (int) $request->question_id) {
+        if (! $window) {
             return response()->json(['message' => 'Questa domanda non è più attiva'], 422);
         }
 
-        $question = $window['question'];
+        $question = $this->resolveQuestionForAttempt($attempt, $window, $timeline);
+
+        if ((int) $question->id !== (int) $request->question_id) {
+            return response()->json(['message' => 'Questa domanda non è più attiva'], 422);
+        }
 
         $alreadyAnswered = QuizAnswer::where('attempt_id', $attempt->id)
             ->where('question_id', $question->id)
@@ -211,7 +216,7 @@ class MidalarioController extends Controller
             return response()->json(['message' => 'Risposta non valida'], 422);
         }
 
-        $maxTimeMs = (int) $question->time_limit_seconds * 1000;
+        $maxTimeMs = max(1, (int) $window['starts_at']->diffInMilliseconds($window['ends_at']));
         $timeTakenMs = min($maxTimeMs, max(0, $window['starts_at']->diffInMilliseconds(now())));
 
         $isCorrect = (bool) $answer->is_correct;
@@ -278,7 +283,18 @@ class MidalarioController extends Controller
             ->get()
             ->keyBy('question_id');
 
-        $questions = $quiz->questions->map(function ($question) use ($givenAnswers) {
+        $orderedQuestions = $quiz->questions;
+
+        if (! empty($attempt->question_order)) {
+            $questionsById = $quiz->questions->keyBy('id');
+
+            $orderedQuestions = collect($attempt->question_order)
+                ->map(fn ($questionId) => $questionsById->get($questionId))
+                ->filter()
+                ->values();
+        }
+
+        $questions = $orderedQuestions->map(function ($question) use ($givenAnswers) {
             $given = $givenAnswers->get($question->id);
             $correctAnswer = $question->answers->firstWhere('is_correct', true);
             $givenAnswer = $given?->answer_id
@@ -380,6 +396,25 @@ class MidalarioController extends Controller
     private function calculatePenalty(int $currentScore, float $penaltyRate): int
     {
         return min($currentScore, (int) round($currentScore * $penaltyRate));
+    }
+
+    /**
+     * Each participant gets their own randomized question order (stored on the attempt),
+     * while the shared timing/position is always driven by the canonical quiz order.
+     */
+    private function resolveQuestionForAttempt(QuizAttempt $attempt, array $window, MidalarioTimeline $timeline): Question
+    {
+        $questionId = $attempt->question_order[$window['index']] ?? null;
+
+        if ($questionId) {
+            $question = $timeline->questions()->firstWhere('id', $questionId);
+
+            if ($question) {
+                return $question;
+            }
+        }
+
+        return $window['question'];
     }
 
     private function ensureMidalario(Quiz $quiz): void

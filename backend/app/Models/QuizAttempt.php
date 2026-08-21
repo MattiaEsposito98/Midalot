@@ -14,6 +14,7 @@ class QuizAttempt extends Model
         'score',
         'completed',
         'total_time',
+        'question_order',
     ];
 
     protected $casts = [
@@ -21,6 +22,7 @@ class QuizAttempt extends Model
         'started_at' => 'datetime',
         'finished_at' => 'datetime',
         'total_time' => 'integer',
+        'question_order' => 'array',
     ];
 
     public function quiz()

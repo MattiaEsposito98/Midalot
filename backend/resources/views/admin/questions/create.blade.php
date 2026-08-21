@@ -3,6 +3,11 @@
 @section('title', 'Aggiungi domanda')
 @section('kicker', 'Gestione domande')
 @section('page-title', 'Aggiungi domanda')
+@section('activeNav', match ($quiz->type) {
+    'midalario' => 'midalario',
+    'training' => 'training',
+    default => 'quizzes',
+})
 
 @section('content')
     <form action="{{ route('admin.quizzes.questions.store', $quiz->id) }}" method="POST" enctype="multipart/form-data">

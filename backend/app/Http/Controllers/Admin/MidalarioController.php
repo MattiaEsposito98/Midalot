@@ -113,11 +113,20 @@ class MidalarioController extends Controller
         }
 
         $startedAt = now();
+        $questionIds = $quiz->questions()->orderBy('order')->pluck('id')->all();
 
         foreach ($quiz->participants as $participant) {
+            $shuffledQuestionIds = $questionIds;
+            shuffle($shuffledQuestionIds);
+
             QuizAttempt::firstOrCreate(
                 ['quiz_id' => $quiz->id, 'user_id' => $participant->user_id],
-                ['started_at' => $startedAt, 'completed' => false, 'score' => 0]
+                [
+                    'started_at' => $startedAt,
+                    'completed' => false,
+                    'score' => 0,
+                    'question_order' => $shuffledQuestionIds,
+                ]
             );
         }
 
@@ -156,8 +165,10 @@ class MidalarioController extends Controller
                 $hasAnsweredCurrent = false;
 
                 if ($attempt && $window) {
+                    $questionId = $attempt->question_order[$window['index']] ?? $window['question']->id;
+
                     $hasAnsweredCurrent = QuizAnswer::where('attempt_id', $attempt->id)
-                        ->where('question_id', $window['question']->id)
+                        ->where('question_id', $questionId)
                         ->exists();
                 }
 
@@ -176,7 +187,6 @@ class MidalarioController extends Controller
             'participants' => $participants,
             'totalQuestions' => $totalQuestions,
             'currentQuestionIndex' => $window['index'] ?? null,
-            'currentQuestionText' => $window['question']->question_text ?? null,
         ]);
     }
 

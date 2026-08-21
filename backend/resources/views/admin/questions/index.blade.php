@@ -3,6 +3,24 @@
 @section('title', 'Domande quiz')
 @section('kicker', 'Gestione domande')
 @section('page-title', 'Domande')
+@section('activeNav', match ($quiz->type) {
+    'midalario' => 'midalario',
+    'training' => 'training',
+    default => 'quizzes',
+})
+
+@php
+    $backRoute = match ($quiz->type) {
+        'midalario' => route('admin.midalario.index'),
+        'training' => route('admin.training.quizzes.index'),
+        default => route('admin.quizzes.index'),
+    };
+    $backLabel = match ($quiz->type) {
+        'midalario' => "Torna a Il Midalario",
+        'training' => 'Torna ai training',
+        default => 'Torna ai quiz',
+    };
+@endphp
 
 @section('content')
     <section class="admin-card">
@@ -16,9 +34,9 @@
                     <i class="bi bi-plus-lg"></i>
                     Aggiungi domanda
                 </a>
-                <a href="{{ route('admin.quizzes.index') }}" class="btn btn-outline-secondary btn-sm">
+                <a href="{{ $backRoute }}" class="btn btn-outline-secondary btn-sm">
                     <i class="bi bi-arrow-left"></i>
-                    Torna ai quiz
+                    {{ $backLabel }}
                 </a>
             </div>
         </div>
