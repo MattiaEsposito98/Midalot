@@ -6,9 +6,10 @@ import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import { API_BASE } from "../../service/api"
 
-function Leaderboard() {
+function Leaderboard({ kind = "quiz" }) {
   const { id } = useParams()
   const { token, user } = useAuth()
+  const apiPath = kind === "midalario" ? `midalario/quizzes/${id}/leaderboard` : `quizzes/${id}/leaderboard`
 
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -20,7 +21,7 @@ function Leaderboard() {
         setLoading(true)
         setError("")
 
-        const res = await fetch(`${API_BASE}/api/quizzes/${id}/leaderboard`, {
+        const res = await fetch(`${API_BASE}/api/${apiPath}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
@@ -44,7 +45,7 @@ function Leaderboard() {
     }
 
     loadLeaderboard()
-  }, [id, token])
+  }, [id, token, apiPath])
 
   function formatTime(ms) {
     if (ms == null) return "-"

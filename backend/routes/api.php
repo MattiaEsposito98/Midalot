@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ForgotPasswordController;
+use App\Http\Controllers\Api\MidalarioController;
 use App\Http\Controllers\Api\PeriodLeaderboardController;
 use App\Http\Controllers\Api\QuizPlayController;
 use App\Http\Controllers\Api\ResetPasswordController;
@@ -31,6 +32,8 @@ Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
     ->middleware('throttle:5,1');
 
 Route::get('/showcase', [ShowcaseController::class, 'index']);
+
+Route::get('/midalario/announcement', [MidalarioController::class, 'announcement']);
 
 Route::get('/leaderboard/weekly', [PeriodLeaderboardController::class, 'weekly']);
 Route::get('/leaderboard/monthly', [PeriodLeaderboardController::class, 'monthly']);
@@ -102,4 +105,11 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/training/finish', [TrainingController::class, 'finish']);
     Route::get('/training/progress', [TrainingController::class, 'progress']);
     Route::get('/training/categories/{categorySlug}/leaderboard', [TrainingController::class, 'leaderboard']);
+
+    Route::get('/midalario/quizzes', [MidalarioController::class, 'index']);
+    Route::post('/midalario/quizzes/{quiz}/join', [MidalarioController::class, 'join']);
+    Route::get('/midalario/quizzes/{quiz}/status', [MidalarioController::class, 'status']);
+    Route::post('/midalario/quizzes/{quiz}/answer', [MidalarioController::class, 'answer']);
+    Route::get('/midalario/quizzes/{quiz}/review', [MidalarioController::class, 'review']);
+    Route::get('/midalario/quizzes/{quiz}/leaderboard', [MidalarioController::class, 'leaderboard']);
 });

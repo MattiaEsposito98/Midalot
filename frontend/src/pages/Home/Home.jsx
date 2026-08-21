@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Link } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import css from "./Home.module.css"
@@ -27,6 +27,13 @@ function getQuizStatusClass(status) {
 function getQuizLink(quiz) {
   if (quiz.status === "completed") return `/quiz/${quiz.id}/review`
   return `/quiz/${quiz.id}`
+}
+
+function getMidalarioMessage(status) {
+  if (status === "open") return "Le iscrizioni sono aperte: partecipa ora!"
+  if (status === "closed") return "Iscrizioni chiuse, il quiz sta per iniziare"
+  if (status === "running") return "Il quiz e' in corso in questo momento!"
+  return ""
 }
 
 function FeedbackMarquee({ images, onSelect }) {
@@ -64,9 +71,10 @@ function Home() {
   const { user, token } = useAuth()
   const isLoggedIn = !!(user && token)
   const [feedbacks, setFeedbacks] = useState([])
-  const [quizzes, setQuizzes] = useState([])
+  const [rawQuizzes, setRawQuizzes] = useState([])
   const [trainingCategories, setTrainingCategories] = useState([])
   const [weeklyTop, setWeeklyTop] = useState([])
+  const [midalarioAnnouncement, setMidalarioAnnouncement] = useState(null)
   const [selectedImage, setSelectedImage] = useState(null)
   const [showAuthModal, setShowAuthModal] = useState(false)
 
@@ -82,33 +90,70 @@ function Home() {
     api.get("/leaderboard/weekly")
       .then((res) => setWeeklyTop((res.data.results || []).slice(0, 5)))
       .catch((err) => logError(err))
+
+    api.get("/midalario/announcement")
+      .then((res) => setMidalarioAnnouncement(res.data.quiz || null))
+      .catch((err) => logError(err))
   }, [])
 
   useEffect(() => {
-    if (!isLoggedIn) {
-      setQuizzes([])
-      return
-    }
+    if (!isLoggedIn) return
 
     api.get("/my-quizzes")
-      .then((res) => {
-        const priority = { in_progress: 0, available: 1, completed: 2 }
-        const active = (res.data.quizzes || []).filter((q) => q.is_active)
-
-        active.sort((a, b) => (priority[a.status] ?? 99) - (priority[b.status] ?? 99))
-
-        setQuizzes(active.slice(0, 4))
-      })
+      .then((res) => setRawQuizzes(res.data.quizzes || []))
       .catch((err) => logError(err))
   }, [isLoggedIn])
+
+  const quizzes = useMemo(() => {
+    if (!isLoggedIn) return []
+
+    const priority = { in_progress: 0, available: 1, completed: 2 }
+    const active = rawQuizzes.filter((q) => q.is_active)
+
+    active.sort((a, b) => (priority[a.status] ?? 99) - (priority[b.status] ?? 99))
+
+    return active.slice(0, 4)
+  }, [isLoggedIn, rawQuizzes])
 
   function handleGuestQuizClick(e) {
     e.preventDefault()
     setShowAuthModal(true)
   }
 
+  const midalarioBannerContent = midalarioAnnouncement && (
+    <>
+      <span className={css.midalarioBannerIcon}>
+        <i className="bi bi-broadcast"></i>
+      </span>
+      <span className={css.midalarioBannerText}>
+        <strong>Il Midalario: {midalarioAnnouncement.title}</strong>
+        <span>{getMidalarioMessage(midalarioAnnouncement.status)}</span>
+      </span>
+      <span className={css.midalarioBannerCta}>
+        Scopri di piu'
+        <i className="bi bi-arrow-right"></i>
+      </span>
+    </>
+  )
+
   return (
     <section className={css.page}>
+      {midalarioAnnouncement && (
+        isLoggedIn ? (
+          <Link to="/midalario" className={`container ${css.midalarioBanner}`}>
+            {midalarioBannerContent}
+          </Link>
+        ) : (
+          <button
+            type="button"
+            className={`container ${css.midalarioBanner} ${css.midalarioBannerBtn}`}
+            onClick={handleGuestQuizClick}
+          >
+            {midalarioBannerContent}
+          </button>
+        )
+      )}
+
       <div className={`container ${css.hero}`}>
         <div className={css.copy}>
           {isLoggedIn && (
@@ -325,7 +370,7 @@ function Home() {
 
             <h3 className={css.authModalTitle}>Accedi o registrati</h3>
             <p className={css.authModalText}>
-              Per vedere e giocare i quiz assegnati devi avere un account Midalot.
+              Per vedere e partecipare ai quiz devi avere un account Midalot.
             </p>
 
             <div className={css.authModalActions}>

@@ -15,17 +15,25 @@ class Quiz extends Model
         'training_question_mode',
         'created_by',
         'is_active',
-        'leaderboard_visible'
+        'leaderboard_visible',
+        'midalario_status',
+        'midalario_started_at',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'leaderboard_visible' => 'boolean',
+        'midalario_started_at' => 'datetime',
     ];
 
     public function isTraining(): bool
     {
         return $this->type === 'training';
+    }
+
+    public function isMidalario(): bool
+    {
+        return $this->type === 'midalario';
     }
 
     // Relazione: chi ha creato il quiz (admin)
@@ -58,5 +66,10 @@ class Quiz extends Model
     public function trainingAttempts()
     {
         return $this->hasMany(TrainingAttempt::class);
+    }
+
+    public function participants()
+    {
+        return $this->hasMany(QuizParticipant::class);
     }
 }

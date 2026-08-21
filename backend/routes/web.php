@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\MidalarioController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\ShowcaseImageController;
@@ -63,6 +64,27 @@ Route::middleware(['auth', 'admin'])
         Route::resource('training/quizzes', TrainingQuizController::class)
             ->names('training.quizzes')
             ->parameters(['quizzes' => 'quiz']);
+
+        Route::get('midalario', [MidalarioController::class, 'index'])
+            ->name('midalario.index');
+        Route::get('midalario/create', [MidalarioController::class, 'create'])
+            ->name('midalario.create');
+        Route::post('midalario', [MidalarioController::class, 'store'])
+            ->name('midalario.store');
+        Route::get('midalario/{quiz}/edit', [MidalarioController::class, 'edit'])
+            ->name('midalario.edit');
+        Route::put('midalario/{quiz}', [MidalarioController::class, 'update'])
+            ->name('midalario.update');
+        Route::delete('midalario/{quiz}', [MidalarioController::class, 'destroy'])
+            ->name('midalario.destroy');
+        Route::get('midalario/{quiz}/monitor', [MidalarioController::class, 'monitor'])
+            ->name('midalario.monitor');
+        Route::patch('midalario/{quiz}/close', [MidalarioController::class, 'closeParticipation'])
+            ->name('midalario.close');
+        Route::patch('midalario/{quiz}/reopen', [MidalarioController::class, 'reopenParticipation'])
+            ->name('midalario.reopen');
+        Route::patch('midalario/{quiz}/start', [MidalarioController::class, 'start'])
+            ->name('midalario.start');
 
         Route::get('showcase', [ShowcaseImageController::class, 'index'])
             ->name('showcase.index');

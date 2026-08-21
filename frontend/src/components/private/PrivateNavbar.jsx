@@ -41,6 +41,13 @@ function PrivateNavbar() {
         <div className="collapse navbar-collapse" id="privateNavbar">
           <ul className="navbar-nav ms-auto align-items-lg-center gap-lg-2">
             <li className="nav-item">
+              <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/midalario">
+                <i className="bi bi-broadcast"></i>
+                Il Midalario
+              </NavLink>
+            </li>
+
+            <li className="nav-item">
               <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/dashboard">
                 <i className="bi bi-grid-1x2-fill"></i>
                 Quiz One Shot

@@ -6,9 +6,12 @@ import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import { API_BASE } from "../../service/api"
 
-function QuizReview() {
+function QuizReview({ kind = "quiz" }) {
   const { id } = useParams()
   const { token } = useAuth()
+  const backTo = kind === "midalario" ? "/midalario" : "/dashboard"
+  const backLabel = kind === "midalario" ? "Torna a Il Midalario" : "Torna ai Quiz One Shot"
+  const apiPath = kind === "midalario" ? `midalario/quizzes/${id}/review` : `quizzes/${id}/review`
 
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -20,7 +23,7 @@ function QuizReview() {
         setLoading(true)
         setError("")
 
-        const res = await fetch(`${API_BASE}/api/quizzes/${id}/review`, {
+        const res = await fetch(`${API_BASE}/api/${apiPath}`, {
           headers: {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
@@ -44,7 +47,7 @@ function QuizReview() {
     }
 
     loadReview()
-  }, [id, token])
+  }, [id, token, apiPath])
 
   function formatTime(ms) {
     if (ms == null) return "-"
@@ -72,8 +75,8 @@ function QuizReview() {
         <div className={`alert alert-danger ${styles.errorBox}`}>
           {error}
         </div>
-        <Link to="/dashboard" className="btn btn-primary">
-          Torna ai Quiz One Shot
+        <Link to={backTo} className="btn btn-primary">
+          {backLabel}
         </Link>
       </div>
     )
@@ -146,9 +149,9 @@ function QuizReview() {
         })}
       </div>
 
-      <Link to="/dashboard" className={`btn btn-primary ${styles.backBtn}`}>
+      <Link to={backTo} className={`btn btn-primary ${styles.backBtn}`}>
         <i className="bi bi-arrow-left"></i>
-        Torna ai Quiz One Shot
+        {backLabel}
       </Link>
     </div>
   )

@@ -45,6 +45,11 @@ function PublicNavbar() {
 
             {isLoggedIn ? (
               <>
+                <NavLink to="/midalario" className={css.navPill}>
+                  <i className="bi bi-broadcast"></i>
+                  Il Midalario
+                </NavLink>
+
                 <NavLink to="/dashboard" className={css.navPill}>
                   <i className="bi bi-grid-1x2-fill"></i>
                   Quiz One Shot

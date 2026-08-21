@@ -4,6 +4,79 @@
   padding: 56px 0;
 }
 
+.midalarioBanner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  text-align: left;
+  text-decoration: none;
+  color: inherit;
+  background: linear-gradient(90deg, #182033, #0f8b8d);
+  border: 2px solid #182033;
+  border-radius: 8px;
+  padding: 16px 22px;
+  margin-bottom: 36px;
+  box-shadow: 6px 6px 0 #ffc107;
+  transition: transform 0.15s ease;
+}
+
+.midalarioBannerBtn {
+  cursor: pointer;
+}
+
+.midalarioBanner:hover {
+  color: inherit;
+  transform: translateY(-2px);
+}
+
+.midalarioBannerIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffc107;
+  font-size: 1.3rem;
+  animation: midalario-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes midalario-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.55; }
+}
+
+.midalarioBannerText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #ffffff;
+  min-width: 0;
+}
+
+.midalarioBannerText strong {
+  font-size: 1.05rem;
+  font-weight: 900;
+}
+
+.midalarioBannerText span {
+  font-size: 0.9rem;
+  color: #dce5ee;
+}
+
+.midalarioBannerCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #ffc107;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
 .hero {
   display: grid;
   grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
@@ -484,6 +557,17 @@
 }
 
 @media (max-width: 575px) {
+  .midalarioBanner {
+    flex-wrap: wrap;
+    text-align: left;
+  }
+
+  .midalarioBannerCta {
+    width: 100%;
+    justify-content: center;
+    margin-top: 4px;
+  }
+
   .actions {
     flex-direction: column;
   }

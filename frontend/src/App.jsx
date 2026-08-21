@@ -23,6 +23,8 @@ import LegalPage from "./pages/Legal/LegalPage"
 import Regolamento from "./pages/Regolamento/Regolamento"
 import ChiSiamo from "./pages/ChiSiamo/ChiSiamo"
 import Classifiche from "./pages/Classifiche/Classifiche"
+import Midalario from "./pages/Midalario/Midalario"
+import MidalarioRoom from "./pages/Midalario/MidalarioRoom"
 
 function App() {
   return (
@@ -64,6 +66,10 @@ function App() {
         <Route path="/cambia-password" element={<CambiaPassword />} />
         <Route path="/quiz/:id/leaderboard" element={<Leaderboard />} />
         <Route path="/quiz/:id/review" element={<QuizReview />} />
+        <Route path="/midalario" element={<Midalario />} />
+        <Route path="/midalario/:id" element={<MidalarioRoom />} />
+        <Route path="/midalario/:id/leaderboard" element={<Leaderboard kind="midalario" />} />
+        <Route path="/midalario/:id/review" element={<QuizReview kind="midalario" />} />
       </Route>
     </Routes>
   )
