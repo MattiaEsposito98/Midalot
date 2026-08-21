@@ -88,12 +88,18 @@ function Midalario() {
                 </div>
               </div>
 
-              <div className={styles.footer}>
+              <div className={`${styles.footer} d-flex flex-column gap-2`}>
                 {quiz.completed ? (
-                  <Link to={`/midalario/${quiz.id}/review`} className="btn btn-outline-success w-100">
-                    <i className="bi bi-clipboard-check"></i>
-                    Vedi riepilogo
-                  </Link>
+                  <>
+                    <Link to={`/midalario/${quiz.id}/review`} className="btn btn-outline-success w-100">
+                      <i className="bi bi-clipboard-check"></i>
+                      Vedi riepilogo
+                    </Link>
+                    <Link to={`/midalario/${quiz.id}/leaderboard`} className="btn btn-warning w-100">
+                      <i className="bi bi-trophy-fill"></i>
+                      Classifica
+                    </Link>
+                  </>
                 ) : (
                   <Link to={`/midalario/${quiz.id}`} className="btn btn-primary w-100">
                     <i className="bi bi-broadcast"></i>

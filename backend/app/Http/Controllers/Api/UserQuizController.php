@@ -117,6 +117,7 @@ class UserQuizController extends Controller
                 'description' => $quiz->description,
                 'total_questions' => $quiz->questions->count(),
                 'total_time_seconds' => $quiz->questions->sum('time_limit_seconds'),
+                'leaderboard_visible' => (bool) $quiz->leaderboard_visible,
                 'questions' => $quiz->questions->map(function ($question) {
                     return [
                         'id' => $question->id,

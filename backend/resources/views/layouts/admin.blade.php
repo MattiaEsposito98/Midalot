@@ -27,13 +27,13 @@
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="{{ route('admin.quizzes.index') }}" class="admin-nav-link {{ Route::is('admin.quizzes.*') ? 'active' : '' }}">
-                    <i class="bi bi-ui-checks-grid"></i>
-                    <span>Quiz</span>
-                </a>
                 <a href="{{ route('admin.midalario.index') }}" class="admin-nav-link {{ Route::is('admin.midalario.*') ? 'active' : '' }}">
                     <i class="bi bi-broadcast"></i>
                     <span>Il Midalario</span>
+                </a>
+                <a href="{{ route('admin.quizzes.index') }}" class="admin-nav-link {{ Route::is('admin.quizzes.*') ? 'active' : '' }}">
+                    <i class="bi bi-ui-checks-grid"></i>
+                    <span>Quiz</span>
                 </a>
                 <a href="{{ route('admin.training.quizzes.index') }}" class="admin-nav-link {{ Route::is('admin.training.*') ? 'active' : '' }}">
                     <i class="bi bi-lightning-charge"></i>

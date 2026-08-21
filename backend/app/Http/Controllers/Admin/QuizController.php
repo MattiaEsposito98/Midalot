@@ -47,6 +47,7 @@ class QuizController extends Controller
             'type' => 'assigned',
             'created_by' => Auth::id(),
             'is_active' => false,
+            'leaderboard_visible' => true,
         ]);
 
         return redirect()

@@ -426,6 +426,12 @@ function Quiz() {
             <i className="bi bi-clipboard-check"></i>
             Rivedi il quiz
           </Link>
+          {quiz?.leaderboard_visible && (
+            <Link to={`/quiz/${id}/leaderboard`} className="btn btn-warning">
+              <i className="bi bi-trophy-fill"></i>
+              Classifica
+            </Link>
+          )}
         </div>
       </div>
     )
