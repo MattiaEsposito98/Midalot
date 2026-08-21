@@ -52,7 +52,7 @@ function Login() {
       const { token, user } = res.data
 
       authLogin(user, token)
-      navigate("/dashboard")
+      navigate("/")
     } catch (err) {
       logError("ERRORE LOGIN:", err)
 

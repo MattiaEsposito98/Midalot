@@ -14,7 +14,7 @@ function PrivateNavbar() {
   return (
     <nav className={`navbar navbar-expand-lg navbar-light border-bottom shadow-sm ${css.navbar}`}>
       <div className="container">
-        <Link className={`navbar-brand fw-bold ${css.brand}`} to="/dashboard">
+        <Link className={`navbar-brand fw-bold ${css.brand}`} to="/">
           <img
             src="/Midalot.png"
             alt="logo Midalot"

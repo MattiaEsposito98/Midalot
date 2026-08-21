@@ -92,6 +92,33 @@
   transform: translateY(1px);
 }
 
+.profileBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #182033;
+  color: #ffffff;
+  text-decoration: none;
+  font-weight: 900;
+  border-radius: 8px;
+  box-shadow: 0 3px 0 rgba(24, 32, 51, 0.45);
+  transition: all 0.2s ease;
+}
+
+.profileBtn:hover,
+.profileBtn:focus {
+  background: #0f1728;
+  color: #ffffff;
+  transform: translateY(1px);
+}
+
+.profileMenu {
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
 .footer {
   background:
     linear-gradient(135deg, rgba(255, 193, 7, 0.09), transparent 32%),
@@ -190,8 +217,13 @@
 
   .navPill,
   .loginBtn,
-  .registerBtn {
+  .registerBtn,
+  .profileBtn {
     justify-content: center;
+    width: 100%;
+  }
+
+  .publicActions > .dropdown {
     width: 100%;
   }
 }

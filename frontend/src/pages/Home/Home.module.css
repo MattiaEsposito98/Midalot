@@ -29,6 +29,12 @@
   margin-bottom: 18px;
 }
 
+.badgeSuccess {
+  background: #dcf5e6;
+  color: #1a7a44;
+  border-color: rgba(26, 122, 68, 0.35);
+}
+
 .title {
   font-size: clamp(2.45rem, 5vw, 4.6rem);
   font-weight: 950;
@@ -130,6 +136,19 @@
   border-radius: 8px;
   padding: 20px;
   box-shadow: 0 14px 34px rgba(24, 32, 51, 0.08);
+}
+
+.featureCardLink {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color .15s ease, transform .15s ease;
+}
+
+.featureCardLink:hover {
+  color: inherit;
+  border-color: #ffc107;
+  transform: translateY(-2px);
 }
 
 .featureIcon {

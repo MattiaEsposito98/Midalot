@@ -1,7 +1,17 @@
-import { NavLink, Link } from "react-router-dom"
+import { NavLink, Link, useNavigate } from "react-router-dom"
+import { useAuth } from "../../context/useAuth"
 import css from "./PublicNavbarFooter.module.css"
 
 function PublicNavbar() {
+  const { user, token, logout } = useAuth()
+  const navigate = useNavigate()
+  const isLoggedIn = !!(user && token)
+
+  const handleLogout = () => {
+    logout()
+    navigate("/")
+  }
+
   return (
     <nav className={`navbar navbar-expand-lg navbar-light ${css.publicNavbar}`}>
       <div className="container">
@@ -33,25 +43,94 @@ function PublicNavbar() {
         <div className="collapse navbar-collapse" id="publicNavbar">
           <div className={`ms-auto ${css.publicActions}`}>
 
-            <NavLink to="/training" className={css.navPill}>
-              <i className="bi bi-lightning-charge-fill"></i>
-              Training
-            </NavLink>
+            {isLoggedIn ? (
+              <>
+                <NavLink to="/dashboard" className={css.navPill}>
+                  <i className="bi bi-grid-1x2-fill"></i>
+                  Dashboard
+                </NavLink>
 
-            <NavLink to="/chi-siamo" className={css.navPill}>
-              <i className="bi bi-info-circle-fill"></i>
-              Chi siamo
-            </NavLink>
+                <NavLink to="/training" className={css.navPill}>
+                  <i className="bi bi-lightning-charge-fill"></i>
+                  Training
+                </NavLink>
 
-            <Link to="/login" className={`btn ${css.loginBtn}`}>
-              <i className="bi bi-box-arrow-in-right"></i>
-              Accedi
-            </Link>
+                <NavLink to="/storico" className={css.navPill}>
+                  <i className="bi bi-clock-history"></i>
+                  Storico
+                </NavLink>
 
-            <Link to="/register" className={`btn ${css.registerBtn}`}>
-              <i className="bi bi-person-plus-fill"></i>
-              Registrati
-            </Link>
+                <NavLink to="/chi-siamo" className={css.navPill}>
+                  <i className="bi bi-info-circle-fill"></i>
+                  Chi siamo
+                </NavLink>
+
+                <div className="dropdown">
+                  <a
+                    className={`${css.profileBtn} dropdown-toggle`}
+                    href="#"
+                    role="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                  >
+                    <i className="bi bi-person-circle"></i>
+                    {user?.name || user?.nickname || "Profilo"}
+                  </a>
+
+                  <ul className={`dropdown-menu dropdown-menu-end shadow-sm border-0 ${css.profileMenu}`}>
+                    <li>
+                      <Link className="dropdown-item" to="/profilo">
+                        <i className="bi bi-person-lines-fill me-2"></i>
+                        Il mio profilo
+                      </Link>
+                    </li>
+
+                    <li>
+                      <Link className="dropdown-item" to="/regolamento">
+                        <i className="bi bi-journal-check me-2"></i>
+                        Regolamento
+                      </Link>
+                    </li>
+
+                    <li>
+                      <hr className="dropdown-divider" />
+                    </li>
+
+                    <li>
+                      <button
+                        onClick={handleLogout}
+                        className="dropdown-item text-danger"
+                      >
+                        <i className="bi bi-box-arrow-right me-2"></i>
+                        Logout
+                      </button>
+                    </li>
+                  </ul>
+                </div>
+              </>
+            ) : (
+              <>
+                <NavLink to="/training" className={css.navPill}>
+                  <i className="bi bi-lightning-charge-fill"></i>
+                  Training
+                </NavLink>
+
+                <NavLink to="/chi-siamo" className={css.navPill}>
+                  <i className="bi bi-info-circle-fill"></i>
+                  Chi siamo
+                </NavLink>
+
+                <Link to="/login" className={`btn ${css.loginBtn}`}>
+                  <i className="bi bi-box-arrow-in-right"></i>
+                  Accedi
+                </Link>
+
+                <Link to="/register" className={`btn ${css.registerBtn}`}>
+                  <i className="bi bi-person-plus-fill"></i>
+                  Registrati
+                </Link>
+              </>
+            )}
 
           </div>
         </div>
