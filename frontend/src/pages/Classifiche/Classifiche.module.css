@@ -1,0 +1,221 @@
+.page {
+  padding-top: 24px;
+  padding-bottom: 32px;
+}
+
+.loadingWrap {
+  min-height: 50vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.loadingText {
+  margin-top: 12px;
+  color: #647084;
+}
+
+.header {
+  margin-bottom: 20px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #fff4bf;
+  color: #7a5400;
+  border: 1px solid rgba(255, 193, 7, 0.5);
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 900;
+  margin-bottom: 14px;
+}
+
+.title {
+  margin: 0 0 8px;
+  font-size: 32px;
+  font-weight: 950;
+  color: #182033;
+}
+
+.subtitle {
+  margin: 0;
+  color: #647084;
+  font-size: 15px;
+}
+
+.tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.tabBtn {
+  border: 2px solid #182033;
+  background: #ffffff;
+  color: #182033;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.tabActive {
+  background: #182033;
+  color: #ffffff;
+}
+
+.periodBar {
+  max-width: 320px;
+  margin-bottom: 12px;
+}
+
+.periodLabel {
+  color: #647084;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+
+.emptyBox {
+  border-radius: 8px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.row {
+  display: flex;
+  align-items: stretch;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #dce5ee;
+  box-shadow: 0 14px 34px rgba(24, 32, 51, 0.08);
+}
+
+.topRow {
+  border-color: rgba(255, 193, 7, 0.65);
+  box-shadow: 0 14px 34px rgba(255, 193, 7, 0.14);
+}
+
+.meRow {
+  border: 2px solid #ffc107;
+  background: linear-gradient(180deg, #fff9dc 0%, #ffffff 100%);
+}
+
+.rankCol {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 72px;
+}
+
+.rankBadge {
+  min-width: 58px;
+  height: 58px;
+  border-radius: 8px;
+  background: #f7f8fb;
+  color: #182033;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 950;
+  font-size: 18px;
+  border: 1px solid #dce5ee;
+}
+
+.topBadge {
+  background: #ffc107;
+  border-color: #182033;
+  box-shadow: 0 4px 0 rgba(24, 32, 51, 0.18);
+}
+
+.mainCol {
+  flex: 1;
+  min-width: 0;
+}
+
+.nameWrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  margin-bottom: 14px;
+}
+
+.name {
+  font-size: 20px;
+  font-weight: 900;
+  color: #182033;
+  word-break: break-word;
+}
+
+.meTag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border-radius: 8px;
+  background: #0f8b8d;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.statBox {
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #f7f8fb;
+  border: 1px solid #dce5ee;
+}
+
+.statLabel {
+  display: block;
+  font-size: 12px;
+  color: #647084;
+  margin-bottom: 6px;
+}
+
+.statValue {
+  font-size: 18px;
+  font-weight: 950;
+  color: #182033;
+}
+
+@media (max-width: 768px) {
+  .row {
+    padding: 14px;
+    gap: 12px;
+  }
+
+  .rankCol {
+    min-width: 58px;
+  }
+
+  .rankBadge {
+    min-width: 48px;
+    height: 48px;
+    font-size: 16px;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .name {
+    font-size: 18px;
+  }
+}

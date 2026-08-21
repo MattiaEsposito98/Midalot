@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ForgotPasswordController;
+use App\Http\Controllers\Api\PeriodLeaderboardController;
 use App\Http\Controllers\Api\QuizPlayController;
 use App\Http\Controllers\Api\ResetPasswordController;
 use App\Http\Controllers\Api\ShowcaseController;
@@ -30,6 +31,11 @@ Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
     ->middleware('throttle:5,1');
 
 Route::get('/showcase', [ShowcaseController::class, 'index']);
+
+Route::get('/leaderboard/weekly', [PeriodLeaderboardController::class, 'weekly']);
+Route::get('/leaderboard/monthly', [PeriodLeaderboardController::class, 'monthly']);
+Route::get('/leaderboard/weeks', [PeriodLeaderboardController::class, 'availableWeeks']);
+Route::get('/leaderboard/months', [PeriodLeaderboardController::class, 'availableMonths']);
 
 Route::get('/training/categories', [TrainingController::class, 'categories']);
 Route::get('/training/categories/{categorySlug}/quizzes', [TrainingController::class, 'categoryQuizzes']);

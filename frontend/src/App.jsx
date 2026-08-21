@@ -22,6 +22,7 @@ import TrainingPlay from "./pages/Training/TrainingPlay"
 import LegalPage from "./pages/Legal/LegalPage"
 import Regolamento from "./pages/Regolamento/Regolamento"
 import ChiSiamo from "./pages/ChiSiamo/ChiSiamo"
+import Classifiche from "./pages/Classifiche/Classifiche"
 
 function App() {
   return (
@@ -30,6 +31,7 @@ function App() {
       <Route element={<PublicLayout />}>
         <Route path="/" element={<Home />} />
         <Route path="/chi-siamo" element={<ChiSiamo />} />
+        <Route path="/classifiche" element={<Classifiche />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />

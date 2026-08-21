@@ -6,9 +6,9 @@
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.02fr) minmax(320px, 0.98fr);
+  grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
   align-items: center;
-  gap: 44px;
+  gap: 40px;
 }
 
 .copy {
@@ -83,100 +83,20 @@
   transform: translateY(1px);
 }
 
-.visual {
-  position: relative;
-}
-
-.heroImage {
-  width: 100%;
-  aspect-ratio: 4 / 3;
-  border-radius: 8px;
-  border: 3px solid #182033;
-  box-shadow: 12px 12px 0 #ffc107, 0 18px 42px rgba(24, 32, 51, 0.15);
-  object-fit: contain;
-  background: #ffffff;
-  padding: 36px;
-}
-
-.scoreCard {
-  position: absolute;
-  right: -12px;
-  bottom: 20px;
-  min-width: 116px;
-  background: #ffffff;
-  border: 2px solid #182033;
-  border-radius: 8px;
-  padding: 12px 14px;
-  box-shadow: 0 8px 0 rgba(24, 32, 51, 0.15);
-}
-
-.scoreCard span {
-  display: block;
-  color: #647084;
-  font-weight: 900;
-  font-size: 13px;
-}
-
-.scoreCard strong {
-  color: #0f8b8d;
-  font-size: 1.8rem;
-  line-height: 1;
-}
-
-.featureGrid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-top: 48px;
-}
-
-.featureCard {
-  background: #ffffff;
-  border: 1px solid #dce5ee;
-  border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0 14px 34px rgba(24, 32, 51, 0.08);
-}
-
-.featureCardLink {
-  display: block;
-  color: inherit;
-  text-decoration: none;
-  transition: border-color .15s ease, transform .15s ease;
-}
-
-.featureCardLink:hover {
-  color: inherit;
-  border-color: #ffc107;
-  transform: translateY(-2px);
-}
-
-.featureIcon {
-  width: 42px;
-  height: 42px;
-  border-radius: 8px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #fff4bf;
-  color: #182033;
-  margin-bottom: 12px;
-}
-
-.featureCard h2 {
-  font-size: 1.15rem;
-  font-weight: 900;
-  margin-bottom: 8px;
-}
-
-.featureCard p {
-  color: #647084;
-  margin: 0;
-  line-height: 1.6;
+.carouselSection {
+  margin-top: 52px;
 }
 
 .feedbackSection {
-  margin-top: 48px;
+  margin-top: 52px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+  margin-bottom: 18px;
 }
 
 .sectionBadge {
@@ -194,8 +114,198 @@
 .sectionTitle {
   font-size: 1.5rem;
   font-weight: 950;
-  margin-bottom: 18px;
+  margin: 0;
   color: #182033;
+}
+
+.seeMoreLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 0;
+  color: #0f8b8d;
+  font-weight: 900;
+  font-size: .95rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.seeMoreLink:hover {
+  color: #0b6a6b;
+  text-decoration: underline;
+}
+
+.carouselTrack {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scroll-snap-type: x proximity;
+}
+
+.carouselTrack::-webkit-scrollbar {
+  height: 6px;
+}
+
+.carouselTrack::-webkit-scrollbar-thumb {
+  background: #dce5ee;
+  border-radius: 6px;
+}
+
+.quizCard,
+.trainingCard {
+  flex: 0 0 auto;
+  width: 260px;
+  scroll-snap-align: start;
+  background: #ffffff;
+  border: 1px solid #dce5ee;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 14px 34px rgba(24, 32, 51, 0.08);
+  text-align: left;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color .15s ease, transform .15s ease;
+  cursor: pointer;
+}
+
+.quizCard:hover,
+.trainingCard:hover {
+  color: inherit;
+  border-color: #ffc107;
+  transform: translateY(-2px);
+}
+
+.quizCardLocked {
+  background: #f7f8fb;
+}
+
+.lockIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: #fff4bf;
+  color: #7a5400;
+  margin-bottom: 12px;
+  font-size: 1rem;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-size: .72rem;
+  font-weight: 900;
+  margin-bottom: 12px;
+}
+
+.statusAvailable {
+  background: #eaf5ff;
+  color: #1d55c7;
+}
+
+.statusInProgress {
+  background: #fff4bf;
+  color: #7a5400;
+}
+
+.statusCompleted {
+  background: #e9f8f0;
+  color: #1f7a4b;
+}
+
+.quizCardTitle {
+  font-size: 1.05rem;
+  font-weight: 900;
+  margin-bottom: 8px;
+  color: #182033;
+}
+
+.quizCardMeta {
+  color: #647084;
+  margin: 0;
+  font-size: .88rem;
+  line-height: 1.5;
+}
+
+.emptyCarousel {
+  color: #647084;
+  font-style: italic;
+  padding: 12px 0;
+}
+
+.heroLeaderboard {
+  display: flex;
+}
+
+.leaderboardBox {
+  width: 100%;
+  background: #ffffff;
+  border: 3px solid #182033;
+  border-radius: 8px;
+  padding: 22px 24px 18px;
+  box-shadow: 12px 12px 0 #ffc107, 0 18px 42px rgba(24, 32, 51, 0.15);
+}
+
+.leaderboardBoxHeader {
+  margin-bottom: 6px;
+}
+
+.leaderboardBoxTitle {
+  font-size: 1.3rem;
+  font-weight: 950;
+  margin: 0;
+  color: #182033;
+}
+
+.leaderboardLinks {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #eef1f5;
+}
+
+.leaderboardList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.leaderboardRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 0;
+  border-bottom: 1px solid #eef1f5;
+}
+
+.leaderboardRow:last-child {
+  border-bottom: none;
+}
+
+.leaderboardRank {
+  min-width: 34px;
+  font-weight: 950;
+  color: #7a5400;
+}
+
+.leaderboardName {
+  flex: 1;
+  font-weight: 900;
+  color: #182033;
+}
+
+.leaderboardScore {
+  font-weight: 950;
+  color: #0f8b8d;
 }
 
 .marqueeWrap {
@@ -308,6 +418,38 @@
   cursor: pointer;
 }
 
+.authModal {
+  position: relative;
+  max-width: 420px;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 8px;
+  border: 2px solid #182033;
+  box-shadow: 10px 10px 0 #ffc107;
+  padding: 32px 28px;
+  text-align: center;
+}
+
+.authModalTitle {
+  font-size: 1.4rem;
+  font-weight: 950;
+  color: #182033;
+  margin: 4px 0 10px;
+}
+
+.authModalText {
+  color: #647084;
+  line-height: 1.6;
+  margin-bottom: 22px;
+}
+
+.authModalActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
 @media (max-width: 767.98px) {
   .imageCard {
     width: 150px;
@@ -335,8 +477,9 @@
     justify-content: center;
   }
 
-  .featureGrid {
-    grid-template-columns: 1fr;
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
   }
 }
 
@@ -347,9 +490,5 @@
 
   .actions a {
     width: 100%;
-  }
-
-  .scoreCard {
-    right: 10px;
   }
 }
