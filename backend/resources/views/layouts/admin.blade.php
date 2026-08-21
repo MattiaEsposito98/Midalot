@@ -16,7 +16,7 @@
 
 <body class="admin-body">
     <div class="admin-shell">
-        <aside class="admin-sidebar">
+        <header class="admin-topnav">
             <a class="admin-brand" href="{{ route('admin.index') }}">
                 <img src="{{ asset('images/Midalot.png') }}" alt="Midalot">
                 <span>Midalot Admin</span>
@@ -48,24 +48,26 @@
                 </a>
             </nav>
 
-            <form action="{{ route('logout') }}" method="POST" class="admin-logout">
-                @csrf
-                <button type="submit" class="admin-nav-link admin-nav-button">
-                    <i class="bi bi-box-arrow-right"></i>
-                    <span>Logout</span>
-                </button>
-            </form>
-        </aside>
+            <div class="admin-topnav-right">
+                <div class="admin-user">
+                    <span>{{ Auth::user()->name }}</span>
+                    <small>Admin</small>
+                </div>
+                <form action="{{ route('logout') }}" method="POST" class="admin-logout">
+                    @csrf
+                    <button type="submit" class="admin-nav-link admin-nav-button">
+                        <i class="bi bi-box-arrow-right"></i>
+                        <span>Logout</span>
+                    </button>
+                </form>
+            </div>
+        </header>
 
         <div class="admin-main">
             <header class="admin-topbar">
                 <div>
                     <p class="admin-kicker mb-1">@yield('kicker', 'Area amministrazione')</p>
                     <h1>@yield('page-title', 'Dashboard')</h1>
-                </div>
-                <div class="admin-user">
-                    <span>{{ Auth::user()->name }}</span>
-                    <small>Admin</small>
                 </div>
             </header>
 
