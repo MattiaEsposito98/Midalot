@@ -53,16 +53,6 @@
   font-weight: 800;
 }
 
-.notice {
-  background: #fff9dc;
-  border: 1px solid rgba(255, 193, 7, 0.55);
-  color: #7a5400;
-  border-radius: 8px;
-  padding: 14px 16px;
-  font-weight: 800;
-  margin-bottom: 18px;
-}
-
 .content {
   display: grid;
   gap: 14px;

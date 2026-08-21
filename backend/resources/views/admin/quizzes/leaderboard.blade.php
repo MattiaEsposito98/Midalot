@@ -9,15 +9,27 @@
         <div class="admin-card-header">
             <div>
                 <h2 class="admin-section-title">{{ $quiz->title }}</h2>
-                <p class="admin-muted mb-0">Risultati ordinati per completamento, punteggio e tempo.</p>
+                <p class="admin-muted mb-2">Risultati ordinati per completamento, punteggio e tempo.</p>
+
+                @if ($quiz->leaderboard_visible)
+                    <span class="badge bg-success">
+                        <i class="bi bi-eye me-1"></i>
+                        La classifica e' visibile agli utenti
+                    </span>
+                @else
+                    <span class="badge bg-secondary">
+                        <i class="bi bi-eye-slash me-1"></i>
+                        La classifica e' nascosta agli utenti
+                    </span>
+                @endif
             </div>
             <div class="admin-page-actions">
                 <form action="{{ route('admin.quizzes.toggleLeaderboard', $quiz) }}" method="POST">
                     @csrf
                     @method('PATCH')
-                    <button type="submit" class="btn btn-sm {{ $quiz->leaderboard_visible ? 'btn-success' : 'btn-outline-secondary' }}">
-                        <i class="bi bi-eye{{ $quiz->leaderboard_visible ? '' : '-slash' }}"></i>
-                        {{ $quiz->leaderboard_visible ? 'Visibile agli utenti' : 'Rendi visibile' }}
+                    <button type="submit" class="btn btn-sm {{ $quiz->leaderboard_visible ? 'btn-outline-danger' : 'btn-success' }}">
+                        <i class="bi bi-eye{{ $quiz->leaderboard_visible ? '-slash' : '' }}"></i>
+                        {{ $quiz->leaderboard_visible ? 'Nascondi agli utenti' : 'Mostra agli utenti' }}
                     </button>
                 </form>
                 <a href="{{ route('admin.quizzes.index') }}" class="btn btn-outline-secondary btn-sm">
@@ -25,15 +37,6 @@
                     Torna ai quiz
                 </a>
             </div>
-        </div>
-
-        <div class="admin-card-body border-bottom">
-            <strong>Stato classifica:</strong>
-            @if ($quiz->leaderboard_visible)
-                <span class="badge bg-success">Visibile</span>
-            @else
-                <span class="badge bg-secondary">Nascosta</span>
-            @endif
         </div>
 
         @if ($results->isEmpty())

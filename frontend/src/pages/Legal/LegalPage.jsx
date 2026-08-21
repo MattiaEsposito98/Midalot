@@ -14,8 +14,8 @@ const pages = {
       {
         title: "Titolare del trattamento",
         body: [
-          "Il titolare del trattamento e' Midalot. Per richieste privacy puoi scrivere a " + CONTACT_EMAIL + ".",
-          "Prima della pubblicazione online questa sezione andra' completata con ragione sociale, indirizzo e dati identificativi del titolare."
+          "Il progetto Midalot e' gestito da Antonio Scalamogna e Mattia Esposito, titolari del trattamento dei dati raccolti tramite il sito.",
+          "Per richieste privacy puoi scrivere a " + CONTACT_EMAIL + "."
         ],
       },
       {
@@ -50,8 +50,7 @@ const pages = {
         body: [
           "I dati account sono conservati finche' l'account resta attivo o finche' servono per obblighi legali o tutela dei diritti.",
           "Risultati, storico quiz e training sono conservati per fornire progressi e classifiche.",
-          "I log tecnici e di sicurezza sono conservati per un periodo proporzionato alle finalita' di sicurezza.",
-          "Prima della pubblicazione online e' consigliato definire tempi precisi di conservazione."
+          "I log tecnici e di sicurezza sono conservati per un massimo di 12 mesi, salvo necessita' diverse legate alla sicurezza o a obblighi di legge."
         ],
       },
       {
@@ -119,8 +118,7 @@ const pages = {
       {
         title: "Contatti",
         body: [
-          "Per richieste relative al servizio puoi scrivere a " + CONTACT_EMAIL + ".",
-          "Prima della pubblicazione online questa pagina andra' completata con i dati legali del gestore."
+          "Midalot e' gestito da Mattia Esposito e Antonio Scalamogna. Per richieste relative al servizio puoi scrivere a " + CONTACT_EMAIL + "."
         ],
       },
     ],
@@ -180,11 +178,6 @@ function LegalPage({ type }) {
           <h1>{page.title}</h1>
           <p>{page.intro}</p>
           <small>{page.updated}</small>
-        </div>
-
-        <div className={styles.notice}>
-          Questi testi sono una base operativa per il progetto Midalot e vanno verificati
-          prima della pubblicazione con i dati legali definitivi del titolare.
         </div>
 
         <div className={styles.content}>

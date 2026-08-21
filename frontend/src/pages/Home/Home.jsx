@@ -24,7 +24,7 @@ function Home() {
 
           <h1 className={css.title}>
             {isLoggedIn
-              ? `Bentornato, ${user?.name || user?.nickname}!`
+              ? `Bentornato, ${user?.nickname}!`
               : "Benvenuti sul Midalario!"}
           </h1>
 
