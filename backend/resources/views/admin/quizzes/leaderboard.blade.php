@@ -4,7 +4,24 @@
 @section('kicker', 'Risultati')
 @section('page-title', 'Classifica')
 
+@php
+    $backRoute = match ($quiz->type) {
+        'midalario' => route('admin.midalario.monitor', $quiz),
+        'training' => route('admin.training.quizzes.index'),
+        default => route('admin.quizzes.index'),
+    };
+    $backLabel = match ($quiz->type) {
+        'midalario' => "Torna alla sala Midalario",
+        'training' => 'Torna ai training',
+        default => 'Torna ai quiz',
+    };
+@endphp
+
 @section('content')
+    @if ($quiz->isMidalario() && $quiz->midalario_status === 'running')
+        <meta http-equiv="refresh" content="4">
+    @endif
+
     <section class="admin-card">
         <div class="admin-card-header">
             <div>
@@ -22,6 +39,13 @@
                         La classifica e' nascosta agli utenti
                     </span>
                 @endif
+
+                @if ($quiz->isMidalario() && $quiz->midalario_status === 'running')
+                    <div class="alert alert-primary mt-2 mb-0 py-1 px-2 d-inline-block">
+                        <i class="bi bi-arrow-repeat"></i>
+                        Il quiz e' in corso. Questa pagina si aggiorna automaticamente ogni 4 secondi.
+                    </div>
+                @endif
             </div>
             <div class="admin-page-actions">
                 <form action="{{ route('admin.quizzes.toggleLeaderboard', $quiz) }}" method="POST">
@@ -32,9 +56,9 @@
                         {{ $quiz->leaderboard_visible ? 'Nascondi agli utenti' : 'Mostra agli utenti' }}
                     </button>
                 </form>
-                <a href="{{ route('admin.quizzes.index') }}" class="btn btn-outline-secondary btn-sm">
+                <a href="{{ $backRoute }}" class="btn btn-outline-secondary btn-sm">
                     <i class="bi bi-arrow-left"></i>
-                    Torna ai quiz
+                    {{ $backLabel }}
                 </a>
             </div>
         </div>

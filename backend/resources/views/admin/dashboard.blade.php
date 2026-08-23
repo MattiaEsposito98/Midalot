@@ -31,6 +31,21 @@
             <span>Training attivi</span>
             <strong>{{ $stats['active_trainings'] }}</strong>
         </div>
+        <a href="{{ route('admin.midalario.index') }}" class="admin-stat-card admin-stat-card-link">
+            <i class="bi bi-broadcast"></i>
+            <span>Midalario totali</span>
+            <strong>{{ $stats['midalarios'] }}</strong>
+        </a>
+        <div class="admin-stat-card">
+            <i class="bi bi-broadcast-pin"></i>
+            <span>Midalario in corso/aperti</span>
+            <strong>{{ $stats['midalarios_live'] }}</strong>
+        </div>
+        <div class="admin-stat-card">
+            <i class="bi bi-person-check"></i>
+            <span>Partecipanti Midalario</span>
+            <strong>{{ $stats['midalario_participants'] }}</strong>
+        </div>
         <div class="admin-stat-card">
             <i class="bi bi-question-circle"></i>
             <span>Domande</span>
@@ -58,60 +73,176 @@
         </div>
     </div>
 
+    @php
+        $midalarioStatusLabels = [
+            'open' => ['Iscrizioni aperte', 'bg-success'],
+            'closed' => ['Iscrizioni chiuse', 'bg-warning text-dark'],
+            'running' => ['In corso', 'bg-primary'],
+            'finished' => ['Terminato', 'bg-secondary'],
+        ];
+    @endphp
+
     <div class="admin-dashboard-grid">
-        <section class="admin-card">
-            <div class="admin-card-header">
-                <div>
-                    <h2 class="admin-section-title">Quiz recenti</h2>
-                    <p class="admin-muted mb-0">Ultimi quiz creati e stato operativo.</p>
+        <div class="d-grid gap-3">
+            <section class="admin-card">
+                <div class="admin-card-header">
+                    <div>
+                        <h2 class="admin-section-title">Quiz one shot recenti</h2>
+                        <p class="admin-muted mb-0">Ultimi quiz creati e stato operativo.</p>
+                    </div>
+                    <a href="{{ route('admin.quizzes.create') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-lg"></i>
+                        Crea quiz
+                    </a>
                 </div>
-                <a href="{{ route('admin.quizzes.create') }}" class="btn btn-primary btn-sm">
-                    <i class="bi bi-plus-lg"></i>
-                    Crea quiz
-                </a>
-            </div>
-            <div class="table-responsive">
-                <table class="table admin-table">
-                    <thead>
-                        <tr>
-                            <th>Quiz</th>
-                            <th>Stato</th>
-                            <th>Domande</th>
-                            <th>Utenti</th>
-                            <th>Tentativi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($recentQuizzes as $quiz)
+                <div class="table-responsive">
+                    <table class="table admin-table">
+                        <thead>
                             <tr>
-                                <td>
-                                    <a href="{{ route('admin.quizzes.edit', $quiz) }}" class="fw-bold text-decoration-none">
-                                        {{ $quiz->title }}
-                                    </a>
-                                    <div class="small admin-muted">{{ $quiz->created_at->format('d/m/Y H:i') }}</div>
-                                </td>
-                                <td>
-                                    @if ($quiz->is_active)
-                                        <span class="badge bg-success">Attivo</span>
-                                    @else
-                                        <span class="badge bg-secondary">Non attivo</span>
-                                    @endif
-                                </td>
-                                <td>{{ $quiz->questions_count }}</td>
-                                <td>{{ $quiz->users_count }}</td>
-                                <td>{{ $quiz->attempts_count }}</td>
+                                <th>Quiz</th>
+                                <th>Stato</th>
+                                <th>Domande</th>
+                                <th>Utenti</th>
+                                <th>Tentativi</th>
                             </tr>
-                        @empty
+                        </thead>
+                        <tbody>
+                            @forelse ($recentQuizzes as $quiz)
+                                <tr>
+                                    <td>
+                                        <a href="{{ route('admin.quizzes.edit', $quiz) }}" class="fw-bold text-decoration-none">
+                                            {{ $quiz->title }}
+                                        </a>
+                                        <div class="small admin-muted">{{ $quiz->created_at->format('d/m/Y H:i') }}</div>
+                                    </td>
+                                    <td>
+                                        @if ($quiz->is_active)
+                                            <span class="badge bg-success">Attivo</span>
+                                        @else
+                                            <span class="badge bg-secondary">Non attivo</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $quiz->questions_count }}</td>
+                                    <td>{{ $quiz->users_count }}</td>
+                                    <td>{{ $quiz->attempts_count }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5">
+                                        <div class="admin-empty">Nessun quiz creato.</div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="admin-card">
+                <div class="admin-card-header">
+                    <div>
+                        <h2 class="admin-section-title">Training recenti</h2>
+                        <p class="admin-muted mb-0">Ultimi training creati e stato operativo.</p>
+                    </div>
+                    <a href="{{ route('admin.training.quizzes.create') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-lg"></i>
+                        Crea training
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table admin-table">
+                        <thead>
                             <tr>
-                                <td colspan="5">
-                                    <div class="admin-empty">Nessun quiz creato.</div>
-                                </td>
+                                <th>Training</th>
+                                <th>Stato</th>
+                                <th>Domande</th>
+                                <th>Tentativi</th>
                             </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </section>
+                        </thead>
+                        <tbody>
+                            @forelse ($recentTrainings as $quiz)
+                                <tr>
+                                    <td>
+                                        <a href="{{ route('admin.training.quizzes.edit', $quiz) }}" class="fw-bold text-decoration-none">
+                                            {{ $quiz->title }}
+                                        </a>
+                                        <div class="small admin-muted">{{ $quiz->created_at->format('d/m/Y H:i') }}</div>
+                                    </td>
+                                    <td>
+                                        @if ($quiz->is_active)
+                                            <span class="badge bg-success">Attivo</span>
+                                        @else
+                                            <span class="badge bg-secondary">Non attivo</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $quiz->questions_count }}</td>
+                                    <td>{{ $quiz->attempts_count }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4">
+                                        <div class="admin-empty">Nessun training creato.</div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="admin-card">
+                <div class="admin-card-header">
+                    <div>
+                        <h2 class="admin-section-title">Midalario recenti</h2>
+                        <p class="admin-muted mb-0">Ultime sessioni Midalario e stato operativo.</p>
+                    </div>
+                    <a href="{{ route('admin.midalario.create') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-lg"></i>
+                        Crea Midalario
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table admin-table">
+                        <thead>
+                            <tr>
+                                <th>Midalario</th>
+                                <th>Stato</th>
+                                <th>Domande</th>
+                                <th>Partecipanti</th>
+                                <th>Tentativi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($recentMidalarios as $quiz)
+                                @php
+                                    [$midalarioLabel, $midalarioBadgeClass] = $midalarioStatusLabels[$quiz->midalario_status] ?? ['-', 'bg-secondary'];
+                                @endphp
+                                <tr>
+                                    <td>
+                                        <a href="{{ route('admin.midalario.monitor', $quiz) }}" class="fw-bold text-decoration-none">
+                                            {{ $quiz->title }}
+                                        </a>
+                                        <div class="small admin-muted">{{ $quiz->created_at->format('d/m/Y H:i') }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge {{ $midalarioBadgeClass }}">{{ $midalarioLabel }}</span>
+                                    </td>
+                                    <td>{{ $quiz->questions_count }}</td>
+                                    <td>{{ $quiz->participants_count }}</td>
+                                    <td>{{ $quiz->attempts_count }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5">
+                                        <div class="admin-empty">Nessuna sessione Midalario creata.</div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
 
         <div class="d-grid gap-3">
             <section class="admin-card">

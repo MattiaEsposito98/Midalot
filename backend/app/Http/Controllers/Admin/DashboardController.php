@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
+use App\Models\QuizParticipant;
 use App\Models\User;
 use App\Models\UserLogin;
 use Illuminate\Support\Facades\DB;
@@ -20,6 +21,11 @@ class DashboardController extends Controller
             'active_quizzes' => Quiz::where('type', 'assigned')->where('is_active', true)->count(),
             'trainings' => Quiz::where('type', 'training')->count(),
             'active_trainings' => Quiz::where('type', 'training')->where('is_active', true)->count(),
+            'midalarios' => Quiz::where('type', 'midalario')->count(),
+            'midalarios_live' => Quiz::where('type', 'midalario')
+                ->whereIn('midalario_status', ['open', 'closed', 'running'])
+                ->count(),
+            'midalario_participants' => QuizParticipant::distinct('user_id')->count('user_id'),
             'questions' => Question::count(),
             'logins_today' => UserLogin::whereDate('logged_in_at', today())->count(),
             'logins_week' => UserLogin::where('logged_in_at', '>=', now()->subDays(7))->count(),
@@ -45,11 +51,31 @@ class DashboardController extends Controller
             ->limit(6)
             ->get();
 
-        $recentQuizzes = Quiz::withCount(['questions', 'users', 'attempts'])
+        $recentQuizzes = Quiz::where('type', 'assigned')
+            ->withCount(['questions', 'users', 'attempts'])
             ->latest()
             ->limit(5)
             ->get();
 
-        return view('admin.dashboard', compact('stats', 'latestLogins', 'topCities', 'recentQuizzes'));
+        $recentTrainings = Quiz::where('type', 'training')
+            ->withCount(['questions', 'attempts'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        $recentMidalarios = Quiz::where('type', 'midalario')
+            ->withCount(['questions', 'participants', 'attempts'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
+        return view('admin.dashboard', compact(
+            'stats',
+            'latestLogins',
+            'topCities',
+            'recentQuizzes',
+            'recentTrainings',
+            'recentMidalarios'
+        ));
     }
 }
