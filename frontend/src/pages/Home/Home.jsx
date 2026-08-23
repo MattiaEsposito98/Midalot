@@ -166,9 +166,22 @@ function Home() {
           </h1>
 
           <p className={css.subtitle}>
-            {isLoggedIn
-              ? "Riprendi i tuoi quiz assegnati, scala la classifica del training e tieni d'occhio i tuoi progressi."
-              : "Sfide a tempo, classifiche in tempo reale e allenamento libero per categoria: entra nella community mida.lot e mettiti alla prova."}
+            {isLoggedIn ? (
+              <>
+                <strong className={css.prizeHighlight}>
+                  Ogni settimana e ogni mese in palio nuovi premi per i migliori giocatori.
+                </strong>{" "}
+                Riprendi i tuoi quiz assegnati, scala la classifica del training e tieni d'occhio i tuoi progressi.
+              </>
+            ) : (
+              <>
+                Sfide a tempo, classifiche in tempo reale e allenamento libero per categoria.{" "}
+                <strong className={css.prizeHighlight}>
+                  Ogni settimana e ogni mese premiamo i migliori giocatori in classifica.
+                </strong>{" "}
+                Entra nella community mida.lot e mettiti alla prova.
+              </>
+            )}
           </p>
 
           <div className={css.actions}>
@@ -257,7 +270,7 @@ function Home() {
                   <i className="bi bi-lock-fill"></i>
                 </span>
                 <h3 className={css.quizCardTitle}>{quiz.title}</h3>
-                <p className={css.quizCardMeta}>Accedi per sbloccare</p>
+                <p className={css.quizCardMeta}>Iscriviti/Accedi per Sbloccare i Quiz a Classifica</p>
               </button>
             ))
           )}

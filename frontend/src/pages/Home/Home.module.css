@@ -124,6 +124,11 @@
   max-width: 600px;
 }
 
+.prizeHighlight {
+  color: #7a5400;
+  font-weight: 900;
+}
+
 .actions {
   display: flex;
   flex-wrap: wrap;
