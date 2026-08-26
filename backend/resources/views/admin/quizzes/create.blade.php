@@ -31,6 +31,13 @@
                         <label class="form-label">Descrizione</label>
                         <textarea name="description" class="form-control" rows="5">{{ old('description') }}</textarea>
                     </div>
+
+                    <div class="full form-check">
+                        <input type="checkbox" name="restrict_to_specific_users" value="1" id="restrictUsers" class="form-check-input" {{ old('restrict_to_specific_users') ? 'checked' : '' }}>
+                        <label class="form-check-label" for="restrictUsers">
+                            Limita a utenti specifici (se disattivo, il quiz e' disponibile per tutti gli utenti registrati)
+                        </label>
+                    </div>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 mt-4">

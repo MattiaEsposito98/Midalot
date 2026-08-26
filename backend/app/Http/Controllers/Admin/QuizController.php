@@ -45,6 +45,7 @@ class QuizController extends Controller
             'title' => $request->title,
             'description' => $request->description,
             'type' => 'assigned',
+            'restrict_to_specific_users' => $request->boolean('restrict_to_specific_users'),
             'created_by' => Auth::id(),
             'is_active' => false,
             'leaderboard_visible' => true,
@@ -90,6 +91,7 @@ class QuizController extends Controller
             'title' => $request->title,
             'description' => $request->description,
             'is_active' => $request->is_active,
+            'restrict_to_specific_users' => $request->boolean('restrict_to_specific_users'),
         ]);
 
         return redirect()

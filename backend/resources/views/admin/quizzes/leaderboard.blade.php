@@ -56,6 +56,12 @@
                         {{ $quiz->leaderboard_visible ? 'Nascondi agli utenti' : 'Mostra agli utenti' }}
                     </button>
                 </form>
+                @if ($quiz->type === 'assigned')
+                    <a href="{{ route('admin.quizzes.edit', $quiz) }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-clipboard-data"></i>
+                        Riepilogo quiz
+                    </a>
+                @endif
                 <a href="{{ $backRoute }}" class="btn btn-outline-secondary btn-sm">
                     <i class="bi bi-arrow-left"></i>
                     {{ $backLabel }}

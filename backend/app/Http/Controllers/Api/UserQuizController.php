@@ -14,12 +14,18 @@ class UserQuizController extends Controller
     {
         $user = $request->user();
 
-        $quizzes = $user->quizzes()
+        $assignedQuizIds = $user->quizzes()->pluck('quizzes.id');
+
+        $quizzes = Quiz::where('type', 'assigned')
+            ->where(function ($q) use ($assignedQuizIds) {
+                $q->where('restrict_to_specific_users', false)
+                    ->orWhereIn('id', $assignedQuizIds);
+            })
             ->withCount('questions')
             ->withAvg('questions', 'time_limit_seconds')
             ->withSum('questions', 'time_limit_seconds')
-            ->orderByDesc('quizzes.is_active')
-            ->orderBy('quizzes.created_at', 'desc')
+            ->orderByDesc('is_active')
+            ->orderBy('created_at', 'desc')
             ->get()
             ->map(function ($quiz) use ($user) {
                 $attempt = QuizAttempt::where('quiz_id', $quiz->id)
@@ -66,7 +72,7 @@ class UserQuizController extends Controller
     {
         $user = $request->user();
 
-        if (!$user->quizzes()->where('quiz_id', $quiz->id)->exists()) {
+        if ($quiz->restrict_to_specific_users && !$user->quizzes()->where('quiz_id', $quiz->id)->exists()) {
             return response()->json([
                 'message' => 'Quiz non assegnato'
             ], 403);
@@ -142,7 +148,7 @@ class UserQuizController extends Controller
     {
         $user = $request->user();
 
-        if (!$user->quizzes()->where('quiz_id', $quiz->id)->exists()) {
+        if ($quiz->restrict_to_specific_users && !$user->quizzes()->where('quiz_id', $quiz->id)->exists()) {
             return response()->json([
                 'message' => 'Quiz non assegnato'
             ], 403);
@@ -220,7 +226,7 @@ class UserQuizController extends Controller
     {
         $user = $request->user();
 
-        if (!$user->quizzes()->where('quiz_id', $quiz->id)->exists()) {
+        if ($quiz->restrict_to_specific_users && !$user->quizzes()->where('quiz_id', $quiz->id)->exists()) {
             return response()->json([
                 'message' => 'Quiz non assegnato'
             ], 403);

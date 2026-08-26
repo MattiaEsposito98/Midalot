@@ -20,6 +20,10 @@
                     <i class="bi bi-person-plus"></i>
                     Utenti
                 </a>
+                <a href="{{ route('admin.quizzes.leaderboard', $quiz->id) }}" class="btn btn-outline-warning btn-sm">
+                    <i class="bi bi-trophy"></i>
+                    Classifica
+                </a>
                 <a href="{{ route('admin.quizzes.index') }}" class="btn btn-outline-secondary btn-sm">
                     <i class="bi bi-arrow-left"></i>
                     Torna ai quiz
@@ -49,6 +53,13 @@
                             <option value="1" {{ old('is_active', $quiz->is_active) ? 'selected' : '' }}>Attivo</option>
                             <option value="0" {{ !old('is_active', $quiz->is_active) ? 'selected' : '' }}>Non attivo</option>
                         </select>
+                    </div>
+
+                    <div class="full form-check">
+                        <input type="checkbox" name="restrict_to_specific_users" value="1" id="restrictUsers" class="form-check-input" {{ old('restrict_to_specific_users', $quiz->restrict_to_specific_users) ? 'checked' : '' }}>
+                        <label class="form-check-label" for="restrictUsers">
+                            Limita a utenti specifici (se disattivo, il quiz e' disponibile per tutti gli utenti registrati)
+                        </label>
                     </div>
                 </div>
 

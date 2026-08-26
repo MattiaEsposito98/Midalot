@@ -24,7 +24,7 @@ class QuizPlayController extends Controller
     {
         $user = $request->user();
 
-        if (! $user->quizzes()->where('quiz_id', $quiz->id)->exists()) {
+        if ($quiz->restrict_to_specific_users && ! $user->quizzes()->where('quiz_id', $quiz->id)->exists()) {
             return response()->json([
                 'message' => 'Quiz non assegnato',
             ], 403);

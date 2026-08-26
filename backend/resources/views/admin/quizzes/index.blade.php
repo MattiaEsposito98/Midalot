@@ -38,6 +38,7 @@
                         <tr>
                             <th>Quiz</th>
                             <th>Stato</th>
+                            <th>Disponibilita</th>
                             <th>Domande</th>
                             <th>Utenti</th>
                             <th>Tentativi</th>
@@ -57,6 +58,13 @@
                                         <span class="badge bg-success">Attivo</span>
                                     @else
                                         <span class="badge bg-secondary">Non attivo</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if ($quiz->restrict_to_specific_users)
+                                        <span class="badge bg-warning text-dark">Utenti specifici</span>
+                                    @else
+                                        <span class="badge bg-success">Tutti gli utenti</span>
                                     @endif
                                 </td>
                                 <td>{{ $quiz->questions_count }}</td>

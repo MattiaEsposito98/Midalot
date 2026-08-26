@@ -11,6 +11,7 @@ class Quiz extends Model
         'title',
         'description',
         'type',
+        'restrict_to_specific_users',
         'training_category_id',
         'training_question_mode',
         'created_by',
@@ -22,6 +23,7 @@ class Quiz extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'restrict_to_specific_users' => 'boolean',
         'leaderboard_visible' => 'boolean',
         'midalario_started_at' => 'datetime',
     ];
