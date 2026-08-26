@@ -110,11 +110,6 @@ function Quiz() {
         const startData = await startRes.json()
 
         if (!startRes.ok) {
-          if (startData.attempt_id && startData.completed === false) {
-            setAttemptId(startData.attempt_id)
-            return
-          }
-
           setError(startData.message || "Impossibile avviare il quiz")
           return
         }

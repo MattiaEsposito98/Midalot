@@ -39,4 +39,19 @@ class QuizAttempt extends Model
     {
         return $this->hasMany(\App\Models\QuizAnswer::class, 'attempt_id');
     }
+
+    /**
+     * Chiude definitivamente un tentativo interrotto (es. quiz one-shot
+     * abbandonato a metà), salvando il punteggio accumulato fino a quel
+     * momento. Il tentativo non è più riprendibile.
+     */
+    public function finalizeWithAccumulatedScore(): void
+    {
+        $this->update([
+            'score' => $this->answers()->sum('score'),
+            'total_time' => $this->answers()->sum('time_taken'),
+            'completed' => true,
+            'finished_at' => $this->finished_at ?? now(),
+        ]);
+    }
 }

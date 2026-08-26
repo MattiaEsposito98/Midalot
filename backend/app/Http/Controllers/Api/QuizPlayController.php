@@ -34,11 +34,16 @@ class QuizPlayController extends Controller
             ->where('user_id', $user->id)
             ->first();
 
+        if ($attempt && !$attempt->completed) {
+            $attempt->finalizeWithAccumulatedScore();
+        }
+
         if ($attempt && (bool) $attempt->completed === true) {
             return response()->json([
-                'message' => 'Hai già completato questo quiz',
+                'message' => 'Il quiz è stato interrotto o già completato: il punteggio accumulato è stato salvato e non è più riprendibile.',
                 'attempt_id' => $attempt->id,
                 'completed' => true,
+                'score' => $attempt->score,
             ], 403);
         }
 
@@ -46,14 +51,6 @@ class QuizPlayController extends Controller
             return response()->json([
                 'message' => 'Questo quiz è scaduto e non è stato completato',
             ], 403);
-        }
-
-        if ($attempt) {
-            return response()->json([
-                'message' => 'Quiz già iniziato, riprendo il tentativo',
-                'attempt_id' => $attempt->id,
-                'completed' => false,
-            ], 200);
         }
 
         $attempt = QuizAttempt::create([

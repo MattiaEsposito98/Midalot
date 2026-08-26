@@ -78,19 +78,26 @@ class UserQuizController extends Controller
             ], 403);
         }
 
-        $completedAttempt = QuizAttempt::where('quiz_id', $quiz->id)
+        $attempt = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('user_id', $user->id)
-            ->get()
-            ->first(function ($attempt) {
-                return (bool) $attempt->completed === true;
-            });
+            ->first();
 
-        if ($completedAttempt) {
+        if ($attempt && !$attempt->completed) {
+            $wasInterrupted = true;
+            $attempt->finalizeWithAccumulatedScore();
+        } else {
+            $wasInterrupted = false;
+        }
+
+        if ($attempt && $attempt->completed) {
             return response()->json([
-                'message' => 'Hai già completato questo quiz',
+                'message' => $wasInterrupted
+                    ? 'Il quiz era stato interrotto: il punteggio accumulato fino a quel momento è stato salvato e il quiz non è più riprendibile.'
+                    : 'Hai già completato questo quiz',
                 'already_completed' => true,
-                'score' => $completedAttempt->score,
-                'finished_at' => $completedAttempt->finished_at,
+                'interrupted' => $wasInterrupted,
+                'score' => $attempt->score,
+                'finished_at' => $attempt->finished_at,
             ], 403);
         }
 
