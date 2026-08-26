@@ -36,6 +36,45 @@ function QuestionAudio({ src, startSeconds, endSeconds, className }) {
     setElapsed(0)
   }, [src, range])
 
+  // Avvio automatico: appena arriva l'audio della domanda, parte da solo
+  // (dall'inizio dell'intervallo scelto, se c'è) senza che l'utente debba
+  // cliccare play, per non fargli perdere secondi preziosi sul timer.
+  useEffect(() => {
+    const audio = audioRef.current
+    if (!audio || !src) return
+
+    let cancelled = false
+
+    function attemptAutoplay() {
+      if (cancelled) return
+
+      if (range) {
+        audio.currentTime = range.start
+      }
+
+      audio.play()
+        .then(() => {
+          if (!cancelled) setPlaying(true)
+        })
+        .catch(() => {
+          if (!cancelled) setPlaying(false)
+        })
+    }
+
+    audio.load()
+
+    if (audio.readyState >= 1) {
+      attemptAutoplay()
+    } else {
+      audio.addEventListener("loadedmetadata", attemptAutoplay, { once: true })
+    }
+
+    return () => {
+      cancelled = true
+      audio.removeEventListener("loadedmetadata", attemptAutoplay)
+    }
+  }, [src, range])
+
   useEffect(() => {
     const audio = audioRef.current
 
@@ -71,7 +110,7 @@ function QuestionAudio({ src, startSeconds, endSeconds, className }) {
 
   if (!range) {
     return (
-      <audio controls className={className}>
+      <audio ref={audioRef} controls preload="metadata" className={className}>
         <source src={src} type="audio/mp4" />
       </audio>
     )

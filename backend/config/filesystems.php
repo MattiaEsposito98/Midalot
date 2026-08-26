@@ -40,7 +40,10 @@ return [
 
         'public' => [
             'driver' => 'local',
-            'root' => storage_path('app/public'),
+            // Cartella reale dentro public/, non un symlink: alcuni hosting
+            // (es. Apache senza FollowSymLinks) bloccano i link simbolici
+            // e restituirebbero 403 su tutti i file caricati (audio/immagini/video).
+            'root' => public_path('storage'),
             'url' => rtrim(env('APP_URL', 'http://localhost'), '/').'/storage',
             'visibility' => 'public',
             'throw' => false,
@@ -67,14 +70,11 @@ return [
     | Symbolic Links
     |--------------------------------------------------------------------------
     |
-    | Here you may configure the symbolic links that will be created when the
-    | `storage:link` Artisan command is executed. The array keys should be
-    | the locations of the links and the values should be their targets.
+    | Non usati: il disco "public" scrive direttamente dentro public/storage
+    | (vedi sopra), quindi non serve alcun symlink creato da `storage:link`.
     |
     */
 
-    'links' => [
-        public_path('storage') => storage_path('app/public'),
-    ],
+    'links' => [],
 
 ];
