@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AudioProxyController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\MidalarioController;
@@ -32,6 +33,9 @@ Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
     ->middleware('throttle:5,1');
 
 Route::get('/showcase', [ShowcaseController::class, 'index']);
+
+Route::get('/audio-proxy', [AudioProxyController::class, 'stream'])
+    ->name('audio.proxy');
 
 Route::get('/midalario/announcement', [MidalarioController::class, 'announcement']);
 

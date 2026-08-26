@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\ITunesController;
 use App\Http\Controllers\Admin\MidalarioController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\QuizController;
@@ -85,6 +86,9 @@ Route::middleware(['auth', 'admin'])
             ->name('midalario.reopen');
         Route::patch('midalario/{quiz}/start', [MidalarioController::class, 'start'])
             ->name('midalario.start');
+
+        Route::get('itunes/search', [ITunesController::class, 'search'])
+            ->name('itunes.search');
 
         Route::get('showcase', [ShowcaseImageController::class, 'index'])
             ->name('showcase.index');

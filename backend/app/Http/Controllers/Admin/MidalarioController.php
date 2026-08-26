@@ -113,7 +113,7 @@ class MidalarioController extends Controller
         }
 
         $startedAt = now();
-        $questionIds = $quiz->questions()->orderBy('order')->pluck('id')->all();
+        $questionIds = $quiz->questions()->orderBy('id')->pluck('id')->all();
 
         foreach ($quiz->participants as $participant) {
             $shuffledQuestionIds = $questionIds;

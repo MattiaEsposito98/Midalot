@@ -40,6 +40,7 @@ class RegistrationTest extends TestCase
             'birth_date' => '1990-01-01',
             'city_id' => $city->id,
             'privacy_accepted' => true,
+            'rules_accepted' => true,
         ]);
 
         $response
@@ -54,6 +55,7 @@ class RegistrationTest extends TestCase
         $user = User::where('email', 'test@example.com')->firstOrFail();
         $this->assertNotNull($user->privacy_accepted_at);
         $this->assertNotNull($user->terms_accepted_at);
+        $this->assertNotNull($user->rules_accepted_at);
         $this->assertSame(0, $user->tokens()->count());
         Mail::assertSent(VerifyEmailMail::class);
     }
@@ -76,6 +78,29 @@ class RegistrationTest extends TestCase
             'city_id' => $city->id,
         ])
             ->assertUnprocessable()
-            ->assertJsonValidationErrors('privacy_accepted');
+            ->assertJsonValidationErrors(['privacy_accepted', 'rules_accepted']);
+    }
+
+    public function test_api_registration_requires_minimum_age(): void
+    {
+        $city = City::create([
+            'name' => 'Milano',
+            'latitude' => 45.464664,
+            'longitude' => 9.188540,
+        ]);
+
+        $this->postJson('/api/register', [
+            'name' => 'Too Young',
+            'nickname' => 'too.young',
+            'email' => 'tooyoung@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+            'birth_date' => now()->subYears(10)->toDateString(),
+            'city_id' => $city->id,
+            'privacy_accepted' => true,
+            'rules_accepted' => true,
+        ])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors('birth_date');
     }
 }

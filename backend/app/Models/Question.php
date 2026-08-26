@@ -12,9 +12,20 @@ class Question extends Model
         'question_text',
         'image_path',
         'audio_path',
+        'audio_source',
+        'itunes_track_id',
+        'itunes_track_name',
+        'itunes_artist_name',
+        'itunes_preview_url',
+        'audio_start_seconds',
+        'audio_end_seconds',
         'video_path',
         'time_limit_seconds',
-        'order',
+    ];
+
+    protected $casts = [
+        'audio_start_seconds' => 'float',
+        'audio_end_seconds' => 'float',
     ];
 
     // Relazione: la domanda appartiene a un quiz
@@ -26,5 +37,14 @@ class Question extends Model
     public function answers()
     {
         return $this->hasMany(\App\Models\Answer::class);
+    }
+
+    public function resolvedAudioUrl(): ?string
+    {
+        if ($this->audio_source === 'itunes' && $this->itunes_preview_url) {
+            return route('audio.proxy', ['url' => $this->itunes_preview_url]);
+        }
+
+        return $this->audio_path ? asset('storage/' . $this->audio_path) : null;
     }
 }

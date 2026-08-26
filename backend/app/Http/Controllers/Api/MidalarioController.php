@@ -148,7 +148,9 @@ class MidalarioController extends Controller
                     'id' => $question->id,
                     'question_text' => $question->question_text,
                     'image' => $question->image_path ? asset('storage/'.$question->image_path) : null,
-                    'audio' => $question->audio_path ? asset('storage/'.$question->audio_path) : null,
+                    'audio' => $question->resolvedAudioUrl(),
+                    'audio_start_seconds' => $question->audio_start_seconds,
+                    'audio_end_seconds' => $question->audio_end_seconds,
                     'video' => $question->video_path ? asset('storage/'.$question->video_path) : null,
                     'starts_at' => $window['starts_at']->toISOString(),
                     'ends_at' => $window['ends_at']->toISOString(),
@@ -265,13 +267,17 @@ class MidalarioController extends Controller
 
         $quiz->load([
             'questions' => function ($q) {
-                $q->orderBy('order')
+                $q->orderBy('id')
                     ->select(
                         'id',
                         'quiz_id',
                         'question_text',
                         'image_path',
                         'audio_path',
+                        'audio_source',
+                        'itunes_preview_url',
+                        'audio_start_seconds',
+                        'audio_end_seconds',
                         'video_path',
                         'time_limit_seconds'
                     );
@@ -305,7 +311,9 @@ class MidalarioController extends Controller
                 'id' => $question->id,
                 'question_text' => $question->question_text,
                 'image' => $question->image_path ? asset('storage/'.$question->image_path) : null,
-                'audio' => $question->audio_path ? asset('storage/'.$question->audio_path) : null,
+                'audio' => $question->resolvedAudioUrl(),
+                'audio_start_seconds' => $question->audio_start_seconds,
+                'audio_end_seconds' => $question->audio_end_seconds,
                 'video' => $question->video_path ? asset('storage/'.$question->video_path) : null,
                 'time_limit_seconds' => $question->time_limit_seconds,
                 'given_answer_text' => $givenAnswer?->answer_text,

@@ -88,22 +88,35 @@
                             @endif
                         </div>
 
-                        <div>
+                        <div class="full">
                             <label class="form-label">Audio</label>
-                            @if ($question->audio_path)
-                                <audio controls class="w-100 mb-2">
-                                    <source src="{{ asset('storage/' . $question->audio_path) }}">
-                                </audio>
-                            @else
-                                <p class="admin-muted small mb-2">Nessun audio caricato.</p>
-                            @endif
-                            <input type="file" name="audio" class="form-control" accept=".mp3,.wav,.ogg,audio/*">
-                            @if ($question->audio_path)
-                                <div class="form-check mt-2">
-                                    <input type="checkbox" name="remove_audio" value="1" class="form-check-input" id="remove_audio">
-                                    <label class="form-check-label text-danger" for="remove_audio">Elimina audio</label>
-                                </div>
-                            @endif
+
+                            <div class="btn-group btn-group-sm mb-2" role="group">
+                                <input type="radio" class="btn-check" name="audio_source" id="audioSourceUpload" value="upload" {{ old('audio_source', $question->audio_source ?? 'upload') !== 'itunes' ? 'checked' : '' }}>
+                                <label class="btn btn-outline-secondary" for="audioSourceUpload">Carica file</label>
+
+                                <input type="radio" class="btn-check" name="audio_source" id="audioSourceItunes" value="itunes" {{ old('audio_source', $question->audio_source ?? 'upload') === 'itunes' ? 'checked' : '' }}>
+                                <label class="btn btn-outline-secondary" for="audioSourceItunes">Cerca su iTunes</label>
+                            </div>
+
+                            <div id="audioUploadBlock">
+                                @if ($question->audio_source !== 'itunes' && $question->audio_path)
+                                    <audio controls class="w-100 mb-2">
+                                        <source src="{{ asset('storage/' . $question->audio_path) }}">
+                                    </audio>
+                                @else
+                                    <p class="admin-muted small mb-2">Nessun audio caricato.</p>
+                                @endif
+                                <input type="file" name="audio" class="form-control" accept=".mp3,.wav,.ogg,audio/*">
+                                @if ($question->audio_source !== 'itunes' && $question->audio_path)
+                                    <div class="form-check mt-2">
+                                        <input type="checkbox" name="remove_audio" value="1" class="form-check-input" id="remove_audio">
+                                        <label class="form-check-label text-danger" for="remove_audio">Elimina audio</label>
+                                    </div>
+                                @endif
+                            </div>
+
+                            @include('admin.questions._itunes-search')
                         </div>
 
                         <div>
@@ -139,12 +152,6 @@
                                 value="{{ old('time_limit_seconds', $question->time_limit_seconds) }}" class="form-control"
                                 min="5" required>
                         </div>
-                        <div>
-                            <label class="form-label">Ordine</label>
-                            <input type="number" name="order" id="orderInput"
-                                value="{{ old('order', $question->order) }}" class="form-control" min="1" required>
-                            <small class="admin-muted">Numeri gia utilizzati: {{ implode(', ', $usedOrders) ?: 'nessuno' }}</small>
-                        </div>
                     </div>
                 </div>
             </section>
@@ -163,19 +170,3 @@
     </form>
 @endsection
 
-@push('scripts')
-    <script>
-        const usedOrders = @json($usedOrders);
-        const input = document.getElementById('orderInput');
-
-        input.addEventListener('input', function() {
-            const value = parseInt(this.value);
-
-            if (usedOrders.includes(value)) {
-                this.setCustomValidity('Numero gia utilizzato per questo quiz');
-            } else {
-                this.setCustomValidity('');
-            }
-        });
-    </script>
-@endpush

@@ -12,6 +12,8 @@
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
 
     @vite(['resources/js/app.js'])
+
+    @stack('styles')
 </head>
 
 <body class="admin-body">

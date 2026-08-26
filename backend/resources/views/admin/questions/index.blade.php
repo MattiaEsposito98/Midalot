@@ -54,7 +54,6 @@
                 <table class="table admin-table">
                     <thead>
                         <tr>
-                            <th>Ordine</th>
                             <th>Testo</th>
                             <th>Media</th>
                             <th>Timer</th>
@@ -64,7 +63,6 @@
                     <tbody>
                         @foreach ($questions as $question)
                             <tr>
-                                <td><span class="badge bg-primary">{{ $question->order }}</span></td>
                                 <td>{{ \Illuminate\Support\Str::limit($question->question_text, 90) }}</td>
                                 <td>
                                     <div class="admin-actions">

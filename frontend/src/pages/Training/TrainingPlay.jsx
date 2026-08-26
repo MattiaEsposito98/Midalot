@@ -5,6 +5,7 @@ import styles from "../Quiz/Quiz.module.css"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import { API_BASE } from "../../service/api"
+import QuestionAudio from "../../components/QuestionAudio/QuestionAudio"
 
 function shuffleArray(array) {
   const copy = [...array]
@@ -451,9 +452,12 @@ function TrainingPlay() {
 
           {currentQuestion.audio && (
             <div className={styles.mediaWrap}>
-              <audio controls className={styles.mediaControl}>
-                <source src={currentQuestion.audio} />
-              </audio>
+              <QuestionAudio
+                src={currentQuestion.audio}
+                startSeconds={currentQuestion.audio_start_seconds}
+                endSeconds={currentQuestion.audio_end_seconds}
+                className={styles.mediaControl}
+              />
             </div>
           )}
 

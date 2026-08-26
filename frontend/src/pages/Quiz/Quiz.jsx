@@ -5,6 +5,7 @@ import styles from "./Quiz.module.css"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import { API_BASE } from "../../service/api"
+import QuestionAudio from "../../components/QuestionAudio/QuestionAudio"
 
 function shuffleArray(array) {
   const copy = [...array]
@@ -44,6 +45,7 @@ function Quiz() {
   const submittingRef = useRef(false)
   const questionLockedRef = useRef(false)
   const quizRef = useRef(null)
+  const initedKeyRef = useRef(null)
 
   const currentQuestion = useMemo(() => {
     return quiz?.questions?.[currentIndex] || null
@@ -74,6 +76,11 @@ function Quiz() {
   }, [quiz])
 
   useEffect(() => {
+    const initKey = `${id}:${token}`
+
+    if (initedKeyRef.current === initKey) return
+    initedKeyRef.current = initKey
+
     async function initQuiz() {
       try {
         setLoading(true)
@@ -500,9 +507,12 @@ function Quiz() {
 
           {currentQuestion.audio && (
             <div className={styles.mediaWrap}>
-              <audio controls className={styles.mediaControl}>
-                <source src={currentQuestion.audio} />
-              </audio>
+              <QuestionAudio
+                src={currentQuestion.audio}
+                startSeconds={currentQuestion.audio_start_seconds}
+                endSeconds={currentQuestion.audio_end_seconds}
+                className={styles.mediaControl}
+              />
             </div>
           )}
 

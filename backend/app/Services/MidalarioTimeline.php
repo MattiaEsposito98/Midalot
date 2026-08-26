@@ -16,7 +16,7 @@ class MidalarioTimeline
     public function questions(): Collection
     {
         if ($this->questions === null) {
-            $this->questions = $this->quiz->questions()->orderBy('order')->get();
+            $this->questions = $this->quiz->questions()->orderBy('id')->get();
         }
 
         return $this->questions;

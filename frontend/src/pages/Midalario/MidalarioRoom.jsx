@@ -4,6 +4,7 @@ import styles from "./MidalarioRoom.module.css"
 import api from "../../service/api"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
+import QuestionAudio from "../../components/QuestionAudio/QuestionAudio"
 
 const POLL_INTERVAL_MS = 2000
 const TICK_INTERVAL_MS = 250
@@ -320,9 +321,12 @@ function MidalarioRoom() {
 
           {question.audio && (
             <div className={styles.mediaWrap}>
-              <audio controls className={styles.mediaControl}>
-                <source src={question.audio} />
-              </audio>
+              <QuestionAudio
+                src={question.audio}
+                startSeconds={question.audio_start_seconds}
+                endSeconds={question.audio_end_seconds}
+                className={styles.mediaControl}
+              />
             </div>
           )}
 

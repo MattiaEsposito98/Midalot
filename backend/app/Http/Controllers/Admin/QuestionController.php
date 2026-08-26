@@ -19,7 +19,7 @@ class QuestionController extends Controller
         $quiz = Quiz::findOrFail($quiz);
 
         $questions = $quiz->questions()
-            ->orderBy('order')
+            ->orderBy('id')
             ->get();
 
         return view('admin.questions.index', compact('quiz', 'questions'));
@@ -32,14 +32,7 @@ class QuestionController extends Controller
     {
         $quiz = Quiz::findOrFail($quiz);
 
-        // Ordini già occupati
-        $usedOrders = $quiz->questions()->pluck('order')->toArray();
-
-        // Ultimo ordine
-        $lastOrder = $quiz->questions()->max('order');
-        $nextOrder = $lastOrder ? $lastOrder + 1 : 1;
-
-        return view('admin.questions.create', compact('quiz', 'nextOrder', 'usedOrders'));
+        return view('admin.questions.create', compact('quiz'));
     }
     /**
      * Store a newly created resource in storage.
@@ -51,43 +44,47 @@ class QuestionController extends Controller
         $request->validate([
             'question_text' => 'required|string',
             'time_limit_seconds' => 'required|integer|min:5',
-            'order' => [
-                'required',
-                'integer',
-                'min:1',
-                function ($attribute, $value, $fail) use ($quiz) {
-
-                    $exists = $quiz->questions()
-                        ->where('order', $value)
-                        ->exists();
-
-                    if ($exists) {
-                        $fail('Questo numero di ordine è già utilizzato per questo quiz.');
-                    }
-                },
-            ],
             'answers' => 'required|array|size:4',
             'answers.*' => 'required|string|max:255',
             'correct_answer' => 'required|integer|min:0|max:3',
 
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'audio_source' => 'nullable|in:upload,itunes',
             'audio' => 'nullable|mimes:mp3,wav,ogg|max:5120',
+            'itunes_track_id' => 'required_if:audio_source,itunes|nullable|integer',
+            'itunes_track_name' => 'required_if:audio_source,itunes|nullable|string|max:255',
+            'itunes_artist_name' => 'required_if:audio_source,itunes|nullable|string|max:255',
+            'itunes_preview_url' => 'required_if:audio_source,itunes|nullable|url|max:500',
+            'audio_start_seconds' => 'nullable|numeric|min:0|max:3600',
+            'audio_end_seconds' => 'nullable|numeric|min:0|max:3600|gt:audio_start_seconds',
             'video' => 'nullable|mimes:mp4,mov,webm|max:20000',
+        ], [
+            'audio_end_seconds.gt' => 'Il secondo finale dell\'audio deve essere maggiore di quello iniziale.',
         ]);
 
         $data = [
             'quiz_id' => $quiz->id,
             'question_text' => $request->question_text,
             'time_limit_seconds' => $request->time_limit_seconds,
-            'order' => $request->order,
         ];
 
         if ($request->hasFile('image')) {
             $data['image_path'] = $request->file('image')->store('questions', 'public');
         }
 
-        if ($request->hasFile('audio')) {
+        if ($request->input('audio_source') === 'itunes') {
+            $data['audio_source'] = 'itunes';
+            $data['itunes_track_id'] = $request->itunes_track_id;
+            $data['itunes_track_name'] = $request->itunes_track_name;
+            $data['itunes_artist_name'] = $request->itunes_artist_name;
+            $data['itunes_preview_url'] = $request->itunes_preview_url;
+            $data['audio_start_seconds'] = $request->filled('audio_start_seconds') ? $request->audio_start_seconds : null;
+            $data['audio_end_seconds'] = $request->filled('audio_end_seconds') ? $request->audio_end_seconds : null;
+        } elseif ($request->hasFile('audio')) {
+            $data['audio_source'] = 'upload';
             $data['audio_path'] = $request->file('audio')->store('questions', 'public');
+            $data['audio_start_seconds'] = null;
+            $data['audio_end_seconds'] = null;
         }
 
         if ($request->hasFile('video')) {
@@ -121,13 +118,7 @@ class QuestionController extends Controller
         $question = Question::where('quiz_id', $quiz->id)
             ->findOrFail($question);
 
-        // Ordini occupati esclusa la domanda corrente
-        $usedOrders = $quiz->questions()
-            ->where('id', '!=', $question->id)
-            ->pluck('order')
-            ->toArray();
-
-        return view('admin.questions.edit', compact('quiz', 'question', 'usedOrders'));
+        return view('admin.questions.edit', compact('quiz', 'question'));
     }
 
     /**
@@ -143,35 +134,27 @@ class QuestionController extends Controller
         $request->validate([
             'question_text' => 'required|string',
             'time_limit_seconds' => 'required|integer|min:5',
-            'order' => [
-                'required',
-                'integer',
-                'min:1',
-                function ($attribute, $value, $fail) use ($quiz, $question) {
-
-                    $exists = $quiz->questions()
-                        ->where('order', $value)
-                        ->where('id', '!=', $question->id)
-                        ->exists();
-
-                    if ($exists) {
-                        $fail('Questo numero di ordine è già utilizzato per questo quiz.');
-                    }
-                },
-            ],
             'answers' => 'required|array|size:4',
             'answers.*' => 'required|string|max:255',
             'correct_answer' => 'required|integer|min:0|max:3',
 
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'audio_source' => 'nullable|in:upload,itunes',
             'audio' => 'nullable|mimes:mp3,wav,ogg|max:5120',
+            'itunes_track_id' => 'required_if:audio_source,itunes|nullable|integer',
+            'itunes_track_name' => 'required_if:audio_source,itunes|nullable|string|max:255',
+            'itunes_artist_name' => 'required_if:audio_source,itunes|nullable|string|max:255',
+            'itunes_preview_url' => 'required_if:audio_source,itunes|nullable|url|max:500',
+            'audio_start_seconds' => 'nullable|numeric|min:0|max:3600',
+            'audio_end_seconds' => 'nullable|numeric|min:0|max:3600|gt:audio_start_seconds',
             'video' => 'nullable|mimes:mp4,mov,webm|max:20000',
+        ], [
+            'audio_end_seconds.gt' => 'Il secondo finale dell\'audio deve essere maggiore di quello iniziale.',
         ]);
 
         $data = [
             'question_text' => $request->question_text,
             'time_limit_seconds' => $request->time_limit_seconds,
-            'order' => $request->order,
         ];
 
         // =====================
@@ -194,18 +177,41 @@ class QuestionController extends Controller
         // =====================
         // AUDIO
         // =====================
-        if ($request->has('remove_audio') && $question->audio_path) {
-            Storage::disk('public')->delete($question->audio_path);
-            $data['audio_path'] = null;
-        }
-
-        if ($request->hasFile('audio')) {
+        if ($request->input('audio_source') === 'itunes') {
             if ($question->audio_path) {
                 Storage::disk('public')->delete($question->audio_path);
             }
 
-            $data['audio_path'] = $request->file('audio')
-                ->store('questions', 'public');
+            $data['audio_path'] = null;
+            $data['audio_source'] = 'itunes';
+            $data['itunes_track_id'] = $request->itunes_track_id;
+            $data['itunes_track_name'] = $request->itunes_track_name;
+            $data['itunes_artist_name'] = $request->itunes_artist_name;
+            $data['itunes_preview_url'] = $request->itunes_preview_url;
+            $data['audio_start_seconds'] = $request->filled('audio_start_seconds') ? $request->audio_start_seconds : null;
+            $data['audio_end_seconds'] = $request->filled('audio_end_seconds') ? $request->audio_end_seconds : null;
+        } else {
+            $data['audio_source'] = 'upload';
+            $data['itunes_track_id'] = null;
+            $data['itunes_track_name'] = null;
+            $data['itunes_artist_name'] = null;
+            $data['itunes_preview_url'] = null;
+            $data['audio_start_seconds'] = null;
+            $data['audio_end_seconds'] = null;
+
+            if ($request->has('remove_audio') && $question->audio_path) {
+                Storage::disk('public')->delete($question->audio_path);
+                $data['audio_path'] = null;
+            }
+
+            if ($request->hasFile('audio')) {
+                if ($question->audio_path) {
+                    Storage::disk('public')->delete($question->audio_path);
+                }
+
+                $data['audio_path'] = $request->file('audio')
+                    ->store('questions', 'public');
+            }
         }
 
         // =====================

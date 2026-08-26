@@ -55,7 +55,6 @@ class AdditionalTrainingQuizzesSeeder extends Seeder
                         'quiz_id' => $quiz->id,
                         'question_text' => $questionData['question'],
                         'time_limit_seconds' => 20,
-                        'order' => $index + 1,
                     ]);
 
                     foreach ($questionData['answers'] as $answerText) {

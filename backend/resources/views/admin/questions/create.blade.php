@@ -72,10 +72,23 @@
                             <input type="file" name="image" class="form-control" accept=".jpg,.jpeg,.png,image/*">
                             <small class="admin-muted">JPG o PNG, max 2MB.</small>
                         </div>
-                        <div>
+                        <div class="full">
                             <label class="form-label">Audio</label>
-                            <input type="file" name="audio" class="form-control" accept=".mp3,.wav,.ogg,audio/*">
-                            <small class="admin-muted">MP3, WAV o OGG, max 5MB.</small>
+
+                            <div class="btn-group btn-group-sm mb-2" role="group">
+                                <input type="radio" class="btn-check" name="audio_source" id="audioSourceUpload" value="upload" {{ old('audio_source', 'upload') !== 'itunes' ? 'checked' : '' }}>
+                                <label class="btn btn-outline-secondary" for="audioSourceUpload">Carica file</label>
+
+                                <input type="radio" class="btn-check" name="audio_source" id="audioSourceItunes" value="itunes" {{ old('audio_source') === 'itunes' ? 'checked' : '' }}>
+                                <label class="btn btn-outline-secondary" for="audioSourceItunes">Cerca su iTunes</label>
+                            </div>
+
+                            <div id="audioUploadBlock">
+                                <input type="file" name="audio" class="form-control" accept=".mp3,.wav,.ogg,audio/*">
+                                <small class="admin-muted">MP3, WAV o OGG, max 5MB.</small>
+                            </div>
+
+                            @include('admin.questions._itunes-search')
                         </div>
                         <div>
                             <label class="form-label">Video</label>
@@ -97,13 +110,6 @@
                             <input type="number" name="time_limit_seconds" class="form-control"
                                 value="{{ old('time_limit_seconds', 10) }}" min="5" required>
                         </div>
-                        <div>
-                            <label class="form-label">Ordine</label>
-                            <input type="number" name="order" id="orderInput" class="form-control"
-                                value="{{ old('order', $nextOrder) }}" min="1" required>
-                            <small class="admin-muted">Numeri gia utilizzati:
-                                {{ implode(', ', $usedOrders) ?: 'nessuno' }}</small>
-                        </div>
                     </div>
                 </div>
             </section>
@@ -122,19 +128,3 @@
     </form>
 @endsection
 
-@push('scripts')
-    <script>
-        const usedOrders = @json($usedOrders);
-        const input = document.getElementById('orderInput');
-
-        input.addEventListener('input', function() {
-            const value = parseInt(this.value);
-
-            if (usedOrders.includes(value)) {
-                this.setCustomValidity('Numero gia utilizzato per questo quiz');
-            } else {
-                this.setCustomValidity('');
-            }
-        });
-    </script>
-@endpush

@@ -12,31 +12,42 @@ class UserQuizApiTest extends TestCase
     use CreatesQuizData;
     use RefreshDatabase;
 
-    public function test_user_only_sees_assigned_quizzes(): void
+    public function test_user_sees_open_quizzes_and_only_assigned_restricted_quizzes(): void
     {
         $user = $this->createUser();
-        $assignedQuiz = $this->createAssignedQuiz();
-        $unassignedQuiz = $this->createAssignedQuiz(['leaderboard_visible' => false]);
+        $openQuiz = $this->createAssignedQuiz();
+        $assignedRestrictedQuiz = $this->createAssignedQuiz(['restrict_to_specific_users' => true]);
+        $unassignedRestrictedQuiz = $this->createAssignedQuiz(['restrict_to_specific_users' => true]);
 
-        $user->quizzes()->attach($assignedQuiz);
+        $user->quizzes()->attach($assignedRestrictedQuiz);
 
         $response = $this
             ->actingAs($user, 'sanctum')
             ->getJson('/api/my-quizzes');
 
-        $response
-            ->assertOk()
-            ->assertJsonPath('quizzes.0.id', $assignedQuiz->id);
+        $response->assertOk();
 
         $ids = collect($response->json('quizzes'))->pluck('id');
-        $this->assertTrue($ids->contains($assignedQuiz->id));
-        $this->assertFalse($ids->contains($unassignedQuiz->id));
+        $this->assertTrue($ids->contains($openQuiz->id));
+        $this->assertTrue($ids->contains($assignedRestrictedQuiz->id));
+        $this->assertFalse($ids->contains($unassignedRestrictedQuiz->id));
     }
 
-    public function test_unassigned_quiz_is_forbidden(): void
+    public function test_open_quiz_is_accessible_without_assignment(): void
     {
         $user = $this->createUser();
         $quiz = $this->createAssignedQuiz();
+
+        $this
+            ->actingAs($user, 'sanctum')
+            ->getJson("/api/quizzes/{$quiz->id}")
+            ->assertOk();
+    }
+
+    public function test_unassigned_restricted_quiz_is_forbidden(): void
+    {
+        $user = $this->createUser();
+        $quiz = $this->createAssignedQuiz(['restrict_to_specific_users' => true]);
 
         $this
             ->actingAs($user, 'sanctum')
@@ -101,7 +112,7 @@ class UserQuizApiTest extends TestCase
             ->assertCreated()
             ->json('attempt_id');
 
-        $questions = $quiz->questions()->with('answers')->orderBy('order')->get();
+        $questions = $quiz->questions()->with('answers')->orderBy('id')->get();
 
         $correctScore = $this
             ->actingAs($user, 'sanctum')
@@ -167,7 +178,7 @@ class UserQuizApiTest extends TestCase
             ->assertCreated()
             ->json('attempt_id');
 
-        $questions = $quiz->questions()->with('answers')->orderBy('order')->get();
+        $questions = $quiz->questions()->with('answers')->orderBy('id')->get();
 
         $fasterScore = $this
             ->actingAs($user, 'sanctum')

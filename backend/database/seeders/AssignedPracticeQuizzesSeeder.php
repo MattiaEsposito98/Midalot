@@ -56,7 +56,6 @@ class AssignedPracticeQuizzesSeeder extends Seeder
                         'audio_path' => $questionData['audio'] ?? null,
                         'video_path' => $questionData['video'] ?? null,
                         'time_limit_seconds' => $questionData['time'] ?? 20,
-                        'order' => $index + 1,
                     ]);
 
                     foreach ($questionData['answers'] as $answerText) {

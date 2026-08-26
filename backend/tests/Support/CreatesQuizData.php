@@ -37,6 +37,7 @@ trait CreatesQuizData
             'created_by' => $adminId,
             'is_active' => $attributes['is_active'] ?? true,
             'leaderboard_visible' => $attributes['leaderboard_visible'] ?? true,
+            'restrict_to_specific_users' => $attributes['restrict_to_specific_users'] ?? false,
         ]);
     }
 
@@ -72,7 +73,6 @@ trait CreatesQuizData
                 'quiz_id' => $quiz->id,
                 'question_text' => "Question {$i}",
                 'time_limit_seconds' => 30,
-                'order' => $i,
             ]);
 
             Answer::create([
