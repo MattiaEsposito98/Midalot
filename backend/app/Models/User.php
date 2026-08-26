@@ -25,6 +25,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'city_id',
         'privacy_accepted_at',
         'terms_accepted_at',
+        'rules_accepted_at',
     ];
 
     protected $hidden = [
@@ -40,6 +41,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'birth_date' => 'date',
             'privacy_accepted_at' => 'datetime',
             'terms_accepted_at' => 'datetime',
+            'rules_accepted_at' => 'datetime',
         ];
     }
 

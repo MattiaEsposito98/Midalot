@@ -151,6 +151,31 @@
   margin-bottom: 0;
 }
 
+.section ul {
+  margin: 0 0 10px;
+  padding-left: 20px;
+  color: #647084;
+  line-height: 1.7;
+}
+
+.section ul:last-child {
+  margin-bottom: 0;
+}
+
+.section ul li {
+  margin-bottom: 6px;
+}
+
+.section ul li:last-child {
+  margin-bottom: 0;
+}
+
+.intro {
+  margin: 0 0 22px;
+  color: #647084;
+  line-height: 1.7;
+}
+
 .reportNotice {
   display: flex;
   align-items: flex-start;

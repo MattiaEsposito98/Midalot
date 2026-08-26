@@ -57,9 +57,13 @@ class AuthController extends Controller
                 Rules\Password::defaults()
             ],
 
-            'birth_date' => ['required', 'date', 'before:today'],
+            'birth_date' => ['required', 'date', 'before:-14 years'],
             'city_id' => ['required', 'exists:cities,id'],
             'privacy_accepted' => ['accepted'],
+            'rules_accepted' => ['accepted'],
+        ], [
+            'birth_date.before' => 'Devi avere almeno 14 anni per registrarti.',
+            'rules_accepted.accepted' => 'Devi accettare la dichiarazione su età, regolamento e privacy.',
         ]);
 
         $user = User::create([
@@ -72,6 +76,7 @@ class AuthController extends Controller
             'city_id' => $request->city_id,
             'privacy_accepted_at' => now(),
             'terms_accepted_at' => now(),
+            'rules_accepted_at' => now(),
         ]);
 
         event(new Registered($user));

@@ -41,6 +41,7 @@ function App() {
         <Route path="/privacy" element={<LegalPage type="privacy" />} />
         <Route path="/termini" element={<LegalPage type="terms" />} />
         <Route path="/cookie" element={<LegalPage type="cookies" />} />
+        <Route path="/regolamento" element={<Regolamento />} />
       </Route>
 
       {/* TRAINING PUBBLICO / UTENTI */}
@@ -63,7 +64,6 @@ function App() {
         <Route path="/quiz/:id" element={<Quiz />} />
         <Route path="/storico" element={<Storico />} />
         <Route path="/profilo" element={<Profilo />} />
-        <Route path="/regolamento" element={<Regolamento />} />
         <Route path="/cambia-password" element={<CambiaPassword />} />
         <Route path="/quiz/:id/leaderboard" element={<Leaderboard />} />
         <Route path="/quiz/:id/review" element={<QuizReview />} />

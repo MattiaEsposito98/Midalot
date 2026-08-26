@@ -19,6 +19,7 @@ function Register() {
     birth_date: "",
     city_id: "",
     privacy_accepted: false,
+    rules_accepted: false,
     website: ""
   })
 
@@ -30,6 +31,21 @@ function Register() {
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false)
 
   const nicknameRegex = /^(?!.*\.\.)(?!.*\.$)(?!^\.)[a-z0-9._]+$/
+
+  const isAtLeast14 = (birthDate) => {
+    const birth = new Date(birthDate)
+    if (Number.isNaN(birth.getTime())) return false
+
+    const today = new Date()
+    let age = today.getFullYear() - birth.getFullYear()
+    const monthDiff = today.getMonth() - birth.getMonth()
+
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--
+    }
+
+    return age >= 14
+  }
 
   const handleChange = (e) => {
     let value = e.target.value
@@ -104,6 +120,8 @@ function Register() {
 
     if (!form.birth_date) {
       newErrors.birth_date = "Data di nascita obbligatoria"
+    } else if (!isAtLeast14(form.birth_date)) {
+      newErrors.birth_date = "Devi avere almeno 14 anni per registrarti"
     }
 
     if (!form.city_id) {
@@ -112,6 +130,10 @@ function Register() {
 
     if (!form.privacy_accepted) {
       newErrors.privacy_accepted = "Devi accettare Privacy Policy e Termini"
+    }
+
+    if (!form.rules_accepted) {
+      newErrors.rules_accepted = "Devi accettare questa dichiarazione per registrarti"
     }
 
     setErrors(newErrors)
@@ -334,15 +356,28 @@ function Register() {
                   </div>
                 </div>
 
-                <LoaderButton
-                  type="submit"
-                  loading={loading}
-                  className={`btn btn-primary w-100 mt-3 ${css.submitBtn}`}
-                >
-                  Registrati
-                </LoaderButton>
-
                 <div className={`form-check mt-3 ${css.legalCheck}`}>
+                  <input
+                    id="rules_accepted"
+                    className="form-check-input"
+                    name="rules_accepted"
+                    type="checkbox"
+                    checked={form.rules_accepted}
+                    onChange={handleChange}
+                    disabled={loading}
+                  />
+                  <label className="form-check-label" htmlFor="rules_accepted">
+                    Dichiaro di aver compiuto almeno 14 anni e, se minorenne, di disporre del consenso dei
+                    genitori/tutori, e di aver letto e accettato il{" "}
+                    <Link to="/regolamento" target="_blank" rel="noopener noreferrer">Regolamento</Link> e
+                    l'<Link to="/privacy" target="_blank" rel="noopener noreferrer">Informativa Privacy</Link>.
+                  </label>
+                  {errors.rules_accepted && (
+                    <div className="text-danger small mt-1">{errors.rules_accepted}</div>
+                  )}
+                </div>
+
+                <div className={`form-check mt-2 ${css.legalCheck}`}>
                   <input
                     id="privacy_accepted"
                     className="form-check-input"
@@ -353,13 +388,22 @@ function Register() {
                     disabled={loading}
                   />
                   <label className="form-check-label" htmlFor="privacy_accepted">
-                    Ho letto e accetto la <Link to="/privacy">Privacy Policy</Link>, i{" "}
-                    <Link to="/termini">Termini</Link> e la <Link to="/cookie">Cookie Policy</Link>.
+                    Ho letto e accetto la <Link to="/privacy" target="_blank" rel="noopener noreferrer">Privacy Policy</Link>, i{" "}
+                    <Link to="/termini" target="_blank" rel="noopener noreferrer">Termini</Link> e la{" "}
+                    <Link to="/cookie" target="_blank" rel="noopener noreferrer">Cookie Policy</Link>.
                   </label>
                   {errors.privacy_accepted && (
                     <div className="text-danger small mt-1">{errors.privacy_accepted}</div>
                   )}
                 </div>
+
+                <LoaderButton
+                  type="submit"
+                  loading={loading}
+                  className={`btn btn-primary w-100 mt-3 ${css.submitBtn}`}
+                >
+                  Registrati
+                </LoaderButton>
 
                 <div className={css.switchText}>
                   Hai gia' un account? <Link to="/login">Accedi</Link>
