@@ -1,4 +1,6 @@
+import { useState } from "react"
 import { Link } from "react-router-dom"
+import jsPDF from "jspdf"
 import styles from "./Regolamento.module.css"
 
 const intro =
@@ -178,7 +180,139 @@ const articles = [
   },
 ]
 
+function buildRegolamentoPdf() {
+  const doc = new jsPDF({ unit: "pt", format: "a4" })
+
+  const marginX = 56
+  const marginTop = 64
+  const marginBottom = 56
+  const pageWidth = doc.internal.pageSize.getWidth()
+  const pageHeight = doc.internal.pageSize.getHeight()
+  const contentWidth = pageWidth - marginX * 2
+
+  let y = marginTop
+
+  function ensureSpace(lineHeight) {
+    if (y + lineHeight > pageHeight - marginBottom) {
+      doc.addPage()
+      y = marginTop
+    }
+  }
+
+  function writeLines(lines, { fontSize, font = "helvetica", style = "normal", color = "#222222", lineGap = 4, indent = 0 }) {
+    doc.setFont(font, style)
+    doc.setFontSize(fontSize)
+    doc.setTextColor(color)
+    const lineHeight = fontSize * 1.28 + lineGap
+
+    lines.forEach((line) => {
+      ensureSpace(lineHeight)
+      doc.text(line, marginX + indent, y)
+      y += lineHeight
+    })
+  }
+
+  function paragraph(text, opts = {}) {
+    const indent = opts.indent || 0
+    const lines = doc.splitTextToSize(text, contentWidth - indent)
+    writeLines(lines, { fontSize: 10.5, ...opts, indent })
+    y += 4
+  }
+
+  function heading(text) {
+    y += 10
+    const lines = doc.splitTextToSize(text, contentWidth)
+    writeLines(lines, { fontSize: 13, style: "bold", color: "#182033" })
+    y += 2
+  }
+
+  function bulletList(items) {
+    const bulletIndent = 14
+    items.forEach((item) => {
+      const lines = doc.splitTextToSize(item, contentWidth - bulletIndent)
+      const lineHeight = 10.5 * 1.28 + 4
+      ensureSpace(lineHeight)
+      doc.setFillColor("#222222")
+      doc.circle(marginX + 3, y - 3, 1.4, "F")
+      writeLines(lines, { fontSize: 10.5, indent: bulletIndent })
+    })
+    y += 4
+  }
+
+  // Title
+  doc.setFont("helvetica", "bold")
+  doc.setFontSize(18)
+  doc.setTextColor("#182033")
+  doc.text("REGOLAMENTO UFFICIALE DI GIOCO", pageWidth / 2, y, { align: "center" })
+  y += 24
+  doc.text("MIDALOT.LIVE", pageWidth / 2, y, { align: "center" })
+  y += 22
+
+  doc.setFont("helvetica", "normal")
+  doc.setFontSize(10)
+  doc.setTextColor("#647084")
+  doc.text("Documento ufficiale che disciplina la partecipazione al gioco sulla piattaforma midalot.live", pageWidth / 2, y, { align: "center" })
+  y += 16
+
+  doc.setDrawColor("#ffc107")
+  doc.setLineWidth(2)
+  doc.line(marginX, y, pageWidth - marginX, y)
+  y += 20
+
+  doc.setFont("helvetica", "italic")
+  paragraph(intro, { style: "italic", color: "#333333" })
+  y += 6
+
+  articles.forEach((article) => {
+    heading(article.title)
+
+    article.blocks.forEach((block) => {
+      if (block.type === "ul") {
+        bulletList(block.items)
+      } else {
+        paragraph(block.text)
+      }
+    })
+  })
+
+  y += 10
+  doc.setDrawColor("#dce5ee")
+  doc.setLineWidth(0.7)
+  ensureSpace(20)
+  doc.line(marginX, y, pageWidth - marginX, y)
+  y += 16
+
+  doc.setFont("helvetica", "italic")
+  doc.setFontSize(8.5)
+  doc.setTextColor("#647084")
+  doc.text("Ultimo aggiornamento: 26 agosto 2026 — midalot.live", pageWidth / 2, y, { align: "center" })
+
+  const pageCount = doc.internal.getNumberOfPages()
+  for (let i = 1; i <= pageCount; i++) {
+    doc.setPage(i)
+    doc.setFont("helvetica", "normal")
+    doc.setFontSize(8)
+    doc.setTextColor("#647084")
+    doc.text(`Pagina ${i} di ${pageCount}`, pageWidth / 2, pageHeight - 24, { align: "center" })
+  }
+
+  return doc
+}
+
 function Regolamento() {
+  const [downloading, setDownloading] = useState(false)
+
+  function handleDownloadPdf() {
+    setDownloading(true)
+
+    try {
+      const doc = buildRegolamentoPdf()
+      doc.save("Regolamento_Midalot.pdf")
+    } finally {
+      setDownloading(false)
+    }
+  }
+
   return (
     <section className={styles.page}>
       <div className={`container ${styles.wrap}`}>
@@ -188,10 +322,21 @@ function Regolamento() {
         </Link>
 
         <header className={styles.header}>
-          <span className={styles.eyebrow}>
-            <i className="bi bi-journal-check"></i>
-            Regolamento ufficiale di gioco
-          </span>
+          <div className={styles.headerTop}>
+            <span className={styles.eyebrow}>
+              <i className="bi bi-journal-check"></i>
+              Regolamento ufficiale di gioco
+            </span>
+            <button
+              type="button"
+              className={`btn btn-outline-primary btn-sm ${styles.downloadBtn}`}
+              onClick={handleDownloadPdf}
+              disabled={downloading}
+            >
+              <i className="bi bi-file-earmark-pdf"></i>
+              {downloading ? "Preparazione..." : "Scarica PDF"}
+            </button>
+          </div>
           <h1>Regolamento ufficiale di gioco – midalot.live</h1>
           <p className={styles.intro}>{intro}</p>
         </header>
