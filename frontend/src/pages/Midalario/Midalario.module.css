@@ -39,6 +39,11 @@
   text-align: center;
 }
 
+.loadingText {
+  margin-top: 12px;
+  color: #647084;
+}
+
 .emptyBox {
   border-radius: 8px;
 }

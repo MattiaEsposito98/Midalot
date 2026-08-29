@@ -60,6 +60,11 @@ function PublicNavbar() {
                   Training
                 </NavLink>
 
+                <NavLink to="/minigiochi" className={css.navPill}>
+                  <i className="bi bi-joystick"></i>
+                  Minigiochi
+                </NavLink>
+
                 <div className="dropdown">
                   <a
                     className={`${css.profileBtn} dropdown-toggle`}

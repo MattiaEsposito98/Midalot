@@ -107,8 +107,9 @@ function Training() {
 
   if (loading) {
     return (
-      <div className={`container-wide ${styles.page}`}>
-        <div className="spinner-border text-primary"></div>
+      <div className={`container-wide ${styles.loadingWrap}`}>
+        <div className="spinner-border"></div>
+        <p className={styles.loadingText}>Caricamento training...</p>
       </div>
     )
   }

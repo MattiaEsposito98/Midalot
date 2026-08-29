@@ -30,7 +30,8 @@ function Midalario() {
   if (loading) {
     return (
       <div className={`container ${styles.loadingWrap}`}>
-        <div className="spinner-border text-primary"></div>
+        <div className="spinner-border"></div>
+        <p className={styles.loadingText}>Caricamento Midalario...</p>
       </div>
     )
   }

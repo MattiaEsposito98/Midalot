@@ -52,8 +52,9 @@ function TrainingLeaderboard() {
 
   if (loading) {
     return (
-      <div className={`container ${styles.page}`}>
-        <div className="spinner-border text-primary"></div>
+      <div className={`container ${styles.loadingWrap}`}>
+        <div className="spinner-border"></div>
+        <p className={styles.loadingText}>Caricamento classifica...</p>
       </div>
     )
   }
