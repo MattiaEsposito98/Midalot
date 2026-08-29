@@ -9,7 +9,12 @@ import { API_BASE } from "../../service/api"
 function Leaderboard({ kind = "quiz" }) {
   const { id } = useParams()
   const { token, user } = useAuth()
-  const apiPath = kind === "midalario" ? `midalario/quizzes/${id}/leaderboard` : `quizzes/${id}/leaderboard`
+  const apiPath =
+    kind === "midalario"
+      ? `midalario/quizzes/${id}/leaderboard`
+      : kind === "minigioco"
+        ? `minigiochi/${id}/leaderboard`
+        : `quizzes/${id}/leaderboard`
 
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
@@ -97,14 +102,20 @@ function Leaderboard({ kind = "quiz" }) {
 
   const results = data.results || []
   const myResult = results.find((r) => r.user.nickname === user?.nickname)
-  const reviewPath = kind === "midalario" ? `/midalario/${id}/review` : `/quiz/${id}/review`
+  const reviewPath =
+    kind === "midalario"
+      ? `/midalario/${id}/review`
+      : kind === "minigioco"
+        ? `/minigiochi/${id}/review`
+        : `/quiz/${id}/review`
+  const titleData = kind === "minigioco" ? data.minigioco : data.quiz
 
   return (
     <div className={`container ${styles.page}`}>
       <div className={styles.header}>
         <div>
           <h1 className={styles.title}>Classifica</h1>
-          <p className={styles.subtitle}>{data.quiz.title}</p>
+          <p className={styles.subtitle}>{titleData.title}</p>
         </div>
 
         <div className={styles.headerRight}>
@@ -116,7 +127,7 @@ function Leaderboard({ kind = "quiz" }) {
           {myResult?.completed && (
             <Link to={reviewPath} className="btn btn-outline-primary">
               <i className="bi bi-clipboard-check"></i>
-              Rivedi il mio quiz
+              {kind === "minigioco" ? "Rivedi il mio minigioco" : "Rivedi il mio quiz"}
             </Link>
           )}
         </div>

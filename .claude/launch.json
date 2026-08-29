@@ -7,6 +7,13 @@
       "runtimeArgs": ["run", "dev", "--prefix", "frontend"],
       "port": 5173,
       "autoPort": true
+    },
+    {
+      "name": "midalot-backend-dev",
+      "runtimeExecutable": "php",
+      "runtimeArgs": ["artisan", "serve", "--port=8000"],
+      "cwd": "backend",
+      "port": 8000
     }
   ]
 }

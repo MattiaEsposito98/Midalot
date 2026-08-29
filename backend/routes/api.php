@@ -4,12 +4,14 @@ use App\Http\Controllers\Api\AudioProxyController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\MidalarioController;
+use App\Http\Controllers\Api\MinigiocoPlayController;
 use App\Http\Controllers\Api\PeriodLeaderboardController;
 use App\Http\Controllers\Api\QuizPlayController;
 use App\Http\Controllers\Api\ResetPasswordController;
 use App\Http\Controllers\Api\ShowcaseController;
 use App\Http\Controllers\Api\TrainingController;
 use App\Http\Controllers\Api\TrainingReportController;
+use App\Http\Controllers\Api\UserMinigiocoController;
 use App\Http\Controllers\Api\UserQuizController;
 use App\Models\User;
 use Illuminate\Support\Facades\Route;
@@ -101,6 +103,15 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/quiz/{quiz}/start', [QuizPlayController::class, 'start']);
     Route::post('/quiz/answer', [QuizPlayController::class, 'submitAnswer']);
     Route::post('/quiz/finish', [QuizPlayController::class, 'finishQuiz']);
+
+    Route::get('/my-minigiochi', [UserMinigiocoController::class, 'index']);
+    Route::get('/minigiochi/{minigioco}', [UserMinigiocoController::class, 'show']);
+    Route::get('/minigiochi/{minigioco}/leaderboard', [UserMinigiocoController::class, 'leaderboard']);
+    Route::get('/minigiochi/{minigioco}/review', [UserMinigiocoController::class, 'review']);
+
+    Route::post('/minigiochi/{minigioco}/start', [MinigiocoPlayController::class, 'start']);
+    Route::post('/minigiochi/answer', [MinigiocoPlayController::class, 'submitAnswer']);
+    Route::post('/minigiochi/finish', [MinigiocoPlayController::class, 'finishMinigioco']);
 
     Route::post('/change-password', [AuthController::class, 'changePassword']);
 

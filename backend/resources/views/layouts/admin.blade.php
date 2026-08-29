@@ -45,6 +45,10 @@
                     <i class="bi bi-lightning-charge"></i>
                     <span>Training</span>
                 </a>
+                <a href="{{ route('admin.minigiochi.index') }}" class="admin-nav-link {{ Route::is('admin.minigiochi.*') ? 'active' : '' }}">
+                    <i class="bi bi-joystick"></i>
+                    <span>Minigiochi</span>
+                </a>
                 <a href="{{ route('admin.reports.index') }}" class="admin-nav-link {{ Route::is('admin.reports.*') ? 'active' : '' }}">
                     <i class="bi bi-flag"></i>
                     <span>Segnalazioni</span>

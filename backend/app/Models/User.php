@@ -65,6 +65,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(\App\Models\TrainingAttempt::class);
     }
 
+    public function minigiocoAttempts()
+    {
+        return $this->hasMany(\App\Models\MinigiocoAttempt::class);
+    }
+
     public function logins()
     {
         return $this->hasMany(\App\Models\UserLogin::class);

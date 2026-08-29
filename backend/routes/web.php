@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ITunesController;
 use App\Http\Controllers\Admin\MidalarioController;
+use App\Http\Controllers\Admin\MinigiocoController;
+use App\Http\Controllers\Admin\MinigiocoRoundController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\ShowcaseImageController;
@@ -146,6 +148,26 @@ Route::middleware(['auth', 'admin'])
             'quizzes/{quiz}/users/{user}',
             [QuizController::class, 'detachUser']
         )->name('quizzes.detachUser');
+
+        /*
+        |--------------------------------------------------------------------------
+        | MINIGIOCHI
+        |--------------------------------------------------------------------------
+        */
+
+        // CRUD Minigiochi
+        Route::resource('minigiochi', MinigiocoController::class)
+            ->parameters(['minigiochi' => 'minigioco']);
+
+        // CRUD Domande (round) dei minigiochi
+        Route::resource('minigiochi.rounds', MinigiocoRoundController::class)
+            ->parameters(['minigiochi' => 'minigioco', 'rounds' => 'round']);
+
+        Route::get('minigiochi/{minigioco}/leaderboard', [MinigiocoController::class, 'leaderboard'])
+            ->name('minigiochi.leaderboard');
+
+        Route::patch('minigiochi/{minigioco}/toggle-leaderboard', [MinigiocoController::class, 'toggleLeaderboard'])
+            ->name('minigiochi.toggleLeaderboard');
     });
 
 Route::get('/cities/search', [CityController::class, 'search'])

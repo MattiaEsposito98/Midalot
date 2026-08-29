@@ -61,6 +61,13 @@ function PrivateNavbar() {
               </NavLink>
             </li>
 
+            <li className="nav-item">
+              <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/minigiochi">
+                <i className="bi bi-joystick"></i>
+                Minigiochi
+              </NavLink>
+            </li>
+
             <li className="nav-item dropdown ms-lg-3">
               <a
                 className={`${css.profileBtn} dropdown-toggle`}
