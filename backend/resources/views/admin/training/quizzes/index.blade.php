@@ -102,6 +102,10 @@
                                         <a href="{{ route('admin.training.quizzes.edit', $quiz) }}" class="btn btn-sm btn-warning">
                                             Modifica
                                         </a>
+                                        <a href="{{ route('admin.training.quizzes.leaderboard', $quiz) }}" class="btn btn-sm btn-dark">
+                                            <i class="bi bi-trophy"></i>
+                                            Classifica
+                                        </a>
                                         <form action="{{ route('admin.training.quizzes.destroy', $quiz) }}" method="POST">
                                             @csrf
                                             @method('DELETE')

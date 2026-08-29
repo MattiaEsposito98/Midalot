@@ -120,6 +120,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/training/finish', [TrainingController::class, 'finish']);
     Route::get('/training/progress', [TrainingController::class, 'progress']);
     Route::get('/training/categories/{categorySlug}/leaderboard', [TrainingController::class, 'leaderboard']);
+    Route::get('/training/quizzes/{quiz}/leaderboard', [TrainingController::class, 'quizLeaderboard']);
 
     Route::get('/midalario/quizzes', [MidalarioController::class, 'index']);
     Route::post('/midalario/quizzes/{quiz}/join', [MidalarioController::class, 'join']);

@@ -294,6 +294,48 @@ class TrainingController extends Controller
         ]);
     }
 
+    public function quizLeaderboard(Quiz $quiz)
+    {
+        abort_unless($quiz->type === 'training', 404);
+
+        if (! $quiz->leaderboard_visible) {
+            return response()->json([
+                'message' => 'Classifica non disponibile',
+            ], 403);
+        }
+
+        $quiz->loadMissing('trainingCategory');
+
+        $attempts = TrainingAttempt::with('user')
+            ->where('quiz_id', $quiz->id)
+            ->where('completed', true)
+            ->orderByDesc('score')
+            ->orderBy('total_time')
+            ->limit(50)
+            ->get();
+
+        return response()->json([
+            'quiz' => [
+                'id' => $quiz->id,
+                'title' => $quiz->title,
+                'category' => [
+                    'id' => $quiz->trainingCategory->id,
+                    'name' => $quiz->trainingCategory->name,
+                    'slug' => $quiz->trainingCategory->slug,
+                ],
+            ],
+            'results' => $attempts->map(fn ($attempt, $index) => [
+                'position' => $index + 1,
+                'nickname' => $attempt->user->nickname ?? $attempt->user->name,
+                'score' => $attempt->score,
+                'correct_answers' => $attempt->correct_answers,
+                'total_questions' => $attempt->total_questions,
+                'total_time' => $attempt->total_time,
+                'finished_at' => $attempt->finished_at?->toISOString(),
+            ]),
+        ]);
+    }
+
     private function isPlayable(Quiz $quiz): bool
     {
         $questionsCount = $quiz->questions_count ?? $quiz->questions()->count();
@@ -345,6 +387,7 @@ class TrainingController extends Controller
             ],
             'question_mode' => $quiz->training_question_mode,
             'questions_count' => $quiz->questions_count,
+            'leaderboard_visible' => (bool) $quiz->leaderboard_visible,
         ];
     }
 

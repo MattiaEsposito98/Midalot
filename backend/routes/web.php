@@ -68,6 +68,11 @@ Route::middleware(['auth', 'admin'])
             ->names('training.quizzes')
             ->parameters(['quizzes' => 'quiz']);
 
+        Route::get('training/quizzes/{quiz}/leaderboard', [TrainingQuizController::class, 'leaderboard'])
+            ->name('training.quizzes.leaderboard');
+        Route::patch('training/quizzes/{quiz}/toggle-leaderboard', [TrainingQuizController::class, 'toggleLeaderboard'])
+            ->name('training.quizzes.toggleLeaderboard');
+
         Route::get('midalario', [MidalarioController::class, 'index'])
             ->name('midalario.index');
         Route::get('midalario/create', [MidalarioController::class, 'create'])

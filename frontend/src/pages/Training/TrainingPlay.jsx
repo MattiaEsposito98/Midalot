@@ -391,6 +391,12 @@ function TrainingPlay() {
             <Link className="btn btn-primary" to={`/training/${quiz.category.slug}`}>
               Torna alla categoria
             </Link>
+            {token && quiz.leaderboard_visible && (
+              <Link className="btn btn-warning" to={`/training/play/${quiz.id}/leaderboard`}>
+                <i className="bi bi-trophy-fill"></i>
+                Vedi classifica di questo training
+              </Link>
+            )}
             {!token && <Link className="btn btn-outline-secondary" to="/register">Registrati</Link>}
           </div>
         </div>

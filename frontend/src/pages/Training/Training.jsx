@@ -209,9 +209,17 @@ function Training() {
                       Domande: {quiz.question_mode === "all" ? "tutte" : quiz.question_mode}
                     </small>
                   </div>
-                  <Link to={`/training/play/${quiz.id}`} className="btn btn-primary mt-3">
-                    Inizia training
-                  </Link>
+                  <div className="d-grid gap-2 mt-3">
+                    <Link to={`/training/play/${quiz.id}`} className="btn btn-primary">
+                      Inizia training
+                    </Link>
+                    {token && quiz.leaderboard_visible && (
+                      <Link to={`/training/play/${quiz.id}/leaderboard`} className="btn btn-outline-warning">
+                        <i className="bi bi-trophy-fill"></i>
+                        Classifica
+                      </Link>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>

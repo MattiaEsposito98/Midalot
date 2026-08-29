@@ -19,6 +19,7 @@ import CambiaPassword from "./pages/CambiaPassword/CambiaPassword"
 import Leaderboard from "./pages/Leaderboard/Leaderboard"
 import Training from "./pages/Training/Training"
 import TrainingPlay from "./pages/Training/TrainingPlay"
+import TrainingLeaderboard from "./pages/Training/TrainingLeaderboard"
 import LegalPage from "./pages/Legal/LegalPage"
 import Regolamento from "./pages/Regolamento/Regolamento"
 import ChiSiamo from "./pages/ChiSiamo/ChiSiamo"
@@ -52,6 +53,7 @@ function App() {
         <Route path="/training" element={<Training />} />
         <Route path="/training/:categorySlug" element={<Training />} />
         <Route path="/training/play/:id" element={<TrainingPlay />} />
+        <Route path="/training/play/:id/leaderboard" element={<TrainingLeaderboard />} />
       </Route>
 
       {/* AREA PRIVATA */}

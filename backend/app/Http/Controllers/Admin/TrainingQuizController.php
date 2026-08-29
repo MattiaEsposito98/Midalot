@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Quiz;
+use App\Models\TrainingAttempt;
 use App\Models\TrainingCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -95,6 +96,53 @@ class TrainingQuizController extends Controller
         return redirect()
             ->route('admin.training.quizzes.index')
             ->with('success', 'Training quiz eliminato.');
+    }
+
+    public function leaderboard(Quiz $quiz)
+    {
+        $this->ensureTraining($quiz);
+
+        $attempts = TrainingAttempt::with('user')
+            ->where('quiz_id', $quiz->id)
+            ->get()
+            ->sort(function ($a, $b) {
+
+                if ($a->completed !== $b->completed) {
+                    return $a->completed ? -1 : 1;
+                }
+
+                if ($a->completed && $b->completed) {
+
+                    if ($a->score !== $b->score) {
+                        return $b->score <=> $a->score;
+                    }
+
+                    return ($a->total_time ?? PHP_INT_MAX) <=> ($b->total_time ?? PHP_INT_MAX);
+                }
+
+                return 0;
+            })
+            ->values();
+
+        $results = $attempts->map(function ($attempt) {
+            $attempt->correct_answers = $attempt->correct_answers ?? 0;
+            $attempt->total_questions = $attempt->total_questions ?? 0;
+
+            return $attempt;
+        });
+
+        return view('admin.training.quizzes.leaderboard', compact('quiz', 'results'));
+    }
+
+    public function toggleLeaderboard(Quiz $quiz)
+    {
+        $this->ensureTraining($quiz);
+
+        $quiz->update([
+            'leaderboard_visible' => ! $quiz->leaderboard_visible,
+        ]);
+
+        return back()->with('success', 'Visibilità classifica aggiornata con successo.');
     }
 
     private function validateTrainingQuiz(Request $request): array

@@ -15,6 +15,10 @@
                 <a href="{{ route('admin.quizzes.questions.index', $quiz->id) }}" class="btn btn-outline-primary btn-sm">
                     Domande
                 </a>
+                <a href="{{ route('admin.training.quizzes.leaderboard', $quiz) }}" class="btn btn-outline-warning btn-sm">
+                    <i class="bi bi-trophy"></i>
+                    Classifica
+                </a>
                 <a href="{{ route('admin.training.quizzes.index') }}" class="btn btn-outline-secondary btn-sm">
                     Torna ai training
                 </a>
