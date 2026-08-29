@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Minigioco;
+use App\Models\MinigiocoAttempt;
 use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
@@ -26,6 +28,11 @@ class DashboardController extends Controller
                 ->whereIn('midalario_status', ['open', 'closed', 'running'])
                 ->count(),
             'midalario_participants' => QuizParticipant::distinct('user_id')->count('user_id'),
+            'minigiochi' => Minigioco::count(),
+            'active_minigiochi' => Minigioco::where('is_active', true)->count(),
+            'minigioco_attempts' => MinigiocoAttempt::count(),
+            'minigioco_completed_attempts' => MinigiocoAttempt::where('completed', true)->count(),
+            'minigioco_players' => MinigiocoAttempt::distinct('user_id')->count('user_id'),
             'questions' => Question::count(),
             'logins_today' => UserLogin::whereDate('logged_in_at', today())->count(),
             'logins_week' => UserLogin::where('logged_in_at', '>=', now()->subDays(7))->count(),
@@ -69,13 +76,19 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        $recentMinigiochi = Minigioco::withCount(['rounds', 'attempts'])
+            ->latest()
+            ->limit(5)
+            ->get();
+
         return view('admin.dashboard', compact(
             'stats',
             'latestLogins',
             'topCities',
             'recentQuizzes',
             'recentTrainings',
-            'recentMidalarios'
+            'recentMidalarios',
+            'recentMinigiochi'
         ));
     }
 }

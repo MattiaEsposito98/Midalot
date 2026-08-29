@@ -23,7 +23,7 @@
                 </div>
             @endif
 
-            <form action="{{ route('admin.training.quizzes.store') }}" method="POST">
+            <form action="{{ route('admin.training.quizzes.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 <div class="admin-form-grid">
                     <div class="full">
@@ -33,6 +33,11 @@
                     <div class="full">
                         <label class="form-label">Descrizione</label>
                         <textarea class="form-control" name="description" rows="4">{{ old('description') }}</textarea>
+                    </div>
+                    <div class="full">
+                        <label class="form-label">Immagine di copertina (opzionale)</label>
+                        <input type="file" name="image" class="form-control" accept=".jpg,.jpeg,.png,image/*">
+                        <small class="admin-muted">JPG o PNG, max 2MB. Se non caricata, il training appare senza immagine come oggi.</small>
                     </div>
                     <div>
                         <label class="form-label">Categoria</label>

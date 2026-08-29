@@ -36,7 +36,7 @@ function Midalario() {
   }
 
   return (
-    <div className={`container ${styles.page}`}>
+    <div className={`container-wide ${styles.page}`}>
       <div className={styles.header}>
         <span className={styles.eyebrow}>
           <i className="bi bi-broadcast"></i>
@@ -63,13 +63,23 @@ function Midalario() {
 
           return (
             <div className={styles.card} key={quiz.id}>
-              <div className={styles.cardTop}>
-                <span className={`${styles.statusBadge} ${styles[statusClass]}`}>{label}</span>
-                {quiz.joined && <span className={styles.joinedBadge}>Sei iscritto</span>}
-              </div>
+              <div className={styles.cardHeader}>
+                {quiz.image && (
+                  <div className={styles.cardImageWrap}>
+                    <img src={quiz.image} alt="" className={styles.cardImage} />
+                  </div>
+                )}
 
-              <h2 className={styles.cardTitle}>{quiz.title}</h2>
-              <p className={styles.cardDescription}>{quiz.description || "Nessuna descrizione"}</p>
+                <div className={styles.cardHeaderText}>
+                  <div className={styles.cardTop}>
+                    <span className={`${styles.statusBadge} ${styles[statusClass]}`}>{label}</span>
+                    {quiz.joined && <span className={styles.joinedBadge}>Sei iscritto</span>}
+                  </div>
+
+                  <h2 className={styles.cardTitle}>{quiz.title}</h2>
+                  <p className={styles.cardDescription}>{quiz.description || "Nessuna descrizione"}</p>
+                </div>
+              </div>
 
               <div className={styles.infoGrid}>
                 <div className={styles.infoItem}>

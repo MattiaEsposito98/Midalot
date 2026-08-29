@@ -10,6 +10,7 @@ use App\Services\MidalarioFinalizer;
 use App\Services\MidalarioTimeline;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class MidalarioController extends Controller
 {
@@ -32,13 +33,19 @@ class MidalarioController extends Controller
     {
         $validated = $this->validateMidalario($request);
 
-        Quiz::create([
+        $data = [
             ...$validated,
             'type' => 'midalario',
             'created_by' => Auth::id(),
             'midalario_status' => 'open',
             'leaderboard_visible' => true,
-        ]);
+        ];
+
+        if ($request->hasFile('image')) {
+            $data['image_path'] = $request->file('image')->store('covers', 'public');
+        }
+
+        Quiz::create($data);
 
         return redirect()
             ->route('admin.midalario.index')
@@ -56,7 +63,22 @@ class MidalarioController extends Controller
     {
         $this->ensureMidalario($quiz);
 
-        $quiz->update($this->validateMidalario($request));
+        $data = $this->validateMidalario($request);
+
+        if ($request->has('remove_image') && $quiz->image_path) {
+            Storage::disk('public')->delete($quiz->image_path);
+            $data['image_path'] = null;
+        }
+
+        if ($request->hasFile('image')) {
+            if ($quiz->image_path) {
+                Storage::disk('public')->delete($quiz->image_path);
+            }
+
+            $data['image_path'] = $request->file('image')->store('covers', 'public');
+        }
+
+        $quiz->update($data);
 
         return redirect()
             ->route('admin.midalario.index')
@@ -66,6 +88,10 @@ class MidalarioController extends Controller
     public function destroy(Quiz $quiz)
     {
         $this->ensureMidalario($quiz);
+
+        if ($quiz->image_path) {
+            Storage::disk('public')->delete($quiz->image_path);
+        }
 
         $quiz->delete();
 
@@ -196,6 +222,7 @@ class MidalarioController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'is_active' => ['required', 'boolean'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
         ]);
     }
 

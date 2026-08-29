@@ -56,8 +56,19 @@
                             @endphp
                             <tr>
                                 <td>
-                                    <div class="fw-bold">{{ $quiz->title }}</div>
-                                    <div class="small admin-muted">{{ \Illuminate\Support\Str::limit($quiz->description, 80) ?: 'Nessuna descrizione' }}</div>
+                                    <div class="admin-title-cell">
+                                        <span class="admin-thumb">
+                                            @if ($quiz->image_path)
+                                                <img src="{{ $quiz->image_url }}" alt="">
+                                            @else
+                                                <i class="bi bi-image admin-thumb-empty"></i>
+                                            @endif
+                                        </span>
+                                        <div class="admin-title-cell-text">
+                                            <div class="fw-bold">{{ $quiz->title }}</div>
+                                            <div class="small admin-muted">{{ \Illuminate\Support\Str::limit($quiz->description, 80) ?: 'Nessuna descrizione' }}</div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>{{ $quiz->questions_count }}</td>
                                 <td>{{ $quiz->participants_count }}</td>

@@ -41,6 +41,7 @@ class UserMinigiocoController extends Controller
                     'id' => $minigioco->id,
                     'title' => $minigioco->title,
                     'description' => $minigioco->description,
+                    'image' => $minigioco->image_url,
                     'is_active' => $isActive,
                     'status' => $status,
                     'completed' => $completed,

@@ -5,7 +5,7 @@ function PrivateLayout() {
   return (
     <div className="min-vh-100">
       <PrivateNavbar />
-      <main className="container py-4">
+      <main className="container-wide py-4">
         <Outlet />
       </main>
     </div>

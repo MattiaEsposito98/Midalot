@@ -49,6 +49,7 @@ class UserQuizController extends Controller
                     'id' => $quiz->id,
                     'title' => $quiz->title,
                     'description' => $quiz->description,
+                    'image' => $quiz->image_url,
                     'is_active' => $isActive,
                     'status' => $status,
                     'completed' => $completed,

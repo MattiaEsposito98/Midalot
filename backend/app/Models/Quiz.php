@@ -10,6 +10,7 @@ class Quiz extends Model
     protected $fillable = [
         'title',
         'description',
+        'image_path',
         'type',
         'restrict_to_specific_users',
         'training_category_id',
@@ -27,6 +28,11 @@ class Quiz extends Model
         'leaderboard_visible' => 'boolean',
         'midalario_started_at' => 'datetime',
     ];
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image_path ? asset('storage/'.$this->image_path) : null;
+    }
 
     public function isTraining(): bool
     {

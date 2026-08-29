@@ -155,7 +155,7 @@ function QuizOneShot() {
 
   if (error) {
     return (
-      <div className={`container ${styles.page}`}>
+      <div className={`container-wide ${styles.page}`}>
         <div className={`alert alert-danger ${styles.emptyBox}`}>
           {error}
         </div>
@@ -164,7 +164,7 @@ function QuizOneShot() {
   }
 
   return (
-    <div className={`container ${styles.page}`}>
+    <div className={`container-wide ${styles.page}`}>
       <div className={styles.header}>
         <div>
           <span className={styles.eyebrow}>
@@ -192,24 +192,34 @@ function QuizOneShot() {
         {sortedQuizzes.map((q) => (
           <div className="col-md-6 col-xl-4 mb-4" key={q.id}>
             <div className={`${styles.card} ${getCardClass(q.status)}`}>
-              <div className={styles.cardTop}>
-                <span className={`${styles.statusBadge} ${getStatusClass(q.status)}`}>
-                  {getStatusLabel(q.status)}
-                </span>
-
-                {q.leaderboard_visible && (
-                  <span className={styles.leaderboardBadge}>
-                    <i className="bi bi-trophy-fill"></i>
-                    Classifica
-                  </span>
+              <div className={styles.cardHeader}>
+                {q.image && (
+                  <div className={styles.cardImageWrap}>
+                    <img src={q.image} alt="" className={styles.cardImage} />
+                  </div>
                 )}
+
+                <div className={styles.cardHeaderText}>
+                  <div className={styles.cardTop}>
+                    <span className={`${styles.statusBadge} ${getStatusClass(q.status)}`}>
+                      {getStatusLabel(q.status)}
+                    </span>
+
+                    {q.leaderboard_visible && (
+                      <span className={styles.leaderboardBadge}>
+                        <i className="bi bi-trophy-fill"></i>
+                        Classifica
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className={styles.cardTitle}>{q.title}</h3>
+
+                  <p className={styles.cardDescription}>
+                    {q.description || "Nessuna descrizione"}
+                  </p>
+                </div>
               </div>
-
-              <h3 className={styles.cardTitle}>{q.title}</h3>
-
-              <p className={styles.cardDescription}>
-                {q.description || "Nessuna descrizione"}
-              </p>
 
               <div className={styles.infoGrid}>
                 <div className={styles.infoItem}>

@@ -25,7 +25,7 @@
             </div>
         </div>
         <div class="admin-card-body">
-            <form action="{{ route('admin.training.quizzes.update', $quiz) }}" method="POST">
+            <form action="{{ route('admin.training.quizzes.update', $quiz) }}" method="POST" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
                 <div class="admin-form-grid">
@@ -36,6 +36,22 @@
                     <div class="full">
                         <label class="form-label">Descrizione</label>
                         <textarea class="form-control" name="description" rows="4">{{ old('description', $quiz->description) }}</textarea>
+                    </div>
+                    <div class="full">
+                        <label class="form-label">Immagine di copertina (opzionale)</label>
+                        @if ($quiz->image_path)
+                            <img src="{{ $quiz->image_url }}" class="img-fluid rounded border mb-2" style="max-height: 140px;" alt="">
+                        @else
+                            <p class="admin-muted small mb-2">Nessuna immagine caricata.</p>
+                        @endif
+                        <input type="file" name="image" class="form-control" accept=".jpg,.jpeg,.png,image/*">
+                        <small class="admin-muted">JPG o PNG, max 2MB.</small>
+                        @if ($quiz->image_path)
+                            <div class="form-check mt-2">
+                                <input type="checkbox" name="remove_image" value="1" class="form-check-input" id="remove_image">
+                                <label class="form-check-label text-danger" for="remove_image">Elimina immagine</label>
+                            </div>
+                        @endif
                     </div>
                     <div>
                         <label class="form-label">Categoria</label>

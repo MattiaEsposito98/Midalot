@@ -7,6 +7,7 @@ use App\Models\Minigioco;
 use App\Models\MinigiocoAttempt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class MinigiocoController extends Controller
 {
@@ -29,15 +30,22 @@ class MinigiocoController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        Minigioco::create([
+        $data = [
             'title' => $request->title,
             'description' => $request->description,
             'created_by' => Auth::id(),
             'is_active' => false,
             'leaderboard_visible' => true,
-        ]);
+        ];
+
+        if ($request->hasFile('image')) {
+            $data['image_path'] = $request->file('image')->store('covers', 'public');
+        }
+
+        Minigioco::create($data);
 
         return redirect()
             ->route('admin.minigiochi.index')
@@ -64,13 +72,29 @@ class MinigiocoController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_active' => 'required|boolean',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $minigioco->update([
+        $data = [
             'title' => $request->title,
             'description' => $request->description,
             'is_active' => $request->is_active,
-        ]);
+        ];
+
+        if ($request->has('remove_image') && $minigioco->image_path) {
+            Storage::disk('public')->delete($minigioco->image_path);
+            $data['image_path'] = null;
+        }
+
+        if ($request->hasFile('image')) {
+            if ($minigioco->image_path) {
+                Storage::disk('public')->delete($minigioco->image_path);
+            }
+
+            $data['image_path'] = $request->file('image')->store('covers', 'public');
+        }
+
+        $minigioco->update($data);
 
         return redirect()
             ->route('admin.minigiochi.index')
@@ -80,6 +104,10 @@ class MinigiocoController extends Controller
     public function destroy(string $id)
     {
         $minigioco = Minigioco::findOrFail($id);
+
+        if ($minigioco->image_path) {
+            Storage::disk('public')->delete($minigioco->image_path);
+        }
 
         $minigioco->delete();
 

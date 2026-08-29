@@ -266,6 +266,43 @@
   vertical-align: middle;
 }
 
+/* Miniatura immagine di copertina nelle liste admin */
+.admin-thumb {
+  align-items: center;
+  background: #eef4f7;
+  border: 1px solid var(--admin-border);
+  border-radius: .4rem;
+  display: flex;
+  flex-shrink: 0;
+  height: 52px;
+  justify-content: center;
+  overflow: hidden;
+  width: 52px;
+}
+
+.admin-thumb img {
+  display: block;
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.admin-thumb-empty {
+  color: #9fb3c0;
+  font-size: 1.1rem;
+}
+
+/* Cella "titolo + miniatura" nelle liste admin */
+.admin-title-cell {
+  align-items: center;
+  display: flex;
+  gap: .7rem;
+}
+
+.admin-title-cell-text {
+  min-width: 0;
+}
+
 .admin-actions {
   display: flex;
   flex-wrap: wrap;

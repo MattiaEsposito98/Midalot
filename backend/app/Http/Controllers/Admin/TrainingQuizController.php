@@ -8,6 +8,7 @@ use App\Models\TrainingAttempt;
 use App\Models\TrainingCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class TrainingQuizController extends Controller
 {
@@ -48,12 +49,18 @@ class TrainingQuizController extends Controller
     {
         $validated = $this->validateTrainingQuiz($request);
 
-        Quiz::create([
+        $data = [
             ...$validated,
             'type' => 'training',
             'created_by' => Auth::id(),
             'leaderboard_visible' => true,
-        ]);
+        ];
+
+        if ($request->hasFile('image')) {
+            $data['image_path'] = $request->file('image')->store('covers', 'public');
+        }
+
+        Quiz::create($data);
 
         return redirect()
             ->route('admin.training.quizzes.index')
@@ -80,7 +87,22 @@ class TrainingQuizController extends Controller
     {
         $this->ensureTraining($quiz);
 
-        $quiz->update($this->validateTrainingQuiz($request));
+        $data = $this->validateTrainingQuiz($request);
+
+        if ($request->has('remove_image') && $quiz->image_path) {
+            Storage::disk('public')->delete($quiz->image_path);
+            $data['image_path'] = null;
+        }
+
+        if ($request->hasFile('image')) {
+            if ($quiz->image_path) {
+                Storage::disk('public')->delete($quiz->image_path);
+            }
+
+            $data['image_path'] = $request->file('image')->store('covers', 'public');
+        }
+
+        $quiz->update($data);
 
         return redirect()
             ->route('admin.training.quizzes.index')
@@ -90,6 +112,10 @@ class TrainingQuizController extends Controller
     public function destroy(Quiz $quiz)
     {
         $this->ensureTraining($quiz);
+
+        if ($quiz->image_path) {
+            Storage::disk('public')->delete($quiz->image_path);
+        }
 
         $quiz->delete();
 
@@ -153,6 +179,7 @@ class TrainingQuizController extends Controller
             'training_category_id' => ['required', 'exists:training_categories,id'],
             'training_question_mode' => ['required', 'in:5,10,all'],
             'is_active' => ['required', 'boolean'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
         ]);
     }
 

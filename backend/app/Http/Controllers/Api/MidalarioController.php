@@ -61,6 +61,7 @@ class MidalarioController extends Controller
                     'id' => $quiz->id,
                     'title' => $quiz->title,
                     'description' => $quiz->description,
+                    'image' => $quiz->image_url,
                     'status' => $quiz->midalario_status,
                     'questions_count' => $quiz->questions_count,
                     'participants_count' => $quiz->participants_count,

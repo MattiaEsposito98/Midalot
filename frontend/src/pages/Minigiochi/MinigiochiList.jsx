@@ -154,7 +154,7 @@ function MinigiochiList() {
 
   if (error) {
     return (
-      <div className={`container ${styles.page}`}>
+      <div className={`container-wide ${styles.page}`}>
         <div className={`alert alert-danger ${styles.emptyBox}`}>
           {error}
         </div>
@@ -163,7 +163,7 @@ function MinigiochiList() {
   }
 
   return (
-    <div className={`container ${styles.page}`}>
+    <div className={`container-wide ${styles.page}`}>
       <div className={styles.header}>
         <span className={styles.eyebrow}>
           <i className="bi bi-joystick"></i>
@@ -185,24 +185,34 @@ function MinigiochiList() {
         {sortedMinigiochi.map((m) => (
           <div className="col-md-6 col-xl-4 mb-4" key={m.id}>
             <div className={`${styles.card} ${getCardClass(m.status)}`}>
-              <div className={styles.cardTop}>
-                <span className={`${styles.statusBadge} ${getStatusClass(m.status)}`}>
-                  {getStatusLabel(m.status)}
-                </span>
-
-                {m.leaderboard_visible && (
-                  <span className={styles.leaderboardBadge}>
-                    <i className="bi bi-trophy-fill"></i>
-                    Classifica
-                  </span>
+              <div className={styles.cardHeader}>
+                {m.image && (
+                  <div className={styles.cardImageWrap}>
+                    <img src={m.image} alt="" className={styles.cardImage} />
+                  </div>
                 )}
+
+                <div className={styles.cardHeaderText}>
+                  <div className={styles.cardTop}>
+                    <span className={`${styles.statusBadge} ${getStatusClass(m.status)}`}>
+                      {getStatusLabel(m.status)}
+                    </span>
+
+                    {m.leaderboard_visible && (
+                      <span className={styles.leaderboardBadge}>
+                        <i className="bi bi-trophy-fill"></i>
+                        Classifica
+                      </span>
+                    )}
+                  </div>
+
+                  <h3 className={styles.cardTitle}>{m.title}</h3>
+
+                  <p className={styles.cardDescription}>
+                    {m.description || "Nessuna descrizione"}
+                  </p>
+                </div>
               </div>
-
-              <h3 className={styles.cardTitle}>{m.title}</h3>
-
-              <p className={styles.cardDescription}>
-                {m.description || "Nessuna descrizione"}
-              </p>
 
               <div className={styles.infoGrid}>
                 <div className={styles.infoItem}>

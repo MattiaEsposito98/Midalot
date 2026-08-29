@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\TrainingCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class TrainingCategoryController extends Controller
@@ -24,9 +25,14 @@ class TrainingCategoryController extends Controller
             'name' => ['required', 'string', 'max:80', 'unique:training_categories,name'],
             'description' => ['nullable', 'string'],
             'is_active' => ['required', 'boolean'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
         ]);
 
         $validated['slug'] = $this->uniqueSlug($validated['name']);
+
+        if ($request->hasFile('image')) {
+            $validated['image_path'] = $request->file('image')->store('covers', 'public');
+        }
 
         TrainingCategory::create($validated);
 
@@ -39,10 +45,24 @@ class TrainingCategoryController extends Controller
             'name' => ['required', 'string', 'max:80', 'unique:training_categories,name,' . $category->id],
             'description' => ['nullable', 'string'],
             'is_active' => ['required', 'boolean'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
         ]);
 
         if ($category->name !== $validated['name']) {
             $validated['slug'] = $this->uniqueSlug($validated['name'], $category->id);
+        }
+
+        if ($request->has('remove_image') && $category->image_path) {
+            Storage::disk('public')->delete($category->image_path);
+            $validated['image_path'] = null;
+        }
+
+        if ($request->hasFile('image')) {
+            if ($category->image_path) {
+                Storage::disk('public')->delete($category->image_path);
+            }
+
+            $validated['image_path'] = $request->file('image')->store('covers', 'public');
         }
 
         $category->update($validated);
@@ -56,6 +76,10 @@ class TrainingCategoryController extends Controller
             return back()->withErrors([
                 'category' => 'Non puoi eliminare una categoria che contiene training quiz.',
             ]);
+        }
+
+        if ($category->image_path) {
+            Storage::disk('public')->delete($category->image_path);
         }
 
         $category->delete();

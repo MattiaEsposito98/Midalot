@@ -46,6 +46,26 @@
             <span>Partecipanti Midalario</span>
             <strong>{{ $stats['midalario_participants'] }}</strong>
         </div>
+        <a href="{{ route('admin.minigiochi.index') }}" class="admin-stat-card admin-stat-card-link">
+            <i class="bi bi-joystick"></i>
+            <span>Minigiochi totali</span>
+            <strong>{{ $stats['minigiochi'] }}</strong>
+        </a>
+        <div class="admin-stat-card">
+            <i class="bi bi-controller"></i>
+            <span>Minigiochi attivi</span>
+            <strong>{{ $stats['active_minigiochi'] }}</strong>
+        </div>
+        <div class="admin-stat-card">
+            <i class="bi bi-people-fill"></i>
+            <span>Giocatori minigiochi</span>
+            <strong>{{ $stats['minigioco_players'] }}</strong>
+        </div>
+        <div class="admin-stat-card">
+            <i class="bi bi-flag-fill"></i>
+            <span>Partite minigiochi</span>
+            <strong>{{ $stats['minigioco_completed_attempts'] }}/{{ $stats['minigioco_attempts'] }}</strong>
+        </div>
         <div class="admin-stat-card">
             <i class="bi bi-question-circle"></i>
             <span>Domande</span>
@@ -235,6 +255,69 @@
                                 <tr>
                                     <td colspan="5">
                                         <div class="admin-empty">Nessuna sessione Midalario creata.</div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="admin-card">
+                <div class="admin-card-header">
+                    <div>
+                        <h2 class="admin-section-title">Minigiochi recenti</h2>
+                        <p class="admin-muted mb-0">Ultimi minigiochi creati e stato operativo.</p>
+                    </div>
+                    <a href="{{ route('admin.minigiochi.create') }}" class="btn btn-primary btn-sm">
+                        <i class="bi bi-plus-lg"></i>
+                        Crea minigioco
+                    </a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table admin-table">
+                        <thead>
+                            <tr>
+                                <th>Minigioco</th>
+                                <th>Stato</th>
+                                <th>Domande</th>
+                                <th>Tentativi</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @forelse ($recentMinigiochi as $minigioco)
+                                <tr>
+                                    <td>
+                                        <div class="admin-title-cell">
+                                            <span class="admin-thumb">
+                                                @if ($minigioco->image_path)
+                                                    <img src="{{ $minigioco->image_url }}" alt="">
+                                                @else
+                                                    <i class="bi bi-image admin-thumb-empty"></i>
+                                                @endif
+                                            </span>
+                                            <div class="admin-title-cell-text">
+                                                <a href="{{ route('admin.minigiochi.edit', $minigioco->id) }}" class="fw-bold text-decoration-none">
+                                                    {{ $minigioco->title }}
+                                                </a>
+                                                <div class="small admin-muted">{{ $minigioco->created_at->format('d/m/Y H:i') }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if ($minigioco->is_active)
+                                            <span class="badge bg-success">Attivo</span>
+                                        @else
+                                            <span class="badge bg-secondary">Non attivo</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $minigioco->rounds_count }}</td>
+                                    <td>{{ $minigioco->attempts_count }}</td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="4">
+                                        <div class="admin-empty">Nessun minigioco creato.</div>
                                     </td>
                                 </tr>
                             @endforelse

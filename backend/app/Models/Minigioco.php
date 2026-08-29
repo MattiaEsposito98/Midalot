@@ -11,6 +11,7 @@ class Minigioco extends Model
     protected $fillable = [
         'title',
         'description',
+        'image_path',
         'created_by',
         'is_active',
         'leaderboard_visible',
@@ -20,6 +21,11 @@ class Minigioco extends Model
         'is_active' => 'boolean',
         'leaderboard_visible' => 'boolean',
     ];
+
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image_path ? asset('storage/'.$this->image_path) : null;
+    }
 
     public function creator()
     {

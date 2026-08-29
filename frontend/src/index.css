@@ -68,6 +68,15 @@ h6 {
   width: min(100% - 24px, 1140px);
 }
 
+/* Container piu' largo per le pagine con liste di giochi (card ricche di contenuto) */
+.container-wide {
+  width: min(100% - 24px, 1460px);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
 .card {
   border: 1px solid var(--midalot-border);
   border-radius: 8px;

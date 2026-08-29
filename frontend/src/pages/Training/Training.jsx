@@ -107,7 +107,7 @@ function Training() {
 
   if (loading) {
     return (
-      <div className={`container ${styles.page}`}>
+      <div className={`container-wide ${styles.page}`}>
         <div className="spinner-border text-primary"></div>
       </div>
     )
@@ -115,14 +115,14 @@ function Training() {
 
   if (error) {
     return (
-      <div className={`container ${styles.page}`}>
+      <div className={`container-wide ${styles.page}`}>
         <div className="alert alert-danger">{error}</div>
       </div>
     )
   }
 
   return (
-    <div className={`container ${styles.page}`}>
+    <div className={`container-wide ${styles.page}`}>
       <div className={styles.hero}>
         <span className={styles.eyebrow}>
           <i className="bi bi-lightning-charge-fill"></i>
@@ -165,11 +165,18 @@ function Training() {
               const stats = progressBySlug[category.slug]
               return (
                 <div className={styles.card} key={category.id}>
-                  <div>
-                    <h3 className={styles.cardTitle}>{category.name}</h3>
-                    <p className={styles.muted}>{category.description || "Training disponibili per questa categoria."}</p>
+                  <div className={styles.cardHeader}>
+                    {category.image && (
+                      <div className={styles.cardImageWrap}>
+                        <img src={category.image} alt="" className={styles.cardImage} />
+                      </div>
+                    )}
+                    <div className={styles.cardHeaderText}>
+                      <h3 className={styles.cardTitle}>{category.name}</h3>
+                      <p className={`${styles.muted} mb-0`}>{category.description || "Training disponibili per questa categoria."}</p>
+                    </div>
                   </div>
-                  <div className="d-grid gap-2">
+                  <div className="d-grid gap-2 mt-3">
                     {stats && (
                       <small className={styles.muted}>
                         Miglior punteggio: <strong>{formatQuizScore(stats.best_score)}</strong>
@@ -202,12 +209,19 @@ function Training() {
             <div className={styles.quizGrid}>
               {categoryData.quizzes.map((quiz) => (
                 <div className={styles.card} key={quiz.id}>
-                  <div>
-                    <h3 className={styles.cardTitle}>{quiz.title}</h3>
-                    <p className={styles.muted}>{quiz.description || "Quiz di allenamento"}</p>
-                    <small className={styles.muted}>
-                      Domande: {quiz.question_mode === "all" ? "tutte" : quiz.question_mode}
-                    </small>
+                  <div className={styles.cardHeader}>
+                    {quiz.image && (
+                      <div className={styles.cardImageWrap}>
+                        <img src={quiz.image} alt="" className={styles.cardImage} />
+                      </div>
+                    )}
+                    <div className={styles.cardHeaderText}>
+                      <h3 className={styles.cardTitle}>{quiz.title}</h3>
+                      <p className={styles.muted}>{quiz.description || "Quiz di allenamento"}</p>
+                      <small className={styles.muted}>
+                        Domande: {quiz.question_mode === "all" ? "tutte" : quiz.question_mode}
+                      </small>
+                    </div>
                   </div>
                   <div className="d-grid gap-2 mt-3">
                     <Link to={`/training/play/${quiz.id}`} className="btn btn-primary">

@@ -7,6 +7,7 @@ use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class QuizController extends Controller
 {
@@ -39,9 +40,10 @@ class QuizController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        Quiz::create([
+        $data = [
             'title' => $request->title,
             'description' => $request->description,
             'type' => 'assigned',
@@ -49,7 +51,13 @@ class QuizController extends Controller
             'created_by' => Auth::id(),
             'is_active' => false,
             'leaderboard_visible' => true,
-        ]);
+        ];
+
+        if ($request->hasFile('image')) {
+            $data['image_path'] = $request->file('image')->store('covers', 'public');
+        }
+
+        Quiz::create($data);
 
         return redirect()
             ->route('admin.quizzes.index')
@@ -85,14 +93,30 @@ class QuizController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_active' => 'required|boolean',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        $quiz->update([
+        $data = [
             'title' => $request->title,
             'description' => $request->description,
             'is_active' => $request->is_active,
             'restrict_to_specific_users' => $request->boolean('restrict_to_specific_users'),
-        ]);
+        ];
+
+        if ($request->has('remove_image') && $quiz->image_path) {
+            Storage::disk('public')->delete($quiz->image_path);
+            $data['image_path'] = null;
+        }
+
+        if ($request->hasFile('image')) {
+            if ($quiz->image_path) {
+                Storage::disk('public')->delete($quiz->image_path);
+            }
+
+            $data['image_path'] = $request->file('image')->store('covers', 'public');
+        }
+
+        $quiz->update($data);
 
         return redirect()
             ->route('admin.quizzes.index')
@@ -105,6 +129,10 @@ class QuizController extends Controller
     public function destroy(string $id)
     {
         $quiz = Quiz::findOrFail($id);
+
+        if ($quiz->image_path) {
+            Storage::disk('public')->delete($quiz->image_path);
+        }
 
         $quiz->delete();
 

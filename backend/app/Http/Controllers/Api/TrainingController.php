@@ -36,6 +36,7 @@ class TrainingController extends Controller
                 'name' => $category->name,
                 'slug' => $category->slug,
                 'description' => $category->description,
+                'image' => $category->image_url,
                 'quizzes_count' => $category->quizzes_count,
             ]);
 
@@ -380,6 +381,7 @@ class TrainingController extends Controller
             'id' => $quiz->id,
             'title' => $quiz->title,
             'description' => $quiz->description,
+            'image' => $quiz->image_url,
             'category' => [
                 'id' => $quiz->trainingCategory->id,
                 'name' => $quiz->trainingCategory->name,

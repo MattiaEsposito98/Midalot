@@ -21,7 +21,7 @@
                 <table class="table admin-table">
                     <thead>
                         <tr>
-                            <th>Nome</th>
+                            <th>Categoria</th>
                             <th>Descrizione</th>
                             <th>Quiz</th>
                             <th>Stato</th>
@@ -31,7 +31,18 @@
                     <tbody>
                         @forelse ($categories as $category)
                             <tr>
-                                <td class="fw-bold">{{ $category->name }}</td>
+                                <td>
+                                    <div class="admin-title-cell">
+                                        <span class="admin-thumb">
+                                            @if ($category->image_path)
+                                                <img src="{{ $category->image_url }}" alt="">
+                                            @else
+                                                <i class="bi bi-image admin-thumb-empty"></i>
+                                            @endif
+                                        </span>
+                                        <div class="admin-title-cell-text fw-bold">{{ $category->name }}</div>
+                                    </div>
+                                </td>
                                 <td>{{ $category->description ?: '-' }}</td>
                                 <td>{{ $category->quizzes_count }}</td>
                                 <td>
@@ -40,7 +51,7 @@
                                     </span>
                                 </td>
                                 <td>
-                                    <form class="d-grid gap-2" action="{{ route('admin.training.categories.update', $category) }}" method="POST">
+                                    <form class="d-grid gap-2" action="{{ route('admin.training.categories.update', $category) }}" method="POST" enctype="multipart/form-data">
                                         @csrf
                                         @method('PUT')
                                         <input class="form-control form-control-sm" name="name" value="{{ $category->name }}" required>
@@ -49,6 +60,13 @@
                                             <option value="1" {{ $category->is_active ? 'selected' : '' }}>Attiva</option>
                                             <option value="0" {{ !$category->is_active ? 'selected' : '' }}>Non attiva</option>
                                         </select>
+                                        <input type="file" class="form-control form-control-sm" name="image" accept=".jpg,.jpeg,.png,image/*">
+                                        @if ($category->image_path)
+                                            <div class="form-check">
+                                                <input type="checkbox" name="remove_image" value="1" class="form-check-input" id="remove_image_{{ $category->id }}">
+                                                <label class="form-check-label small text-danger" for="remove_image_{{ $category->id }}">Elimina immagine</label>
+                                            </div>
+                                        @endif
                                         <button class="btn btn-sm btn-primary">Salva</button>
                                     </form>
                                     <form action="{{ route('admin.training.categories.destroy', $category) }}" method="POST" class="mt-2">
@@ -75,7 +93,7 @@
                 <h2 class="admin-section-title">Nuova categoria</h2>
             </div>
             <div class="admin-card-body">
-                <form action="{{ route('admin.training.categories.store') }}" method="POST">
+                <form action="{{ route('admin.training.categories.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="mb-3">
                         <label class="form-label">Nome</label>
@@ -84,6 +102,11 @@
                     <div class="mb-3">
                         <label class="form-label">Descrizione</label>
                         <textarea class="form-control" name="description" rows="4">{{ old('description') }}</textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Immagine di copertina (opzionale)</label>
+                        <input type="file" name="image" class="form-control" accept=".jpg,.jpeg,.png,image/*">
+                        <small class="admin-muted">JPG o PNG, max 2MB.</small>
                     </div>
                     <div class="mb-4">
                         <label class="form-label">Stato</label>

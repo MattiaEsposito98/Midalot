@@ -72,6 +72,34 @@
   overflow: hidden;
 }
 
+.cardHeader {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.cardHeaderText {
+  flex: 1;
+  min-width: 0;
+}
+
+.cardImageWrap {
+  flex-shrink: 0;
+  width: 86px;
+  height: 86px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #dce5ee;
+  background: #f7f8fb;
+}
+
+.cardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .card::before {
   content: "";
   position: absolute;
@@ -192,6 +220,11 @@
 }
 
 @media (max-width: 767px) {
+  .cardImageWrap {
+    width: 68px;
+    height: 68px;
+  }
+
   .page {
     padding-top: 20px;
   }
