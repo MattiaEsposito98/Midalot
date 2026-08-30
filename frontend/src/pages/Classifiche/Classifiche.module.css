@@ -47,6 +47,25 @@
   font-size: 15px;
 }
 
+.infoNote {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #eef4f7;
+  color: #176b87;
+  border: 1px solid rgba(23, 107, 135, 0.25);
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.infoNote i {
+  margin-top: 2px;
+}
+
 .tabs {
   display: flex;
   gap: 8px;

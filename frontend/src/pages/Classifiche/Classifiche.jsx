@@ -126,13 +126,18 @@ function Classifiche() {
         <div>
           <span className={styles.eyebrow}>
             <i className="bi bi-trophy-fill"></i>
-            Classifiche Quiz One Shot
+            Classifica premi
           </span>
           <h1 className={styles.title}>Classifiche</h1>
           <p className={styles.subtitle}>
-            Punteggio totale dei quiz completati nel periodo selezionato.
+            Punteggio totale ottenuto nel periodo selezionato.
           </p>
         </div>
+      </div>
+
+      <div className={styles.infoNote}>
+        <i className="bi bi-info-circle"></i>
+        I punti derivano da Quiz One Shot e Minigiochi. Il Training ha una classifica propria per categoria e non contribuisce a questa classifica.
       </div>
 
       <div className={styles.tabs}>
@@ -219,7 +224,7 @@ function Classifiche() {
                   </div>
 
                   <div className={styles.statBox}>
-                    <span className={styles.statLabel}>Quiz completati</span>
+                    <span className={styles.statLabel}>Attività completate</span>
                     <strong className={styles.statValue}>{r.quizzes_completed}</strong>
                   </div>
                 </div>

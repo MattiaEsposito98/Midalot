@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Minigioco;
 use App\Models\MinigiocoRound;
+use App\Models\MinigiocoRoundItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class MinigiocoRoundController extends Controller
@@ -15,6 +18,7 @@ class MinigiocoRoundController extends Controller
         $minigioco = Minigioco::findOrFail($minigioco);
 
         $rounds = $minigioco->rounds()
+            ->with('items')
             ->orderBy('id')
             ->get();
 
@@ -25,13 +29,80 @@ class MinigiocoRoundController extends Controller
     {
         $minigioco = Minigioco::findOrFail($minigioco);
 
-        return view('admin.minigioco_rounds.create', compact('minigioco'));
+        return view("admin.minigioco_rounds.create_{$this->viewSuffix($minigioco)}", compact('minigioco'));
     }
 
     public function store(Request $request, string $minigioco)
     {
         $minigioco = Minigioco::findOrFail($minigioco);
 
+        return match ($minigioco->tipo) {
+            'salto_temporale' => $this->storeItemsRound($request, $minigioco),
+            'trova_intruso' => $this->storeItemsRound($request, $minigioco, intruso: true),
+            default => $this->storeTastieraRotta($request, $minigioco),
+        };
+    }
+
+    public function show(string $minigioco, string $round)
+    {
+        //
+    }
+
+    public function edit(string $minigioco, string $round)
+    {
+        $minigioco = Minigioco::findOrFail($minigioco);
+
+        $round = MinigiocoRound::where('minigioco_id', $minigioco->id)
+            ->with('items')
+            ->findOrFail($round);
+
+        return view("admin.minigioco_rounds.edit_{$this->viewSuffix($minigioco)}", compact('minigioco', 'round'));
+    }
+
+    public function update(Request $request, string $minigioco, string $round)
+    {
+        $minigioco = Minigioco::findOrFail($minigioco);
+
+        $round = MinigiocoRound::where('minigioco_id', $minigioco->id)
+            ->findOrFail($round);
+
+        return match ($minigioco->tipo) {
+            'salto_temporale' => $this->updateItemsRound($request, $minigioco, $round),
+            'trova_intruso' => $this->updateItemsRound($request, $minigioco, $round, intruso: true),
+            default => $this->updateTastieraRotta($request, $minigioco, $round),
+        };
+    }
+
+    public function destroy(string $minigioco, string $round)
+    {
+        $minigioco = Minigioco::findOrFail($minigioco);
+
+        $round = MinigiocoRound::where('minigioco_id', $minigioco->id)
+            ->with('items')
+            ->findOrFail($round);
+
+        foreach ($round->items as $item) {
+            if ($item->image_path) {
+                Storage::disk('public')->delete($item->image_path);
+            }
+        }
+
+        $round->delete();
+
+        return back()->with('success', 'Domanda eliminata!');
+    }
+
+    private function viewSuffix(Minigioco $minigioco): string
+    {
+        return match ($minigioco->tipo) {
+            'salto_temporale' => 'salto_temporale',
+            'trova_intruso' => 'trova_intruso',
+            default => 'tastiera_rotta',
+        };
+    }
+
+    private function storeTastieraRotta(Request $request, Minigioco $minigioco)
+    {
         $request->validate([
             'parola' => 'required|string|max:100',
             'direzione' => 'required|in:sinistra,destra',
@@ -51,28 +122,8 @@ class MinigiocoRoundController extends Controller
             ->with('success', 'Domanda creata con successo!');
     }
 
-    public function show(string $minigioco, string $round)
+    private function updateTastieraRotta(Request $request, Minigioco $minigioco, MinigiocoRound $round)
     {
-        //
-    }
-
-    public function edit(string $minigioco, string $round)
-    {
-        $minigioco = Minigioco::findOrFail($minigioco);
-
-        $round = MinigiocoRound::where('minigioco_id', $minigioco->id)
-            ->findOrFail($round);
-
-        return view('admin.minigioco_rounds.edit', compact('minigioco', 'round'));
-    }
-
-    public function update(Request $request, string $minigioco, string $round)
-    {
-        $minigioco = Minigioco::findOrFail($minigioco);
-
-        $round = MinigiocoRound::where('minigioco_id', $minigioco->id)
-            ->findOrFail($round);
-
         $request->validate([
             'parola' => 'required|string|max:100',
             'direzione' => 'required|in:sinistra,destra',
@@ -91,16 +142,113 @@ class MinigiocoRoundController extends Controller
             ->with('success', 'Domanda aggiornata!');
     }
 
-    public function destroy(string $minigioco, string $round)
+    /**
+     * Salto Temporale e Trova l'Intruso condividono lo stesso form: un round
+     * è un puzzle con esattamente 4 elementi (label + immagine opzionale),
+     * creati/aggiornati tutti insieme in un'unica transazione.
+     */
+    private function storeItemsRound(Request $request, Minigioco $minigioco, bool $intruso = false)
     {
-        $minigioco = Minigioco::findOrFail($minigioco);
+        $rules = [
+            'time_limit_seconds' => 'required|integer|min:5',
+            'items' => 'required|array|size:4',
+            'items.*.label' => 'required|string|max:255',
+            'items.*.image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+        ];
 
-        $round = MinigiocoRound::where('minigioco_id', $minigioco->id)
-            ->findOrFail($round);
+        if ($intruso) {
+            $rules['intruso'] = 'required|integer|min:0|max:3';
+        }
 
-        $round->delete();
+        $request->validate($rules);
 
-        return back()->with('success', 'Domanda eliminata!');
+        DB::transaction(function () use ($request, $minigioco, $intruso) {
+            $round = MinigiocoRound::create([
+                'minigioco_id' => $minigioco->id,
+                'time_limit_seconds' => $request->time_limit_seconds,
+            ]);
+
+            foreach ($request->items as $index => $item) {
+                $imagePath = $request->hasFile("items.{$index}.image")
+                    ? $request->file("items.{$index}.image")->store('minigioco-round-items', 'public')
+                    : null;
+
+                MinigiocoRoundItem::create([
+                    'minigioco_round_id' => $round->id,
+                    'ordine' => $index + 1,
+                    'label' => $item['label'],
+                    'image_path' => $imagePath,
+                    'is_intruso' => $intruso && (int) $request->intruso === (int) $index,
+                ]);
+            }
+        });
+
+        return redirect()
+            ->route('admin.minigiochi.rounds.index', $minigioco->id)
+            ->with('success', 'Puzzle creato con successo!');
+    }
+
+    private function updateItemsRound(Request $request, Minigioco $minigioco, MinigiocoRound $round, bool $intruso = false)
+    {
+        $rules = [
+            'time_limit_seconds' => 'required|integer|min:5',
+            'items' => 'required|array|size:4',
+            'items.*.label' => 'required|string|max:255',
+            'items.*.image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'items.*.remove_image' => 'nullable|boolean',
+        ];
+
+        if ($intruso) {
+            $rules['intruso'] = 'required|integer|min:0|max:3';
+        }
+
+        $request->validate($rules);
+
+        DB::transaction(function () use ($request, $minigioco, $round, $intruso) {
+            $existingItems = $round->items()->orderBy('ordine')->get()->values();
+
+            $round->update(['time_limit_seconds' => $request->time_limit_seconds]);
+
+            foreach ($request->items as $index => $item) {
+                $existing = $existingItems->get($index);
+                $imagePath = $existing?->image_path;
+
+                if ($request->boolean("items.{$index}.remove_image") && $imagePath) {
+                    Storage::disk('public')->delete($imagePath);
+                    $imagePath = null;
+                }
+
+                if ($request->hasFile("items.{$index}.image")) {
+                    if ($imagePath) {
+                        Storage::disk('public')->delete($imagePath);
+                    }
+
+                    $imagePath = $request->file("items.{$index}.image")->store('minigioco-round-items', 'public');
+                }
+
+                $isIntruso = $intruso && (int) $request->intruso === (int) $index;
+
+                if ($existing) {
+                    $existing->update([
+                        'label' => $item['label'],
+                        'image_path' => $imagePath,
+                        'is_intruso' => $isIntruso,
+                    ]);
+                } else {
+                    MinigiocoRoundItem::create([
+                        'minigioco_round_id' => $round->id,
+                        'ordine' => $index + 1,
+                        'label' => $item['label'],
+                        'image_path' => $imagePath,
+                        'is_intruso' => $isIntruso,
+                    ]);
+                }
+            }
+        });
+
+        return redirect()
+            ->route('admin.minigiochi.rounds.index', $minigioco->id)
+            ->with('success', 'Puzzle aggiornato!');
     }
 
     private function resolveShift(string $direzione, int $quantita): int

@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ITunesController;
 use App\Http\Controllers\Admin\MidalarioController;
 use App\Http\Controllers\Admin\MinigiocoController;
 use App\Http\Controllers\Admin\MinigiocoRoundController;
+use App\Http\Controllers\Admin\PeriodLeaderboardController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\ShowcaseImageController;
@@ -173,6 +174,9 @@ Route::middleware(['auth', 'admin'])
 
         Route::patch('minigiochi/{minigioco}/toggle-leaderboard', [MinigiocoController::class, 'toggleLeaderboard'])
             ->name('minigiochi.toggleLeaderboard');
+
+        Route::get('classifica-premi', [PeriodLeaderboardController::class, 'index'])
+            ->name('period-leaderboard.index');
     });
 
 Route::get('/cities/search', [CityController::class, 'search'])

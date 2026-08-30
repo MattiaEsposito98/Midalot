@@ -37,6 +37,7 @@
                     <thead>
                         <tr>
                             <th>Minigioco</th>
+                            <th>Tipo</th>
                             <th>Stato</th>
                             <th>Domande</th>
                             <th>Tentativi</th>
@@ -61,6 +62,15 @@
                                             <div class="small admin-muted">{{ \Illuminate\Support\Str::limit($minigioco->description, 90) ?: 'Nessuna descrizione' }}</div>
                                         </div>
                                     </div>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info text-dark">
+                                        {{ [
+                                            'tastiera_rotta' => 'Tastiera Rotta',
+                                            'salto_temporale' => 'Salto Temporale',
+                                            'trova_intruso' => "Trova l'Intruso",
+                                        ][$minigioco->tipo] ?? $minigioco->tipo }}
+                                    </span>
                                 </td>
                                 <td>
                                     @if ($minigioco->is_active)

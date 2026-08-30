@@ -27,7 +27,7 @@ import Classifiche from "./pages/Classifiche/Classifiche"
 import Midalario from "./pages/Midalario/Midalario"
 import MidalarioRoom from "./pages/Midalario/MidalarioRoom"
 import MinigiochiList from "./pages/Minigiochi/MinigiochiList"
-import TastieraRotta from "./pages/Minigiochi/TastieraRotta"
+import MinigiocoPlay from "./pages/Minigiochi/MinigiocoPlay"
 import MinigiocoReview from "./pages/Minigiochi/MinigiocoReview"
 
 function App() {
@@ -77,7 +77,7 @@ function App() {
         <Route path="/midalario/:id/leaderboard" element={<Leaderboard kind="midalario" />} />
         <Route path="/midalario/:id/review" element={<QuizReview kind="midalario" />} />
         <Route path="/minigiochi" element={<MinigiochiList />} />
-        <Route path="/minigiochi/:id" element={<TastieraRotta />} />
+        <Route path="/minigiochi/:id" element={<MinigiocoPlay />} />
         <Route path="/minigiochi/:id/leaderboard" element={<Leaderboard kind="minigioco" />} />
         <Route path="/minigiochi/:id/review" element={<MinigiocoReview />} />
       </Route>

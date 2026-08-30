@@ -11,6 +11,8 @@ class Minigioco extends Model
     protected $fillable = [
         'title',
         'description',
+        'tipo',
+        'max_score',
         'image_path',
         'created_by',
         'is_active',
@@ -20,6 +22,7 @@ class Minigioco extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'leaderboard_visible' => 'boolean',
+        'max_score' => 'integer',
     ];
 
     public function getImageUrlAttribute(): ?string

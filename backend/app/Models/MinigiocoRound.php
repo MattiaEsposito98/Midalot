@@ -26,6 +26,11 @@ class MinigiocoRound extends Model
         return $this->hasMany(MinigiocoRoundRisposta::class, 'round_id');
     }
 
+    public function items()
+    {
+        return $this->hasMany(MinigiocoRoundItem::class, 'minigioco_round_id')->orderBy('ordine');
+    }
+
     public function getParolaCifrataAttribute(): string
     {
         return KeyboardShiftCipher::encode($this->parola_originale, $this->shift);

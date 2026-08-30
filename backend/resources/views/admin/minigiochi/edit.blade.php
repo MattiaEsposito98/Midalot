@@ -43,6 +43,22 @@
                         <textarea name="description" class="form-control" rows="5">{{ old('description', $minigioco->description) }}</textarea>
                     </div>
 
+                    <div>
+                        <label class="form-label">Tipo di minigioco</label>
+                        <input type="text" class="form-control" value="{{ [
+                            'tastiera_rotta' => 'Tastiera Rotta',
+                            'salto_temporale' => 'Salto Temporale',
+                            'trova_intruso' => 'Trova l\'Intruso',
+                        ][$minigioco->tipo] ?? $minigioco->tipo }}" disabled>
+                        <small class="admin-muted">Il tipo non è modificabile dopo la creazione.</small>
+                    </div>
+
+                    <div>
+                        <label class="form-label">Punteggio massimo</label>
+                        <input type="number" name="max_score" class="form-control" value="{{ old('max_score', $minigioco->max_score) }}" min="1" required>
+                        <small class="admin-muted">Punti massimi ottenibili in totale su un tentativo completo.</small>
+                    </div>
+
                     <div class="full">
                         <label class="form-label">Immagine di copertina (opzionale)</label>
                         @if ($minigioco->image_path)

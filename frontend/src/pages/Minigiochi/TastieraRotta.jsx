@@ -1,168 +1,39 @@
-import { useEffect, useMemo, useRef, useState } from "react"
-import { Link, useNavigate, useParams } from "react-router-dom"
-import { useAuth } from "../../context/useAuth"
+import { useEffect, useRef, useState } from "react"
+import { Link, useParams } from "react-router-dom"
 import styles from "./TastieraRotta.module.css"
-import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
-import { API_BASE } from "../../service/api"
+import { useMinigiocoAttempt } from "../../hooks/useMinigiocoAttempt"
 
 const KEYBOARD_ROWS = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"]
 
 function TastieraRotta() {
   const { id } = useParams()
-  const navigate = useNavigate()
-  const { token } = useAuth()
 
-  const [minigioco, setMinigioco] = useState(null)
-  const [attemptId, setAttemptId] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState("")
-  const [currentIndex, setCurrentIndex] = useState(0)
-  const [timeLeft, setTimeLeft] = useState(0)
-  const [roundStartedAt, setRoundStartedAt] = useState(null)
+  const {
+    minigioco,
+    currentRound,
+    currentIndex,
+    loading,
+    error,
+    result,
+    submitting,
+    roundLocked,
+    feedback,
+    timeLeft,
+    submitAnswer,
+    handleBackToMinigiochi,
+  } = useMinigiocoAttempt(id, { retryOnWrong: true })
+
   const [inputValue, setInputValue] = useState("")
-  const [submitting, setSubmitting] = useState(false)
-  const [result, setResult] = useState(null)
-  const [roundLocked, setRoundLocked] = useState(false)
-  const [feedback, setFeedback] = useState(null)
   const [tentativiFalliti, setTentativiFalliti] = useState(0)
-
-  const timerRef = useRef(null)
-  const timeoutTriggeredRef = useRef(false)
-  const finishingRef = useRef(false)
-  const visibilityAlertShownRef = useRef(false)
-  const currentRoundRef = useRef(null)
-  const currentIndexRef = useRef(0)
-  const roundDeadlineRef = useRef(null)
-  const submittingRef = useRef(false)
-  const roundLockedRef = useRef(false)
-  const minigiocoRef = useRef(null)
-  const initedKeyRef = useRef(null)
+  const [seenRoundId, setSeenRoundId] = useState(currentRound?.id)
   const inputRef = useRef(null)
 
-  const currentRound = useMemo(() => {
-    return minigioco?.rounds?.[currentIndex] || null
-  }, [minigioco, currentIndex])
-
-  function setSubmittingSafe(value) {
-    submittingRef.current = value
-    setSubmitting(value)
-  }
-
-  function setRoundLockedSafe(value) {
-    roundLockedRef.current = value
-    setRoundLocked(value)
-  }
-
-  useEffect(() => {
-    currentRoundRef.current = currentRound
-    currentIndexRef.current = currentIndex
-  }, [currentRound, currentIndex])
-
-  useEffect(() => {
-    minigiocoRef.current = minigioco
-  }, [minigioco])
-
-  useEffect(() => {
-    const initKey = `${id}:${token}`
-
-    if (initedKeyRef.current === initKey) return
-    initedKeyRef.current = initKey
-
-    async function initMinigioco() {
-      try {
-        setLoading(true)
-        setError("")
-        setMinigioco(null)
-        setAttemptId(null)
-        setCurrentIndex(0)
-        setResult(null)
-
-        const res = await fetch(`${API_BASE}/api/minigiochi/${id}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-          },
-        })
-
-        const data = await res.json()
-
-        if (!res.ok) {
-          setError(data.message || "Errore nel caricamento del minigioco")
-          return
-        }
-
-        setMinigioco(data.minigioco)
-
-        const startRes = await fetch(`${API_BASE}/api/minigiochi/${id}/start`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-          },
-        })
-
-        const startData = await startRes.json()
-
-        if (!startRes.ok) {
-          setError(startData.message || "Impossibile avviare il minigioco")
-          return
-        }
-
-        setAttemptId(startData.attempt_id)
-      } catch (err) {
-        logError(err)
-        setError("Errore di connessione")
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    initMinigioco()
-
-    return () => {
-      clearInterval(timerRef.current)
-    }
-  }, [id, token])
-
-  useEffect(() => {
-    if (!currentRound || !attemptId || result) return
-
-    clearInterval(timerRef.current)
-
-    const maxTime = Number(currentRound.time_limit_seconds || 0)
-    const startedAt = Date.now()
-    const deadline = startedAt + maxTime * 1000
-
-    setTimeLeft(maxTime)
-    setRoundStartedAt(startedAt)
+  if (currentRound?.id !== seenRoundId) {
+    setSeenRoundId(currentRound?.id)
     setInputValue("")
-    setFeedback(null)
     setTentativiFalliti(0)
-    setRoundLockedSafe(false)
-    setSubmittingSafe(false)
-
-    timeoutTriggeredRef.current = false
-    roundDeadlineRef.current = deadline
-
-    timerRef.current = setInterval(() => {
-      const now = Date.now()
-      const remainingMs = Math.max(0, roundDeadlineRef.current - now)
-      const remainingSeconds = Math.ceil(remainingMs / 1000)
-
-      setTimeLeft(remainingSeconds)
-
-      if (remainingMs <= 0 && !timeoutTriggeredRef.current) {
-        timeoutTriggeredRef.current = true
-        clearInterval(timerRef.current)
-        handleTimeout()
-      }
-    }, 250)
-
-    return () => clearInterval(timerRef.current)
-    // handleTimeout reads the latest round/attempt state from refs.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentRound, attemptId, result])
+  }
 
   useEffect(() => {
     if (!roundLocked && !submitting) {
@@ -170,145 +41,18 @@ function TastieraRotta() {
     }
   }, [roundLocked, submitting, currentIndex])
 
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.hidden && attemptId && !result) {
-        if (!visibilityAlertShownRef.current) {
-          visibilityAlertShownRef.current = true
-          alert("Attenzione: durante il minigioco non dovresti cambiare scheda o finestra.")
-        }
-      } else {
-        visibilityAlertShownRef.current = false
-      }
-    }
-
-    document.addEventListener("visibilitychange", handleVisibilityChange)
-
-    return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange)
-    }
-  }, [attemptId, result])
-
-  async function goNextOrFinish() {
-    const minigiocoData = minigiocoRef.current
-    const index = currentIndexRef.current
-
-    if (!minigiocoData) return
-
-    const isLast = index >= minigiocoData.rounds.length - 1
-
-    if (isLast) {
-      await finishMinigioco()
-      return
-    }
-
-    setCurrentIndex((prev) => {
-      const next = prev + 1
-      currentIndexRef.current = next
-      return next
-    })
-  }
-
-  async function handleTimeout() {
-    const round = currentRoundRef.current
-
-    if (!round || !attemptId || finishingRef.current) return
-    if (roundLockedRef.current) return
-
-    setRoundLockedSafe(true)
-    setSubmittingSafe(true)
-    clearInterval(timerRef.current)
-
-    try {
-      const maxTimeMs = Number(round.time_limit_seconds || 0) * 1000
-
-      const res = await fetch(`${API_BASE}/api/minigiochi/answer`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          attempt_id: attemptId,
-          round_id: round.id,
-          risposta: null,
-          time_taken: maxTimeMs,
-        }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.message || "Errore salvataggio timeout")
-        return
-      }
-
-      setFeedback({ type: "wrong", message: "Tempo scaduto!" })
-      await new Promise((resolve) => setTimeout(resolve, 500))
-      await goNextOrFinish()
-    } catch (err) {
-      logError(err)
-      setError("Errore di connessione")
-    } finally {
-      setSubmittingSafe(false)
-    }
-  }
-
   async function handleSubmit(e) {
     e.preventDefault()
 
-    const round = currentRoundRef.current
+    if (submitting || roundLocked || !inputValue.trim()) return
 
-    if (!round || !attemptId || finishingRef.current) return
-    if (submittingRef.current || roundLockedRef.current) return
-    if (!inputValue.trim()) return
+    const data = await submitAnswer(inputValue.trim())
 
-    setSubmittingSafe(true)
-
-    try {
-      const maxTimeMs = Number(round.time_limit_seconds || 0) * 1000
-      const elapsedMs = Math.min(Date.now() - roundStartedAt, maxTimeMs)
-
-      const res = await fetch(`${API_BASE}/api/minigiochi/answer`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          attempt_id: attemptId,
-          round_id: round.id,
-          risposta: inputValue.trim(),
-          time_taken: elapsedMs,
-        }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.message || "Errore nel salvataggio della risposta")
-        return
-      }
-
+    if (data) {
       setTentativiFalliti(data.tentativi_falliti || 0)
-
-      if (data.correct) {
-        setRoundLockedSafe(true)
-        clearInterval(timerRef.current)
-        setFeedback({ type: "correct", message: "Corretto!" })
-        await new Promise((resolve) => setTimeout(resolve, 500))
-        await goNextOrFinish()
-      } else {
-        setFeedback({ type: "wrong", message: "Sbagliato, riprova!" })
+      if (!data.correct) {
         setInputValue("")
-        setSubmittingSafe(false)
       }
-    } catch (err) {
-      logError(err)
-      setError("Errore di connessione")
-      setSubmittingSafe(false)
     }
   }
 
@@ -324,50 +68,8 @@ function TastieraRotta() {
     inputRef.current?.focus()
   }
 
-  async function finishMinigioco() {
-    if (!attemptId || finishingRef.current) return
-
-    finishingRef.current = true
-    clearInterval(timerRef.current)
-
-    try {
-      const res = await fetch(`${API_BASE}/api/minigiochi/finish`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
-        body: JSON.stringify({
-          attempt_id: attemptId,
-        }),
-      })
-
-      const data = await res.json()
-
-      if (!res.ok) {
-        setError(data.message || "Errore nella chiusura del minigioco")
-        return
-      }
-
-      setResult({
-        score: data.score,
-      })
-    } catch (err) {
-      logError(err)
-      setError("Errore di connessione durante la chiusura del minigioco")
-    } finally {
-      finishingRef.current = false
-    }
-  }
-
   function formatSeconds(seconds) {
     return `${seconds}s`
-  }
-
-  function handleBackToMinigiochi() {
-    clearInterval(timerRef.current)
-    navigate("/minigiochi")
   }
 
   if (loading) {

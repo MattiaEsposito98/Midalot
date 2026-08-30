@@ -57,6 +57,122 @@ function MinigiocoReview() {
     return { label: "Sbagliata", className: styles.outcomeWrong, icon: "bi-x-circle-fill" }
   }
 
+  function renderTastieraRotta(r) {
+    return (
+      <>
+        <p className={styles.questionText}>Parola cifrata: {r.parola_cifrata}</p>
+        <div className={styles.answersGrid}>
+          <div className={styles.answerBox}>
+            <span className={styles.answerLabel}>La tua risposta</span>
+            <strong className={styles.answerValue}>
+              {r.risposta_utente || (r.is_timeout ? "Nessuna risposta (timeout)" : "-")}
+            </strong>
+          </div>
+
+          {!r.is_correct && (
+            <div className={styles.answerBox}>
+              <span className={styles.answerLabel}>Parola corretta</span>
+              <strong className={`${styles.answerValue} ${styles.correctText}`}>
+                {r.parola_corretta || "-"}
+              </strong>
+            </div>
+          )}
+
+          <div className={styles.answerBox}>
+            <span className={styles.answerLabel}>Tentativi falliti</span>
+            <strong className={styles.answerValue}>{r.tentativi_falliti}</strong>
+          </div>
+
+          <div className={styles.answerBox}>
+            <span className={styles.answerLabel}>Tempo impiegato</span>
+            <strong className={styles.answerValue}>{formatTime(r.time_taken)}</strong>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  function renderSaltoTemporale(r) {
+    const correctOrder = r.items_corretti || []
+    const labelById = new Map(correctOrder.map((item) => [item.id, item.label]))
+    const userLabels = (r.ordine_utente || []).map((itemId) => labelById.get(itemId) || "?")
+
+    return (
+      <>
+        <p className={styles.questionText}>
+          Ordina cronologicamente: {correctOrder.map((item) => item.label).join(" · ")}
+        </p>
+
+        <div className={styles.answersGrid}>
+          <div className={styles.answerBox}>
+            <span className={styles.answerLabel}>La tua sequenza</span>
+            <strong className={styles.answerValue}>
+              {userLabels.length > 0
+                ? userLabels.join(" → ")
+                : r.is_timeout
+                  ? "Nessuna risposta (timeout)"
+                  : "-"}
+            </strong>
+          </div>
+
+          {!r.is_correct && (
+            <div className={styles.answerBox}>
+              <span className={styles.answerLabel}>Sequenza corretta</span>
+              <strong className={`${styles.answerValue} ${styles.correctText}`}>
+                {correctOrder.map((item) => item.label).join(" → ")}
+              </strong>
+            </div>
+          )}
+
+          <div className={styles.answerBox}>
+            <span className={styles.answerLabel}>Tempo impiegato</span>
+            <strong className={styles.answerValue}>{formatTime(r.time_taken)}</strong>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  function renderTrovaIntruso(r) {
+    const items = r.items || []
+    const labelById = new Map(items.map((item) => [item.id, item.label]))
+    const intrusoLabel = labelById.get(r.intruso_id) || "-"
+    const sceltoLabel = r.scelto_id != null ? labelById.get(r.scelto_id) || "-" : null
+
+    return (
+      <>
+        <p className={styles.questionText}>Elementi: {items.map((item) => item.label).join(" · ")}</p>
+
+        <div className={styles.answersGrid}>
+          <div className={styles.answerBox}>
+            <span className={styles.answerLabel}>La tua scelta</span>
+            <strong className={styles.answerValue}>
+              {sceltoLabel || (r.is_timeout ? "Nessuna risposta (timeout)" : "-")}
+            </strong>
+          </div>
+
+          {!r.is_correct && (
+            <div className={styles.answerBox}>
+              <span className={styles.answerLabel}>Intruso corretto</span>
+              <strong className={`${styles.answerValue} ${styles.correctText}`}>{intrusoLabel}</strong>
+            </div>
+          )}
+
+          <div className={styles.answerBox}>
+            <span className={styles.answerLabel}>Tempo impiegato</span>
+            <strong className={styles.answerValue}>{formatTime(r.time_taken)}</strong>
+          </div>
+        </div>
+      </>
+    )
+  }
+
+  function renderRoundBody(r, tipo) {
+    if (tipo === "salto_temporale") return renderSaltoTemporale(r)
+    if (tipo === "trova_intruso") return renderTrovaIntruso(r)
+    return renderTastieraRotta(r)
+  }
+
   if (loading) {
     return (
       <div className={`container ${styles.loadingWrap}`}>
@@ -121,35 +237,7 @@ function MinigiocoReview() {
                 </span>
               </div>
 
-              <p className={styles.questionText}>Parola cifrata: {r.parola_cifrata}</p>
-
-              <div className={styles.answersGrid}>
-                <div className={styles.answerBox}>
-                  <span className={styles.answerLabel}>La tua risposta</span>
-                  <strong className={styles.answerValue}>
-                    {r.risposta_utente || (r.is_timeout ? "Nessuna risposta (timeout)" : "-")}
-                  </strong>
-                </div>
-
-                {!r.is_correct && (
-                  <div className={styles.answerBox}>
-                    <span className={styles.answerLabel}>Parola corretta</span>
-                    <strong className={`${styles.answerValue} ${styles.correctText}`}>
-                      {r.parola_corretta || "-"}
-                    </strong>
-                  </div>
-                )}
-
-                <div className={styles.answerBox}>
-                  <span className={styles.answerLabel}>Tentativi falliti</span>
-                  <strong className={styles.answerValue}>{r.tentativi_falliti}</strong>
-                </div>
-
-                <div className={styles.answerBox}>
-                  <span className={styles.answerLabel}>Tempo impiegato</span>
-                  <strong className={styles.answerValue}>{formatTime(r.time_taken)}</strong>
-                </div>
-              </div>
+              {renderRoundBody(r, data.minigioco.tipo)}
             </div>
           )
         })}

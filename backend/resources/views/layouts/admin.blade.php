@@ -49,6 +49,10 @@
                     <i class="bi bi-joystick"></i>
                     <span>Minigiochi</span>
                 </a>
+                <a href="{{ route('admin.period-leaderboard.index') }}" class="admin-nav-link {{ Route::is('admin.period-leaderboard.*') ? 'active' : '' }}">
+                    <i class="bi bi-trophy"></i>
+                    <span>Classifica premi</span>
+                </a>
                 <a href="{{ route('admin.reports.index') }}" class="admin-nav-link {{ Route::is('admin.reports.*') ? 'active' : '' }}">
                     <i class="bi bi-flag"></i>
                     <span>Segnalazioni</span>

@@ -12,9 +12,10 @@ use Illuminate\Support\Str;
 
 class MinigiocoPlayController extends Controller
 {
-    private const CORRECT_ANSWER_BASE_SCORE = 7000;
+    // Quota di punteggio per round corretto: 70% fisso, 30% bonus velocità.
+    private const BASE_SHARE = 0.7;
 
-    private const MAX_SPEED_BONUS = 3000;
+    private const SPEED_BONUS_SHARE = 0.3;
 
     private const WRONG_ANSWER_PENALTY_RATE = 0.10;
 
@@ -67,7 +68,6 @@ class MinigiocoPlayController extends Controller
         $request->validate([
             'attempt_id' => 'required|exists:minigioco_attempts,id',
             'round_id' => 'required|exists:minigioco_round,id',
-            'risposta' => 'nullable|string|max:100',
             'time_taken' => 'required|integer|min:0',
         ]);
 
@@ -94,6 +94,64 @@ class MinigiocoPlayController extends Controller
                 'message' => 'Domanda non valida per questo minigioco',
             ], 422);
         }
+
+        $minigioco = $attempt->minigioco;
+
+        return match ($minigioco->tipo) {
+            'salto_temporale' => $this->submitSaltoTemporale($request, $attempt, $round, $minigioco),
+            'trova_intruso' => $this->submitTrovaIntruso($request, $attempt, $round, $minigioco),
+            default => $this->submitTastieraRotta($request, $attempt, $round, $minigioco),
+        };
+    }
+
+    public function finishMinigioco(Request $request)
+    {
+        $request->validate([
+            'attempt_id' => 'required|exists:minigioco_attempts,id',
+        ]);
+
+        $user = $request->user();
+        $attempt = MinigiocoAttempt::findOrFail($request->attempt_id);
+
+        if ((int) $attempt->user_id !== (int) $user->id) {
+            return response()->json([
+                'message' => 'Tentativo non valido',
+            ], 403);
+        }
+
+        if ($attempt->completed) {
+            return response()->json([
+                'message' => 'Minigioco già completato',
+            ], 403);
+        }
+
+        $totalScore = (int) MinigiocoRoundRisposta::where('attempt_id', $attempt->id)->sum('score');
+        $totalScore = min($totalScore, $attempt->minigioco->max_score * 100);
+        $totalTime = MinigiocoRoundRisposta::where('attempt_id', $attempt->id)->sum('time_taken');
+
+        $attempt->update([
+            'score' => $totalScore,
+            'total_time' => $totalTime,
+            'completed' => true,
+            'finished_at' => now(),
+        ]);
+
+        return response()->json([
+            'score' => $totalScore,
+        ]);
+    }
+
+    /**
+     * Tastiera Rotta: gameplay invariato (retry finché non scade il timer,
+     * penalità percentuale su risposta sbagliata/timeout), solo con la
+     * quota di punteggio per round ora calcolata dinamicamente sul tetto
+     * massimo configurabile del minigioco invece di costanti fisse.
+     */
+    private function submitTastieraRotta(Request $request, MinigiocoAttempt $attempt, MinigiocoRound $round, Minigioco $minigioco)
+    {
+        $request->validate(['risposta' => 'nullable|string|max:100']);
+
+        ['base' => $base, 'maxSpeedBonus' => $maxSpeedBonus] = $this->perRoundBudget($minigioco);
 
         $row = MinigiocoRoundRisposta::firstOrCreate(
             ['attempt_id' => $attempt->id, 'round_id' => $round->id],
@@ -134,9 +192,9 @@ class MinigiocoPlayController extends Controller
         $rispostaNormalizzata = Str::upper(trim($request->risposta));
 
         if ($rispostaNormalizzata === $round->parola_originale) {
-            $speedBonus = (int) round((($maxTimeMs - $timeTaken) / $maxTimeMs) * self::MAX_SPEED_BONUS);
+            $speedBonus = (int) round((($maxTimeMs - $timeTaken) / $maxTimeMs) * $maxSpeedBonus);
 
-            $row->score += self::CORRECT_ANSWER_BASE_SCORE + $speedBonus;
+            $row->score += (int) round($base) + $speedBonus;
             $row->is_correct = true;
             $row->risposta_utente = $rispostaNormalizzata;
             $row->time_taken = $timeTaken;
@@ -165,40 +223,136 @@ class MinigiocoPlayController extends Controller
         ]);
     }
 
-    public function finishMinigioco(Request $request)
+    /**
+     * Salto Temporale: un solo tentativo (nessun retry). Corretto se l'ordine
+     * proposto dal giocatore coincide con l'ordine degli item per 'ordine' crescente.
+     */
+    private function submitSaltoTemporale(Request $request, MinigiocoAttempt $attempt, MinigiocoRound $round, Minigioco $minigioco)
     {
         $request->validate([
-            'attempt_id' => 'required|exists:minigioco_attempts,id',
+            'risposta' => 'nullable|array',
+            'risposta.*' => 'integer',
         ]);
 
-        $user = $request->user();
-        $attempt = MinigiocoAttempt::findOrFail($request->attempt_id);
+        ['base' => $base, 'maxSpeedBonus' => $maxSpeedBonus] = $this->perRoundBudget($minigioco);
 
-        if ((int) $attempt->user_id !== (int) $user->id) {
+        $row = MinigiocoRoundRisposta::firstOrCreate(
+            ['attempt_id' => $attempt->id, 'round_id' => $round->id],
+            ['risposta_utente' => null, 'tentativi_falliti' => 0, 'time_taken' => 0, 'score' => 0]
+        );
+
+        if ($row->is_correct || $row->is_timeout || $row->tentativi_falliti > 0) {
             return response()->json([
-                'message' => 'Tentativo non valido',
+                'message' => 'Hai già risolto questa domanda',
             ], 403);
         }
 
-        if ($attempt->completed) {
+        $maxTimeMs = (int) $round->time_limit_seconds * 1000;
+        $timeTaken = min((int) $request->time_taken, $maxTimeMs);
+
+        if ($request->risposta === null) {
+            $row->is_timeout = true;
+            $row->time_taken = $maxTimeMs;
+            $row->score = 0;
+            $row->save();
+
+            return response()->json(['correct' => false, 'timeout' => true, 'score' => 0]);
+        }
+
+        $correctOrder = $round->items()->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $submittedOrder = array_map('intval', $request->risposta);
+
+        $isCorrect = $submittedOrder === $correctOrder;
+
+        $row->risposta_utente = json_encode($submittedOrder);
+        $row->time_taken = $timeTaken;
+
+        if ($isCorrect) {
+            $speedBonus = (int) round((($maxTimeMs - $timeTaken) / $maxTimeMs) * $maxSpeedBonus);
+            $row->score = (int) round($base) + $speedBonus;
+            $row->is_correct = true;
+        } else {
+            $row->score = 0;
+            $row->tentativi_falliti = 1;
+        }
+
+        $row->save();
+
+        return response()->json(['correct' => $isCorrect, 'timeout' => false, 'score' => $row->score]);
+    }
+
+    /**
+     * Trova l'Intruso: un solo tentativo (nessun retry). Corretto se l'item
+     * scelto dal giocatore ha is_intruso=true.
+     */
+    private function submitTrovaIntruso(Request $request, MinigiocoAttempt $attempt, MinigiocoRound $round, Minigioco $minigioco)
+    {
+        $request->validate(['risposta' => 'nullable|integer']);
+
+        ['base' => $base, 'maxSpeedBonus' => $maxSpeedBonus] = $this->perRoundBudget($minigioco);
+
+        $row = MinigiocoRoundRisposta::firstOrCreate(
+            ['attempt_id' => $attempt->id, 'round_id' => $round->id],
+            ['risposta_utente' => null, 'tentativi_falliti' => 0, 'time_taken' => 0, 'score' => 0]
+        );
+
+        if ($row->is_correct || $row->is_timeout || $row->tentativi_falliti > 0) {
             return response()->json([
-                'message' => 'Minigioco già completato',
+                'message' => 'Hai già risolto questa domanda',
             ], 403);
         }
 
-        $totalScore = MinigiocoRoundRisposta::where('attempt_id', $attempt->id)->sum('score');
-        $totalTime = MinigiocoRoundRisposta::where('attempt_id', $attempt->id)->sum('time_taken');
+        $maxTimeMs = (int) $round->time_limit_seconds * 1000;
+        $timeTaken = min((int) $request->time_taken, $maxTimeMs);
 
-        $attempt->update([
-            'score' => $totalScore,
-            'total_time' => $totalTime,
-            'completed' => true,
-            'finished_at' => now(),
-        ]);
+        if ($request->risposta === null) {
+            $row->is_timeout = true;
+            $row->time_taken = $maxTimeMs;
+            $row->score = 0;
+            $row->save();
 
-        return response()->json([
-            'score' => $totalScore,
-        ]);
+            return response()->json(['correct' => false, 'timeout' => true, 'score' => 0]);
+        }
+
+        $selectedItem = $round->items()->find($request->risposta);
+        $isCorrect = (bool) $selectedItem?->is_intruso;
+
+        $row->risposta_utente = (string) $request->risposta;
+        $row->time_taken = $timeTaken;
+
+        if ($isCorrect) {
+            $speedBonus = (int) round((($maxTimeMs - $timeTaken) / $maxTimeMs) * $maxSpeedBonus);
+            $row->score = (int) round($base) + $speedBonus;
+            $row->is_correct = true;
+        } else {
+            $row->score = 0;
+            $row->tentativi_falliti = 1;
+        }
+
+        $row->save();
+
+        return response()->json(['correct' => $isCorrect, 'timeout' => false, 'score' => $row->score]);
+    }
+
+    /**
+     * Distribuisce il tetto massimo di punti del minigioco sui suoi round:
+     * ogni round corretto vale al massimo max_score/numero_round, suddiviso
+     * in una quota fissa (70%) e un bonus velocità (30%).
+     *
+     * `max_score` è il valore MOSTRATO all'utente (es. 30): come ogni altro
+     * punteggio del progetto, il valore grezzo salvato nel DB è x100
+     * (frontend/src/utils/quizScore.js divide per 100 in visualizzazione),
+     * quindi qui il budget viene calcolato su `max_score * 100`.
+     */
+    private function perRoundBudget(Minigioco $minigioco): array
+    {
+        $roundsCount = max(1, MinigiocoRound::where('minigioco_id', $minigioco->id)->count());
+        $perRoundMax = ($minigioco->max_score * 100) / $roundsCount;
+
+        return [
+            'base' => $perRoundMax * self::BASE_SHARE,
+            'maxSpeedBonus' => $perRoundMax * self::SPEED_BONUS_SHARE,
+        ];
     }
 
     private function calculatePenalty(int $currentScore, float $penaltyRate): int

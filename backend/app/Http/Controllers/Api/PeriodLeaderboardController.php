@@ -3,12 +3,16 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\QuizAttempt;
+use App\Services\PeriodLeaderboardService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PeriodLeaderboardController extends Controller
 {
+    public function __construct(private PeriodLeaderboardService $leaderboard)
+    {
+    }
+
     public function weekly(Request $request)
     {
         $reference = $request->query('week')
@@ -22,7 +26,7 @@ class PeriodLeaderboardController extends Controller
             'period' => 'weekly',
             'start' => $start->toDateString(),
             'end' => $end->toDateString(),
-            'results' => $this->aggregate($start, $end),
+            'results' => $this->leaderboard->aggregate($start, $end),
         ]);
     }
 
@@ -38,13 +42,13 @@ class PeriodLeaderboardController extends Controller
         return response()->json([
             'period' => 'monthly',
             'month' => $start->format('Y-m'),
-            'results' => $this->aggregate($start, $end),
+            'results' => $this->leaderboard->aggregate($start, $end),
         ]);
     }
 
     public function availableWeeks()
     {
-        $weeks = $this->finishedDates()
+        $weeks = $this->leaderboard->finishedDates()
             ->map(fn ($date) => Carbon::parse($date)->startOfWeek(Carbon::MONDAY)->toDateString())
             ->unique()
             ->sortDesc()
@@ -55,45 +59,12 @@ class PeriodLeaderboardController extends Controller
 
     public function availableMonths()
     {
-        $months = $this->finishedDates()
+        $months = $this->leaderboard->finishedDates()
             ->map(fn ($date) => Carbon::parse($date)->format('Y-m'))
             ->unique()
             ->sortDesc()
             ->values();
 
         return response()->json(['months' => $months]);
-    }
-
-    private function finishedDates()
-    {
-        return QuizAttempt::query()
-            ->join('quizzes', 'quizzes.id', '=', 'quiz_attempts.quiz_id')
-            ->where('quizzes.type', 'assigned')
-            ->where('quiz_attempts.completed', true)
-            ->whereNotNull('quiz_attempts.finished_at')
-            ->pluck('quiz_attempts.finished_at');
-    }
-
-    private function aggregate(Carbon $start, Carbon $end)
-    {
-        return QuizAttempt::query()
-            ->join('quizzes', 'quizzes.id', '=', 'quiz_attempts.quiz_id')
-            ->join('users', 'users.id', '=', 'quiz_attempts.user_id')
-            ->where('quizzes.type', 'assigned')
-            ->where('quiz_attempts.completed', true)
-            ->whereBetween('quiz_attempts.finished_at', [$start, $end])
-            ->groupBy('quiz_attempts.user_id', 'users.nickname')
-            ->selectRaw('users.nickname as nickname, SUM(quiz_attempts.score) as total_score, COUNT(*) as quizzes_completed')
-            ->orderByDesc('total_score')
-            ->get()
-            ->values()
-            ->map(function ($row, $index) {
-                return [
-                    'position' => $index + 1,
-                    'nickname' => $row->nickname,
-                    'total_score' => (int) $row->total_score,
-                    'quizzes_completed' => (int) $row->quizzes_completed,
-                ];
-            });
     }
 }

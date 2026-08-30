@@ -42,6 +42,7 @@ class UserMinigiocoController extends Controller
                     'title' => $minigioco->title,
                     'description' => $minigioco->description,
                     'image' => $minigioco->image_url,
+                    'tipo' => $minigioco->tipo,
                     'is_active' => $isActive,
                     'status' => $status,
                     'completed' => $completed,
@@ -94,26 +95,49 @@ class UserMinigiocoController extends Controller
         }
 
         $minigioco->load(['rounds' => function ($q) {
-            $q->inRandomOrder()
-                ->select('id', 'minigioco_id', 'parola_originale', 'shift', 'time_limit_seconds');
-        }]);
+            $q->inRandomOrder();
+        }, 'rounds.items']);
 
         return response()->json([
             'minigioco' => [
                 'id' => $minigioco->id,
                 'title' => $minigioco->title,
                 'description' => $minigioco->description,
+                'tipo' => $minigioco->tipo,
+                'max_score' => $minigioco->max_score,
                 'total_rounds' => $minigioco->rounds->count(),
                 'total_time_seconds' => $minigioco->rounds->sum('time_limit_seconds'),
                 'leaderboard_visible' => (bool) $minigioco->leaderboard_visible,
-                'rounds' => $minigioco->rounds->map(function ($round) {
-                    return [
-                        'id' => $round->id,
-                        'parola_cifrata' => $round->parola_cifrata,
-                        'time_limit_seconds' => $round->time_limit_seconds,
-                    ];
-                }),
+                'rounds' => $minigioco->rounds->map(fn ($round) => $this->roundPlayPayload($round, $minigioco->tipo)),
             ],
+        ]);
+    }
+
+    /**
+     * Payload di un round per il gioco (dati mai rivelano la risposta corretta):
+     * Tastiera Rotta espone la parola cifrata; Salto Temporale/Trova l'Intruso
+     * espongono i 4 elementi mescolati casualmente.
+     */
+    private function roundPlayPayload($round, string $tipo): array
+    {
+        $base = [
+            'id' => $round->id,
+            'time_limit_seconds' => $round->time_limit_seconds,
+        ];
+
+        if ($tipo === 'tastiera_rotta') {
+            return [...$base, 'parola_cifrata' => $round->parola_cifrata];
+        }
+
+        return [...$base, 'items' => $this->itemsPayload($round)->shuffle()->values()];
+    }
+
+    private function itemsPayload($round)
+    {
+        return $round->items->map(fn ($item) => [
+            'id' => $item->id,
+            'label' => $item->label,
+            'image' => $item->image_url,
         ]);
     }
 
@@ -132,29 +156,50 @@ class UserMinigiocoController extends Controller
             ], 403);
         }
 
-        $minigioco->load(['rounds' => function ($q) {
-            $q->inRandomOrder()
-                ->select('id', 'minigioco_id', 'parola_originale', 'shift', 'time_limit_seconds');
-        }]);
+        $minigioco->load(['rounds', 'rounds.items']);
 
         $givenRisposte = MinigiocoRoundRisposta::where('attempt_id', $attempt->id)
             ->get()
             ->keyBy('round_id');
 
-        $rounds = $minigioco->rounds->map(function ($round) use ($givenRisposte) {
+        $rounds = $minigioco->rounds->map(function ($round) use ($givenRisposte, $minigioco) {
             $given = $givenRisposte->get($round->id);
 
-            return [
+            $base = [
                 'id' => $round->id,
-                'parola_cifrata' => $round->parola_cifrata,
                 'time_limit_seconds' => $round->time_limit_seconds,
-                'parola_corretta' => $round->parola_originale,
-                'risposta_utente' => $given?->risposta_utente,
                 'tentativi_falliti' => $given?->tentativi_falliti ?? 0,
                 'is_correct' => (bool) ($given?->is_correct ?? false),
                 'is_timeout' => (bool) ($given?->is_timeout ?? false),
                 'time_taken' => $given?->time_taken,
                 'score' => $given?->score ?? 0,
+            ];
+
+            if ($minigioco->tipo === 'salto_temporale') {
+                return [
+                    ...$base,
+                    'items_corretti' => $this->itemsPayload($round)->values(),
+                    'ordine_utente' => $given?->risposta_utente ? json_decode($given->risposta_utente, true) : null,
+                ];
+            }
+
+            if ($minigioco->tipo === 'trova_intruso') {
+                $intrusoItem = $round->items->firstWhere('is_intruso', true);
+                $sceltoId = $given?->risposta_utente !== null ? (int) $given->risposta_utente : null;
+
+                return [
+                    ...$base,
+                    'items' => $this->itemsPayload($round)->values(),
+                    'intruso_id' => $intrusoItem?->id,
+                    'scelto_id' => $sceltoId,
+                ];
+            }
+
+            return [
+                ...$base,
+                'parola_cifrata' => $round->parola_cifrata,
+                'parola_corretta' => $round->parola_originale,
+                'risposta_utente' => $given?->risposta_utente,
             ];
         });
 
@@ -162,6 +207,7 @@ class UserMinigiocoController extends Controller
             'minigioco' => [
                 'id' => $minigioco->id,
                 'title' => $minigioco->title,
+                'tipo' => $minigioco->tipo,
             ],
             'score' => $attempt->score,
             'total_time' => $attempt->total_time,
