@@ -294,10 +294,17 @@ function Home() {
           {trainingCategories.length > 0 ? (
             trainingCategories.map((category) => (
               <Link to={`/training/${category.slug}`} key={category.id} className={css.trainingCard}>
-                <h3 className={css.quizCardTitle}>{category.name}</h3>
-                <p className={css.quizCardMeta}>
-                  {category.description || "Training disponibili per questa categoria."}
-                </p>
+                {category.image && (
+                  <div className={css.trainingCardImage}>
+                    <img src={category.image} alt="" />
+                  </div>
+                )}
+                <div className={css.trainingCardBody}>
+                  <h3 className={css.quizCardTitle}>{category.name}</h3>
+                  <p className={css.quizCardMeta}>
+                    {category.description || "Training disponibili per questa categoria."}
+                  </p>
+                </div>
               </Link>
             ))
           ) : (

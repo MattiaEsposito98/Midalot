@@ -190,3 +190,14 @@
     flex-direction: column;
   }
 }
+
+@media (max-width: 767px) {
+  .cardHeader {
+    flex-direction: column;
+  }
+
+  .cardImageWrap {
+    width: 100%;
+    height: 160px;
+  }
+}
