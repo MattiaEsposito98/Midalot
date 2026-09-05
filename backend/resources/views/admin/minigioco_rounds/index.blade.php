@@ -88,6 +88,7 @@
                 <table class="table admin-table">
                     <thead>
                         <tr>
+                            <th>Formato</th>
                             <th>Elementi</th>
                             @if ($minigioco->tipo === 'trova_intruso')
                                 <th>Intruso</th>
@@ -101,12 +102,31 @@
                             @php $intrusoItem = $round->items->firstWhere('is_intruso', true); @endphp
                             <tr>
                                 <td>
+                                    <span class="badge {{ $round->content_mode === 'immagine' ? 'bg-info-subtle text-dark border' : 'bg-primary-subtle text-dark border' }}">
+                                        {{ $round->content_mode === 'immagine' ? 'Immagine' : 'Testo' }}
+                                    </span>
+                                </td>
+                                <td>
                                     @foreach ($round->items as $item)
-                                        <span class="badge bg-secondary me-1 mb-1">{{ $item->label }}</span>
+                                        @if ($item->label)
+                                            <span class="badge bg-secondary me-1 mb-1">{{ $item->label }}</span>
+                                        @elseif ($item->image_path)
+                                            <img src="{{ $item->image_url }}" class="rounded border me-1 mb-1" style="width: 36px; height: 36px; object-fit: cover;" alt="">
+                                        @else
+                                            <span class="badge bg-light text-dark border me-1 mb-1">-</span>
+                                        @endif
                                     @endforeach
                                 </td>
                                 @if ($minigioco->tipo === 'trova_intruso')
-                                    <td><span class="badge bg-danger">{{ $intrusoItem?->label ?? '-' }}</span></td>
+                                    <td>
+                                        @if ($intrusoItem?->label)
+                                            <span class="badge bg-danger">{{ $intrusoItem->label }}</span>
+                                        @elseif ($intrusoItem?->image_path)
+                                            <img src="{{ $intrusoItem->image_url }}" class="rounded border" style="width: 36px; height: 36px; object-fit: cover;" alt="">
+                                        @else
+                                            <span class="badge bg-danger">-</span>
+                                        @endif
+                                    </td>
                                 @endif
                                 <td>{{ $round->time_limit_seconds }} sec</td>
                                 <td>

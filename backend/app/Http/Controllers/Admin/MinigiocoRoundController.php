@@ -149,12 +149,20 @@ class MinigiocoRoundController extends Controller
      */
     private function storeItemsRound(Request $request, Minigioco $minigioco, bool $intruso = false)
     {
+        $contentMode = $request->input('content_mode') === 'immagine' ? 'immagine' : 'testo';
+
         $rules = [
             'time_limit_seconds' => 'required|integer|min:5',
+            'content_mode' => 'required|in:testo,immagine',
             'items' => 'required|array|size:4',
-            'items.*.label' => 'required|string|max:255',
-            'items.*.image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ];
+
+        if ($contentMode === 'immagine') {
+            $rules['items.*.image'] = 'required|image|mimes:jpg,jpeg,png|max:2048';
+        } else {
+            $rules['items.*.label'] = 'required|string|max:255';
+            $rules['items.*.image'] = 'nullable|image|mimes:jpg,jpeg,png|max:2048';
+        }
 
         if ($intruso) {
             $rules['intruso'] = 'required|integer|min:0|max:3';
@@ -162,21 +170,22 @@ class MinigiocoRoundController extends Controller
 
         $request->validate($rules);
 
-        DB::transaction(function () use ($request, $minigioco, $intruso) {
+        DB::transaction(function () use ($request, $minigioco, $intruso, $contentMode) {
             $round = MinigiocoRound::create([
                 'minigioco_id' => $minigioco->id,
                 'time_limit_seconds' => $request->time_limit_seconds,
+                'content_mode' => $contentMode,
             ]);
 
             foreach ($request->items as $index => $item) {
-                $imagePath = $request->hasFile("items.{$index}.image")
+                $imagePath = $contentMode === 'immagine' && $request->hasFile("items.{$index}.image")
                     ? $request->file("items.{$index}.image")->store('minigioco-round-items', 'public')
                     : null;
 
                 MinigiocoRoundItem::create([
                     'minigioco_round_id' => $round->id,
                     'ordine' => $index + 1,
-                    'label' => $item['label'],
+                    'label' => $contentMode === 'testo' ? $item['label'] : null,
                     'image_path' => $imagePath,
                     'is_intruso' => $intruso && (int) $request->intruso === (int) $index,
                 ]);
@@ -190,13 +199,19 @@ class MinigiocoRoundController extends Controller
 
     private function updateItemsRound(Request $request, Minigioco $minigioco, MinigiocoRound $round, bool $intruso = false)
     {
+        $contentMode = $request->input('content_mode') === 'immagine' ? 'immagine' : 'testo';
+
         $rules = [
             'time_limit_seconds' => 'required|integer|min:5',
+            'content_mode' => 'required|in:testo,immagine',
             'items' => 'required|array|size:4',
-            'items.*.label' => 'required|string|max:255',
             'items.*.image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'items.*.remove_image' => 'nullable|boolean',
         ];
+
+        if ($contentMode === 'testo') {
+            $rules['items.*.label'] = 'required|string|max:255';
+        }
 
         if ($intruso) {
             $rules['intruso'] = 'required|integer|min:0|max:3';
@@ -204,10 +219,27 @@ class MinigiocoRoundController extends Controller
 
         $request->validate($rules);
 
-        DB::transaction(function () use ($request, $minigioco, $round, $intruso) {
-            $existingItems = $round->items()->orderBy('ordine')->get()->values();
+        $existingItems = $round->items()->orderBy('ordine')->get()->values();
 
-            $round->update(['time_limit_seconds' => $request->time_limit_seconds]);
+        if ($contentMode === 'immagine') {
+            foreach ($request->items as $index => $item) {
+                $existing = $existingItems->get($index);
+                $keepsExisting = $existing?->image_path && ! $request->boolean("items.{$index}.remove_image");
+                $hasNewUpload = $request->hasFile("items.{$index}.image");
+
+                if (! $keepsExisting && ! $hasNewUpload) {
+                    return back()
+                        ->withErrors(['items.'.$index.'.image' => 'Elemento '.($index + 1).': carica un\'immagine.'])
+                        ->withInput();
+                }
+            }
+        }
+
+        DB::transaction(function () use ($request, $minigioco, $round, $intruso, $contentMode, $existingItems) {
+            $round->update([
+                'time_limit_seconds' => $request->time_limit_seconds,
+                'content_mode' => $contentMode,
+            ]);
 
             foreach ($request->items as $index => $item) {
                 $existing = $existingItems->get($index);
@@ -226,11 +258,17 @@ class MinigiocoRoundController extends Controller
                     $imagePath = $request->file("items.{$index}.image")->store('minigioco-round-items', 'public');
                 }
 
+                if ($contentMode === 'testo' && $imagePath) {
+                    Storage::disk('public')->delete($imagePath);
+                    $imagePath = null;
+                }
+
+                $label = $contentMode === 'testo' ? $item['label'] : null;
                 $isIntruso = $intruso && (int) $request->intruso === (int) $index;
 
                 if ($existing) {
                     $existing->update([
-                        'label' => $item['label'],
+                        'label' => $label,
                         'image_path' => $imagePath,
                         'is_intruso' => $isIntruso,
                     ]);
@@ -238,7 +276,7 @@ class MinigiocoRoundController extends Controller
                     MinigiocoRoundItem::create([
                         'minigioco_round_id' => $round->id,
                         'ordine' => $index + 1,
-                        'label' => $item['label'],
+                        'label' => $label,
                         'image_path' => $imagePath,
                         'is_intruso' => $isIntruso,
                     ]);

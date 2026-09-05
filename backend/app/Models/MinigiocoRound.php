@@ -14,6 +14,7 @@ class MinigiocoRound extends Model
         'parola_originale',
         'shift',
         'time_limit_seconds',
+        'content_mode',
     ];
 
     public function minigioco()

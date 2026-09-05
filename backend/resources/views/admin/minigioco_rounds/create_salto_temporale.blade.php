@@ -27,6 +27,19 @@
                             <input type="number" name="time_limit_seconds" class="form-control"
                                 value="{{ old('time_limit_seconds', 30) }}" min="5" required>
                         </div>
+                        <div>
+                            <label class="form-label">Formato elementi</label>
+                            <div class="d-flex gap-3 pt-2">
+                                <div class="form-check">
+                                    <input type="radio" name="content_mode" value="testo" class="form-check-input content-mode-radio" id="mode_testo" {{ old('content_mode', 'testo') === 'testo' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="mode_testo">Solo testo</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" name="content_mode" value="immagine" class="form-check-input content-mode-radio" id="mode_immagine" {{ old('content_mode') === 'immagine' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="mode_immagine">Solo immagine</label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <hr class="my-4">
@@ -36,13 +49,13 @@
                             <div class="full">
                                 <label class="form-label fw-bold">Elemento {{ $i + 1 }} (posizione {{ $i + 1 }} in ordine cronologico)</label>
                             </div>
-                            <div>
+                            <div class="mode-field mode-field-testo">
                                 <label class="form-label">Testo (data / citazione / didascalia)</label>
                                 <input type="text" name="items[{{ $i }}][label]" class="form-control"
-                                    value="{{ old("items.$i.label") }}" required>
+                                    value="{{ old("items.$i.label") }}">
                             </div>
-                            <div>
-                                <label class="form-label">Immagine (opzionale)</label>
+                            <div class="mode-field mode-field-immagine">
+                                <label class="form-label">Immagine</label>
                                 <input type="file" name="items[{{ $i }}][image]" class="form-control" accept=".jpg,.jpeg,.png,image/*">
                             </div>
                         </div>
@@ -62,4 +75,6 @@
             </div>
         </div>
     </form>
+
+    @include('admin.minigioco_rounds._content_mode_script')
 @endsection

@@ -94,13 +94,14 @@ function MinigiocoReview() {
 
   function renderSaltoTemporale(r) {
     const correctOrder = r.items_corretti || []
-    const labelById = new Map(correctOrder.map((item) => [item.id, item.label]))
+    const itemDisplay = (item, index) => item.label || `Elemento ${index + 1}`
+    const labelById = new Map(correctOrder.map((item, index) => [item.id, itemDisplay(item, index)]))
     const userLabels = (r.ordine_utente || []).map((itemId) => labelById.get(itemId) || "?")
 
     return (
       <>
         <p className={styles.questionText}>
-          Ordina cronologicamente: {correctOrder.map((item) => item.label).join(" · ")}
+          Ordina cronologicamente: {correctOrder.map(itemDisplay).join(" · ")}
         </p>
 
         <div className={styles.answersGrid}>
@@ -119,7 +120,7 @@ function MinigiocoReview() {
             <div className={styles.answerBox}>
               <span className={styles.answerLabel}>Sequenza corretta</span>
               <strong className={`${styles.answerValue} ${styles.correctText}`}>
-                {correctOrder.map((item) => item.label).join(" → ")}
+                {correctOrder.map(itemDisplay).join(" → ")}
               </strong>
             </div>
           )}
@@ -135,13 +136,14 @@ function MinigiocoReview() {
 
   function renderTrovaIntruso(r) {
     const items = r.items || []
-    const labelById = new Map(items.map((item) => [item.id, item.label]))
+    const itemDisplay = (item, index) => item.label || `Elemento ${index + 1}`
+    const labelById = new Map(items.map((item, index) => [item.id, itemDisplay(item, index)]))
     const intrusoLabel = labelById.get(r.intruso_id) || "-"
     const sceltoLabel = r.scelto_id != null ? labelById.get(r.scelto_id) || "-" : null
 
     return (
       <>
-        <p className={styles.questionText}>Elementi: {items.map((item) => item.label).join(" · ")}</p>
+        <p className={styles.questionText}>Elementi: {items.map(itemDisplay).join(" · ")}</p>
 
         <div className={styles.answersGrid}>
           <div className={styles.answerBox}>

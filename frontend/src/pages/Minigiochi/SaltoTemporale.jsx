@@ -35,7 +35,7 @@ function SortableItem({ item, index, disabled }) {
         </div>
       )}
 
-      <span className={styles.itemLabel}>{item.label}</span>
+      {item.label && <span className={styles.itemLabel}>{item.label}</span>}
 
       <i className={`bi bi-grip-vertical ${styles.dragHandle}`}></i>
     </div>

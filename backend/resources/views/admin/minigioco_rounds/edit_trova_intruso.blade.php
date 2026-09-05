@@ -32,6 +32,19 @@
                             <input type="number" name="time_limit_seconds" class="form-control"
                                 value="{{ old('time_limit_seconds', $round->time_limit_seconds) }}" min="5" required>
                         </div>
+                        <div>
+                            <label class="form-label">Formato elementi</label>
+                            <div class="d-flex gap-3 pt-2">
+                                <div class="form-check">
+                                    <input type="radio" name="content_mode" value="testo" class="form-check-input content-mode-radio" id="mode_testo" {{ old('content_mode', $round->content_mode) === 'testo' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="mode_testo">Solo testo</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="radio" name="content_mode" value="immagine" class="form-check-input content-mode-radio" id="mode_immagine" {{ old('content_mode', $round->content_mode) === 'immagine' ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="mode_immagine">Solo immagine</label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <hr class="my-4">
@@ -47,13 +60,13 @@
                                     <label class="form-check-label text-danger" for="intruso_{{ $i }}">È l'intruso</label>
                                 </div>
                             </div>
-                            <div>
+                            <div class="mode-field mode-field-testo">
                                 <label class="form-label">Testo (parola / didascalia)</label>
                                 <input type="text" name="items[{{ $i }}][label]" class="form-control"
-                                    value="{{ old("items.$i.label", $item?->label) }}" required>
+                                    value="{{ old("items.$i.label", $item?->label) }}">
                             </div>
-                            <div>
-                                <label class="form-label">Immagine (opzionale)</label>
+                            <div class="mode-field mode-field-immagine" data-has-image="{{ $item?->image_path ? '1' : '0' }}">
+                                <label class="form-label">Immagine</label>
                                 @if ($item?->image_path)
                                     <img src="{{ $item->image_url }}" class="img-fluid rounded border mb-2" style="max-height: 100px;" alt="">
                                 @endif
@@ -82,4 +95,6 @@
             </div>
         </div>
     </form>
+
+    @include('admin.minigioco_rounds._content_mode_script')
 @endsection

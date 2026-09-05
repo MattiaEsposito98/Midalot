@@ -170,7 +170,7 @@ function TrovaIntruso() {
                     <img src={item.image} alt="" />
                   </div>
                 )}
-                <span className={styles.tileLabel}>{item.label}</span>
+                {item.label && <span className={styles.tileLabel}>{item.label}</span>}
               </button>
             ))}
           </div>
