@@ -156,38 +156,40 @@
   margin-bottom: 14px;
 }
 
-.subcategoryRow {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 16px;
+.subcategorySection {
+  margin-bottom: 20px;
 }
 
-.subcategoryChip {
-  display: inline-flex;
-  align-items: center;
-  padding: 7px 14px;
-  border-radius: 999px;
-  border: 1px solid #dce5ee;
-  background: #ffffff;
+.subcategoryTitle {
+  font-size: 1rem;
+  font-weight: 900;
   color: #182033;
-  font-weight: 800;
-  font-size: 0.9rem;
-  text-decoration: none;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  margin-bottom: 12px;
 }
 
-.subcategoryChip:hover {
+.cardActive {
   border-color: #0f8b8d;
-  color: #0f8b8d;
-  text-decoration: none;
+  box-shadow: 0 14px 34px rgba(15, 139, 141, 0.25);
 }
 
-.subcategoryChipActive,
-.subcategoryChipActive:hover {
+.cardActive::before {
+  width: 8px;
+}
+
+.activeBadge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
   background: #0f8b8d;
-  border-color: #0f8b8d;
   color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.quizResultsAnchor {
+  scroll-margin-top: 90px;
 }
 
 .quizGrid {

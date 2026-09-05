@@ -98,14 +98,28 @@
                                                 <ul class="list-unstyled d-grid gap-2 mb-3">
                                                     @forelse ($category->subcategories as $subcategory)
                                                         <li class="admin-subcategory-row">
-                                                            <form class="d-flex align-items-center gap-1 flex-grow-1" action="{{ route('admin.training.subcategories.update', $subcategory) }}" method="POST">
+                                                            <form class="d-flex align-items-center gap-1 flex-grow-1 flex-wrap" action="{{ route('admin.training.subcategories.update', $subcategory) }}" method="POST" enctype="multipart/form-data">
                                                                 @csrf
                                                                 @method('PUT')
-                                                                <input class="form-control form-control-sm" name="name" value="{{ $subcategory->name }}" required>
-                                                                <select class="form-select form-select-sm" name="is_active" style="max-width: 100px;">
+                                                                <span class="admin-thumb" style="width: 36px; height: 36px;">
+                                                                    @if ($subcategory->image_path)
+                                                                        <img src="{{ $subcategory->image_url }}" alt="">
+                                                                    @else
+                                                                        <i class="bi bi-image admin-thumb-empty" style="font-size: .9rem;"></i>
+                                                                    @endif
+                                                                </span>
+                                                                <input class="form-control form-control-sm" style="max-width: 130px;" name="name" value="{{ $subcategory->name }}" required>
+                                                                <select class="form-select form-select-sm" name="is_active" style="max-width: 90px;">
                                                                     <option value="1" {{ $subcategory->is_active ? 'selected' : '' }}>Attiva</option>
                                                                     <option value="0" {{ !$subcategory->is_active ? 'selected' : '' }}>Off</option>
                                                                 </select>
+                                                                <input type="file" class="form-control form-control-sm" style="max-width: 150px;" name="image" accept=".jpg,.jpeg,.png,image/*">
+                                                                @if ($subcategory->image_path)
+                                                                    <div class="form-check form-check-inline m-0">
+                                                                        <input type="checkbox" name="remove_image" value="1" class="form-check-input" id="remove_sub_image_{{ $subcategory->id }}">
+                                                                        <label class="form-check-label small text-danger" for="remove_sub_image_{{ $subcategory->id }}">Elimina img</label>
+                                                                    </div>
+                                                                @endif
                                                                 <span class="small admin-muted text-nowrap">{{ $subcategory->quizzes_count }} quiz</span>
                                                                 <button class="btn btn-sm btn-outline-primary" title="Salva"><i class="bi bi-check-lg"></i></button>
                                                             </form>
@@ -121,9 +135,10 @@
                                                         <li class="admin-muted small">Nessuna sottocategoria.</li>
                                                     @endforelse
                                                 </ul>
-                                                <form action="{{ route('admin.training.subcategories.store', $category) }}" method="POST" class="d-flex gap-1">
+                                                <form action="{{ route('admin.training.subcategories.store', $category) }}" method="POST" enctype="multipart/form-data" class="d-flex gap-1 flex-wrap">
                                                     @csrf
-                                                    <input class="form-control form-control-sm" name="name" placeholder="Nuova sottocategoria" required>
+                                                    <input class="form-control form-control-sm" style="max-width: 160px;" name="name" placeholder="Nuova sottocategoria" required>
+                                                    <input type="file" class="form-control form-control-sm" style="max-width: 160px;" name="image" accept=".jpg,.jpeg,.png,image/*">
                                                     <input type="hidden" name="is_active" value="1">
                                                     <button class="btn btn-sm btn-outline-secondary text-nowrap" title="Aggiungi">
                                                         <i class="bi bi-plus-lg"></i>

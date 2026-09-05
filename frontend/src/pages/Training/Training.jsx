@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Link, useParams, useSearchParams } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "./Training.module.css"
@@ -17,6 +17,8 @@ function Training() {
   const [leaderboard, setLeaderboard] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const quizResultsRef = useRef(null)
+  const previousFilterRef = useRef({ categorySlug: null, subcategorySlug: null })
 
   useEffect(() => {
     async function loadBase() {
@@ -62,6 +64,7 @@ function Training() {
       if (!categorySlug) {
         setCategoryData(null)
         setLeaderboard(null)
+        previousFilterRef.current = { categorySlug: null, subcategorySlug: null }
         return
       }
 
@@ -80,6 +83,17 @@ function Training() {
         }
 
         setCategoryData(data)
+
+        const previousFilter = previousFilterRef.current
+        const shouldScrollToResults =
+          previousFilter.categorySlug === categorySlug && previousFilter.subcategorySlug !== subcategorySlug
+        previousFilterRef.current = { categorySlug, subcategorySlug }
+
+        if (shouldScrollToResults) {
+          requestAnimationFrame(() => {
+            quizResultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
+          })
+        }
 
         if (token) {
           const leaderboardRes = await fetch(`${API_BASE}/api/training/categories/${categorySlug}/leaderboard`, {
@@ -211,60 +225,86 @@ function Training() {
             </div>
 
             {categoryData.subcategories?.length > 0 && (
-              <div className={styles.subcategoryRow}>
-                <Link
-                  to={`/training/${categorySlug}`}
-                  className={`${styles.subcategoryChip} ${!subcategorySlug ? styles.subcategoryChipActive : ""}`}
-                >
-                  Tutte
-                </Link>
-                {categoryData.subcategories.map((sub) => (
-                  <Link
-                    key={sub.id}
-                    to={`/training/${categorySlug}?subcategory=${sub.slug}`}
-                    className={`${styles.subcategoryChip} ${subcategorySlug === sub.slug ? styles.subcategoryChipActive : ""}`}
-                  >
-                    {sub.name}
-                  </Link>
-                ))}
+              <div className={styles.subcategorySection}>
+                <h3 className={styles.subcategoryTitle}>Scegli una sottocategoria</h3>
+                <div className={styles.grid}>
+                  <div className={`${styles.card} ${!subcategorySlug ? styles.cardActive : ""}`}>
+                    {!subcategorySlug && <span className={styles.activeBadge}>Selezionata</span>}
+                    <div className={styles.cardHeader}>
+                      <div className={styles.cardHeaderText}>
+                        <h3 className={styles.cardTitle}>Tutte</h3>
+                        <p className={`${styles.muted} mb-0`}>Tutti i quiz della categoria, senza filtro.</p>
+                      </div>
+                    </div>
+                    <div className="d-grid gap-2 mt-3">
+                      <Link to={`/training/${categorySlug}`} className="btn btn-primary">
+                        Mostra tutte
+                      </Link>
+                    </div>
+                  </div>
+
+                  {categoryData.subcategories.map((sub) => (
+                    <div className={`${styles.card} ${subcategorySlug === sub.slug ? styles.cardActive : ""}`} key={sub.id}>
+                      {subcategorySlug === sub.slug && <span className={styles.activeBadge}>Selezionata</span>}
+                      <div className={styles.cardHeader}>
+                        {sub.image && (
+                          <div className={styles.cardImageWrap}>
+                            <img src={sub.image} alt="" className={styles.cardImage} />
+                          </div>
+                        )}
+                        <div className={styles.cardHeaderText}>
+                          <h3 className={styles.cardTitle}>{sub.name}</h3>
+                          <p className={`${styles.muted} mb-0`}>{sub.quizzes_count} quiz disponibili</p>
+                        </div>
+                      </div>
+                      <div className="d-grid gap-2 mt-3">
+                        <Link to={`/training/${categorySlug}?subcategory=${sub.slug}`} className="btn btn-primary">
+                          Apri sottocategoria
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
 
-            <div className={styles.quizGrid}>
-              {categoryData.quizzes.map((quiz) => (
-                <div className={styles.card} key={quiz.id}>
-                  <div className={styles.cardHeader}>
-                    {quiz.image && (
-                      <div className={styles.cardImageWrap}>
-                        <img src={quiz.image} alt="" className={styles.cardImage} />
+            <div ref={quizResultsRef} className={styles.quizResultsAnchor}>
+              <div className={styles.quizGrid}>
+                {categoryData.quizzes.map((quiz) => (
+                  <div className={styles.card} key={quiz.id}>
+                    <div className={styles.cardHeader}>
+                      {quiz.image && (
+                        <div className={styles.cardImageWrap}>
+                          <img src={quiz.image} alt="" className={styles.cardImage} />
+                        </div>
+                      )}
+                      <div className={styles.cardHeaderText}>
+                        <h3 className={styles.cardTitle}>{quiz.title}</h3>
+                        <p className={styles.muted}>{quiz.description || "Quiz di allenamento"}</p>
+                        <small className={styles.muted}>
+                          Domande: {quiz.question_mode === "all" ? "tutte" : quiz.question_mode}
+                        </small>
                       </div>
-                    )}
-                    <div className={styles.cardHeaderText}>
-                      <h3 className={styles.cardTitle}>{quiz.title}</h3>
-                      <p className={styles.muted}>{quiz.description || "Quiz di allenamento"}</p>
-                      <small className={styles.muted}>
-                        Domande: {quiz.question_mode === "all" ? "tutte" : quiz.question_mode}
-                      </small>
+                    </div>
+                    <div className="d-grid gap-2 mt-3">
+                      <Link to={`/training/play/${quiz.id}`} className="btn btn-primary">
+                        Inizia training
+                      </Link>
+                      {token && quiz.leaderboard_visible && (
+                        <Link to={`/training/play/${quiz.id}/leaderboard`} className="btn btn-outline-warning">
+                          <i className="bi bi-trophy-fill"></i>
+                          Classifica
+                        </Link>
+                      )}
                     </div>
                   </div>
-                  <div className="d-grid gap-2 mt-3">
-                    <Link to={`/training/play/${quiz.id}`} className="btn btn-primary">
-                      Inizia training
-                    </Link>
-                    {token && quiz.leaderboard_visible && (
-                      <Link to={`/training/play/${quiz.id}/leaderboard`} className="btn btn-outline-warning">
-                        <i className="bi bi-trophy-fill"></i>
-                        Classifica
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
 
-            {categoryData.quizzes.length === 0 && (
-              <div className="alert alert-info mb-0">Nessun training disponibile in questa categoria.</div>
-            )}
+              {categoryData.quizzes.length === 0 && (
+                <div className="alert alert-info mb-0">Nessun training disponibile in questa categoria.</div>
+              )}
+            </div>
           </section>
 
           {token && leaderboard && (

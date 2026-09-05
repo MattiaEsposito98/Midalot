@@ -51,6 +51,7 @@ class TrainingController extends Controller
                     'id' => $subcategory->id,
                     'name' => $subcategory->name,
                     'slug' => $subcategory->slug,
+                    'image' => $subcategory->image_url,
                     'quizzes_count' => $subcategory->quizzes_count,
                 ])->values(),
             ]);
@@ -108,6 +109,7 @@ class TrainingController extends Controller
                 'id' => $subcategory->id,
                 'name' => $subcategory->name,
                 'slug' => $subcategory->slug,
+                'image' => $subcategory->image_url,
                 'quizzes_count' => $subcategory->quizzes_count,
             ])->values(),
             'selected_subcategory' => $selectedSubcategory?->slug,
