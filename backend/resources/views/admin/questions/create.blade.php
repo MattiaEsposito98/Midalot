@@ -34,24 +34,45 @@
 
             <section class="admin-card">
                 <div class="admin-card-header">
-                    <h2 class="admin-section-title">Risposte</h2>
+                    <div>
+                        <h2 class="admin-section-title">Risposte</h2>
+                        @if ($quiz->type === 'training')
+                            <p class="admin-muted mb-0">Puoi inserire da 2 a 4 risposte.</p>
+                        @endif
+                    </div>
                 </div>
                 <div class="admin-card-body">
+                    @if ($quiz->type === 'training')
+                        @php $oldAnswersCount = old('answers') ? count(array_filter(old('answers'))) : 4; @endphp
+                        <div class="admin-form-grid mb-2">
+                            <div>
+                                <label class="form-label">Numero di risposte</label>
+                                <select class="form-select" id="answers_count">
+                                    <option value="2" {{ $oldAnswersCount === 2 ? 'selected' : '' }}>2</option>
+                                    <option value="3" {{ $oldAnswersCount === 3 ? 'selected' : '' }}>3</option>
+                                    <option value="4" {{ $oldAnswersCount >= 4 ? 'selected' : '' }}>4</option>
+                                </select>
+                            </div>
+                        </div>
+                    @endif
+
                     <div class="admin-form-grid">
                         @for ($i = 0; $i < 4; $i++)
-                            <div>
+                            <div @if ($quiz->type === 'training') class="answer-field" data-answer-index="{{ $i }}" @endif>
                                 <label class="form-label">Risposta {{ $i + 1 }}</label>
                                 <input type="text" name="answers[]" class="form-control"
-                                    value="{{ old('answers.' . $i) }}" required>
+                                    value="{{ old('answers.' . $i) }}" {{ $quiz->type !== 'training' ? 'required' : '' }}>
                             </div>
                         @endfor
 
                         <div class="full">
                             <label class="form-label">Risposta corretta</label>
-                            <select name="correct_answer" class="form-select" required>
+                            <select name="correct_answer" class="form-select" id="correct_answer_select" required>
                                 <option value="">Seleziona...</option>
                                 @for ($i = 0; $i < 4; $i++)
-                                    <option value="{{ $i }}" @if (old('correct_answer') == $i) selected @endif>
+                                    <option value="{{ $i }}"
+                                        @if ($quiz->type === 'training') class="correct-answer-option" data-answer-index="{{ $i }}" @endif
+                                        @if (old('correct_answer') == $i) selected @endif>
                                         Risposta {{ $i + 1 }}
                                     </option>
                                 @endfor
@@ -126,5 +147,9 @@
             </div>
         </div>
     </form>
+
+    @if ($quiz->type === 'training')
+        @include('admin.questions._answers_count_script')
+    @endif
 @endsection
 

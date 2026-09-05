@@ -40,13 +40,26 @@ class QuestionController extends Controller
     public function store(Request $request, string $quiz)
     {
         $quiz = Quiz::findOrFail($quiz);
+        $isTraining = $quiz->type === 'training';
+
+        if ($isTraining) {
+            $request->merge([
+                'answers' => collect($request->input('answers', []))
+                    ->map(fn ($answer) => trim((string) $answer))
+                    ->filter(fn ($answer) => $answer !== '')
+                    ->values()
+                    ->all(),
+            ]);
+        }
+
+        $answersCount = count($request->input('answers', []));
 
         $request->validate([
             'question_text' => 'required|string',
             'time_limit_seconds' => 'required|integer|min:5',
-            'answers' => 'required|array|size:4',
+            'answers' => $isTraining ? 'required|array|min:2|max:4' : 'required|array|size:4',
             'answers.*' => 'required|string|max:255',
-            'correct_answer' => 'required|integer|min:0|max:3',
+            'correct_answer' => 'required|integer|min:0|max:'.max(0, $answersCount - 1),
 
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'audio_source' => 'nullable|in:upload,itunes',
@@ -127,16 +140,29 @@ class QuestionController extends Controller
     public function update(Request $request, string $quiz, string $question)
     {
         $quiz = Quiz::findOrFail($quiz);
+        $isTraining = $quiz->type === 'training';
 
         $question = Question::where('quiz_id', $quiz->id)
             ->findOrFail($question);
 
+        if ($isTraining) {
+            $request->merge([
+                'answers' => collect($request->input('answers', []))
+                    ->map(fn ($answer) => trim((string) $answer))
+                    ->filter(fn ($answer) => $answer !== '')
+                    ->values()
+                    ->all(),
+            ]);
+        }
+
+        $answersCount = count($request->input('answers', []));
+
         $request->validate([
             'question_text' => 'required|string',
             'time_limit_seconds' => 'required|integer|min:5',
-            'answers' => 'required|array|size:4',
+            'answers' => $isTraining ? 'required|array|min:2|max:4' : 'required|array|size:4',
             'answers.*' => 'required|string|max:255',
-            'correct_answer' => 'required|integer|min:0|max:3',
+            'correct_answer' => 'required|integer|min:0|max:'.max(0, $answersCount - 1),
 
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
             'audio_source' => 'nullable|in:upload,itunes',
