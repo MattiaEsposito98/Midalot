@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react"
-import { Link, useParams } from "react-router-dom"
+import { Link, useParams, useSearchParams } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "./Training.module.css"
 import { logError } from "../../utils/logger"
@@ -8,6 +8,8 @@ import { API_BASE } from "../../service/api"
 
 function Training() {
   const { categorySlug } = useParams()
+  const [searchParams] = useSearchParams()
+  const subcategorySlug = searchParams.get("subcategory") || ""
   const { token } = useAuth()
   const [categories, setCategories] = useState([])
   const [categoryData, setCategoryData] = useState(null)
@@ -66,7 +68,8 @@ function Training() {
       try {
         setError("")
 
-        const res = await fetch(`${API_BASE}/api/training/categories/${categorySlug}/quizzes`, {
+        const query = subcategorySlug ? `?subcategory=${encodeURIComponent(subcategorySlug)}` : ""
+        const res = await fetch(`${API_BASE}/api/training/categories/${categorySlug}/quizzes${query}`, {
           headers: { Accept: "application/json" },
         })
         const data = await res.json()
@@ -95,7 +98,7 @@ function Training() {
     }
 
     loadCategory()
-  }, [categorySlug, token])
+  }, [categorySlug, subcategorySlug, token])
 
   const progressBySlug = useMemo(() => {
     const map = {}
@@ -206,6 +209,26 @@ function Training() {
                 Categorie
               </Link>
             </div>
+
+            {categoryData.subcategories?.length > 0 && (
+              <div className={styles.subcategoryRow}>
+                <Link
+                  to={`/training/${categorySlug}`}
+                  className={`${styles.subcategoryChip} ${!subcategorySlug ? styles.subcategoryChipActive : ""}`}
+                >
+                  Tutte
+                </Link>
+                {categoryData.subcategories.map((sub) => (
+                  <Link
+                    key={sub.id}
+                    to={`/training/${categorySlug}?subcategory=${sub.slug}`}
+                    className={`${styles.subcategoryChip} ${subcategorySlug === sub.slug ? styles.subcategoryChipActive : ""}`}
+                  >
+                    {sub.name}
+                  </Link>
+                ))}
+              </div>
+            )}
 
             <div className={styles.quizGrid}>
               {categoryData.quizzes.map((quiz) => (

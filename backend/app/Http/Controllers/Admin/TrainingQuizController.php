@@ -6,18 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Models\Quiz;
 use App\Models\TrainingAttempt;
 use App\Models\TrainingCategory;
+use App\Models\TrainingSubcategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 
 class TrainingQuizController extends Controller
 {
     public function index(Request $request)
     {
         $search = $request->get('search');
+        $categoryId = $request->get('category');
+        $subcategoryId = $request->get('subcategory');
 
         $quizzes = Quiz::where('type', 'training')
-            ->with('trainingCategory')
+            ->with(['trainingCategory', 'trainingSubcategory'])
             ->withCount('questions')
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
@@ -27,13 +31,16 @@ class TrainingQuizController extends Controller
                         });
                 });
             })
+            ->when($categoryId, fn($query) => $query->where('training_category_id', $categoryId))
+            ->when($subcategoryId, fn($query) => $query->where('training_subcategory_id', $subcategoryId))
             ->latest()
             ->paginate(10)
             ->withQueryString();
 
         $categories = TrainingCategory::orderBy('name')->get();
+        $subcategories = TrainingSubcategory::orderBy('name')->get(['id', 'training_category_id', 'name']);
 
-        return view('admin.training.quizzes.index', compact('quizzes', 'categories', 'search'));
+        return view('admin.training.quizzes.index', compact('quizzes', 'categories', 'subcategories', 'search', 'categoryId', 'subcategoryId'));
     }
 
     public function create()
@@ -42,7 +49,11 @@ class TrainingQuizController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('admin.training.quizzes.create', compact('categories'));
+        $subcategories = TrainingSubcategory::where('is_active', true)
+            ->orderBy('name')
+            ->get(['id', 'training_category_id', 'name']);
+
+        return view('admin.training.quizzes.create', compact('categories', 'subcategories'));
     }
 
     public function store(Request $request)
@@ -73,7 +84,9 @@ class TrainingQuizController extends Controller
 
         $categories = TrainingCategory::orderBy('name')->get();
 
-        return view('admin.training.quizzes.edit', compact('quiz', 'categories'));
+        $subcategories = TrainingSubcategory::orderBy('name')->get(['id', 'training_category_id', 'name']);
+
+        return view('admin.training.quizzes.edit', compact('quiz', 'categories', 'subcategories'));
     }
 
     public function show(Quiz $quiz)
@@ -177,6 +190,11 @@ class TrainingQuizController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'training_category_id' => ['required', 'exists:training_categories,id'],
+            'training_subcategory_id' => [
+                'nullable',
+                Rule::exists('training_subcategories', 'id')
+                    ->where(fn($query) => $query->where('training_category_id', $request->input('training_category_id'))),
+            ],
             'training_question_mode' => ['required', 'in:5,10,all'],
             'is_active' => ['required', 'boolean'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],

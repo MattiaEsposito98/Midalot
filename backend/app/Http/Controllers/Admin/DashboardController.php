@@ -9,6 +9,8 @@ use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\QuizAttempt;
 use App\Models\QuizParticipant;
+use App\Models\TrainingCategory;
+use App\Models\TrainingSubcategory;
 use App\Models\User;
 use App\Models\UserLogin;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +25,8 @@ class DashboardController extends Controller
             'active_quizzes' => Quiz::where('type', 'assigned')->where('is_active', true)->count(),
             'trainings' => Quiz::where('type', 'training')->count(),
             'active_trainings' => Quiz::where('type', 'training')->where('is_active', true)->count(),
+            'training_categories' => TrainingCategory::count(),
+            'training_subcategories' => TrainingSubcategory::count(),
             'midalarios' => Quiz::where('type', 'midalario')->count(),
             'midalarios_live' => Quiz::where('type', 'midalario')
                 ->whereIn('midalario_status', ['open', 'closed', 'running'])

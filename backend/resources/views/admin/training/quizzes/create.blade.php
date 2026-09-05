@@ -41,13 +41,19 @@
                     </div>
                     <div>
                         <label class="form-label">Categoria</label>
-                        <select class="form-select" name="training_category_id" required>
+                        <select class="form-select" name="training_category_id" id="training_category_id" required>
                             <option value="">Seleziona...</option>
                             @foreach ($categories as $category)
                                 <option value="{{ $category->id }}" {{ old('training_category_id') == $category->id ? 'selected' : '' }}>
                                     {{ $category->name }}
                                 </option>
                             @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label class="form-label">Sottocategoria (opzionale)</label>
+                        <select class="form-select" name="training_subcategory_id" id="training_subcategory_id">
+                            <option value="">Nessuna</option>
                         </select>
                     </div>
                     <div>
@@ -76,4 +82,33 @@
             </form>
         </div>
     </section>
+
+    <script>
+        (function () {
+            const subcategories = @json($subcategories->values());
+            const oldSubcategoryId = @json(old('training_subcategory_id'));
+            const categorySelect = document.getElementById('training_category_id');
+            const subcategorySelect = document.getElementById('training_subcategory_id');
+
+            function renderSubcategories() {
+                const categoryId = categorySelect.value;
+                subcategorySelect.innerHTML = '<option value="">Nessuna</option>';
+
+                subcategories
+                    .filter((sub) => String(sub.training_category_id) === String(categoryId))
+                    .forEach((sub) => {
+                        const option = document.createElement('option');
+                        option.value = sub.id;
+                        option.textContent = sub.name;
+                        if (oldSubcategoryId && String(oldSubcategoryId) === String(sub.id)) {
+                            option.selected = true;
+                        }
+                        subcategorySelect.appendChild(option);
+                    });
+            }
+
+            categorySelect.addEventListener('change', renderSubcategories);
+            renderSubcategories();
+        })();
+    </script>
 @endsection

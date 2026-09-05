@@ -10,81 +10,134 @@
             <div class="admin-card-header">
                 <div>
                     <h2 class="admin-section-title">Categorie</h2>
-                    <p class="admin-muted mb-0">Organizza i training per argomento.</p>
+                    <p class="admin-muted mb-0">Organizza i training per argomento. Apri una categoria per gestirla e vedere le sue sottocategorie.</p>
                 </div>
                 <a href="{{ route('admin.training.quizzes.index') }}" class="btn btn-outline-secondary btn-sm">
                     Training quiz
                 </a>
             </div>
 
-            <div class="table-responsive">
-                <table class="table admin-table">
-                    <thead>
-                        <tr>
-                            <th>Categoria</th>
-                            <th>Descrizione</th>
-                            <th>Quiz</th>
-                            <th>Stato</th>
-                            <th>Azioni</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse ($categories as $category)
-                            <tr>
-                                <td>
-                                    <div class="admin-title-cell">
-                                        <span class="admin-thumb">
-                                            @if ($category->image_path)
-                                                <img src="{{ $category->image_url }}" alt="">
-                                            @else
-                                                <i class="bi bi-image admin-thumb-empty"></i>
-                                            @endif
-                                        </span>
-                                        <div class="admin-title-cell-text fw-bold">{{ $category->name }}</div>
-                                    </div>
-                                </td>
-                                <td>{{ $category->description ?: '-' }}</td>
-                                <td>{{ $category->quizzes_count }}</td>
-                                <td>
-                                    <span class="badge {{ $category->is_active ? 'bg-success' : 'bg-secondary' }}">
-                                        {{ $category->is_active ? 'Attiva' : 'Non attiva' }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <form class="d-grid gap-2" action="{{ route('admin.training.categories.update', $category) }}" method="POST" enctype="multipart/form-data">
-                                        @csrf
-                                        @method('PUT')
-                                        <input class="form-control form-control-sm" name="name" value="{{ $category->name }}" required>
-                                        <textarea class="form-control form-control-sm" name="description" rows="2">{{ $category->description }}</textarea>
-                                        <select class="form-select form-select-sm" name="is_active">
-                                            <option value="1" {{ $category->is_active ? 'selected' : '' }}>Attiva</option>
-                                            <option value="0" {{ !$category->is_active ? 'selected' : '' }}>Non attiva</option>
-                                        </select>
-                                        <input type="file" class="form-control form-control-sm" name="image" accept=".jpg,.jpeg,.png,image/*">
-                                        @if ($category->image_path)
-                                            <div class="form-check">
-                                                <input type="checkbox" name="remove_image" value="1" class="form-check-input" id="remove_image_{{ $category->id }}">
-                                                <label class="form-check-label small text-danger" for="remove_image_{{ $category->id }}">Elimina immagine</label>
+            <div class="admin-card-body">
+                @if ($categories->isEmpty())
+                    <div class="admin-empty">Nessuna categoria training.</div>
+                @else
+                    <div class="accordion" id="categoriesAccordion">
+                        @foreach ($categories as $category)
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading-category-{{ $category->id }}">
+                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-category-{{ $category->id }}">
+                                        <div class="d-flex align-items-center gap-3 w-100 flex-wrap">
+                                            <span class="admin-thumb">
+                                                @if ($category->image_path)
+                                                    <img src="{{ $category->image_url }}" alt="">
+                                                @else
+                                                    <i class="bi bi-image admin-thumb-empty"></i>
+                                                @endif
+                                            </span>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-bold">{{ $category->name }}</div>
+                                                <div class="small admin-muted">{{ Illuminate\Support\Str::limit($category->description, 90) ?: 'Nessuna descrizione' }}</div>
                                             </div>
-                                        @endif
-                                        <button class="btn btn-sm btn-primary">Salva</button>
-                                    </form>
-                                    <form action="{{ route('admin.training.categories.destroy', $category) }}" method="POST" class="mt-2">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button class="btn btn-sm btn-danger w-100" onclick="return confirm('Eliminare questa categoria?')">
-                                            Elimina
-                                        </button>
-                                    </form>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="5"><div class="admin-empty">Nessuna categoria training.</div></td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                                            <span class="badge bg-info-subtle text-dark border">
+                                                {{ $category->subcategories->count() }} sottocategorie
+                                            </span>
+                                            <span class="badge bg-primary-subtle text-dark border">
+                                                {{ $category->quizzes_count }} quiz
+                                            </span>
+                                            <span class="badge {{ $category->is_active ? 'bg-success' : 'bg-secondary' }}">
+                                                {{ $category->is_active ? 'Attiva' : 'Non attiva' }}
+                                            </span>
+                                        </div>
+                                    </button>
+                                </h2>
+                                <div id="collapse-category-{{ $category->id }}" class="accordion-collapse collapse" data-bs-parent="#categoriesAccordion">
+                                    <div class="accordion-body">
+                                        <div class="row g-4">
+                                            <div class="col-lg-5">
+                                                <h3 class="admin-section-subtitle">Modifica categoria</h3>
+                                                <form class="d-grid gap-2" action="{{ route('admin.training.categories.update', $category) }}" method="POST" enctype="multipart/form-data">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <div>
+                                                        <label class="form-label small">Nome</label>
+                                                        <input class="form-control form-control-sm" name="name" value="{{ $category->name }}" required>
+                                                    </div>
+                                                    <div>
+                                                        <label class="form-label small">Descrizione</label>
+                                                        <textarea class="form-control form-control-sm" name="description" rows="2">{{ $category->description }}</textarea>
+                                                    </div>
+                                                    <div>
+                                                        <label class="form-label small">Stato</label>
+                                                        <select class="form-select form-select-sm" name="is_active">
+                                                            <option value="1" {{ $category->is_active ? 'selected' : '' }}>Attiva</option>
+                                                            <option value="0" {{ !$category->is_active ? 'selected' : '' }}>Non attiva</option>
+                                                        </select>
+                                                    </div>
+                                                    <div>
+                                                        <label class="form-label small">Immagine di copertina</label>
+                                                        <input type="file" class="form-control form-control-sm" name="image" accept=".jpg,.jpeg,.png,image/*">
+                                                    </div>
+                                                    @if ($category->image_path)
+                                                        <div class="form-check">
+                                                            <input type="checkbox" name="remove_image" value="1" class="form-check-input" id="remove_image_{{ $category->id }}">
+                                                            <label class="form-check-label small text-danger" for="remove_image_{{ $category->id }}">Elimina immagine</label>
+                                                        </div>
+                                                    @endif
+                                                    <button class="btn btn-sm btn-primary">Salva</button>
+                                                </form>
+                                                <form action="{{ route('admin.training.categories.destroy', $category) }}" method="POST" class="mt-2">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button class="btn btn-sm btn-outline-danger" onclick="return confirm('Eliminare questa categoria?')">
+                                                        Elimina categoria
+                                                    </button>
+                                                </form>
+                                            </div>
+                                            <div class="col-lg-7">
+                                                <h3 class="admin-section-subtitle">Sottocategorie</h3>
+                                                <ul class="list-unstyled d-grid gap-2 mb-3">
+                                                    @forelse ($category->subcategories as $subcategory)
+                                                        <li class="admin-subcategory-row">
+                                                            <form class="d-flex align-items-center gap-1 flex-grow-1" action="{{ route('admin.training.subcategories.update', $subcategory) }}" method="POST">
+                                                                @csrf
+                                                                @method('PUT')
+                                                                <input class="form-control form-control-sm" name="name" value="{{ $subcategory->name }}" required>
+                                                                <select class="form-select form-select-sm" name="is_active" style="max-width: 100px;">
+                                                                    <option value="1" {{ $subcategory->is_active ? 'selected' : '' }}>Attiva</option>
+                                                                    <option value="0" {{ !$subcategory->is_active ? 'selected' : '' }}>Off</option>
+                                                                </select>
+                                                                <span class="small admin-muted text-nowrap">{{ $subcategory->quizzes_count }} quiz</span>
+                                                                <button class="btn btn-sm btn-outline-primary" title="Salva"><i class="bi bi-check-lg"></i></button>
+                                                            </form>
+                                                            <form action="{{ route('admin.training.subcategories.destroy', $subcategory) }}" method="POST">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button class="btn btn-sm btn-link text-danger" title="Elimina" onclick="return confirm('Eliminare questa sottocategoria?')">
+                                                                    <i class="bi bi-trash"></i>
+                                                                </button>
+                                                            </form>
+                                                        </li>
+                                                    @empty
+                                                        <li class="admin-muted small">Nessuna sottocategoria.</li>
+                                                    @endforelse
+                                                </ul>
+                                                <form action="{{ route('admin.training.subcategories.store', $category) }}" method="POST" class="d-flex gap-1">
+                                                    @csrf
+                                                    <input class="form-control form-control-sm" name="name" placeholder="Nuova sottocategoria" required>
+                                                    <input type="hidden" name="is_active" value="1">
+                                                    <button class="btn btn-sm btn-outline-secondary text-nowrap" title="Aggiungi">
+                                                        <i class="bi bi-plus-lg"></i>
+                                                        Aggiungi
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
             </div>
         </section>
 

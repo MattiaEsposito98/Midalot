@@ -13,6 +13,7 @@ class TrainingCategoryController extends Controller
     public function index()
     {
         $categories = TrainingCategory::withCount('quizzes')
+            ->with(['subcategories' => fn($query) => $query->withCount('quizzes')->orderBy('name')])
             ->orderBy('name')
             ->get();
 

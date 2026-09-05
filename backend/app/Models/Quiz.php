@@ -14,6 +14,7 @@ class Quiz extends Model
         'type',
         'restrict_to_specific_users',
         'training_category_id',
+        'training_subcategory_id',
         'training_question_mode',
         'created_by',
         'is_active',
@@ -69,6 +70,11 @@ class Quiz extends Model
     public function trainingCategory()
     {
         return $this->belongsTo(TrainingCategory::class, 'training_category_id');
+    }
+
+    public function trainingSubcategory()
+    {
+        return $this->belongsTo(TrainingSubcategory::class, 'training_subcategory_id');
     }
 
     public function trainingAttempts()

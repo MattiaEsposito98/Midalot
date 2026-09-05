@@ -24,17 +24,42 @@
 
         <div class="admin-card-body">
             <form method="GET" action="{{ route('admin.training.quizzes.index') }}" class="row g-2 align-items-center mb-3">
-                <div class="col-auto flex-grow-1">
+                <div class="col-auto flex-grow-1" style="min-width: 200px;">
                     <input type="search" name="search" value="{{ $search }}" class="form-control"
                         placeholder="Cerca per titolo o categoria...">
                 </div>
                 <div class="col-auto">
+                    <select class="form-select" name="category" id="filter_category">
+                        <option value="">Tutte le categorie</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}" {{ (string) $categoryId === (string) $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <select class="form-select" name="subcategory" id="filter_subcategory">
+                        <option value="">Tutte le sottocategorie</option>
+                        @foreach ($subcategories as $subcategory)
+                            <option
+                                value="{{ $subcategory->id }}"
+                                data-category="{{ $subcategory->training_category_id }}"
+                                class="{{ (string) $categoryId !== '' && (string) $categoryId !== (string) $subcategory->training_category_id ? 'd-none' : '' }}"
+                                {{ (string) $subcategoryId === (string) $subcategory->id ? 'selected' : '' }}
+                            >
+                                {{ $subcategory->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-auto">
                     <button type="submit" class="btn btn-outline-primary">
                         <i class="bi bi-search"></i>
-                        Cerca
+                        Filtra
                     </button>
                 </div>
-                @if ($search)
+                @if ($search || $categoryId || $subcategoryId)
                     <div class="col-auto">
                         <a href="{{ route('admin.training.quizzes.index') }}" class="btn btn-outline-secondary">
                             Azzera
@@ -43,6 +68,26 @@
                 @endif
             </form>
         </div>
+
+        <script>
+            (function () {
+                const categorySelect = document.getElementById('filter_category');
+                const subcategorySelect = document.getElementById('filter_subcategory');
+
+                categorySelect.addEventListener('change', function () {
+                    const categoryId = categorySelect.value;
+
+                    Array.from(subcategorySelect.options).forEach((option) => {
+                        if (!option.value) return;
+                        const belongs = !categoryId || option.dataset.category === categoryId;
+                        option.classList.toggle('d-none', !belongs);
+                        if (!belongs && option.selected) {
+                            subcategorySelect.value = '';
+                        }
+                    });
+                });
+            })();
+        </script>
 
         @if ($quizzes->isEmpty())
             <div class="admin-empty">
@@ -63,6 +108,7 @@
                         <tr>
                             <th>Training</th>
                             <th>Categoria</th>
+                            <th>Sottocategoria</th>
                             <th>Domande estratte</th>
                             <th>Domande create</th>
                             <th>Stato</th>
@@ -93,6 +139,7 @@
                                     </div>
                                 </td>
                                 <td>{{ $quiz->trainingCategory?->name ?? '-' }}</td>
+                                <td>{{ $quiz->trainingSubcategory?->name ?? '-' }}</td>
                                 <td>{{ $quiz->training_question_mode === 'all' ? 'Tutte' : $quiz->training_question_mode }}</td>
                                 <td>{{ $quiz->questions_count }}</td>
                                 <td>

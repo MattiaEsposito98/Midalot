@@ -189,11 +189,23 @@
   padding: 1.25rem;
 }
 
+.admin-stat-group {
+  margin-bottom: 1.25rem;
+}
+
+.admin-stat-group-title {
+  color: var(--admin-muted);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+  margin-bottom: .6rem;
+  text-transform: uppercase;
+}
+
 .admin-stat-grid {
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin-bottom: 1.5rem;
 }
 
 .admin-stat-card {
@@ -333,6 +345,43 @@
   font-size: 1rem;
   font-weight: 800;
   margin: 0;
+}
+
+.admin-section-subtitle {
+  color: var(--admin-muted);
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .02em;
+  margin-bottom: .6rem;
+  text-transform: uppercase;
+}
+
+.admin-subcategory-row {
+  align-items: center;
+  background: #f7fafc;
+  border: 1px solid var(--admin-border);
+  border-radius: .4rem;
+  display: flex;
+  gap: .5rem;
+  padding: .5rem .6rem;
+}
+
+.accordion-item {
+  border-color: var(--admin-border);
+}
+
+.accordion-button {
+  font-weight: 400;
+}
+
+.accordion-button:not(.collapsed) {
+  background-color: #eef4f7;
+  box-shadow: none;
+  color: inherit;
+}
+
+.accordion-button:focus {
+  box-shadow: none;
 }
 
 .admin-muted {

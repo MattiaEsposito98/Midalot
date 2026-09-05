@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\ShowcaseImageController;
 use App\Http\Controllers\Admin\TrainingCategoryController;
 use App\Http\Controllers\Admin\TrainingQuestionReportController;
+use App\Http\Controllers\Admin\TrainingSubcategoryController;
 use App\Http\Controllers\Admin\TrainingQuizController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\CityController;
@@ -64,6 +65,13 @@ Route::middleware(['auth', 'admin'])
             ->name('training.categories.update');
         Route::delete('training/categories/{category}', [TrainingCategoryController::class, 'destroy'])
             ->name('training.categories.destroy');
+
+        Route::post('training/categories/{category}/subcategories', [TrainingSubcategoryController::class, 'store'])
+            ->name('training.subcategories.store');
+        Route::put('training/subcategories/{subcategory}', [TrainingSubcategoryController::class, 'update'])
+            ->name('training.subcategories.update');
+        Route::delete('training/subcategories/{subcategory}', [TrainingSubcategoryController::class, 'destroy'])
+            ->name('training.subcategories.destroy');
 
         Route::resource('training/quizzes', TrainingQuizController::class)
             ->names('training.quizzes')

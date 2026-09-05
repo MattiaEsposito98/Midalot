@@ -9,6 +9,7 @@ use App\Models\Quiz;
 use App\Models\TrainingAnswer;
 use App\Models\TrainingAttempt;
 use App\Models\TrainingCategory;
+use App\Models\TrainingSubcategory;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -26,9 +27,17 @@ class TrainingController extends Controller
 
     public function categories()
     {
+        $activeTrainingQuiz = fn ($query) => $query->where('type', 'training')->where('is_active', true);
+
         $categories = TrainingCategory::where('is_active', true)
-            ->whereHas('quizzes', fn ($query) => $query->where('type', 'training')->where('is_active', true))
-            ->withCount(['quizzes' => fn ($query) => $query->where('type', 'training')->where('is_active', true)])
+            ->whereHas('quizzes', $activeTrainingQuiz)
+            ->withCount(['quizzes' => $activeTrainingQuiz])
+            ->with(['subcategories' => function ($query) use ($activeTrainingQuiz) {
+                $query->where('is_active', true)
+                    ->whereHas('quizzes', $activeTrainingQuiz)
+                    ->withCount(['quizzes' => $activeTrainingQuiz])
+                    ->orderBy('name');
+            }])
             ->orderBy('name')
             ->get()
             ->map(fn ($category) => [
@@ -38,21 +47,50 @@ class TrainingController extends Controller
                 'description' => $category->description,
                 'image' => $category->image_url,
                 'quizzes_count' => $category->quizzes_count,
+                'subcategories' => $category->subcategories->map(fn ($subcategory) => [
+                    'id' => $subcategory->id,
+                    'name' => $subcategory->name,
+                    'slug' => $subcategory->slug,
+                    'quizzes_count' => $subcategory->quizzes_count,
+                ])->values(),
             ]);
 
         return response()->json(['categories' => $categories]);
     }
 
-    public function categoryQuizzes(string $categorySlug)
+    public function categoryQuizzes(Request $request, string $categorySlug)
     {
         $category = TrainingCategory::where('slug', $categorySlug)
             ->where('is_active', true)
             ->firstOrFail();
 
-        $quizzes = Quiz::where('type', 'training')
+        $activeTrainingQuiz = fn ($query) => $query->where('type', 'training')->where('is_active', true);
+
+        $subcategories = TrainingSubcategory::where('training_category_id', $category->id)
+            ->where('is_active', true)
+            ->whereHas('quizzes', $activeTrainingQuiz)
+            ->withCount(['quizzes' => $activeTrainingQuiz])
+            ->orderBy('name')
+            ->get();
+
+        $selectedSubcategorySlug = $request->query('subcategory');
+        $selectedSubcategory = null;
+
+        $quizzesQuery = Quiz::where('type', 'training')
             ->where('training_category_id', $category->id)
             ->where('is_active', true)
-            ->withCount('questions')
+            ->with('trainingSubcategory')
+            ->withCount('questions');
+
+        if ($selectedSubcategorySlug) {
+            $selectedSubcategory = TrainingSubcategory::where('training_category_id', $category->id)
+                ->where('slug', $selectedSubcategorySlug)
+                ->firstOrFail();
+
+            $quizzesQuery->where('training_subcategory_id', $selectedSubcategory->id);
+        }
+
+        $quizzes = $quizzesQuery
             ->latest()
             ->get()
             ->filter(fn ($quiz) => $this->isPlayable($quiz))
@@ -66,6 +104,13 @@ class TrainingController extends Controller
                 'slug' => $category->slug,
                 'description' => $category->description,
             ],
+            'subcategories' => $subcategories->map(fn ($subcategory) => [
+                'id' => $subcategory->id,
+                'name' => $subcategory->name,
+                'slug' => $subcategory->slug,
+                'quizzes_count' => $subcategory->quizzes_count,
+            ])->values(),
+            'selected_subcategory' => $selectedSubcategory?->slug,
             'quizzes' => $quizzes,
         ]);
     }
@@ -377,6 +422,8 @@ class TrainingController extends Controller
 
     private function quizSummary(Quiz $quiz): array
     {
+        $quiz->loadMissing('trainingSubcategory');
+
         return [
             'id' => $quiz->id,
             'title' => $quiz->title,
@@ -387,6 +434,11 @@ class TrainingController extends Controller
                 'name' => $quiz->trainingCategory->name,
                 'slug' => $quiz->trainingCategory->slug,
             ],
+            'subcategory' => $quiz->trainingSubcategory ? [
+                'id' => $quiz->trainingSubcategory->id,
+                'name' => $quiz->trainingSubcategory->name,
+                'slug' => $quiz->trainingSubcategory->slug,
+            ] : null,
             'question_mode' => $quiz->training_question_mode,
             'questions_count' => $quiz->questions_count,
             'leaderboard_visible' => (bool) $quiz->leaderboard_visible,

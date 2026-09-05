@@ -28,6 +28,11 @@ class TrainingCategory extends Model
         return $this->hasMany(Quiz::class);
     }
 
+    public function subcategories()
+    {
+        return $this->hasMany(TrainingSubcategory::class);
+    }
+
     public function attempts()
     {
         return $this->hasMany(TrainingAttempt::class);
