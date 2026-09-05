@@ -6,6 +6,7 @@ import api from "../../service/api"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import WeeklyLeaderboardBox from "../../components/WeeklyLeaderboardBox/WeeklyLeaderboardBox"
+import UserBadge from "../../components/UserBadge/UserBadge"
 
 const PLACEHOLDER_QUIZZES = [
   { id: "p1", title: "Quiz assegnato" },
@@ -157,6 +158,10 @@ function Home() {
               <i className="bi bi-person-circle"></i>
               {user?.nickname}
             </span>
+          )}
+
+          {isLoggedIn && user?.latest_monthly_badge?.label && (
+            <UserBadge label={user.latest_monthly_badge.label} />
           )}
 
           <h1 className={css.title}>

@@ -411,7 +411,13 @@
                 <div class="list-group list-group-flush">
                     @forelse ($latestLogins as $login)
                         <div class="list-group-item">
-                            <div class="fw-bold">{{ $login->user->nickname ?? ($login->user->name ?? 'Utente eliminato') }}</div>
+                            <div class="fw-bold">
+                                @if ($login->user)
+                                    <x-nickname-badge :user="$login->user" />
+                                @else
+                                    Utente eliminato
+                                @endif
+                            </div>
                             <div class="small admin-muted">
                                 {{ optional($login->logged_in_at)->format('d/m/Y H:i') }}
                             </div>

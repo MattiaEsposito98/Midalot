@@ -141,7 +141,7 @@ class TrainingQuizController extends Controller
     {
         $this->ensureTraining($quiz);
 
-        $attempts = TrainingAttempt::with('user')
+        $attempts = TrainingAttempt::with('user.latestMonthlyBadge')
             ->where('quiz_id', $quiz->id)
             ->get()
             ->sort(function ($a, $b) {

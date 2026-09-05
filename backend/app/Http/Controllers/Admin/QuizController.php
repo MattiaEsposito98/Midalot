@@ -192,7 +192,7 @@ class QuizController extends Controller
 
     public function leaderboard(Quiz $quiz)
     {
-        $attempts = QuizAttempt::with(['user', 'answers'])
+        $attempts = QuizAttempt::with(['user.latestMonthlyBadge', 'answers'])
             ->where('quiz_id', $quiz->id)
             ->get();
 

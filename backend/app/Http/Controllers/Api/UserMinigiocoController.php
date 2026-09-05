@@ -227,7 +227,7 @@ class UserMinigiocoController extends Controller
 
         $totalRounds = $minigioco->rounds()->count();
 
-        $attempts = MinigiocoAttempt::with(['user', 'risposte'])
+        $attempts = MinigiocoAttempt::with(['user.latestMonthlyBadge', 'risposte'])
             ->where('minigioco_id', $minigioco->id)
             ->get();
 
@@ -237,6 +237,7 @@ class UserMinigiocoController extends Controller
             return [
                 'user' => [
                     'nickname' => $attempt->user->nickname ?? 'Utente',
+                    'badge' => $attempt->user->latestMonthlyBadge?->label,
                 ],
                 'score' => $attempt->score ?? 0,
                 'correct_answers' => $correct,

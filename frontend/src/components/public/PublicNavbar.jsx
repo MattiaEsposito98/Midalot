@@ -1,6 +1,7 @@
 import { NavLink, Link, useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import css from "./PublicNavbarFooter.module.css"
+import UserBadge from "../UserBadge/UserBadge"
 
 function PublicNavbar() {
   const { user, token, logout } = useAuth()
@@ -75,6 +76,7 @@ function PublicNavbar() {
                   >
                     <i className="bi bi-person-circle"></i>
                     {user?.name || user?.nickname || "Profilo"}
+                    <UserBadge label={user?.latest_monthly_badge?.label} />
                   </a>
 
                   <ul className={`dropdown-menu dropdown-menu-end shadow-sm border-0 ${css.profileMenu}`}>

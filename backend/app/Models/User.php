@@ -75,6 +75,16 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(\App\Models\UserLogin::class);
     }
 
+    public function monthlyBadges()
+    {
+        return $this->hasMany(\App\Models\MonthlyBadge::class);
+    }
+
+    public function latestMonthlyBadge()
+    {
+        return $this->hasOne(\App\Models\MonthlyBadge::class)->latestOfMany('month');
+    }
+
     public function sendEmailVerificationNotification()
     {
         $url = URL::temporarySignedRoute(

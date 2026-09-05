@@ -5,6 +5,7 @@ import styles from "./Classifiche.module.css"
 import api from "../../service/api"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
+import UserBadge from "../../components/UserBadge/UserBadge"
 
 const MONTH_NAMES = [
   "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
@@ -215,6 +216,7 @@ function Classifiche() {
                 <div className={styles.nameWrap}>
                   <span className={styles.name}>{r.nickname}</span>
                   {isMe && <span className={styles.meTag}>Tu</span>}
+                  <UserBadge label={r.badge} />
                 </div>
 
                 <div className={styles.statsGrid}>

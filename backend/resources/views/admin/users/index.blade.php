@@ -69,7 +69,7 @@
                                         {{ $user->name }}
                                     </a>
                                 </td>
-                                <td>{{ $user->nickname }}</td>
+                                <td><x-nickname-badge :user="$user" /></td>
                                 <td>{{ $user->email }}</td>
                                 <td>{{ $user->phone ?: '-' }}</td>
                                 <td>{{ $user->city?->name ?? '-' }}</td>

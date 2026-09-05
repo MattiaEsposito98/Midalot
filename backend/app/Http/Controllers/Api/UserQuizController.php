@@ -260,7 +260,7 @@ class UserQuizController extends Controller
 
         $totalQuestions = $quiz->questions()->count();
 
-        $attempts = QuizAttempt::with(['user', 'answers'])
+        $attempts = QuizAttempt::with(['user.latestMonthlyBadge', 'answers'])
             ->where('quiz_id', $quiz->id)
             ->get();
 
@@ -270,6 +270,7 @@ class UserQuizController extends Controller
             return [
                 'user' => [
                     'nickname' => $attempt->user->nickname ?? 'Utente',
+                    'badge' => $attempt->user->latestMonthlyBadge?->label,
                 ],
                 'score' => $attempt->score ?? 0,
                 'correct_answers' => $correct,

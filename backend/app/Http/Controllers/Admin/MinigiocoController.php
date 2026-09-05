@@ -124,7 +124,7 @@ class MinigiocoController extends Controller
 
     public function leaderboard(Minigioco $minigioco)
     {
-        $attempts = MinigiocoAttempt::with(['user', 'risposte'])
+        $attempts = MinigiocoAttempt::with(['user.latestMonthlyBadge', 'risposte'])
             ->where('minigioco_id', $minigioco->id)
             ->get();
 

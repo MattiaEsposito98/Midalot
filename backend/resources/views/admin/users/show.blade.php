@@ -26,7 +26,7 @@
                 </div>
                 <div class="col-md-3">
                     <div class="small text-uppercase fw-bold admin-muted mb-1">Nickname</div>
-                    <div>{{ $user->nickname }}</div>
+                    <div><x-nickname-badge :user="$user" /></div>
                 </div>
                 <div class="col-md-3">
                     <div class="small text-uppercase fw-bold admin-muted mb-1">Email</div>

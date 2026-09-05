@@ -78,7 +78,14 @@
                             @foreach ($results as $r)
                                 <tr>
                                     <td><span class="badge bg-primary">{{ $r['position'] }}</span></td>
-                                    <td class="fw-bold">{{ $r['nickname'] }}</td>
+                                    <td class="fw-bold">
+                                        {{ $r['nickname'] }}
+                                        @if ($r['badge'] ?? null)
+                                            <span class="badge bg-warning text-dark" title="{{ $r['badge'] }}">
+                                                <i class="bi bi-award-fill"></i> {{ $r['badge'] }}
+                                            </span>
+                                        @endif
+                                    </td>
                                     <td><strong>{{ number_format($r['total_score'] / 100, 2, ',', '.') }}</strong></td>
                                     <td>{{ $r['quizzes_completed'] }}</td>
                                 </tr>

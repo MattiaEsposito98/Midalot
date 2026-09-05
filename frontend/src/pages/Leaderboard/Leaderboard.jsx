@@ -5,6 +5,7 @@ import styles from "./Leaderboard.module.css"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import { API_BASE } from "../../service/api"
+import UserBadge from "../../components/UserBadge/UserBadge"
 
 function Leaderboard({ kind = "quiz" }) {
   const { id } = useParams()
@@ -161,6 +162,7 @@ function Leaderboard({ kind = "quiz" }) {
                   <div className={styles.nameWrap}>
                     <span className={styles.name}>{r.user.nickname}</span>
                     {isMe && <span className={styles.meTag}>Tu</span>}
+                    <UserBadge label={r.user.badge} />
                   </div>
 
                   <div className={styles.statusWrap}>

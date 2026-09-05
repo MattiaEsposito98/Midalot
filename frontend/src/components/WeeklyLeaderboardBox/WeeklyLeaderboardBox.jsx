@@ -4,6 +4,7 @@ import css from "./WeeklyLeaderboardBox.module.css"
 import api from "../../service/api"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
+import UserBadge from "../UserBadge/UserBadge"
 
 function WeeklyLeaderboardBox() {
   const [weeklyTop, setWeeklyTop] = useState([])
@@ -27,6 +28,7 @@ function WeeklyLeaderboardBox() {
             <li key={r.position} className={css.leaderboardRow}>
               <span className={css.leaderboardRank}>#{r.position}</span>
               <span className={css.leaderboardName}>{r.nickname}</span>
+              <UserBadge label={r.badge} />
               <span className={css.leaderboardScore}>{formatQuizScore(r.total_score)}</span>
             </li>
           ))}

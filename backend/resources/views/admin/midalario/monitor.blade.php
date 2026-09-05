@@ -114,7 +114,14 @@
                     <tbody>
                         @foreach ($participants as $participant)
                             <tr>
-                                <td class="fw-bold">{{ $participant['nickname'] }}</td>
+                                <td class="fw-bold">
+                                    {{ $participant['nickname'] }}
+                                    @if ($participant['badge'] ?? null)
+                                        <span class="badge bg-warning text-dark" title="{{ $participant['badge'] }}">
+                                            <i class="bi bi-award-fill"></i> {{ $participant['badge'] }}
+                                        </span>
+                                    @endif
+                                </td>
                                 <td>{{ optional($participant['joined_at'])->format('d/m/Y H:i') }}</td>
                                 @if ($quiz->midalario_status === 'running')
                                     <td>

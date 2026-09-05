@@ -5,6 +5,7 @@ import { useAuth } from "../../context/useAuth"
 import styles from "./Profilo.module.css"
 import { logError } from "../../utils/logger"
 import { API_BASE } from "../../service/api"
+import UserBadge from "../../components/UserBadge/UserBadge"
 
 function Profilo() {
   const { token, user } = useAuth()
@@ -270,7 +271,7 @@ function Profilo() {
               <div className={styles.infoRow}>
                 <span className={styles.infoLabel}>Nickname</span>
                 <strong className={styles.infoValue}>
-                  {user?.nickname || "-"}
+                  {user?.nickname || "-"} <UserBadge label={user?.latest_monthly_badge?.label} />
                 </strong>
               </div>
 

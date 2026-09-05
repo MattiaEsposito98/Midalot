@@ -48,7 +48,7 @@ class DashboardController extends Controller
                 ->count('city_id'),
         ];
 
-        $latestLogins = UserLogin::with('user')
+        $latestLogins = UserLogin::with('user.latestMonthlyBadge')
             ->latest('logged_in_at')
             ->limit(6)
             ->get();

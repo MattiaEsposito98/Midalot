@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\DailyLoginBonus;
 use App\Models\User;
 use App\Models\UserLogin;
 use Illuminate\Auth\Events\Registered;
@@ -123,8 +124,16 @@ class AuthController extends Controller
             'logged_in_at' => now(),
         ]);
 
+        DailyLoginBonus::insertOrIgnore([
+            'user_id' => $user->id,
+            'bonus_date' => now()->toDateString(),
+            'score' => 1000,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
         return response()->json([
-            'user' => $user->load('city'),
+            'user' => $user->load(['city', 'latestMonthlyBadge']),
             'token' => $token
         ]);
     }
@@ -132,7 +141,7 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         return response()->json(
-            $request->user()->load('city')
+            $request->user()->load(['city', 'latestMonthlyBadge'])
         );
     }
 
@@ -175,7 +184,7 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Profilo aggiornato correttamente',
-            'user' => $user->fresh()->load('city'),
+            'user' => $user->fresh()->load(['city', 'latestMonthlyBadge']),
         ]);
     }
 }

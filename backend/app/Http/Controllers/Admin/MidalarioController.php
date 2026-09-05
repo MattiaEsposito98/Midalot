@@ -177,7 +177,7 @@ class MidalarioController extends Controller
         $window = $quiz->midalario_status === 'running' ? $timeline->currentWindow() : null;
 
         $participants = $quiz->participants()
-            ->with('user:id,nickname,email')
+            ->with(['user:id,nickname,email', 'user.latestMonthlyBadge'])
             ->get()
             ->map(function ($participant) use ($quiz, $window) {
                 $attempt = QuizAttempt::where('quiz_id', $quiz->id)
@@ -200,6 +200,7 @@ class MidalarioController extends Controller
 
                 return [
                     'nickname' => $participant->user->nickname ?? $participant->user->email ?? 'Utente',
+                    'badge' => $participant->user->latestMonthlyBadge?->label,
                     'joined_at' => $participant->created_at,
                     'answered_count' => $answeredCount,
                     'has_answered_current' => $hasAnsweredCurrent,

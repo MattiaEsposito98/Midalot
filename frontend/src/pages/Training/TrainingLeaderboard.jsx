@@ -5,6 +5,7 @@ import styles from "./Training.module.css"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import { API_BASE } from "../../service/api"
+import UserBadge from "../../components/UserBadge/UserBadge"
 
 function TrainingLeaderboard() {
   const { id } = useParams()
@@ -105,7 +106,7 @@ function TrainingLeaderboard() {
 
         {results.map((row) => (
           <div className={styles.leaderboardRow} key={`${row.position}-${row.nickname}-${row.score}`}>
-            <span><strong>#{row.position}</strong> {row.nickname}</span>
+            <span><strong>#{row.position}</strong> {row.nickname} <UserBadge label={row.badge} /></span>
             <span>{formatQuizScore(row.score)} punti · {row.correct_answers}/{row.total_questions}</span>
           </div>
         ))}

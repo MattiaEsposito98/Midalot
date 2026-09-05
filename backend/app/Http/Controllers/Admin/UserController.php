@@ -13,7 +13,7 @@ class UserController extends Controller
         $search = $request->get('search');
 
         $users = User::where('is_admin', false)
-            ->with('city')
+            ->with(['city', 'latestMonthlyBadge'])
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('name', 'like', "%{$search}%")
@@ -32,7 +32,7 @@ class UserController extends Controller
     {
         abort_if($user->is_admin, 404);
 
-        $user->load('city');
+        $user->load(['city', 'latestMonthlyBadge']);
 
         $quizAttempts = $user->quizAttempts()
             ->with('quiz')

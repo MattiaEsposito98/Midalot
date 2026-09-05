@@ -89,7 +89,13 @@
                         @foreach ($results as $index => $r)
                             <tr>
                                 <td><span class="badge bg-primary">{{ $index + 1 }}</span></td>
-                                <td class="fw-bold">{{ $r->user->nickname ?? ($r->user->name ?? '-') }}</td>
+                                <td class="fw-bold">
+                                    @if ($r->user)
+                                        <x-nickname-badge :user="$r->user" />
+                                    @else
+                                        -
+                                    @endif
+                                </td>
                                 <td>{{ $r->user->email ?? '-' }}</td>
                                 <td><strong>{{ number_format(($r->score ?? 0) / 100, 2, ',', '.') }}</strong></td>
                                 <td>{{ $r->correct_answers ?? 0 }} / {{ $r->total_questions ?? 0 }}</td>
