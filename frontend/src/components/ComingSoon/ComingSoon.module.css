@@ -1,0 +1,93 @@
+.wrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 10px;
+  padding: 48px 32px;
+  border-radius: 16px;
+  border: 2px dashed rgba(255, 193, 7, 0.55);
+  background: linear-gradient(160deg, #fffaf0 0%, #fff4bf 45%, #fdf0d8 100%);
+  overflow: hidden;
+}
+
+.glow {
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 160px;
+  height: 160px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 193, 7, 0.35) 0%, rgba(255, 193, 7, 0) 70%);
+  pointer-events: none;
+}
+
+.iconWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid rgba(255, 193, 7, 0.6);
+  box-shadow: 0 10px 24px rgba(122, 84, 0, 0.15);
+  color: #d99a00;
+  font-size: 1.6rem;
+  animation: float 2.6s ease-in-out infinite;
+}
+
+.title {
+  position: relative;
+  font-size: 1.15rem;
+  font-weight: 950;
+  color: #182033;
+  margin: 4px 0 0;
+}
+
+.message {
+  position: relative;
+  color: #7a5400;
+  max-width: 420px;
+  margin: 0;
+  line-height: 1.55;
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+.compact {
+  flex: 0 0 auto;
+  width: 260px;
+  padding: 28px 18px;
+  gap: 8px;
+}
+
+.compact .iconWrap {
+  width: 48px;
+  height: 48px;
+  font-size: 1.25rem;
+}
+
+.compact .title {
+  font-size: 0.95rem;
+}
+
+.compact .message {
+  font-size: 0.85rem;
+  max-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .iconWrap {
+    animation: none;
+  }
+}

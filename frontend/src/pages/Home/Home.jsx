@@ -7,6 +7,7 @@ import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import WeeklyLeaderboardBox from "../../components/WeeklyLeaderboardBox/WeeklyLeaderboardBox"
 import UserBadge from "../../components/UserBadge/UserBadge"
+import ComingSoon from "../../components/ComingSoon/ComingSoon"
 
 const PLACEHOLDER_QUIZZES = [
   { id: "p1", title: "Quiz assegnato" },
@@ -173,16 +174,18 @@ function Home() {
           <p className={css.subtitle}>
             {isLoggedIn ? (
               <>
+                Gioca, divertiti, impara e vinci.{" "}
                 <strong className={css.prizeHighlight}>
-                  Ogni settimana e ogni mese in palio nuovi premi per i migliori giocatori.
+                  Ogni mese in palio nuovi premi per i migliori giocatori.
                 </strong>{" "}
-                Riprendi i tuoi quiz assegnati, scala la classifica del training e tieni d'occhio i tuoi progressi.
+                Scala la classifica del training e tieni d'occhio i tuoi progressi. {" "}
+                Batti i tuoi avversari e diventa il numero 1 del Midalario.
               </>
             ) : (
               <>
                 Sfide a tempo, classifiche in tempo reale e allenamento libero per categoria.{" "}
                 <strong className={css.prizeHighlight}>
-                  Ogni settimana e ogni mese premiamo i migliori giocatori in classifica.
+                  Ogni mese premiamo i migliori giocatori in classifica.
                 </strong>{" "}
                 Entra nella community mida.lot e mettiti alla prova.
               </>
@@ -261,7 +264,12 @@ function Home() {
                 </Link>
               ))
             ) : (
-              <div className={css.emptyCarousel}>Nessun quiz assegnato al momento.</div>
+              <ComingSoon
+                compact
+                icon="bi-grid-1x2-fill"
+                title="Presto in arrivo!"
+                message="Nuovi Quiz One Shot in arrivo a breve."
+              />
             )
           ) : (
             PLACEHOLDER_QUIZZES.map((quiz) => (

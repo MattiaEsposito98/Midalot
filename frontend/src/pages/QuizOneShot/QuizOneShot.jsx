@@ -6,6 +6,7 @@ import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import { API_BASE } from "../../service/api"
 import WeeklyLeaderboardBox from "../../components/WeeklyLeaderboardBox/WeeklyLeaderboardBox"
+import ComingSoon from "../../components/ComingSoon/ComingSoon"
 
 function QuizOneShot() {
   const { token } = useAuth()
@@ -183,9 +184,10 @@ function QuizOneShot() {
       </div>
 
       {sortedQuizzes.length === 0 && (
-        <div className={`alert alert-info ${styles.emptyBox}`}>
-          Nessun quiz attivo al momento.
-        </div>
+        <ComingSoon
+          icon="bi-grid-1x2-fill"
+          message="Nessun Quiz One Shot attivo in questo momento: stiamo preparando nuove sfide a tempo. Nel frattempo mettiti alla prova con il Training!"
+        />
       )}
 
       <div className="row">

@@ -4,6 +4,7 @@ import styles from "./Midalario.module.css"
 import api from "../../service/api"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
+import ComingSoon from "../../components/ComingSoon/ComingSoon"
 
 const STATUS_LABELS = {
   open: ["Iscrizioni aperte", "statusOpen"],
@@ -53,9 +54,10 @@ function Midalario() {
       {error && <div className="alert alert-danger">{error}</div>}
 
       {quizzes.length === 0 && !error && (
-        <div className={`alert alert-info ${styles.emptyBox}`}>
-          Nessun quiz Il Midalario disponibile al momento.
-        </div>
+        <ComingSoon
+          icon="bi-broadcast"
+          message="Nessun Midalario in programma al momento. Segui gli annunci sul sito per non perderti il prossimo evento dal vivo!"
+        />
       )}
 
       <div className={styles.grid}>

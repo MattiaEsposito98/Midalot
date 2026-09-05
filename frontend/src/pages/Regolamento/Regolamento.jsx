@@ -29,7 +29,7 @@ const articles = [
           "Midalot.live declina espressamente ogni responsabilità per l'accesso e la registrazione di minori di 14 anni che abbiano falsificato i propri dati anagrafici o raggirato i controlli di sistema. Gli organizzatori si riservano il diritto di sospendere o cancellare immediatamente l'account, annullando retroattivamente i punteggi e gli eventuali premi vinti senza alcun preavviso, non appena venuti a conoscenza del falso.",
         ],
       },
-      { type: "p", text: "3. Composizione della domanda: Ogni domanda è composta da un testo principale e da 4 (quattro) opzioni di risposta, di cui una sola è corretta." },
+      { type: "p", text: "3. Composizione della domanda: Nei Quiz One Shot e nel Midalario ogni domanda è composta da un testo principale e da 4 (quattro) opzioni di risposta, di cui una sola è corretta. Nel Training il numero di opzioni di risposta può variare da 2 (due) a 4 (quattro) a seconda della domanda, restando comunque una sola risposta corretta tra quelle proposte." },
       { type: "p", text: "4. Contenuti multimediali: Le domande possono includere elementi multimediali (immagini, tracce audio o video) che devono essere consultati prima di selezionare la risposta." },
       { type: "p", text: "5. Limiti di tempo: Ogni domanda prevede un tempo massimo visibile a schermo." },
       { type: "p", text: "6. Mancata risposta: Se il timer scade senza che l'utente abbia selezionato una risposta, la domanda viene registrata come \"Non risposta\"." },
@@ -47,7 +47,8 @@ const articles = [
           "Tentativi consentiti: Ogni quiz One Shot può essere completato una sola volta.",
           "Gestione delle interruzioni: Qualora la sessione si interrompa per qualsiasi motivo (problemi di connessione, chiusura accidentale del browser, ecc.), il sistema chiude automaticamente il tentativo salvando in modo definitivo il punteggio accumulato fino al momento dell'interruzione. Il quiz non potrà essere ripreso: il punteggio registrato al momento dell'interruzione sarà considerato il punteggio finale.",
           "Visualizzazione risposte: Durante lo svolgimento del quiz non viene mostrato l'esito delle singole risposte. Le risposte corrette saranno consultabili esclusivamente al termine del quiz.",
-          "Classifiche e Premi Mensili: Le classifiche dei Quiz One Shot sono sempre visibili e possono essere consultate tramite filtri settimanali e mensili. Il punteggio della classifica mensile è determinato dalla somma dei punteggi ottenuti dall'utente in tutti i Quiz One Shot effettuati nel corso del medesimo mese solare. L'utente che, al termine del mese, si sarà classificato al 1° posto della classifica mensile riceverà, quale riconoscimento al merito, un premio di modico valore, a scelta tra una medaglia, una coppa o un gadget similare.",
+          "Classifica Premi: Nella sezione \"Classifiche\" è sempre consultabile la Classifica Premi, con filtri settimanale e mensile a solo scopo informativo. Ai fini dell'assegnazione del premio rileva esclusivamente la classifica mensile, il cui punteggio è determinato dalla somma dei punteggi ottenuti dall'utente nei Quiz One Shot, nei Minigiochi (Art. 2.4) e dai Bonus di Accesso Giornaliero (Art. 3.4) maturati nel medesimo mese solare. Il Training non concorre alla Classifica Premi ed ha una classifica propria, distinta, per categoria (Art. 2.3).",
+          "Premio e Riconoscimento: L'utente (o gli utenti, in caso di parità) che si classificherà al 1° posto della Classifica Premi mensile riceverà un premio di modico valore, la cui natura specifica è stabilita di volta in volta a insindacabile discrezione degli organizzatori e può variare da un mese all'altro, senza che ciò richieda modifica al presente regolamento. Lo stesso vincitore riceverà inoltre, in automatico e senza necessità di alcuna richiesta, un badge digitale di riconoscimento (es. \"Vincitore di [Mese] [Anno]\"), visibile pubblicamente accanto al proprio nickname in tutte le sezioni del sito fino alla proclamazione del vincitore del mese successivo.",
         ],
       },
       { type: "p", text: "2.2. Midalario (Quiz Settimanali a Premio in Contemporanea)" },
@@ -57,7 +58,7 @@ const articles = [
           "Descrizione e Svolgimento: Il Midalario è la sezione speciale dedicata ai quiz settimanali a premio. A differenza delle altre modalità, il Midalario si svolge in contemporanea tra tutti i partecipanti a un orario e in un giorno specifici.",
           "Comunicazione di Data e Ora: Gli organizzatori comunicheranno preventivamente la data e l'orario esatto di svolgimento tramite avviso sul sito ufficiale midalot.live e attraverso i propri canali social ufficiali.",
           "Chiusura Iscrizioni e Accesso: Le iscrizioni e l'accesso alla stanza di gioco del Midalario si chiudono tassativamente pochi minuti prima dell'orario di inizio stabilito. Gli utenti che non si saranno collegati entro tale termine non potranno partecipare alla sessione in corso.",
-          "Premio per la Competenza: Per premiare l'abilità, la velocità e la preparazione degli utenti, al termine di ciascun quiz del Midalario viene messo in palio per il vincitore (1° classificato) un Buono Regalo Amazon.it del valore di 10,00€.",
+          "Premio per la Competenza: Per premiare l'abilità, la velocità e la preparazione degli utenti, al termine di ciascun quiz del Midalario viene messo in palio per il vincitore (1° classificato) un premio di modico valore, la cui natura specifica è stabilita di volta in volta a insindacabile discrezione degli organizzatori e può variare da una sessione all'altra.",
           "Visibilità Esiti: Le risposte corrette e l'esito delle singole domande vengono mostrati solamente al termine del quiz e al momento della pubblicazione della classifica finale.",
         ],
       },
@@ -68,6 +69,16 @@ const articles = [
           "Struttura: Esercitazioni libere suddivise per categoria, con domande ed opzioni estratte casualmente ad ogni sessione.",
           "Feedback immediato: A differenza dei quiz One Shot e del Midalario, nel Training l'esito viene mostrato subito dopo ogni risposta (verde per la risposta corretta, rosso per l'eventuale errore).",
           "Accessibilità — Utenti registrati: salvano progressi, punteggi e posizione nelle classifiche di categoria (sempre visibili). Ospiti (Guest): possono esercitarsi liberamente senza salvataggio dei dati.",
+        ],
+      },
+      { type: "p", text: "2.4. Minigiochi" },
+      {
+        type: "ul",
+        items: [
+          "Struttura: Sezione di giochi rapidi organizzati in round a tempo, tra cui la ricomposizione di parole cifrate, il riordino cronologico di una sequenza di elementi e l'individuazione dell'elemento intruso tra quattro proposti.",
+          "Formato dei contenuti: A seconda del round, gli elementi da riconoscere possono essere composti da solo testo oppure da sola immagine, a scelta degli organizzatori in fase di creazione dei contenuti.",
+          "Punteggio e Classifiche: Il punteggio ottenuto nei Minigiochi concorre alla Classifica Premi (Art. 2.1) ed è inoltre consultabile in un'apposita classifica dedicata a ciascun minigioco.",
+          "Accessibilità: Riservati agli utenti registrati; non disponibili in modalità Ospite.",
         ],
       },
     ],
@@ -97,6 +108,7 @@ const articles = [
         ],
       },
       { type: "p", text: "3.3. Punteggio Minimo (Soglia di Protezione): Il punteggio totale di una sessione non può scendere sotto 0,00 punti. Risposte errate o non date a punteggio zero non generano punteggi negativi." },
+      { type: "p", text: "3.4. Bonus di Accesso Giornaliero: Ogni utente registrato che effettua il primo accesso (login) della giornata riceve un bonus fisso di 10,00 punti, valido ai fini della Classifica Premi mensile (Art. 2.1). Il bonus viene accreditato una sola volta al giorno per utente, indipendentemente dal numero di accessi successivi effettuati nella stessa giornata; il nuovo giorno decorre dalla mezzanotte, calcolata sull'orario italiano." },
     ],
   },
   {
@@ -111,7 +123,8 @@ const articles = [
         type: "ul",
         items: [
           "Training: Classifiche sempre visibili per categoria.",
-          "Quiz One Shot: Classifiche sempre visibili (con filtri settimanali e mensili).",
+          "Classifica Premi (Quiz One Shot + Minigiochi + Bonus di Accesso Giornaliero): sempre visibile, con filtri settimanali e mensili; il premio è assegnato esclusivamente in base alla classifica mensile (Art. 2.1).",
+          "Minigiochi: oltre a concorrere alla Classifica Premi, ciascun minigioco dispone di una propria classifica dedicata.",
           "Midalario: Classifica visibile al termine del quiz per l'assegnazione del premio al vincitore.",
         ],
       },
@@ -131,13 +144,13 @@ const articles = [
     icon: "bi-gift-fill",
     title: "ART. 6 – Condizioni di erogazione e consegna dei premi",
     blocks: [
-      { type: "p", text: "1. Natura dei Premi: I premi consistono esclusivamente in Buoni Regalo Amazon.it del valore nominale complessivo di 10,00€, erogati a titolo di riconoscimento del merito e della capacità personale, dell'abilità e della preparazione dimostrata dai vincitori nelle varie sessioni di gioco." },
+      { type: "p", text: "1. Natura dei Premi: I premi messi in palio nelle varie modalità di gioco (Classifica Premi mensile, Midalario) sono sempre di modico valore ed erogati a titolo di riconoscimento del merito, della capacità personale, dell'abilità e della preparazione dimostrata dai vincitori. La natura specifica di ciascun premio è stabilita di volta in volta dagli organizzatori e comunicata ai vincitori al momento dell'assegnazione." },
       { type: "p", text: "2. Inquadramento Legale: La piattaforma opera nel rispetto dell'esenzione dalle manifestazioni a premio ai sensi dell'Art. 6, comma 1, lett. a) e d) del D.P.R. 430/2001, trattandosi di riconoscimento del merito personale e/o di premio di minimo valore in concorsi a partecipazione interamente gratuita." },
       { type: "p", text: "3. Modalità e Tempistiche di Consegna:" },
       {
         type: "ul",
         items: [
-          "Il codice alfanumerico del Buono Regalo verrà inviato in formato digitale all'indirizzo email associato all'account del vincitore entro 15 (quindici) giorni lavorativi dalla chiusura della classifica di riferimento (mensile per i Quiz One Shot, settimanale per il Midalario).",
+          "Le modalità e i tempi di consegna del premio (a titolo di esempio: invio di un codice digitale via email, spedizione fisica, comunicazione delle istruzioni per il ritiro) dipendono dalla natura del premio stabilita per quel periodo o sessione e saranno comunicati al vincitore entro 15 (quindici) giorni lavorativi dalla chiusura del periodo di riferimento (mensile per la Classifica Premi; al termine della singola sessione per il Midalario).",
           "Gli organizzatori non si assumono responsabilità in caso di indirizzo e-mail errato, non attivo o di mancata ricezione dovuta a filtri SPAM dell'utente.",
         ],
       },
@@ -145,12 +158,12 @@ const articles = [
       {
         type: "ul",
         items: [
-          "Qualora il vincitore di un premio sia un utente minorenne (di età compresa tra 14 e 17 anni), gli organizzatori si riservano il diritto di erogare il premio previa conferma ed autorizzazione formale da parte del genitore o del tutore legale, al quale potrà essere richiesto di indicare l'indirizzo e-mail di destinazione del voucher.",
+          "Qualora il vincitore di un premio sia un utente minorenne (di età compresa tra 14 e 17 anni), gli organizzatori si riservano il diritto di erogare il premio previa conferma ed autorizzazione formale da parte del genitore o del tutore legale, al quale potrà essere richiesto di indicare i recapiti necessari alla consegna del premio.",
           "Prima dell'erogazione del premio, la gestione si riserva il diritto di effettuare verifiche sull'età dichiarata e sul rispetto delle regole del profilo unico e del fair play.",
         ],
       },
-      { type: "p", text: "5. Convertibilità: I Buoni Regalo non possono in alcun caso essere convertiti in denaro contante, trasferiti ad altri account o sostituiti." },
-      { type: "p", text: "6. Ripartizione del Premio: Nel caso di vincita ex aequo prevista dall'Art. 4.3, il valore di 10,00€ verrà equamente suddiviso in Buoni Regalo di importo pari alla quota spettante a ciascun covincitore." },
+      { type: "p", text: "5. Convertibilità: Qualunque sia la natura del premio assegnato, esso non potrà in alcun caso essere convertito in denaro contante, trasferito ad altri account o sostituito su richiesta del vincitore." },
+      { type: "p", text: "6. Ripartizione del Premio: Nel caso di vincita ex aequo prevista dall'Art. 4.3, il premio messo in palio per quel periodo o sessione verrà ripartito in parti uguali tra i co-vincitori oppure, qualora la natura del premio non ne consenta la suddivisione, gli organizzatori potranno assegnare a ciascun co-vincitore un premio equivalente o di pari valore." },
     ],
   },
   {
@@ -286,7 +299,7 @@ function buildRegolamentoPdf() {
   doc.setFont("helvetica", "italic")
   doc.setFontSize(8.5)
   doc.setTextColor("#647084")
-  doc.text("Ultimo aggiornamento: 26 agosto 2026 — midalot.live", pageWidth / 2, y, { align: "center" })
+  doc.text("Ultimo aggiornamento: 5 settembre 2026 — midalot.live", pageWidth / 2, y, { align: "center" })
 
   const pageCount = doc.internal.getNumberOfPages()
   for (let i = 1; i <= pageCount; i++) {

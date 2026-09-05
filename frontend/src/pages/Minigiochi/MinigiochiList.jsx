@@ -5,6 +5,7 @@ import styles from "./MinigiochiList.module.css"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import { API_BASE } from "../../service/api"
+import ComingSoon from "../../components/ComingSoon/ComingSoon"
 
 function MinigiochiList() {
   const { token } = useAuth()
@@ -176,9 +177,10 @@ function MinigiochiList() {
       </div>
 
       {sortedMinigiochi.length === 0 && (
-        <div className={`alert alert-info ${styles.emptyBox}`}>
-          Nessun minigioco attivo al momento.
-        </div>
+        <ComingSoon
+          icon="bi-joystick"
+          message="Nessun minigioco attivo in questo momento: stiamo preparando nuove sfide veloci. Torna a trovarci presto!"
+        />
       )}
 
       <div className="row">
