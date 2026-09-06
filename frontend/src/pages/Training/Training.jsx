@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Link, useParams, useSearchParams } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "./Training.module.css"
@@ -17,8 +17,6 @@ function Training() {
   const [leaderboard, setLeaderboard] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
-  const quizResultsRef = useRef(null)
-  const previousFilterRef = useRef({ categorySlug: null, subcategorySlug: null })
 
   useEffect(() => {
     async function loadBase() {
@@ -64,7 +62,6 @@ function Training() {
       if (!categorySlug) {
         setCategoryData(null)
         setLeaderboard(null)
-        previousFilterRef.current = { categorySlug: null, subcategorySlug: null }
         return
       }
 
@@ -83,17 +80,6 @@ function Training() {
         }
 
         setCategoryData(data)
-
-        const previousFilter = previousFilterRef.current
-        const shouldScrollToResults =
-          previousFilter.categorySlug === categorySlug && previousFilter.subcategorySlug !== subcategorySlug
-        previousFilterRef.current = { categorySlug, subcategorySlug }
-
-        if (shouldScrollToResults) {
-          requestAnimationFrame(() => {
-            quizResultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" })
-          })
-        }
 
         if (token) {
           const leaderboardRes = await fetch(`${API_BASE}/api/training/categories/${categorySlug}/leaderboard`, {
@@ -121,6 +107,11 @@ function Training() {
     })
     return map
   }, [progress])
+
+  const activeSubcategory = useMemo(() => {
+    if (!subcategorySlug) return null
+    return (categoryData?.subcategories || []).find((sub) => sub.slug === subcategorySlug) || null
+  }, [categoryData, subcategorySlug])
 
   if (loading) {
     return (
@@ -226,49 +217,55 @@ function Training() {
 
             {categoryData.subcategories?.length > 0 && (
               <div className={styles.subcategorySection}>
-                <h3 className={styles.subcategoryTitle}>Scegli una sottocategoria</h3>
-                <div className={styles.grid}>
-                  <div className={`${styles.card} ${!subcategorySlug ? styles.cardActive : ""}`}>
-                    {!subcategorySlug && <span className={styles.activeBadge}>Selezionata</span>}
-                    <div className={styles.cardHeader}>
-                      <div className={styles.cardHeaderText}>
-                        <h3 className={styles.cardTitle}>Tutte</h3>
-                        <p className={`${styles.muted} mb-0`}>Tutti i quiz della categoria, senza filtro.</p>
-                      </div>
-                    </div>
-                    <div className="d-grid gap-2 mt-3">
-                      <Link to={`/training/${categorySlug}`} className="btn btn-primary">
-                        Mostra tutte
-                      </Link>
-                    </div>
-                  </div>
+                <div className={styles.pillBar}>
+                  <Link
+                    to={`/training/${categorySlug}`}
+                    className={`${styles.pill} ${!subcategorySlug ? styles.pillActive : ""}`}
+                  >
+                    <span className={styles.pillLabel}>Tutte</span>
+                  </Link>
 
                   {categoryData.subcategories.map((sub) => (
-                    <div className={`${styles.card} ${subcategorySlug === sub.slug ? styles.cardActive : ""}`} key={sub.id}>
-                      {subcategorySlug === sub.slug && <span className={styles.activeBadge}>Selezionata</span>}
-                      <div className={styles.cardHeader}>
-                        {sub.image && (
-                          <div className={styles.cardImageWrap}>
-                            <img src={sub.image} alt="" className={styles.cardImage} />
-                          </div>
-                        )}
-                        <div className={styles.cardHeaderText}>
-                          <h3 className={styles.cardTitle}>{sub.name}</h3>
-                          <p className={`${styles.muted} mb-0`}>{sub.quizzes_count} quiz disponibili</p>
-                        </div>
-                      </div>
-                      <div className="d-grid gap-2 mt-3">
-                        <Link to={`/training/${categorySlug}?subcategory=${sub.slug}`} className="btn btn-primary">
-                          Apri sottocategoria
-                        </Link>
-                      </div>
-                    </div>
+                    <Link
+                      key={sub.id}
+                      to={`/training/${categorySlug}?subcategory=${sub.slug}`}
+                      className={`${styles.pill} ${subcategorySlug === sub.slug ? styles.pillActive : ""}`}
+                    >
+                      {sub.image ? (
+                        <span className={styles.pillThumb}>
+                          <img src={sub.image} alt="" />
+                        </span>
+                      ) : (
+                        <span className={styles.pillThumbEmpty}>
+                          <i className="bi bi-image"></i>
+                        </span>
+                      )}
+                      <span className={styles.pillLabel}>{sub.name}</span>
+                    </Link>
                   ))}
                 </div>
+
+                {activeSubcategory && (
+                  <div className={styles.subcategoryHero} key={activeSubcategory.slug}>
+                    {activeSubcategory.image ? (
+                      <div className={styles.heroImageWrap}>
+                        <img src={activeSubcategory.image} alt="" className={styles.heroImage} />
+                      </div>
+                    ) : (
+                      <div className={`${styles.heroImageWrap} ${styles.heroImageEmpty}`}>
+                        <i className="bi bi-collection-play"></i>
+                      </div>
+                    )}
+                    <div className={styles.heroText}>
+                      <h3 className={styles.heroTitle}>{activeSubcategory.name}</h3>
+                      <p className={`${styles.heroMeta} mb-0`}>{activeSubcategory.quizzes_count} quiz disponibili</p>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
-            <div ref={quizResultsRef} className={styles.quizResultsAnchor}>
+            <div>
               <div className={styles.quizGrid}>
                 {categoryData.quizzes.map((quiz) => (
                   <div className={styles.card} key={quiz.id}>
