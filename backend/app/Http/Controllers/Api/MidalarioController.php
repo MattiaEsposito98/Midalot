@@ -11,6 +11,7 @@ use App\Models\QuizAttempt;
 use App\Models\QuizParticipant;
 use App\Services\MidalarioFinalizer;
 use App\Services\MidalarioTimeline;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 
 class MidalarioController extends Controller
@@ -182,6 +183,13 @@ class MidalarioController extends Controller
             return response()->json(['message' => 'Il quiz non è in corso'], 403);
         }
 
+        // Il tentativo da solo non basta come prova di iscrizione: va verificata
+        // anche la partecipazione, altrimenti un tentativo creato per altre vie
+        // permetterebbe di giocare e finire in classifica senza essersi iscritti.
+        if (! $quiz->participants()->where('user_id', $user->id)->exists()) {
+            return response()->json(['message' => 'Non hai partecipato a questo quiz'], 403);
+        }
+
         $attempt = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('user_id', $user->id)
             ->first();
@@ -232,16 +240,22 @@ class MidalarioController extends Controller
             $score = -$this->calculatePenalty($currentScore, self::WRONG_ANSWER_PENALTY_RATE);
         }
 
-        QuizAnswer::create([
-            'attempt_id' => $attempt->id,
-            'question_id' => $question->id,
-            'answer_id' => $answer->id,
-            'time_taken' => $timeTakenMs,
-            'is_correct' => $isCorrect,
-            'is_timeout' => false,
-            'is_wrong' => ! $isCorrect,
-            'score' => $score,
-        ]);
+        // Vedi QuizPlayController::submitAnswer: l'indice univoco e' la difesa
+        // reale contro le richieste parallele, il controllo sopra non e' atomico.
+        try {
+            QuizAnswer::create([
+                'attempt_id' => $attempt->id,
+                'question_id' => $question->id,
+                'answer_id' => $answer->id,
+                'time_taken' => $timeTakenMs,
+                'is_correct' => $isCorrect,
+                'is_timeout' => false,
+                'is_wrong' => ! $isCorrect,
+                'score' => $score,
+            ]);
+        } catch (UniqueConstraintViolationException) {
+            return response()->json(['message' => 'Hai già risposto a questa domanda'], 403);
+        }
 
         return response()->json([
             'correct' => $isCorrect,
@@ -355,6 +369,12 @@ class MidalarioController extends Controller
 
         $attempts = QuizAttempt::with(['user.latestMonthlyBadge', 'answers'])
             ->where('quiz_id', $quiz->id)
+            ->orderByDesc('completed')
+            ->orderByDesc('score')
+            ->orderByRaw('total_time IS NULL, total_time ASC')
+            ->orderBy('finished_at')
+            ->orderBy('id')
+            ->limit(50)
             ->get();
 
         $results = $attempts->map(function ($attempt) use ($totalQuestions) {
@@ -372,27 +392,7 @@ class MidalarioController extends Controller
                 'completed' => (bool) $attempt->completed,
                 'finished_at' => $attempt->finished_at?->toISOString(),
             ];
-        })
-            ->sort(function ($a, $b) {
-                if ($a['completed'] !== $b['completed']) {
-                    return $a['completed'] ? -1 : 1;
-                }
-
-                if ($a['completed'] && $b['completed']) {
-                    if ($a['score'] !== $b['score']) {
-                        return $b['score'] <=> $a['score'];
-                    }
-
-                    if (($a['total_time'] ?? PHP_INT_MAX) !== ($b['total_time'] ?? PHP_INT_MAX)) {
-                        return ($a['total_time'] ?? PHP_INT_MAX) <=> ($b['total_time'] ?? PHP_INT_MAX);
-                    }
-
-                    return strcmp($a['finished_at'] ?? '', $b['finished_at'] ?? '');
-                }
-
-                return 0;
-            })
-            ->values();
+        })->values();
 
         return response()->json([
             'quiz' => [

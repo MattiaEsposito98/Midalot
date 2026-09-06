@@ -83,6 +83,16 @@ Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
 
 /*
 |--------------------------------------------------------------------------
+| LOGOUT
+|--------------------------------------------------------------------------
+| Fuori dal gruppo 'verified': anche chi non ha ancora verificato l'email
+| deve poter revocare il proprio token.
+*/
+
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
+
+/*
+|--------------------------------------------------------------------------
 | PROTECTED ROUTES (SANCTUM)
 |--------------------------------------------------------------------------
 */

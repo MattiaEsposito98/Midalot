@@ -7,7 +7,10 @@ use App\Models\Minigioco;
 use App\Models\MinigiocoAttempt;
 use App\Models\MinigiocoRound;
 use App\Models\MinigiocoRoundRisposta;
+use App\Services\AnswerTimer;
+use App\Services\SaltoTemporaleItemOrder;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
 class MinigiocoPlayController extends Controller
@@ -147,6 +150,22 @@ class MinigiocoPlayController extends Controller
      * quota di punteggio per round ora calcolata dinamicamente sul tetto
      * massimo configurabile del minigioco invece di costanti fisse.
      */
+    /**
+     * Istante in cui il round corrente e' di fatto iniziato per il giocatore:
+     * la fine del round precedente, o l'inizio del tentativo se e' il primo.
+     * Serve ad AnswerTimer per verificare il tempo dichiarato dal client.
+     * Su Tastiera Rotta i tentativi multipli restano dentro lo stesso round,
+     * quindi il cronometro continua a correre tra un tentativo e l'altro.
+     */
+    private function roundStartedAt(MinigiocoAttempt $attempt, MinigiocoRound $round): ?Carbon
+    {
+        $previousRoundAt = MinigiocoRoundRisposta::where('attempt_id', $attempt->id)
+            ->where('round_id', '!=', $round->id)
+            ->max('updated_at');
+
+        return $previousRoundAt ? Carbon::parse($previousRoundAt) : $attempt->started_at;
+    }
+
     private function submitTastieraRotta(Request $request, MinigiocoAttempt $attempt, MinigiocoRound $round, Minigioco $minigioco)
     {
         $request->validate(['risposta' => 'nullable|string|max:100']);
@@ -171,7 +190,7 @@ class MinigiocoPlayController extends Controller
         $currentRunningTotal = max(0, $otherRoundsScore + $row->score);
 
         $maxTimeMs = (int) $round->time_limit_seconds * 1000;
-        $timeTaken = min((int) $request->time_taken, $maxTimeMs);
+        $timeTaken = AnswerTimer::resolve((int) $request->time_taken, $this->roundStartedAt($attempt, $round), $maxTimeMs);
 
         if ($request->risposta === null) {
             $penalty = $this->calculatePenalty($currentRunningTotal, self::TIMEOUT_PENALTY_RATE);
@@ -248,7 +267,7 @@ class MinigiocoPlayController extends Controller
         }
 
         $maxTimeMs = (int) $round->time_limit_seconds * 1000;
-        $timeTaken = min((int) $request->time_taken, $maxTimeMs);
+        $timeTaken = AnswerTimer::resolve((int) $request->time_taken, $this->roundStartedAt($attempt, $round), $maxTimeMs);
 
         if ($request->risposta === null) {
             $row->is_timeout = true;
@@ -259,8 +278,14 @@ class MinigiocoPlayController extends Controller
             return response()->json(['correct' => false, 'timeout' => true, 'score' => 0]);
         }
 
-        $correctOrder = $round->items()->pluck('id')->map(fn ($id) => (int) $id)->all();
-        $submittedOrder = array_map('intval', $request->risposta);
+        // Il client ragiona sugli id permutati: vanno ritradotti prima del
+        // confronto. Si salvano gli id reali, cosi' il riepilogo resta coerente.
+        $displayToReal = SaltoTemporaleItemOrder::displayToReal($round, (int) $attempt->user_id);
+        $correctOrder = $round->items->pluck('id')->map(fn ($id) => (int) $id)->all();
+        $submittedOrder = array_map(
+            fn ($id) => $displayToReal[(int) $id] ?? 0,
+            $request->risposta
+        );
 
         $isCorrect = $submittedOrder === $correctOrder;
 
@@ -303,7 +328,7 @@ class MinigiocoPlayController extends Controller
         }
 
         $maxTimeMs = (int) $round->time_limit_seconds * 1000;
-        $timeTaken = min((int) $request->time_taken, $maxTimeMs);
+        $timeTaken = AnswerTimer::resolve((int) $request->time_taken, $this->roundStartedAt($attempt, $round), $maxTimeMs);
 
         if ($request->risposta === null) {
             $row->is_timeout = true;

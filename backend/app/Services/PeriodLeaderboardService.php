@@ -53,6 +53,7 @@ class PeriodLeaderboardService
             ->groupBy('attempts.user_id', 'users.nickname')
             ->selectRaw("attempts.user_id as user_id, users.nickname as nickname, SUM(attempts.score) as total_score, SUM(CASE WHEN attempts.source != 'login' THEN 1 ELSE 0 END) as quizzes_completed")
             ->orderByDesc('total_score')
+            ->limit(50)
             ->get()
             ->values();
 

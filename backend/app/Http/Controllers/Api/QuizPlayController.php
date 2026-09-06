@@ -8,7 +8,10 @@ use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\QuizAnswer;
 use App\Models\QuizAttempt;
+use App\Services\AnswerTimer;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class QuizPlayController extends Controller
 {
@@ -22,6 +25,10 @@ class QuizPlayController extends Controller
 
     public function start(Request $request, Quiz $quiz)
     {
+        // Solo Quiz One Shot: senza questo controllo si potrebbe avviare un
+        // tentativo su un quiz Midalario senza essersi mai iscritti.
+        abort_unless($quiz->type === 'assigned', 404);
+
         $user = $request->user();
 
         if ($quiz->restrict_to_specific_users && ! $user->quizzes()->where('quiz_id', $quiz->id)->exists()) {
@@ -112,7 +119,13 @@ class QuizPlayController extends Controller
         }
 
         $maxTimeMs = (int) $question->time_limit_seconds * 1000;
-        $timeTaken = min((int) $request->time_taken, $maxTimeMs);
+
+        // Il tempo non puo' essere deciso solo dal client: si parte dall'ultimo
+        // istante osservato dal server per questo tentativo.
+        $lastAnsweredAt = QuizAnswer::where('attempt_id', $attempt->id)->max('created_at');
+        $lastEventAt = $lastAnsweredAt ? Carbon::parse($lastAnsweredAt) : $attempt->started_at;
+
+        $timeTaken = AnswerTimer::resolve((int) $request->time_taken, $lastEventAt, $maxTimeMs);
 
         $answerId = null;
         $isCorrect = false;
@@ -150,16 +163,26 @@ class QuizPlayController extends Controller
             }
         }
 
-        QuizAnswer::create([
-            'attempt_id' => $attempt->id,
-            'question_id' => $question->id,
-            'answer_id' => $answerId,
-            'time_taken' => $timeTaken,
-            'is_correct' => $isCorrect,
-            'is_timeout' => $isTimeout,
-            'is_wrong' => $isWrong,
-            'score' => $score,
-        ]);
+        // Il controllo $alreadyAnswered qui sopra non e' atomico: richieste
+        // parallele sulla stessa domanda lo superano tutte. L'indice univoco
+        // su (attempt_id, question_id) e' la vera difesa, questo catch
+        // trasforma la violazione nella stessa risposta del controllo.
+        try {
+            QuizAnswer::create([
+                'attempt_id' => $attempt->id,
+                'question_id' => $question->id,
+                'answer_id' => $answerId,
+                'time_taken' => $timeTaken,
+                'is_correct' => $isCorrect,
+                'is_timeout' => $isTimeout,
+                'is_wrong' => $isWrong,
+                'score' => $score,
+            ]);
+        } catch (UniqueConstraintViolationException) {
+            return response()->json([
+                'message' => 'Hai già risposto a questa domanda',
+            ], 403);
+        }
 
         return response()->json([
             'correct' => $isCorrect,

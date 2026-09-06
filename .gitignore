@@ -1,2 +1,8 @@
 .vscode/sftp.json
 notes.md
+SECURITY-AUDIT.md
+
+# Backup del database: contengono i dati personali degli utenti,
+# non devono mai finire su GitHub.
+backups/
+*.sql

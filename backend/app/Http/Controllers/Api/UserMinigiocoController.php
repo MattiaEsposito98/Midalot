@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Minigioco;
 use App\Models\MinigiocoAttempt;
 use App\Models\MinigiocoRoundRisposta;
+use App\Services\SaltoTemporaleItemOrder;
 use Illuminate\Http\Request;
 
 class UserMinigiocoController extends Controller
@@ -108,7 +109,7 @@ class UserMinigiocoController extends Controller
                 'total_rounds' => $minigioco->rounds->count(),
                 'total_time_seconds' => $minigioco->rounds->sum('time_limit_seconds'),
                 'leaderboard_visible' => (bool) $minigioco->leaderboard_visible,
-                'rounds' => $minigioco->rounds->map(fn ($round) => $this->roundPlayPayload($round, $minigioco->tipo)),
+                'rounds' => $minigioco->rounds->map(fn ($round) => $this->roundPlayPayload($round, $minigioco->tipo, $user->id)),
             ],
         ]);
     }
@@ -118,7 +119,7 @@ class UserMinigiocoController extends Controller
      * Tastiera Rotta espone la parola cifrata; Salto Temporale/Trova l'Intruso
      * espongono i 4 elementi mescolati casualmente.
      */
-    private function roundPlayPayload($round, string $tipo): array
+    private function roundPlayPayload($round, string $tipo, int $userId): array
     {
         $base = [
             'id' => $round->id,
@@ -129,13 +130,22 @@ class UserMinigiocoController extends Controller
             return [...$base, 'parola_cifrata' => $round->parola_cifrata];
         }
 
-        return [...$base, 'items' => $this->itemsPayload($round)->shuffle()->values()];
+        // Su Salto Temporale gli id reali rivelerebbero l'ordine corretto
+        // (vedi SaltoTemporaleItemOrder), quindi si espone una permutazione.
+        $idMap = $tipo === 'salto_temporale'
+            ? SaltoTemporaleItemOrder::realToDisplay($round, $userId)
+            : null;
+
+        return [...$base, 'items' => $this->itemsPayload($round, $idMap)->shuffle()->values()];
     }
 
-    private function itemsPayload($round)
+    /**
+     * @param  array<int, int>|null  $idMap  rimappatura id reale => id mostrato
+     */
+    private function itemsPayload($round, ?array $idMap = null)
     {
         return $round->items->map(fn ($item) => [
-            'id' => $item->id,
+            'id' => $idMap[$item->id] ?? $item->id,
             'label' => $item->label,
             'image' => $item->image_url,
         ]);
@@ -229,6 +239,11 @@ class UserMinigiocoController extends Controller
 
         $attempts = MinigiocoAttempt::with(['user.latestMonthlyBadge', 'risposte'])
             ->where('minigioco_id', $minigioco->id)
+            ->orderByDesc('completed')
+            ->orderByDesc('score')
+            ->orderByRaw('total_time IS NULL, total_time ASC')
+            ->orderBy('id')
+            ->limit(50)
             ->get();
 
         $results = $attempts->map(function ($attempt) use ($totalRounds) {
@@ -246,23 +261,7 @@ class UserMinigiocoController extends Controller
                 'completed' => (bool) $attempt->completed,
                 'finished_at' => $attempt->finished_at?->toISOString(),
             ];
-        })
-            ->sort(function ($a, $b) {
-                if ($a['completed'] !== $b['completed']) {
-                    return $a['completed'] ? -1 : 1;
-                }
-
-                if ($a['completed'] && $b['completed']) {
-                    if ($a['score'] !== $b['score']) {
-                        return $b['score'] <=> $a['score'];
-                    }
-
-                    return ($a['total_time'] ?? PHP_INT_MAX) <=> ($b['total_time'] ?? PHP_INT_MAX);
-                }
-
-                return 0;
-            })
-            ->values();
+        })->values();
 
         return response()->json([
             'minigioco' => [

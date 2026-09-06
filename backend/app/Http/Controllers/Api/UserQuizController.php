@@ -69,8 +69,21 @@ class UserQuizController extends Controller
         ]);
     }
 
+    /**
+     * Questo controller serve solo i Quiz One Shot. Senza questo controllo un
+     * utente potrebbe passare l'id di un quiz Midalario e leggerne domande e
+     * risposte prima della diretta (restrict_to_specific_users e' false di
+     * default, quindi la guardia sull'assegnazione non scatterebbe).
+     */
+    private function ensureOneShot(Quiz $quiz): void
+    {
+        abort_unless($quiz->type === 'assigned', 404);
+    }
+
     public function show(Request $request, Quiz $quiz)
     {
+        $this->ensureOneShot($quiz);
+
         $user = $request->user();
 
         if ($quiz->restrict_to_specific_users && !$user->quizzes()->where('quiz_id', $quiz->id)->exists()) {
@@ -160,6 +173,8 @@ class UserQuizController extends Controller
 
     public function review(Request $request, Quiz $quiz)
     {
+        $this->ensureOneShot($quiz);
+
         $user = $request->user();
 
         if ($quiz->restrict_to_specific_users && !$user->quizzes()->where('quiz_id', $quiz->id)->exists()) {
@@ -244,6 +259,8 @@ class UserQuizController extends Controller
 
     public function leaderboard(Request $request, Quiz $quiz)
     {
+        $this->ensureOneShot($quiz);
+
         $user = $request->user();
 
         if ($quiz->restrict_to_specific_users && !$user->quizzes()->where('quiz_id', $quiz->id)->exists()) {
@@ -262,6 +279,12 @@ class UserQuizController extends Controller
 
         $attempts = QuizAttempt::with(['user.latestMonthlyBadge', 'answers'])
             ->where('quiz_id', $quiz->id)
+            ->orderByDesc('completed')
+            ->orderByDesc('score')
+            ->orderByRaw('total_time IS NULL, total_time ASC')
+            ->orderBy('finished_at')
+            ->orderBy('id')
+            ->limit(50)
             ->get();
 
         $results = $attempts->map(function ($attempt) use ($totalQuestions) {
@@ -279,31 +302,7 @@ class UserQuizController extends Controller
                 'completed' => (bool) $attempt->completed,
                 'finished_at' => $attempt->finished_at?->toISOString(),
             ];
-        })
-            ->sort(function ($a, $b) {
-                if ($a['completed'] !== $b['completed']) {
-                    return $a['completed'] ? -1 : 1;
-                }
-
-                if ($a['completed'] && $b['completed']) {
-                    if ($a['score'] !== $b['score']) {
-                        return $b['score'] <=> $a['score'];
-                    }
-
-                    if (($a['total_time'] ?? PHP_INT_MAX) !== ($b['total_time'] ?? PHP_INT_MAX)) {
-                        return ($a['total_time'] ?? PHP_INT_MAX) <=> ($b['total_time'] ?? PHP_INT_MAX);
-                    }
-
-                    if (($a['finished_at'] ?? '') !== ($b['finished_at'] ?? '')) {
-                        return strcmp($a['finished_at'] ?? '', $b['finished_at'] ?? '');
-                    }
-
-                    return ($a['attempt_id'] ?? PHP_INT_MAX) <=> ($b['attempt_id'] ?? PHP_INT_MAX);
-                }
-
-                return 0;
-            })
-            ->values();
+        })->values();
 
         return response()->json([
             'quiz' => [

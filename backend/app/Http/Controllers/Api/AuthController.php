@@ -145,6 +145,21 @@ class AuthController extends Controller
         );
     }
 
+    /**
+     * Revoca il token usato per questa richiesta. Senza questo il "esci" del
+     * frontend cancellava solo il localStorage, lasciando il token valido a
+     * tempo indeterminato lato server: chi fosse entrato da un dispositivo
+     * condiviso restava di fatto autenticato per sempre.
+     */
+    public function logout(Request $request)
+    {
+        $request->user()->currentAccessToken()?->delete();
+
+        return response()->json([
+            'message' => 'Disconnessione effettuata',
+        ]);
+    }
+
     public function changePassword(Request $request)
     {
         $user = $request->user();

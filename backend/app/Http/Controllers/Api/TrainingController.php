@@ -10,8 +10,10 @@ use App\Models\TrainingAnswer;
 use App\Models\TrainingAttempt;
 use App\Models\TrainingCategory;
 use App\Models\TrainingSubcategory;
+use App\Services\AnswerTimer;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
@@ -163,8 +165,13 @@ class TrainingController extends Controller
             return response()->json(['message' => 'Sessione training scaduta'], 404);
         }
 
-        $result = $this->scoreAnswer($state['quiz_id'], $state['question_ids'], $state['answers'], $validated);
+        // Per gli ospiti l'ultimo istante osservato vive nella cache di sessione,
+        // non essendoci righe a database.
+        $lastEventAt = Carbon::parse($state['last_answer_at'] ?? $state['started_at']);
+
+        $result = $this->scoreAnswer($state['quiz_id'], $state['question_ids'], $state['answers'], $validated, $lastEventAt);
         $state['answers'][(string) $validated['question_id']] = $result['stored'];
+        $state['last_answer_at'] = now()->toISOString();
 
         Cache::put($this->guestCacheKey($validated['session_token']), $state, now()->addHours(2));
 
@@ -232,7 +239,10 @@ class TrainingController extends Controller
             ->map(fn ($score) => ['score' => $score])
             ->toArray();
 
-        $result = $this->scoreAnswer($attempt->quiz_id, $attempt->question_ids, $existingAnswers, $validated);
+        $lastAnsweredAt = $attempt->answers()->max('created_at');
+        $lastEventAt = $lastAnsweredAt ? Carbon::parse($lastAnsweredAt) : $attempt->started_at;
+
+        $result = $this->scoreAnswer($attempt->quiz_id, $attempt->question_ids, $existingAnswers, $validated, $lastEventAt);
         $stored = $result['stored'];
 
         TrainingAnswer::create([
@@ -306,9 +316,16 @@ class TrainingController extends Controller
             })
             ->values();
 
+        $recentAttempts = TrainingAttempt::with(['category', 'quiz'])
+            ->where('user_id', $request->user()->id)
+            ->where('completed', true)
+            ->latest('finished_at')
+            ->limit(8)
+            ->get();
+
         return response()->json([
             'categories' => $categories,
-            'recent_attempts' => $attempts->take(8)->map(fn ($attempt) => $this->attemptPayload($attempt))->values(),
+            'recent_attempts' => $recentAttempts->map(fn ($attempt) => $this->attemptPayload($attempt))->values(),
         ]);
     }
 
@@ -471,7 +488,7 @@ class TrainingController extends Controller
         ];
     }
 
-    private function scoreAnswer(int $quizId, array $questionIds, array $existingAnswers, array $data): array
+    private function scoreAnswer(int $quizId, array $questionIds, array $existingAnswers, array $data, ?Carbon $lastEventAt = null): array
     {
         if (! in_array((int) $data['question_id'], array_map('intval', $questionIds), true)) {
             throw new HttpResponseException(response()->json(['message' => 'Domanda non valida per questo training'], 422));
@@ -486,7 +503,7 @@ class TrainingController extends Controller
             ->where('is_correct', true)
             ->value('id');
         $maxTimeMs = (int) $question->time_limit_seconds * 1000;
-        $timeTaken = min((int) $data['time_taken'], $maxTimeMs);
+        $timeTaken = AnswerTimer::resolve((int) $data['time_taken'], $lastEventAt, $maxTimeMs);
         $answerId = null;
         $isCorrect = false;
         $isTimeout = false;

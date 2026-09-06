@@ -47,7 +47,9 @@ return [
     |
     */
 
-    'expiration' => null,
+    // 30 giorni: un token rubato o rimasto su un dispositivo condiviso smette
+    // comunque di funzionare da solo. Prima restava valido per sempre.
+    'expiration' => env('SANCTUM_TOKEN_EXPIRATION', 43200),
 
     /*
     |--------------------------------------------------------------------------

@@ -1,5 +1,7 @@
 import { useState } from "react"
 import { AuthContext } from "./authStore"
+import { API_BASE } from "../service/api"
+import { logError } from "../utils/logger"
 
 export function AuthProvider({ children }) {
 
@@ -30,13 +32,31 @@ export function AuthProvider({ children }) {
     localStorage.setItem("token", tokenData)
   }
 
-  const logout = () => {
+  const logout = async () => {
+    const currentToken = localStorage.getItem("token")
 
+    // Prima si svuota lo stato locale, cosi' l'utente esce subito anche se la
+    // rete e' lenta o assente.
     setUser(null)
     setToken(null)
-
     localStorage.removeItem("user")
     localStorage.removeItem("token")
+
+    if (!currentToken) return
+
+    // Poi si revoca il token lato server: senza questa chiamata resterebbe
+    // valido anche dopo il logout.
+    try {
+      await fetch(`${API_BASE}/api/logout`, {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${currentToken}`,
+        },
+      })
+    } catch (err) {
+      logError(err)
+    }
   }
 
   return (
