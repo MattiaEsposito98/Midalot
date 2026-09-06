@@ -38,8 +38,12 @@ class DashboardController extends Controller
             'minigioco_completed_attempts' => MinigiocoAttempt::where('completed', true)->count(),
             'minigioco_players' => MinigiocoAttempt::distinct('user_id')->count('user_id'),
             'questions' => Question::count(),
-            'logins_today' => UserLogin::whereDate('logged_in_at', today())->count(),
-            'logins_week' => UserLogin::where('logged_in_at', '>=', now()->subDays(7))->count(),
+            'logins_today' => UserLogin::whereHas('user', fn ($q) => $q->where('is_admin', false))
+                ->whereDate('logged_in_at', today())
+                ->count(),
+            'logins_week' => UserLogin::whereHas('user', fn ($q) => $q->where('is_admin', false))
+                ->where('logged_in_at', '>=', now()->subDays(7))
+                ->count(),
             'attempts' => QuizAttempt::count(),
             'completed_attempts' => QuizAttempt::where('completed', true)->count(),
             'cities' => User::where('is_admin', false)
@@ -49,6 +53,7 @@ class DashboardController extends Controller
         ];
 
         $latestLogins = UserLogin::with('user.latestMonthlyBadge')
+            ->whereHas('user', fn ($q) => $q->where('is_admin', false))
             ->latest('logged_in_at')
             ->limit(6)
             ->get();
