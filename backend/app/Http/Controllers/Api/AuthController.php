@@ -124,18 +124,44 @@ class AuthController extends Controller
             'logged_in_at' => now(),
         ]);
 
-        DailyLoginBonus::insertOrIgnore([
-            'user_id' => $user->id,
+        $this->grantDailyBonus($user->id);
+
+        return response()->json([
+            'user' => $user->load(['city', 'latestMonthlyBadge']),
+            'token' => $token
+        ]);
+    }
+
+    /**
+     * Assegna il bonus giornaliero se non e' gia' stato preso oggi. Chiamato
+     * sia da login() sia da dailyBonus(): il token API resta valido per giorni
+     * (fino a 30), quindi la maggior parte delle visite non passa mai da
+     * login() e senza questo secondo punto di ingresso il bonus scatterebbe
+     * solo il giorno in cui l'utente reinserisce le credenziali, non ogni
+     * giorno che visita davvero il sito.
+     */
+    private function grantDailyBonus(int $userId): bool
+    {
+        $inserted = DailyLoginBonus::insertOrIgnore([
+            'user_id' => $userId,
             'bonus_date' => now()->toDateString(),
             'score' => 1000,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
 
-        return response()->json([
-            'user' => $user->load(['city', 'latestMonthlyBadge']),
-            'token' => $token
-        ]);
+        return $inserted > 0;
+    }
+
+    /**
+     * Da chiamare ad ogni apertura dell'app quando l'utente ha gia' un token
+     * valido: e' questo il vero "sono entrato oggi", non il login.
+     */
+    public function dailyBonus(Request $request)
+    {
+        $granted = $this->grantDailyBonus($request->user()->id);
+
+        return response()->json(['granted' => $granted]);
     }
 
     public function user(Request $request)

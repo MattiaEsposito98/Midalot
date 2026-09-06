@@ -101,6 +101,11 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
 
     Route::get('/user', [AuthController::class, 'user']);
 
+    // Chiamata dal frontend ad ogni apertura dell'app: assegna il bonus
+    // giornaliero anche a chi non rifa' il login perche' il token e' ancora
+    // valido (vedi commento su AuthController::dailyBonus).
+    Route::post('/daily-bonus', [AuthController::class, 'dailyBonus']);
+
     // ✅ AGGIORNAMENTO PROFILO
     Route::put('/user/profile', [AuthController::class, 'updateProfile']);
 

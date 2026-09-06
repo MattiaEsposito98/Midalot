@@ -138,7 +138,7 @@ function Classifiche() {
 
       <div className={styles.infoNote}>
         <i className="bi bi-info-circle"></i>
-        I punti derivano da Quiz One Shot e Minigiochi. Il Training ha una classifica propria per categoria e non contribuisce a questa classifica.
+        I punti derivano da Quiz One Shot, Minigiochi e dal bonus giornaliero di accesso. Il Training ha una classifica propria per categoria e non contribuisce a questa classifica.
       </div>
 
       <div className={styles.tabs}>

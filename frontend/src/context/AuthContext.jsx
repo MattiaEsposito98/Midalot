@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { AuthContext } from "./authStore"
 import { API_BASE } from "../service/api"
 import { logError } from "../utils/logger"
@@ -22,6 +22,25 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => {
     return localStorage.getItem("token")
   })
+
+  useEffect(() => {
+    // Il token API resta valido per giorni: chi apre il sito con una
+    // sessione gia' attiva non passa mai da login(), quindi senza questa
+    // chiamata il bonus giornaliero scatterebbe solo il giorno in cui
+    // l'utente reinserisce le credenziali. Qui si segnala "sono entrato
+    // oggi" ad ogni apertura dell'app.
+    const existingToken = localStorage.getItem("token")
+    if (!existingToken) return
+
+    fetch(`${API_BASE}/api/daily-bonus`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        Authorization: `Bearer ${existingToken}`,
+      },
+    }).catch(logError)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   const login = (userData, tokenData) => {
 
