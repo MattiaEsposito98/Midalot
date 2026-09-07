@@ -14,6 +14,7 @@ import QuizReview from "./pages/QuizReview/QuizReview"
 import Profilo from "./pages/Profilo/Profilo"
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword"
 import ResetPassword from "./pages/ResetPassword/ResetPassword"
+import VerificaEmail from "./pages/VerificaEmail/VerificaEmail"
 import Storico from "./pages/Storico/Storico"
 import CambiaPassword from "./pages/CambiaPassword/CambiaPassword"
 import Leaderboard from "./pages/Leaderboard/Leaderboard"
@@ -42,6 +43,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/verifica-email" element={<VerificaEmail />} />
         <Route path="/privacy" element={<LegalPage type="privacy" />} />
         <Route path="/termini" element={<LegalPage type="terms" />} />
         <Route path="/cookie" element={<LegalPage type="cookies" />} />

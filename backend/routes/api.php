@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AudioProxyController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\MidalarioController;
 use App\Http\Controllers\Api\MinigiocoPlayController;
@@ -13,7 +14,6 @@ use App\Http\Controllers\Api\TrainingController;
 use App\Http\Controllers\Api\TrainingReportController;
 use App\Http\Controllers\Api\UserMinigiocoController;
 use App\Http\Controllers\Api\UserQuizController;
-use App\Models\User;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -64,22 +64,14 @@ Route::post('/training/report-question', [TrainingReportController::class, 'stor
 |--------------------------------------------------------------------------
 */
 
-Route::get('/email/verify/{id}/{hash}', function ($id, $hash) {
+// Niente middleware 'signed' qui: la validita' della firma viene controllata
+// dentro EmailVerificationController::verify per poter distinguere link
+// scaduto, gia' verificato e link non valido (vedi commento nel controller).
+Route::get('/email/verify/{id}/{hash}', [EmailVerificationController::class, 'verify'])
+    ->name('verification.verify');
 
-    $user = User::findOrFail($id);
-
-    // 🔐 verifica hash email
-    if (! hash_equals((string) $hash, sha1($user->email))) {
-        abort(403, 'Link non valido');
-    }
-
-    // ✅ verifica email (solo se non già verificata)
-    if (! $user->hasVerifiedEmail()) {
-        $user->markEmailAsVerified();
-    }
-
-    return redirect(config('app.frontend_url').'/login?verified=1');
-})->middleware(['signed'])->name('verification.verify');
+Route::post('/email/verification-notification/resend', [EmailVerificationController::class, 'resend'])
+    ->middleware('throttle:3,1');
 
 /*
 |--------------------------------------------------------------------------
