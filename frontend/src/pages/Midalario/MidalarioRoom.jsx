@@ -261,11 +261,15 @@ function MidalarioRoom() {
 
   const question = status.question
 
+  // Le domande sono una di seguito all'altra senza pause: se la partita e' in
+  // corso ma non c'e' una domanda attiva, significa che l'ultima e' appena
+  // scaduta e il server sta salvando i risultati. Meglio dirlo, invece di
+  // annunciare una domanda che non arrivera' mai.
   if (!question) {
     return (
       <div className={styles.centerBox}>
         <div className="spinner-border text-primary"></div>
-        <p className={styles.centerText}>Attendi il caricamento della prossima domanda...</p>
+        <p className={styles.centerText}>Tempo scaduto! Stiamo calcolando i risultati...</p>
       </div>
     )
   }
