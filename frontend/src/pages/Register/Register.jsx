@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import axios from "axios"
 import { Link, useNavigate } from "react-router-dom"
 import css from "./Register.module.css"
@@ -23,6 +23,10 @@ function Register() {
     website: ""
   })
 
+  const [birthDay, setBirthDay] = useState("")
+  const [birthMonth, setBirthMonth] = useState("")
+  const [birthYear, setBirthYear] = useState("")
+
   const [citySearch, setCitySearch] = useState("")
   const [cities, setCities] = useState([])
   const [loading, setLoading] = useState(false)
@@ -31,6 +35,77 @@ function Register() {
   const [showPasswordConfirmation, setShowPasswordConfirmation] = useState(false)
 
   const nicknameRegex = /^(?!.*\.\.)(?!.*\.$)(?!^\.)[a-z0-9._]+$/
+
+  const currentYear = new Date().getFullYear()
+
+  const MONTHS = [
+    { value: "01", label: "Gennaio" },
+    { value: "02", label: "Febbraio" },
+    { value: "03", label: "Marzo" },
+    { value: "04", label: "Aprile" },
+    { value: "05", label: "Maggio" },
+    { value: "06", label: "Giugno" },
+    { value: "07", label: "Luglio" },
+    { value: "08", label: "Agosto" },
+    { value: "09", label: "Settembre" },
+    { value: "10", label: "Ottobre" },
+    { value: "11", label: "Novembre" },
+    { value: "12", label: "Dicembre" },
+  ]
+
+  // Niente input type="date": su alcuni dispositivi Samsung il picker nativo
+  // non mostra l'icona per digitare la data a mano, obbligando l'utente a
+  // scorrere il calendario/le rotelle. Con tre select la digitazione manuale
+  // non serve mai.
+  const daysInMonth = (month, year) => {
+    if (!month) return 31
+    const y = year ? Number(year) : 2000 // anno bisestile "neutro" finche' non e' scelto
+    return new Date(y, Number(month), 0).getDate()
+  }
+
+  const dayOptions = useMemo(() => {
+    const max = daysInMonth(birthMonth, birthYear)
+    return Array.from({ length: max }, (_, i) => String(i + 1).padStart(2, "0"))
+  }, [birthMonth, birthYear])
+
+  const yearOptions = useMemo(() => {
+    const years = []
+    for (let y = currentYear; y >= currentYear - 100; y--) years.push(String(y))
+    return years
+  }, [currentYear])
+
+  const updateBirthDate = (day, month, year) => {
+    setForm((prev) => ({
+      ...prev,
+      birth_date: day && month && year ? `${year}-${month}-${day}` : "",
+    }))
+  }
+
+  const handleBirthDayChange = (e) => {
+    const value = e.target.value
+    setBirthDay(value)
+    updateBirthDate(value, birthMonth, birthYear)
+  }
+
+  const handleBirthMonthChange = (e) => {
+    const value = e.target.value
+    const maxDay = daysInMonth(value, birthYear)
+    const clampedDay = birthDay && Number(birthDay) > maxDay ? String(maxDay).padStart(2, "0") : birthDay
+
+    setBirthMonth(value)
+    if (clampedDay !== birthDay) setBirthDay(clampedDay)
+    updateBirthDate(clampedDay, value, birthYear)
+  }
+
+  const handleBirthYearChange = (e) => {
+    const value = e.target.value
+    const maxDay = daysInMonth(birthMonth, value)
+    const clampedDay = birthDay && Number(birthDay) > maxDay ? String(maxDay).padStart(2, "0") : birthDay
+
+    setBirthYear(value)
+    if (clampedDay !== birthDay) setBirthDay(clampedDay)
+    updateBirthDate(clampedDay, birthMonth, value)
+  }
 
   const isAtLeast14 = (birthDate) => {
     const birth = new Date(birthDate)
@@ -259,14 +334,52 @@ function Register() {
                 <div className="row">
                   <div className="col-md-6 mb-3">
                     <label className="form-label">Data di nascita</label>
-                    <input
-                      type="date"
-                      className="form-control"
-                      name="birth_date"
-                      value={form.birth_date}
-                      onChange={handleChange}
-                      disabled={loading}
-                    />
+                    <div className="row g-2">
+                      <div className="col-4">
+                        <select
+                          className="form-select"
+                          aria-label="Giorno di nascita"
+                          value={birthDay}
+                          onChange={handleBirthDayChange}
+                          disabled={loading}
+                        >
+                          <option value="">GG</option>
+                          {dayOptions.map((d) => (
+                            <option key={d} value={d}>{d}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="col-4">
+                        <select
+                          className="form-select"
+                          aria-label="Mese di nascita"
+                          value={birthMonth}
+                          onChange={handleBirthMonthChange}
+                          disabled={loading}
+                        >
+                          <option value="">Mese</option>
+                          {MONTHS.map((m) => (
+                            <option key={m.value} value={m.value}>{m.label}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="col-4">
+                        <select
+                          className="form-select"
+                          aria-label="Anno di nascita"
+                          value={birthYear}
+                          onChange={handleBirthYearChange}
+                          disabled={loading}
+                        >
+                          <option value="">Anno</option>
+                          {yearOptions.map((y) => (
+                            <option key={y} value={y}>{y}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
                     {errors.birth_date && <div className="text-danger small mt-1">{errors.birth_date}</div>}
                   </div>
 
