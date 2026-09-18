@@ -216,7 +216,7 @@ function Classifiche() {
                 <div className={styles.nameWrap}>
                   <span className={styles.name}>{r.nickname}</span>
                   {isMe && <span className={styles.meTag}>Tu</span>}
-                  <UserBadge label={r.badge} />
+                  <UserBadge badges={r.badges} />
                 </div>
 
                 <div className={styles.statsGrid}>

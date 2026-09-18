@@ -106,7 +106,7 @@ function TrainingLeaderboard() {
 
         {results.map((row) => (
           <div className={styles.leaderboardRow} key={`${row.position}-${row.nickname}-${row.score}`}>
-            <span><strong>#{row.position}</strong> {row.nickname} <UserBadge label={row.badge} /></span>
+            <span><strong>#{row.position}</strong> {row.nickname} <UserBadge badges={row.badges} /></span>
             <span>{formatQuizScore(row.score)} punti · {row.correct_answers}/{row.total_questions}</span>
           </div>
         ))}

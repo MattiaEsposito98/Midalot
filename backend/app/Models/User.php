@@ -33,6 +33,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'remember_token',
     ];
 
+    protected $appends = [
+        'badges',
+    ];
+
     protected function casts(): array
     {
         return [
@@ -83,6 +87,44 @@ class User extends Authenticatable implements MustVerifyEmail
     public function latestMonthlyBadge()
     {
         return $this->hasOne(\App\Models\MonthlyBadge::class)->latestOfMany('month');
+    }
+
+    public function midalarioBadges()
+    {
+        return $this->hasMany(\App\Models\MidalarioBadge::class);
+    }
+
+    /**
+     * Tutti i badge dell'utente (mensile + Midalario), per mostrarli
+     * affiancati ovunque nel sito. Vuoto se le relazioni non sono state
+     * caricate (nessuna query aggiuntiva "a sorpresa" nei contesti bulk
+     * che non le richiedono esplicitamente).
+     */
+    public function getBadgesAttribute(): array
+    {
+        if (! $this->relationLoaded('latestMonthlyBadge') && ! $this->relationLoaded('midalarioBadges')) {
+            return [];
+        }
+
+        $badges = [];
+
+        if ($this->relationLoaded('latestMonthlyBadge') && $this->latestMonthlyBadge) {
+            $badges[] = [
+                'type' => 'monthly',
+                'label' => $this->latestMonthlyBadge->label,
+            ];
+        }
+
+        if ($this->relationLoaded('midalarioBadges')) {
+            foreach ($this->midalarioBadges as $badge) {
+                $badges[] = [
+                    'type' => 'midalario',
+                    'label' => $badge->label,
+                ];
+            }
+        }
+
+        return $badges;
     }
 
     public function sendEmailVerificationNotification()

@@ -76,7 +76,7 @@ function PublicNavbar() {
                   >
                     <i className="bi bi-person-circle"></i>
                     {user?.name || user?.nickname || "Profilo"}
-                    <UserBadge label={user?.latest_monthly_badge?.label} />
+                    <UserBadge badges={user?.badges} />
                   </a>
 
                   <ul className={`dropdown-menu dropdown-menu-end shadow-sm border-0 ${css.profileMenu}`}>

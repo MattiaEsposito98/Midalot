@@ -28,7 +28,7 @@ function WeeklyLeaderboardBox() {
             <li key={r.position} className={css.leaderboardRow}>
               <span className={css.leaderboardRank}>#{r.position}</span>
               <span className={css.leaderboardName}>{r.nickname}</span>
-              <UserBadge label={r.badge} />
+              <UserBadge badges={r.badges} />
               <span className={css.leaderboardScore}>{formatQuizScore(r.total_score)}</span>
             </li>
           ))}

@@ -277,7 +277,7 @@ class UserQuizController extends Controller
 
         $totalQuestions = $quiz->questions()->count();
 
-        $attempts = QuizAttempt::with(['user.latestMonthlyBadge', 'answers'])
+        $attempts = QuizAttempt::with(['user.latestMonthlyBadge', 'user.midalarioBadges', 'answers'])
             ->where('quiz_id', $quiz->id)
             ->orderByDesc('completed')
             ->orderByDesc('score')
@@ -293,7 +293,7 @@ class UserQuizController extends Controller
             return [
                 'user' => [
                     'nickname' => $attempt->user->nickname ?? 'Utente',
-                    'badge' => $attempt->user->latestMonthlyBadge?->label,
+                    'badges' => $attempt->user->badges ?? [],
                 ],
                 'score' => $attempt->score ?? 0,
                 'correct_answers' => $correct,

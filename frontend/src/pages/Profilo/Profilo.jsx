@@ -271,7 +271,7 @@ function Profilo() {
               <div className={styles.infoRow}>
                 <span className={styles.infoLabel}>Nickname</span>
                 <strong className={styles.infoValue}>
-                  {user?.nickname || "-"} <UserBadge label={user?.latest_monthly_badge?.label} />
+                  {user?.nickname || "-"} <UserBadge badges={user?.badges} />
                 </strong>
               </div>
 

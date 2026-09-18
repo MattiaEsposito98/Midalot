@@ -188,9 +188,7 @@ function Home() {
             </span>
           )}
 
-          {isLoggedIn && user?.latest_monthly_badge?.label && (
-            <UserBadge label={user.latest_monthly_badge.label} />
-          )}
+          {isLoggedIn && <UserBadge badges={user?.badges} />}
 
           <h1 className={css.title}>
             {isLoggedIn

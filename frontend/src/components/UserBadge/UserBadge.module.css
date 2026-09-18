@@ -1,18 +1,77 @@
-.badge {
+.badges {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  background: #fff4bf;
-  color: #7a5400;
-  border: 1px solid rgba(255, 193, 7, 0.5);
-  border-radius: 999px;
-  padding: 3px 10px;
-  font-size: 0.75rem;
-  font-weight: 800;
-  white-space: nowrap;
-  line-height: 1.4;
+  gap: 6px;
+  vertical-align: middle;
 }
 
-.badge i {
+.badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 50%;
   font-size: 0.8rem;
+  cursor: default;
+  border: 1px solid rgba(24, 32, 51, 0.1);
+  box-shadow: 0 1px 3px rgba(24, 32, 51, 0.18);
+  outline: none;
+}
+
+.badge:focus-visible {
+  box-shadow: 0 0 0 2px rgba(24, 32, 51, 0.25), 0 1px 3px rgba(24, 32, 51, 0.18);
+}
+
+.badgeMonthly {
+  background: linear-gradient(145deg, #ffe9a3, #ffc107);
+  color: #7a5400;
+}
+
+.badgeMidalario {
+  background: linear-gradient(145deg, #182033, #0f8b8d);
+  color: #ffffff;
+}
+
+.tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%) translateY(4px);
+  background: #182033;
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1.35;
+  padding: 7px 11px;
+  border-radius: 8px;
+  white-space: normal;
+  max-width: 200px;
+  width: max-content;
+  text-align: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  box-shadow: 0 10px 24px rgba(24, 32, 51, 0.28);
+  z-index: 30;
+}
+
+.tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: #182033;
+}
+
+.badge:hover .tooltip,
+.badge:focus-visible .tooltip {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
 }

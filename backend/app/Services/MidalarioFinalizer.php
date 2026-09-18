@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\MidalarioBadge;
 use App\Models\Quiz;
 use App\Models\QuizAnswer;
 use App\Models\QuizAttempt;
@@ -95,5 +96,38 @@ class MidalarioFinalizer
         }
 
         $quiz->update(['midalario_status' => 'finished']);
+
+        $this->assignWinnerBadges($quiz);
+    }
+
+    /**
+     * Assegna il badge "Vincitore del Midalario" a chi ha chiuso la partita
+     * col punteggio piu' alto (tutti i pari-merito, se piu' di uno). Gira una
+     * sola volta per quiz grazie al lock in finalizeIfNeeded().
+     */
+    private function assignWinnerBadges(Quiz $quiz): void
+    {
+        $topScore = QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('completed', true)
+            ->max('score');
+
+        if ($topScore === null || $topScore <= 0) {
+            return;
+        }
+
+        $winners = QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('completed', true)
+            ->where('score', $topScore)
+            ->get();
+
+        foreach ($winners as $winner) {
+            MidalarioBadge::updateOrCreate(
+                ['user_id' => $winner->user_id, 'quiz_id' => $quiz->id],
+                [
+                    'label' => "Vincitore del Midalario: {$quiz->title}",
+                    'total_score' => $topScore,
+                ]
+            );
+        }
     }
 }

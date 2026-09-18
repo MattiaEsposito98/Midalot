@@ -333,7 +333,7 @@ class TrainingController extends Controller
     {
         $category = TrainingCategory::where('slug', $categorySlug)->firstOrFail();
 
-        $attempts = TrainingAttempt::with('user.latestMonthlyBadge')
+        $attempts = TrainingAttempt::with(['user.latestMonthlyBadge', 'user.midalarioBadges'])
             ->where('training_category_id', $category->id)
             ->where('completed', true)
             ->orderByDesc('score')
@@ -350,7 +350,7 @@ class TrainingController extends Controller
             'results' => $attempts->map(fn ($attempt, $index) => [
                 'position' => $index + 1,
                 'nickname' => $attempt->user->nickname ?? $attempt->user->name,
-                'badge' => $attempt->user->latestMonthlyBadge?->label,
+                'badges' => $attempt->user->badges ?? [],
                 'score' => $attempt->score,
                 'correct_answers' => $attempt->correct_answers,
                 'total_questions' => $attempt->total_questions,
@@ -372,7 +372,7 @@ class TrainingController extends Controller
 
         $quiz->loadMissing('trainingCategory');
 
-        $attempts = TrainingAttempt::with('user.latestMonthlyBadge')
+        $attempts = TrainingAttempt::with(['user.latestMonthlyBadge', 'user.midalarioBadges'])
             ->where('quiz_id', $quiz->id)
             ->where('completed', true)
             ->orderByDesc('score')
@@ -393,7 +393,7 @@ class TrainingController extends Controller
             'results' => $attempts->map(fn ($attempt, $index) => [
                 'position' => $index + 1,
                 'nickname' => $attempt->user->nickname ?? $attempt->user->name,
-                'badge' => $attempt->user->latestMonthlyBadge?->label,
+                'badges' => $attempt->user->badges ?? [],
                 'score' => $attempt->score,
                 'correct_answers' => $attempt->correct_answers,
                 'total_questions' => $attempt->total_questions,

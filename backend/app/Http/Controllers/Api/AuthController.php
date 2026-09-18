@@ -127,7 +127,7 @@ class AuthController extends Controller
         $this->grantDailyBonus($user->id);
 
         return response()->json([
-            'user' => $user->load(['city', 'latestMonthlyBadge']),
+            'user' => $user->load(['city', 'latestMonthlyBadge', 'midalarioBadges']),
             'token' => $token
         ]);
     }
@@ -167,7 +167,7 @@ class AuthController extends Controller
     public function user(Request $request)
     {
         return response()->json(
-            $request->user()->load(['city', 'latestMonthlyBadge'])
+            $request->user()->load(['city', 'latestMonthlyBadge', 'midalarioBadges'])
         );
     }
 
@@ -225,7 +225,7 @@ class AuthController extends Controller
 
         return response()->json([
             'message' => 'Profilo aggiornato correttamente',
-            'user' => $user->fresh()->load(['city', 'latestMonthlyBadge']),
+            'user' => $user->fresh()->load(['city', 'latestMonthlyBadge', 'midalarioBadges']),
         ]);
     }
 }

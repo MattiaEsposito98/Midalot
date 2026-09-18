@@ -162,7 +162,7 @@ function Leaderboard({ kind = "quiz" }) {
                   <div className={styles.nameWrap}>
                     <span className={styles.name}>{r.user.nickname}</span>
                     {isMe && <span className={styles.meTag}>Tu</span>}
-                    <UserBadge label={r.user.badge} />
+                    <UserBadge badges={r.user.badges} />
                   </div>
 
                   <div className={styles.statusWrap}>

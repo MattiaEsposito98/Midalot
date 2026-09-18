@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\MonthlyBadge;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -57,11 +56,7 @@ class PeriodLeaderboardService
             ->get()
             ->values();
 
-        $badgesByUserId = MonthlyBadge::whereIn('user_id', $rows->pluck('user_id'))
-            ->orderByDesc('month')
-            ->get()
-            ->groupBy('user_id')
-            ->map(fn ($badges) => $badges->first()->label);
+        $badgesByUserId = BadgeService::forUserIds($rows->pluck('user_id'));
 
         return $rows->map(function ($row, $index) use ($badgesByUserId) {
             return [
@@ -70,7 +65,7 @@ class PeriodLeaderboardService
                 'nickname' => $row->nickname,
                 'total_score' => (int) $row->total_score,
                 'quizzes_completed' => (int) $row->quizzes_completed,
-                'badge' => $badgesByUserId->get((int) $row->user_id),
+                'badges' => $badgesByUserId->get((int) $row->user_id, []),
             ];
         });
     }
