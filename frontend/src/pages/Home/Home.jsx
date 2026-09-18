@@ -15,6 +15,12 @@ const PLACEHOLDER_QUIZZES = [
   { id: "p3", title: "Quiz assegnato" },
 ]
 
+const PLACEHOLDER_MINIGIOCHI = [
+  { id: "m1", title: "Minigioco" },
+  { id: "m2", title: "Minigioco" },
+  { id: "m3", title: "Minigioco" },
+]
+
 function getQuizStatusLabel(status) {
   if (status === "completed") return "Completato"
   if (status === "in_progress") return "In corso"
@@ -30,6 +36,11 @@ function getQuizStatusClass(status) {
 function getQuizLink(quiz) {
   if (quiz.status === "completed") return `/quiz/${quiz.id}/review`
   return `/quiz/${quiz.id}`
+}
+
+function getMinigiocoLink(minigioco) {
+  if (minigioco.status === "completed") return `/minigiochi/${minigioco.id}/review`
+  return `/minigiochi/${minigioco.id}`
 }
 
 function getMidalarioMessage(status) {
@@ -75,6 +86,7 @@ function Home() {
   const isLoggedIn = !!(user && token)
   const [feedbacks, setFeedbacks] = useState([])
   const [rawQuizzes, setRawQuizzes] = useState([])
+  const [rawMinigiochi, setRawMinigiochi] = useState([])
   const [trainingCategories, setTrainingCategories] = useState([])
   const [midalarioAnnouncement, setMidalarioAnnouncement] = useState(null)
   const [selectedImage, setSelectedImage] = useState(null)
@@ -100,6 +112,10 @@ function Home() {
     api.get("/my-quizzes")
       .then((res) => setRawQuizzes(res.data.quizzes || []))
       .catch((err) => logError(err))
+
+    api.get("/my-minigiochi")
+      .then((res) => setRawMinigiochi(res.data.minigiochi || []))
+      .catch((err) => logError(err))
   }, [isLoggedIn])
 
   const quizzes = useMemo(() => {
@@ -112,6 +128,17 @@ function Home() {
 
     return active.slice(0, 4)
   }, [isLoggedIn, rawQuizzes])
+
+  const minigiochi = useMemo(() => {
+    if (!isLoggedIn) return []
+
+    const priority = { in_progress: 0, available: 1, completed: 2 }
+    const active = rawMinigiochi.filter((m) => m.is_active)
+
+    active.sort((a, b) => (priority[a.status] ?? 99) - (priority[b.status] ?? 99))
+
+    return active.slice(0, 4)
+  }, [isLoggedIn, rawMinigiochi])
 
   function handleGuestQuizClick(e) {
     e.preventDefault()
@@ -223,6 +250,63 @@ function Home() {
 
         <div className={css.heroLeaderboard}>
           <WeeklyLeaderboardBox />
+        </div>
+      </div>
+
+      <div className={`container ${css.carouselSection}`}>
+        <div className={css.sectionHeader}>
+          <div>
+            <span className={css.sectionBadge}>Minigiochi</span>
+            <h2 className={css.sectionTitle}>Sfide veloci, punteggio in palio</h2>
+          </div>
+
+          <Link to="/minigiochi" className={css.seeMoreLink}>
+            Vedi altro
+            <i className="bi bi-arrow-right"></i>
+          </Link>
+        </div>
+
+        <div className={css.carouselTrack}>
+          {isLoggedIn ? (
+            minigiochi.length > 0 ? (
+              minigiochi.map((minigioco) => (
+                <Link to={getMinigiocoLink(minigioco)} key={minigioco.id} className={css.quizCard}>
+                  <span className={`${css.statusBadge} ${getQuizStatusClass(minigioco.status)}`}>
+                    {getQuizStatusLabel(minigioco.status)}
+                  </span>
+                  <h3 className={css.quizCardTitle}>{minigioco.title}</h3>
+                  <p className={css.quizCardMeta}>
+                    {minigioco.rounds_count} round
+                    {minigioco.status === "completed" && minigioco.score != null && (
+                      <> · {formatQuizScore(minigioco.score)} punti</>
+                    )}
+                  </p>
+                </Link>
+              ))
+            ) : (
+              <ComingSoon
+                compact
+                icon="bi-joystick"
+                title="Presto in arrivo!"
+                message="Nuovi Minigiochi in arrivo a breve."
+              />
+            )
+          ) : (
+            PLACEHOLDER_MINIGIOCHI.map((minigioco) => (
+              <button
+                type="button"
+                key={minigioco.id}
+                className={`${css.quizCard} ${css.quizCardLocked}`}
+                onClick={handleGuestQuizClick}
+              >
+                <span className={css.lockIcon}>
+                  <i className="bi bi-lock-fill"></i>
+                </span>
+                <h3 className={css.quizCardTitle}>{minigioco.title}</h3>
+                <p className={css.quizCardMeta}>Iscriviti/Accedi per Sbloccare i Minigiochi</p>
+              </button>
+            ))
+          )}
         </div>
       </div>
 
