@@ -182,9 +182,55 @@ function MinigiocoReview() {
     )
   }
 
+  function renderVeroFalso(r) {
+    const rispostaLabel = r.risposta_utente == null ? null : r.risposta_utente ? "Vero" : "Falso"
+    const correttaLabel = r.risposta_corretta ? "Vero" : "Falso"
+
+    return (
+      <>
+        <p className={styles.questionText}>{r.affermazione}</p>
+
+        <div className={styles.answersGrid}>
+          <div className={styles.answerBox}>
+            <span className={styles.answerLabel}>La tua risposta</span>
+            <strong className={styles.answerValue}>
+              {rispostaLabel || (r.is_timeout ? "Nessuna risposta (timeout)" : "-")}
+            </strong>
+          </div>
+
+          {!r.is_correct && (
+            <div className={styles.answerBox}>
+              <span className={styles.answerLabel}>Risposta corretta</span>
+              <strong className={`${styles.answerValue} ${styles.correctText}`}>{correttaLabel}</strong>
+            </div>
+          )}
+
+          <div className={styles.answerBox}>
+            <span className={styles.answerLabel}>Tempo impiegato</span>
+            <strong className={styles.answerValue}>{formatTime(r.time_taken)}</strong>
+          </div>
+        </div>
+
+        {r.spiegazione && (
+          <div className={styles.explanationBox}>
+            <strong className={r.is_correct ? styles.explanationHeaderCorrect : styles.explanationHeaderWrong}>
+              {r.is_correct
+                ? "Esatto! Ecco perché"
+                : r.is_timeout
+                  ? "Tempo scaduto: ecco perché"
+                  : "Sbagliato: ecco perché"}
+            </strong>
+            {r.spiegazione}
+          </div>
+        )}
+      </>
+    )
+  }
+
   function renderRoundBody(r, tipo) {
     if (tipo === "salto_temporale") return renderSaltoTemporale(r)
     if (tipo === "trova_intruso") return renderTrovaIntruso(r)
+    if (tipo === "vero_falso") return renderVeroFalso(r)
     return renderTastieraRotta(r)
   }
 

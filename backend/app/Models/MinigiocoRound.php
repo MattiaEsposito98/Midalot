@@ -16,6 +16,13 @@ class MinigiocoRound extends Model
         'time_limit_seconds',
         'content_mode',
         'intruso_spiegazione',
+        'affermazione',
+        'risposta_corretta',
+        'spiegazione',
+    ];
+
+    protected $casts = [
+        'risposta_corretta' => 'boolean',
     ];
 
     public function minigioco()

@@ -69,6 +69,7 @@
                                             'tastiera_rotta' => 'Tastiera Rotta',
                                             'salto_temporale' => 'Salto Temporale',
                                             'trova_intruso' => "Trova l'Intruso",
+                                            'vero_falso' => 'Vero o Falso',
                                         ][$minigioco->tipo] ?? $minigioco->tipo }}
                                     </span>
                                 </td>

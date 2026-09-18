@@ -130,6 +130,10 @@ class UserMinigiocoController extends Controller
             return [...$base, 'parola_cifrata' => $round->parola_cifrata];
         }
 
+        if ($tipo === 'vero_falso') {
+            return [...$base, 'affermazione' => $round->affermazione];
+        }
+
         // Su Salto Temporale gli id reali rivelerebbero l'ordine corretto
         // (vedi SaltoTemporaleItemOrder), quindi si espone una permutazione.
         $idMap = $tipo === 'salto_temporale'
@@ -203,6 +207,16 @@ class UserMinigiocoController extends Controller
                     'intruso_id' => $intrusoItem?->id,
                     'scelto_id' => $sceltoId,
                     'intruso_spiegazione' => $round->intruso_spiegazione,
+                ];
+            }
+
+            if ($minigioco->tipo === 'vero_falso') {
+                return [
+                    ...$base,
+                    'affermazione' => $round->affermazione,
+                    'risposta_corretta' => (bool) $round->risposta_corretta,
+                    'risposta_utente' => $given?->risposta_utente !== null ? (bool) (int) $given->risposta_utente : null,
+                    'spiegazione' => $round->spiegazione,
                 ];
             }
 

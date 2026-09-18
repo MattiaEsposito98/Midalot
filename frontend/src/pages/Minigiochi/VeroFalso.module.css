@@ -1,0 +1,112 @@
+.instructions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #647084;
+  font-weight: 700;
+  font-size: 0.92rem;
+  margin-bottom: 16px;
+}
+
+.affermazione {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: #182033;
+  line-height: 1.4;
+  text-align: center;
+  padding: 22px 18px;
+  margin: 0 0 18px;
+  background: #f7f8fb;
+  border: 1px solid #dce5ee;
+  border-radius: 8px;
+}
+
+.explanationBox {
+  margin-bottom: 16px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #fff9dc;
+  border: 1px solid #ffe28a;
+  color: #182033;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.explanationBox strong {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.explanationHeaderCorrect {
+  color: #146c43;
+}
+
+.explanationHeaderWrong {
+  color: #a52834;
+}
+
+.choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.choiceBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 22px 12px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  border-radius: 8px;
+  border: 2px solid #dce5ee;
+  background: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.choiceBtn i {
+  font-size: 1.3rem;
+}
+
+.choiceBtn:hover:not(:disabled) {
+  transform: translateY(-2px);
+}
+
+.choiceBtn:disabled {
+  cursor: default;
+}
+
+.choiceTrue {
+  color: #146c43;
+}
+
+.choiceTrue:hover:not(:disabled) {
+  border-color: #9fd5b5;
+}
+
+.choiceFalse {
+  color: #a52834;
+}
+
+.choiceFalse:hover:not(:disabled) {
+  border-color: #efb3b9;
+}
+
+.choiceSelected {
+  border-color: #182033;
+  background: #f7f8fb;
+}
+
+@media (max-width: 575px) {
+  .choices {
+    grid-template-columns: 1fr;
+  }
+
+  .choiceBtn {
+    padding: 16px 12px;
+  }
+}

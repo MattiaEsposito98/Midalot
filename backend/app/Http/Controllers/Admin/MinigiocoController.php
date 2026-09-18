@@ -30,7 +30,7 @@ class MinigiocoController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
-            'tipo' => 'required|in:tastiera_rotta,salto_temporale,trova_intruso',
+            'tipo' => 'required|in:tastiera_rotta,salto_temporale,trova_intruso,vero_falso',
             'max_score' => 'nullable|integer|min:1',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);

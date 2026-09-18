@@ -14,6 +14,8 @@
                         Gestisci i puzzle di ordinamento cronologico del minigioco "Salto Temporale".
                     @elseif ($minigioco->tipo === 'trova_intruso')
                         Gestisci i puzzle di "Trova l'Intruso".
+                    @elseif ($minigioco->tipo === 'vero_falso')
+                        Gestisci le affermazioni del minigioco "Vero o Falso".
                     @else
                         Gestisci le parole cifrate del minigioco "Tastiera Rotta".
                     @endif
@@ -59,6 +61,49 @@
                                 <td>
                                     {{ abs($round->shift) }}
                                     {{ $round->shift >= 0 ? 'a destra' : 'a sinistra' }}
+                                </td>
+                                <td>{{ $round->time_limit_seconds }} sec</td>
+                                <td>
+                                    <div class="admin-actions">
+                                        <a href="{{ route('admin.minigiochi.rounds.edit', [$minigioco->id, $round->id]) }}" class="btn btn-sm btn-warning">
+                                            <i class="bi bi-pencil"></i>
+                                            Modifica
+                                        </a>
+                                        <form action="{{ route('admin.minigiochi.rounds.destroy', [$minigioco->id, $round->id]) }}" method="POST">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger"
+                                                onclick="return confirm('Sei sicuro di voler eliminare questa domanda?')">
+                                                <i class="bi bi-trash"></i>
+                                                Elimina
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        @elseif ($minigioco->tipo === 'vero_falso')
+            <div class="table-responsive">
+                <table class="table admin-table">
+                    <thead>
+                        <tr>
+                            <th>Affermazione</th>
+                            <th>Risposta corretta</th>
+                            <th>Timer</th>
+                            <th>Azioni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($rounds as $round)
+                            <tr>
+                                <td>{{ \Illuminate\Support\Str::limit($round->affermazione, 90) }}</td>
+                                <td>
+                                    <span class="badge {{ $round->risposta_corretta ? 'bg-success' : 'bg-danger' }}">
+                                        {{ $round->risposta_corretta ? 'Vero' : 'Falso' }}
+                                    </span>
                                 </td>
                                 <td>{{ $round->time_limit_seconds }} sec</td>
                                 <td>

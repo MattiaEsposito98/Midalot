@@ -39,6 +39,7 @@ class MinigiocoRoundController extends Controller
         return match ($minigioco->tipo) {
             'salto_temporale' => $this->storeItemsRound($request, $minigioco),
             'trova_intruso' => $this->storeItemsRound($request, $minigioco, intruso: true),
+            'vero_falso' => $this->storeVeroFalso($request, $minigioco),
             default => $this->storeTastieraRotta($request, $minigioco),
         };
     }
@@ -69,6 +70,7 @@ class MinigiocoRoundController extends Controller
         return match ($minigioco->tipo) {
             'salto_temporale' => $this->updateItemsRound($request, $minigioco, $round),
             'trova_intruso' => $this->updateItemsRound($request, $minigioco, $round, intruso: true),
+            'vero_falso' => $this->updateVeroFalso($request, $minigioco, $round),
             default => $this->updateTastieraRotta($request, $minigioco, $round),
         };
     }
@@ -97,6 +99,7 @@ class MinigiocoRoundController extends Controller
         return match ($minigioco->tipo) {
             'salto_temporale' => 'salto_temporale',
             'trova_intruso' => 'trova_intruso',
+            'vero_falso' => 'vero_falso',
             default => 'tastiera_rotta',
         };
     }
@@ -134,6 +137,49 @@ class MinigiocoRoundController extends Controller
         $round->update([
             'parola_originale' => Str::upper($request->parola),
             'shift' => $this->resolveShift($request->direzione, $request->quantita),
+            'time_limit_seconds' => $request->time_limit_seconds,
+        ]);
+
+        return redirect()
+            ->route('admin.minigiochi.rounds.index', $minigioco->id)
+            ->with('success', 'Domanda aggiornata!');
+    }
+
+    private function storeVeroFalso(Request $request, Minigioco $minigioco)
+    {
+        $request->validate([
+            'affermazione' => 'required|string|max:500',
+            'risposta_corretta' => 'required|in:1,0',
+            'spiegazione' => 'nullable|string|max:2000',
+            'time_limit_seconds' => 'required|integer|min:5',
+        ]);
+
+        MinigiocoRound::create([
+            'minigioco_id' => $minigioco->id,
+            'affermazione' => $request->affermazione,
+            'risposta_corretta' => $request->boolean('risposta_corretta'),
+            'spiegazione' => $request->spiegazione,
+            'time_limit_seconds' => $request->time_limit_seconds,
+        ]);
+
+        return redirect()
+            ->route('admin.minigiochi.rounds.index', $minigioco->id)
+            ->with('success', 'Domanda creata con successo!');
+    }
+
+    private function updateVeroFalso(Request $request, Minigioco $minigioco, MinigiocoRound $round)
+    {
+        $request->validate([
+            'affermazione' => 'required|string|max:500',
+            'risposta_corretta' => 'required|in:1,0',
+            'spiegazione' => 'nullable|string|max:2000',
+            'time_limit_seconds' => 'required|integer|min:5',
+        ]);
+
+        $round->update([
+            'affermazione' => $request->affermazione,
+            'risposta_corretta' => $request->boolean('risposta_corretta'),
+            'spiegazione' => $request->spiegazione,
             'time_limit_seconds' => $request->time_limit_seconds,
         ]);
 

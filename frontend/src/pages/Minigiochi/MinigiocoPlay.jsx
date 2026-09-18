@@ -7,6 +7,7 @@ import shared from "./TastieraRotta.module.css"
 import TastieraRotta from "./TastieraRotta"
 import SaltoTemporale from "./SaltoTemporale"
 import TrovaIntruso from "./TrovaIntruso"
+import VeroFalso from "./VeroFalso"
 
 /**
  * Sceglie il componente di gioco giusto in base al tipo del minigioco.
@@ -62,6 +63,7 @@ function MinigiocoPlay() {
 
   if (tipo === "salto_temporale") return <SaltoTemporale />
   if (tipo === "trova_intruso") return <TrovaIntruso />
+  if (tipo === "vero_falso") return <VeroFalso />
   return <TastieraRotta />
 }
 

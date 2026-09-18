@@ -49,6 +49,7 @@
                             'tastiera_rotta' => 'Tastiera Rotta',
                             'salto_temporale' => 'Salto Temporale',
                             'trova_intruso' => 'Trova l\'Intruso',
+                            'vero_falso' => 'Vero o Falso',
                         ][$minigioco->tipo] ?? $minigioco->tipo }}" disabled>
                         <small class="admin-muted">Il tipo non è modificabile dopo la creazione.</small>
                     </div>

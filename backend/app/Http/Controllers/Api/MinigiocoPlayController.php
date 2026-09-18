@@ -103,6 +103,7 @@ class MinigiocoPlayController extends Controller
         return match ($minigioco->tipo) {
             'salto_temporale' => $this->submitSaltoTemporale($request, $attempt, $round, $minigioco),
             'trova_intruso' => $this->submitTrovaIntruso($request, $attempt, $round, $minigioco),
+            'vero_falso' => $this->submitVeroFalso($request, $attempt, $round, $minigioco),
             default => $this->submitTastieraRotta($request, $attempt, $round, $minigioco),
         };
     }
@@ -366,6 +367,64 @@ class MinigiocoPlayController extends Controller
             'timeout' => false,
             'score' => $row->score,
             'intruso_spiegazione' => $round->intruso_spiegazione,
+        ]);
+    }
+
+    private function submitVeroFalso(Request $request, MinigiocoAttempt $attempt, MinigiocoRound $round, Minigioco $minigioco)
+    {
+        $request->validate(['risposta' => 'nullable|boolean']);
+
+        ['base' => $base, 'maxSpeedBonus' => $maxSpeedBonus] = $this->perRoundBudget($minigioco);
+
+        $row = MinigiocoRoundRisposta::firstOrCreate(
+            ['attempt_id' => $attempt->id, 'round_id' => $round->id],
+            ['risposta_utente' => null, 'tentativi_falliti' => 0, 'time_taken' => 0, 'score' => 0]
+        );
+
+        if ($row->is_correct || $row->is_timeout || $row->tentativi_falliti > 0) {
+            return response()->json([
+                'message' => 'Hai già risolto questa domanda',
+            ], 403);
+        }
+
+        $maxTimeMs = (int) $round->time_limit_seconds * 1000;
+        $timeTaken = AnswerTimer::resolve((int) $request->time_taken, $this->roundStartedAt($attempt, $round), $maxTimeMs);
+
+        if ($request->risposta === null) {
+            $row->is_timeout = true;
+            $row->time_taken = $maxTimeMs;
+            $row->score = 0;
+            $row->save();
+
+            return response()->json([
+                'correct' => false,
+                'timeout' => true,
+                'score' => 0,
+                'spiegazione' => $round->spiegazione,
+            ]);
+        }
+
+        $isCorrect = $request->boolean('risposta') === (bool) $round->risposta_corretta;
+
+        $row->risposta_utente = $request->boolean('risposta') ? '1' : '0';
+        $row->time_taken = $timeTaken;
+
+        if ($isCorrect) {
+            $speedBonus = (int) round((($maxTimeMs - $timeTaken) / $maxTimeMs) * $maxSpeedBonus);
+            $row->score = (int) round($base) + $speedBonus;
+            $row->is_correct = true;
+        } else {
+            $row->score = 0;
+            $row->tentativi_falliti = 1;
+        }
+
+        $row->save();
+
+        return response()->json([
+            'correct' => $isCorrect,
+            'timeout' => false,
+            'score' => $row->score,
+            'spiegazione' => $round->spiegazione,
         ]);
     }
 

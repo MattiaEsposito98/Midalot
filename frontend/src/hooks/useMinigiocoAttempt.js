@@ -259,7 +259,7 @@ export function useMinigiocoAttempt(id, { retryOnWrong = false, getAdvanceDelayM
       }
 
       const shouldLock = isTimeout || data.correct || !retryOnWrong
-      const spiegazione = data.intruso_spiegazione || null
+      const spiegazione = data.intruso_spiegazione || data.spiegazione || null
 
       if (data.correct) {
         setFeedback({ type: "correct", message: "Corretto!", spiegazione })

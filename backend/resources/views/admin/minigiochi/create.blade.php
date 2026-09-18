@@ -39,6 +39,7 @@
                             <option value="tastiera_rotta" {{ old('tipo') === 'tastiera_rotta' ? 'selected' : '' }}>Tastiera Rotta</option>
                             <option value="salto_temporale" {{ old('tipo') === 'salto_temporale' ? 'selected' : '' }}>Salto Temporale</option>
                             <option value="trova_intruso" {{ old('tipo') === 'trova_intruso' ? 'selected' : '' }}>Trova l'Intruso</option>
+                            <option value="vero_falso" {{ old('tipo') === 'vero_falso' ? 'selected' : '' }}>Vero o Falso</option>
                         </select>
                         <small class="admin-muted">Non sarà più modificabile dopo il salvataggio: determina il tipo di domande da inserire.</small>
                     </div>
