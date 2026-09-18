@@ -3,14 +3,18 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Services\MonthlyBadgeAssigner;
 use App\Services\PeriodLeaderboardService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class PeriodLeaderboardController extends Controller
 {
-    public function __construct(private PeriodLeaderboardService $leaderboard)
-    {
+    public function __construct(
+        private PeriodLeaderboardService $leaderboard,
+        private MonthlyBadgeAssigner $badgeAssigner,
+    ) {
     }
 
     public function index(Request $request)
@@ -50,6 +54,10 @@ class PeriodLeaderboardController extends Controller
 
         $results = $this->leaderboard->aggregate($start, $end);
 
+        $badgeTargetMonth = $this->badgeAssigner->targetMonth();
+        $badgeRun = $this->badgeAssigner->alreadyRun($badgeTargetMonth);
+        $badgePreview = $badgeRun ? null : $this->badgeAssigner->preview($badgeTargetMonth);
+
         return view('admin.period-leaderboard.index', compact(
             'tab',
             'weeks',
@@ -58,7 +66,30 @@ class PeriodLeaderboardController extends Controller
             'selectedMonth',
             'results',
             'start',
-            'end'
+            'end',
+            'badgeTargetMonth',
+            'badgeRun',
+            'badgePreview'
         ));
+    }
+
+    public function assignMonthlyBadge(Request $request)
+    {
+        $month = $this->badgeAssigner->targetMonth();
+
+        if ($this->badgeAssigner->alreadyRun($month)) {
+            return back()->with('error', 'Il premio di questo mese è già stato assegnato: non è possibile riattivarlo prima del mese prossimo.');
+        }
+
+        $summary = $this->badgeAssigner->assign($month, $request->user()->id);
+        $monthLabel = Str::ucfirst($month->locale('it')->translatedFormat('F Y'));
+
+        if (empty($summary['winners'])) {
+            return back()->with('success', "Nessuna attività registrata per {$monthLabel}: nessun badge assegnato.");
+        }
+
+        $nicknames = collect($summary['winners'])->pluck('nickname')->implode(', ');
+
+        return back()->with('success', "Badge \"Vincitore di {$monthLabel}\" assegnato a: {$nicknames}.");
     }
 }

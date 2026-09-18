@@ -185,6 +185,9 @@ Route::middleware(['auth', 'admin'])
 
         Route::get('classifica-premi', [PeriodLeaderboardController::class, 'index'])
             ->name('period-leaderboard.index');
+
+        Route::post('classifica-premi/assegna-vincitore-mese', [PeriodLeaderboardController::class, 'assignMonthlyBadge'])
+            ->name('period-leaderboard.assign-monthly-badge');
     });
 
 Route::get('/cities/search', [CityController::class, 'search'])

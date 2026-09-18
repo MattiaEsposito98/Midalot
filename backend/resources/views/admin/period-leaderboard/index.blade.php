@@ -13,6 +13,72 @@
         ];
     @endphp
 
+    <section class="admin-card mb-3">
+        <div class="admin-card-header">
+            <div>
+                <h2 class="admin-section-title">Premio "Vincitore del mese"</h2>
+                <p class="admin-muted mb-0">
+                    Il cron automatico non è ancora attivabile su questo hosting: finché non lo sarà, questo bottone
+                    assegna manualmente il premio del mese scorso, una sola volta al mese.
+                </p>
+            </div>
+        </div>
+
+        <div class="admin-card-body">
+            @if ($badgeRun)
+                @php
+                    $nextTargetMonth = $badgeTargetMonth->copy()->addMonth();
+                    $availableFrom = $nextTargetMonth->copy()->addMonth()->startOfMonth();
+                @endphp
+                <div class="alert alert-secondary mb-0">
+                    <p class="mb-1">
+                        <i class="bi bi-check-circle-fill text-success"></i>
+                        Il premio di <strong>{{ Illuminate\Support\Str::ucfirst($badgeTargetMonth->locale('it')->translatedFormat('F Y')) }}</strong>
+                        è già stato assegnato il {{ $badgeRun->created_at->format('d/m/Y \a\l\l\e H:i') }}
+                        @if ($badgeRun->triggeredBy)
+                            da {{ $badgeRun->triggeredBy->nickname }}
+                        @else
+                            automaticamente
+                        @endif
+                        .
+                    </p>
+                    <p class="mb-0 admin-muted">
+                        Il prossimo premio assegnabile sarà quello di <strong>{{ Illuminate\Support\Str::ucfirst($nextTargetMonth->locale('it')->translatedFormat('F Y')) }}</strong>,
+                        disponibile a partire dal 1° {{ Illuminate\Support\Str::ucfirst($availableFrom->locale('it')->translatedFormat('F Y')) }}.
+                    </p>
+                </div>
+            @else
+                @php $monthLabel = Illuminate\Support\Str::ucfirst($badgeTargetMonth->locale('it')->translatedFormat('F Y')); @endphp
+                <div class="alert alert-warning">
+                    <p class="mb-1">
+                        Premendo il bottone assegnerai <strong>ora</strong> il premio "Vincitore del mese" per
+                        <strong>{{ $monthLabel }}</strong> (il mese scorso rispetto ad oggi).
+                    </p>
+                    @if (empty($badgePreview['winners']))
+                        <p class="mb-0">Al momento non risulta nessuna attività registrata in quel mese: nessun badge verrebbe assegnato.</p>
+                    @else
+                        <p class="mb-0">
+                            In base ai punteggi attuali,
+                            {{ count($badgePreview['winners']) > 1 ? 'i vincitori sarebbero' : 'il vincitore sarebbe' }}:
+                            @foreach ($badgePreview['winners'] as $winner)
+                                <strong>{{ $winner['nickname'] }}</strong> ({{ number_format($winner['total_score'] / 100, 2, ',', '.') }} punti){{ !$loop->last ? ',' : '' }}
+                            @endforeach
+                        </p>
+                    @endif
+                </div>
+
+                <form method="POST" action="{{ route('admin.period-leaderboard.assign-monthly-badge') }}"
+                    onsubmit="return confirm('Confermi di voler assegnare ORA il premio Vincitore del mese per {{ $monthLabel }}? Una volta fatto non potrai rifarlo prima del mese prossimo.')">
+                    @csrf
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-award-fill"></i>
+                        Assegna il premio di {{ $monthLabel }}
+                    </button>
+                </form>
+            @endif
+        </div>
+    </section>
+
     <section class="admin-card">
         <div class="admin-card-header">
             <div>
@@ -80,11 +146,12 @@
                                     <td><span class="badge bg-primary">{{ $r['position'] }}</span></td>
                                     <td class="fw-bold">
                                         {{ $r['nickname'] }}
-                                        @if ($r['badge'] ?? null)
-                                            <span class="badge bg-warning text-dark" title="{{ $r['badge'] }}">
-                                                <i class="bi bi-award-fill"></i> {{ $r['badge'] }}
+                                        @foreach ($r['badges'] ?? [] as $badge)
+                                            <span class="badge bg-warning text-dark" title="{{ $badge['label'] }}">
+                                                <i class="bi bi-{{ $badge['type'] === 'midalario' ? 'broadcast' : 'award-fill' }}"></i>
+                                                {{ $badge['label'] }}
                                             </span>
-                                        @endif
+                                        @endforeach
                                     </td>
                                     <td><strong>{{ number_format($r['total_score'] / 100, 2, ',', '.') }}</strong></td>
                                     <td>{{ $r['quizzes_completed'] }}</td>
