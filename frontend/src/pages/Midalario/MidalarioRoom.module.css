@@ -96,6 +96,47 @@
   color: #0f8b8d;
 }
 
+.countdownBox {
+  background: #f7f8fb;
+  border: 1px solid #dce5ee;
+  border-radius: 8px;
+  padding: 18px 20px;
+  margin: 8px 0 16px;
+  width: 100%;
+}
+
+.countdownValue {
+  display: block;
+  font-size: 2.4rem;
+  font-weight: 950;
+  color: #0f8b8d;
+  font-variant-numeric: tabular-nums;
+}
+
+.countdownNumber {
+  display: block;
+  font-size: 5rem;
+  line-height: 1;
+  font-weight: 950;
+  color: #0f8b8d;
+  animation: countdownPulse 1s ease-out infinite;
+}
+
+@keyframes countdownPulse {
+  0% {
+    transform: scale(1.25);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 .actionsRow {
   display: flex;
   flex-wrap: wrap;

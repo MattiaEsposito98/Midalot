@@ -59,6 +59,12 @@
                             <option value="0" {{ !old('is_active', $quiz->is_active) ? 'selected' : '' }}>Non attivo</option>
                         </select>
                     </div>
+                    <div>
+                        <label class="form-label">Orario previsto di inizio (opzionale)</label>
+                        <input type="datetime-local" class="form-control" name="midalario_scheduled_at"
+                               value="{{ old('midalario_scheduled_at', $quiz->midalario_scheduled_at?->format('Y-m-d\TH:i')) }}">
+                        <small class="admin-muted">Mostra il conto alla rovescia ai giocatori in sala d'attesa. Il quiz <strong>non parte da solo</strong>: il via lo dai tu con "Avvia".</small>
+                    </div>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 mt-4">

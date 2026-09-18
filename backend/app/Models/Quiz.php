@@ -20,6 +20,7 @@ class Quiz extends Model
         'is_active',
         'leaderboard_visible',
         'midalario_status',
+        'midalario_scheduled_at',
         'midalario_started_at',
     ];
 
@@ -27,6 +28,7 @@ class Quiz extends Model
         'is_active' => 'boolean',
         'restrict_to_specific_users' => 'boolean',
         'leaderboard_visible' => 'boolean',
+        'midalario_scheduled_at' => 'datetime',
         'midalario_started_at' => 'datetime',
     ];
 

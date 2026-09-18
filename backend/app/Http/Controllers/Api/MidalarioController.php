@@ -118,6 +118,7 @@ class MidalarioController extends Controller
                 'description' => $quiz->description,
             ],
             'status' => $quiz->midalario_status,
+            'scheduled_at' => $quiz->midalario_scheduled_at?->toISOString(),
             'server_time' => now()->toISOString(),
             'participants_count' => $quiz->participants()->count(),
             'total_questions' => $timeline->questions()->count(),
@@ -139,6 +140,16 @@ class MidalarioController extends Controller
         ];
 
         if ($quiz->midalario_status === 'running' && $attempt && ! $attempt->completed) {
+            // Fase "3, 2, 1": il via e' stato dato ma il cronometro della prima
+            // domanda deve ancora scattare. La domanda non viene inviata, cosi'
+            // non e' leggibile in anticipo dagli strumenti del browser.
+            if (now()->lt($quiz->midalario_started_at)) {
+                return response()->json([
+                    ...$payload,
+                    'starting_in_ms' => now()->diffInMilliseconds($quiz->midalario_started_at),
+                ]);
+            }
+
             $window = $timeline->currentWindow();
 
             if ($window) {
@@ -203,6 +214,13 @@ class MidalarioController extends Controller
 
         if (! $window) {
             return response()->json(['message' => 'Questa domanda non è più attiva'], 422);
+        }
+
+        // Durante il "3, 2, 1" la finestra esiste ma non e' ancora iniziata:
+        // senza questo controllo il tempo impiegato risulterebbe zero e la
+        // risposta prenderebbe il bonus velocita' massimo.
+        if (now()->lt($window['starts_at'])) {
+            return response()->json(['message' => 'La domanda non è ancora iniziata'], 422);
         }
 
         $question = $this->resolveQuestionForAttempt($attempt, $window, $timeline);

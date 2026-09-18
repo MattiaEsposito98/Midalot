@@ -24,6 +24,51 @@ function formatSeconds(seconds) {
   return `${Math.max(0, seconds)}s`
 }
 
+/** "1 g 03:12:45" quando manca tanto, "03:12" quando manca poco. */
+function formatAttesa(ms) {
+  const totale = Math.max(0, Math.floor(ms / 1000))
+  const giorni = Math.floor(totale / 86400)
+  const ore = Math.floor((totale % 86400) / 3600)
+  const minuti = Math.floor((totale % 3600) / 60)
+  const secondi = totale % 60
+  const dueCifre = (n) => String(n).padStart(2, "0")
+
+  if (giorni > 0) return `${giorni}g ${dueCifre(ore)}:${dueCifre(minuti)}:${dueCifre(secondi)}`
+  if (ore > 0) return `${dueCifre(ore)}:${dueCifre(minuti)}:${dueCifre(secondi)}`
+
+  return `${dueCifre(minuti)}:${dueCifre(secondi)}`
+}
+
+/**
+ * Breve segnale acustico generato al volo, senza file audio da caricare.
+ * Se il browser blocca l'audio (nessuna interazione dell'utente, scheda in
+ * background, permessi) fallisce in silenzio: e' un di piu', non deve mai
+ * rompere la partita.
+ */
+function suona(frequenza, durataMs) {
+  try {
+    const Ctx = window.AudioContext || window.webkitAudioContext
+    if (!Ctx) return
+
+    const ctx = new Ctx()
+    const oscillatore = ctx.createOscillator()
+    const volume = ctx.createGain()
+
+    oscillatore.frequency.value = frequenza
+    oscillatore.type = "sine"
+    volume.gain.setValueAtTime(0.25, ctx.currentTime)
+    volume.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + durataMs / 1000)
+
+    oscillatore.connect(volume)
+    volume.connect(ctx.destination)
+    oscillatore.start()
+    oscillatore.stop(ctx.currentTime + durataMs / 1000)
+    oscillatore.onended = () => ctx.close()
+  } catch {
+    // audio non disponibile: si prosegue senza
+  }
+}
+
 function MidalarioRoom() {
   const { id } = useParams()
 
@@ -37,11 +82,24 @@ function MidalarioRoom() {
   const [, forceTick] = useState(0)
 
   const serverOffsetRef = useRef(0)
+  // Istante locale in cui scatta la prima domanda, ricavato dal server.
+  // Serve a far scorrere il "3, 2, 1" fluido tra un sondaggio e l'altro.
+  const partenzaRef = useRef(null)
+  const ultimoBipRef = useRef(null)
 
   async function fetchStatus() {
     try {
       const res = await api.get(`/midalario/quizzes/${id}/status`)
       serverOffsetRef.current = new Date(res.data.server_time).getTime() - Date.now()
+
+      // Il server dice quanto manca al via: lo si fissa su un istante locale,
+      // cosi' il conto alla rovescia scorre anche tra un sondaggio e l'altro.
+      if (typeof res.data.starting_in_ms === "number") {
+        partenzaRef.current = Date.now() + res.data.starting_in_ms
+      } else if (res.data.question) {
+        partenzaRef.current = null
+      }
+
       setStatus(res.data)
       setError("")
     } catch (err) {
@@ -67,6 +125,16 @@ function MidalarioRoom() {
   useEffect(() => {
     setSelectedAnswerId(null)
   }, [status?.question?.id])
+
+  // Squillo di partenza: solo se si arriva dal conto alla rovescia, non a ogni
+  // cambio di domanda.
+  useEffect(() => {
+    if (status?.question && ultimoBipRef.current !== null) {
+      ultimoBipRef.current = null
+      partenzaRef.current = null
+      suona(1320, 260)
+    }
+  }, [status?.question?.id, status?.question])
 
   const shuffledAnswers = useMemo(() => {
     if (!status?.question?.answers) return []
@@ -230,18 +298,39 @@ function MidalarioRoom() {
   }
 
   if (roomStatus === "open" || roomStatus === "closed") {
+    const orarioPrevisto = status.scheduled_at ? new Date(status.scheduled_at).getTime() : null
+    const mancaAllOrario = orarioPrevisto ? orarioPrevisto - (Date.now() + serverOffsetRef.current) : null
+    const orarioNonAncoraArrivato = mancaAllOrario !== null && mancaAllOrario > 0
+
     return (
       <div className={styles.centerBox}>
         <div className={styles.card}>
-          <div className="spinner-border text-primary mb-3"></div>
           <h1 className={styles.cardTitle}>{quiz.title}</h1>
-          <p className={styles.cardText}>Sei in sala d'attesa.</p>
+
+          {orarioNonAncoraArrivato ? (
+            <>
+              <p className={styles.cardText}>Il quiz inizia tra</p>
+              <div className={styles.countdownBox}>
+                <strong className={styles.countdownValue}>{formatAttesa(mancaAllOrario)}</strong>
+              </div>
+              <p className={styles.cardText}>
+                Resta su questa pagina: partirà da solo, non devi fare altro.
+              </p>
+            </>
+          ) : (
+            <>
+              <div className="spinner-border text-primary mb-3"></div>
+              <p className={styles.cardText}>
+                {orarioPrevisto
+                  ? "Ci siamo! Resta in attesa, il quiz partirà a momenti."
+                  : roomStatus === "open"
+                    ? "Aspetta che l'amministratore chiuda le iscrizioni e avvii il quiz."
+                    : "Le iscrizioni sono chiuse. Il quiz sta per iniziare, resta su questa pagina."}
+              </p>
+            </>
+          )}
+
           <p className={styles.participantsLine}>{participantsCount} partecipanti iscritti.</p>
-          <p className={styles.cardText}>
-            {roomStatus === "open"
-              ? "Aspetta che l'amministratore chiuda le iscrizioni e avvii il quiz."
-              : "Le iscrizioni sono chiuse. Il quiz sta per iniziare, resta su questa pagina."}
-          </p>
         </div>
       </div>
     )
@@ -260,6 +349,46 @@ function MidalarioRoom() {
   }
 
   const question = status.question
+
+  // Il via e' stato dato ma la prima domanda deve ancora scattare: e' la
+  // finestra di qualche secondo in cui mostrare il "3, 2, 1".
+  if (partenzaRef.current !== null && !question) {
+    const mancaMs = partenzaRef.current - Date.now()
+
+    if (mancaMs > 0) {
+      const secondi = Math.ceil(mancaMs / 1000)
+
+      // Un bip per ogni numero, una volta sola.
+      if (ultimoBipRef.current !== secondi) {
+        ultimoBipRef.current = secondi
+        suona(secondi <= 3 ? 880 : 660, 140)
+      }
+
+      return (
+        <div className={styles.centerBox}>
+          <div className={styles.card}>
+            <p className={styles.cardText}>Il quiz sta per iniziare</p>
+            <div className={styles.countdownBox}>
+              <strong className={styles.countdownNumber}>{secondi}</strong>
+            </div>
+            <p className={styles.cardText}>Preparati!</p>
+          </div>
+        </div>
+      )
+    }
+
+    // Conto alla rovescia finito ma la domanda non e' ancora arrivata: manca
+    // al massimo un giro di interrogazione. Qui NON si puo' dire "tempo
+    // scaduto", la partita sta appena cominciando.
+    return (
+      <div className={styles.centerBox}>
+        <div className={styles.card}>
+          <div className="spinner-border text-primary mb-3"></div>
+          <p className={styles.cardText}>Si parte!</p>
+        </div>
+      </div>
+    )
+  }
 
   // Le domande sono una di seguito all'altra senza pause: se la partita e' in
   // corso ma non c'e' una domanda attiva, significa che l'ultima e' appena

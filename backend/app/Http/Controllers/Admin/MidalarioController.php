@@ -14,6 +14,13 @@ use Illuminate\Support\Facades\Storage;
 
 class MidalarioController extends Controller
 {
+    /**
+     * Margine tra il clic su "Avvia" e l'inizio effettivo della prima domanda.
+     * I giocatori interrogano il server ogni 2 secondi, quindi 5 garantisce a
+     * tutti almeno un giro utile per vedere il conto alla rovescia.
+     */
+    public const SECONDI_DI_ATTESA_PRIMA_DEL_VIA = 5;
+
     public function index()
     {
         $quizzes = Quiz::where('type', 'midalario')
@@ -138,7 +145,10 @@ class MidalarioController extends Controller
             return back()->with('error', 'Aggiungi almeno una domanda prima di avviare il quiz.');
         }
 
-        $startedAt = now();
+        // Il cronometro parte qualche secondo nel futuro: quel margine serve al
+        // "3, 2, 1" nella pagina dei giocatori. Senza, il conto alla rovescia
+        // mangerebbe i primi secondi della prima domanda.
+        $startedAt = now()->addSeconds(self::SECONDI_DI_ATTESA_PRIMA_DEL_VIA);
         $questionIds = $quiz->questions()->orderBy('id')->pluck('id')->all();
 
         foreach ($quiz->participants as $participant) {
@@ -223,6 +233,7 @@ class MidalarioController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string'],
             'is_active' => ['required', 'boolean'],
+            'midalario_scheduled_at' => ['nullable', 'date'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
         ]);
     }
