@@ -65,6 +65,16 @@
                             </div>
                         </div>
                     @endfor
+
+                    <hr class="my-4">
+
+                    <div class="admin-form-grid">
+                        <div class="full">
+                            <label class="form-label">Spiegazione (perché è l'intruso)</label>
+                            <textarea name="intruso_spiegazione" class="form-control" rows="3"
+                                placeholder="Mostrata ai giocatori dopo la loro risposta, opzionale">{{ old('intruso_spiegazione') }}</textarea>
+                        </div>
+                    </div>
                 </div>
             </section>
 

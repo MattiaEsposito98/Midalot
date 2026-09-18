@@ -165,6 +165,19 @@ function MinigiocoReview() {
             <strong className={styles.answerValue}>{formatTime(r.time_taken)}</strong>
           </div>
         </div>
+
+        {r.intruso_spiegazione && (
+          <div className={styles.explanationBox}>
+            <strong className={r.is_correct ? styles.explanationHeaderCorrect : styles.explanationHeaderWrong}>
+              {r.is_correct
+                ? "Esatto! Ecco perché"
+                : r.is_timeout
+                  ? "Tempo scaduto: ecco perché"
+                  : "Non era quella: ecco perché"}
+            </strong>
+            {r.intruso_spiegazione}
+          </div>
+        )}
       </>
     )
   }

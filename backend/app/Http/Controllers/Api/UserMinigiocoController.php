@@ -202,6 +202,7 @@ class UserMinigiocoController extends Controller
                     'items' => $this->itemsPayload($round)->values(),
                     'intruso_id' => $intrusoItem?->id,
                     'scelto_id' => $sceltoId,
+                    'intruso_spiegazione' => $round->intruso_spiegazione,
                 ];
             }
 

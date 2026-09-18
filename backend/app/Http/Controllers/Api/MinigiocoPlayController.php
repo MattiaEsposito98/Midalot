@@ -336,7 +336,12 @@ class MinigiocoPlayController extends Controller
             $row->score = 0;
             $row->save();
 
-            return response()->json(['correct' => false, 'timeout' => true, 'score' => 0]);
+            return response()->json([
+                'correct' => false,
+                'timeout' => true,
+                'score' => 0,
+                'intruso_spiegazione' => $round->intruso_spiegazione,
+            ]);
         }
 
         $selectedItem = $round->items()->find($request->risposta);
@@ -356,7 +361,12 @@ class MinigiocoPlayController extends Controller
 
         $row->save();
 
-        return response()->json(['correct' => $isCorrect, 'timeout' => false, 'score' => $row->score]);
+        return response()->json([
+            'correct' => $isCorrect,
+            'timeout' => false,
+            'score' => $row->score,
+            'intruso_spiegazione' => $round->intruso_spiegazione,
+        ]);
     }
 
     /**

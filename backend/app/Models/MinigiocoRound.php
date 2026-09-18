@@ -15,6 +15,7 @@ class MinigiocoRound extends Model
         'shift',
         'time_limit_seconds',
         'content_mode',
+        'intruso_spiegazione',
     ];
 
     public function minigioco()

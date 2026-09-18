@@ -5,6 +5,17 @@ import styles from "./TrovaIntruso.module.css"
 import { formatQuizScore } from "../../utils/quizScore"
 import { useMinigiocoAttempt } from "../../hooks/useMinigiocoAttempt"
 
+/**
+ * Con una spiegazione da leggere il round resta visibile piu' a lungo prima
+ * di passare avanti: tempo base + un margine proporzionale alla lunghezza
+ * del testo, entro un minimo e un massimo ragionevoli.
+ */
+function advanceDelayFor(data) {
+  if (!data?.intruso_spiegazione) return 500
+
+  return Math.min(7000, Math.max(2200, 900 + data.intruso_spiegazione.length * 35))
+}
+
 function TrovaIntruso() {
   const { id } = useParams()
 
@@ -21,7 +32,7 @@ function TrovaIntruso() {
     timeLeft,
     submitAnswer,
     handleBackToMinigiochi,
-  } = useMinigiocoAttempt(id, { retryOnWrong: false })
+  } = useMinigiocoAttempt(id, { retryOnWrong: false, getAdvanceDelayMs: advanceDelayFor })
 
   const [selectedId, setSelectedId] = useState(null)
   const [seenRoundId, setSeenRoundId] = useState(currentRound?.id)
@@ -153,6 +164,23 @@ function TrovaIntruso() {
               }`}
             >
               {feedback.message}
+            </div>
+          )}
+
+          {feedback?.spiegazione && (
+            <div className={styles.explanationBox}>
+              <strong
+                className={
+                  feedback.type === "correct" ? styles.explanationHeaderCorrect : styles.explanationHeaderWrong
+                }
+              >
+                {feedback.type === "correct"
+                  ? "Esatto! Ecco perché"
+                  : feedback.timeout
+                    ? "Tempo scaduto: ecco perché"
+                    : "Non era quella: ecco perché"}
+              </strong>
+              {feedback.spiegazione}
             </div>
           )}
 

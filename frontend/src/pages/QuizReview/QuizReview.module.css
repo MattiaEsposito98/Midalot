@@ -173,6 +173,32 @@
   color: #1f7a4b;
 }
 
+.explanationBox {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: #fff9dc;
+  border: 1px solid #ffe28a;
+  color: #182033;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.explanationBox strong {
+  display: block;
+  font-size: 12px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.explanationHeaderCorrect {
+  color: #146c43;
+}
+
+.explanationHeaderWrong {
+  color: #a52834;
+}
+
 .backBtn {
   display: inline-flex;
   align-items: center;

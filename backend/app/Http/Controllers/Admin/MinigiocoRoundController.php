@@ -166,6 +166,7 @@ class MinigiocoRoundController extends Controller
 
         if ($intruso) {
             $rules['intruso'] = 'required|integer|min:0|max:3';
+            $rules['intruso_spiegazione'] = 'nullable|string|max:2000';
         }
 
         $request->validate($rules);
@@ -175,6 +176,7 @@ class MinigiocoRoundController extends Controller
                 'minigioco_id' => $minigioco->id,
                 'time_limit_seconds' => $request->time_limit_seconds,
                 'content_mode' => $contentMode,
+                'intruso_spiegazione' => $intruso ? $request->intruso_spiegazione : null,
             ]);
 
             foreach ($request->items as $index => $item) {
@@ -215,6 +217,7 @@ class MinigiocoRoundController extends Controller
 
         if ($intruso) {
             $rules['intruso'] = 'required|integer|min:0|max:3';
+            $rules['intruso_spiegazione'] = 'nullable|string|max:2000';
         }
 
         $request->validate($rules);
@@ -239,6 +242,7 @@ class MinigiocoRoundController extends Controller
             $round->update([
                 'time_limit_seconds' => $request->time_limit_seconds,
                 'content_mode' => $contentMode,
+                'intruso_spiegazione' => $intruso ? $request->intruso_spiegazione : null,
             ]);
 
             foreach ($request->items as $index => $item) {

@@ -14,8 +14,13 @@ import { API_BASE } from "../service/api"
  * `retryOnWrong`: true per Tastiera Rotta (si può ritentare finché il
  * tempo non scade), false per i giochi a tentativo singolo (una risposta
  * sbagliata chiude subito il round, come una risposta corretta).
+ *
+ * `getAdvanceDelayMs(data)`: quanto aspettare prima di passare al round
+ * successivo dopo una risposta che chiude il round. Di default 500ms
+ * (giusto il tempo di leggere "Corretto!"/"Sbagliato!"); Trova l'Intruso lo
+ * allunga quando la risposta porta con se' una spiegazione da leggere.
  */
-export function useMinigiocoAttempt(id, { retryOnWrong = false } = {}) {
+export function useMinigiocoAttempt(id, { retryOnWrong = false, getAdvanceDelayMs } = {}) {
   const navigate = useNavigate()
   const { token } = useAuth()
 
@@ -254,19 +259,21 @@ export function useMinigiocoAttempt(id, { retryOnWrong = false } = {}) {
       }
 
       const shouldLock = isTimeout || data.correct || !retryOnWrong
+      const spiegazione = data.intruso_spiegazione || null
 
       if (data.correct) {
-        setFeedback({ type: "correct", message: "Corretto!" })
+        setFeedback({ type: "correct", message: "Corretto!", spiegazione })
       } else if (isTimeout) {
-        setFeedback({ type: "wrong", message: "Tempo scaduto!" })
+        setFeedback({ type: "wrong", message: "Tempo scaduto!", spiegazione, timeout: true })
       } else {
-        setFeedback({ type: "wrong", message: retryOnWrong ? "Sbagliato, riprova!" : "Sbagliato!" })
+        setFeedback({ type: "wrong", message: retryOnWrong ? "Sbagliato, riprova!" : "Sbagliato!", spiegazione })
       }
 
       if (shouldLock) {
         setRoundLockedSafe(true)
         clearInterval(timerRef.current)
-        await new Promise((resolve) => setTimeout(resolve, 500))
+        const delayMs = typeof getAdvanceDelayMs === "function" ? getAdvanceDelayMs(data) : 500
+        await new Promise((resolve) => setTimeout(resolve, delayMs))
         await goNextOrFinish()
       } else {
         setSubmittingSafe(false)
