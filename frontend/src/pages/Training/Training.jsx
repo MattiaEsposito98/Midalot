@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link, useParams, useSearchParams } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
+import { useSEO } from "../../hooks/useSEO"
 import styles from "./Training.module.css"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
@@ -112,6 +113,22 @@ function Training() {
     if (!subcategorySlug) return null
     return (categoryData?.subcategories || []).find((sub) => sub.slug === subcategorySlug) || null
   }, [categoryData, subcategorySlug])
+
+  useSEO(
+    categoryData
+      ? {
+          title: `Quiz ${categoryData.category.name} | Training Gratis su Midalot`,
+          description: (
+            categoryData.category.description ||
+            `Allenati con i quiz di ${categoryData.category.name} su Midalot: giocabile gratis anche senza registrazione.`
+          ).slice(0, 160),
+        }
+      : {
+          title: "Training Quiz per Categoria | Anime, Sport, Cinema, Storia | Midalot",
+          description:
+            "Allenati gratis con i quiz training di Midalot: Anime, Sport, Cinema e TV, Storia, Geografia, Scienze, Matematica e Logica, Musica e altro. Giocabile anche senza registrazione.",
+        }
+  )
 
   if (loading) {
     return (

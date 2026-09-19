@@ -1,0 +1,14 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Consolida tutto su un unico host canonico: https://midalot.live (no www)
+    RewriteCond %{HTTP_HOST} ^www\.midalot\.live$ [NC,OR]
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://midalot.live/$1 [L,R=301]
+
+    # Fallback SPA: le rotte gestite da React Router (es. /training/sport)
+    # non sono file reali sul server, quindi vanno servite da index.html.
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^ index.html [L]
+</IfModule>

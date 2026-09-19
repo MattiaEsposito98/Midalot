@@ -1,4 +1,5 @@
 import { Link } from "react-router-dom"
+import { useCookieConsent } from "../../hooks/useCookieConsent"
 import styles from "./LegalPage.module.css"
 
 const CONTACT_EMAIL = "midalot@libero.it"
@@ -145,29 +146,38 @@ const pages = {
   cookies: {
     eyebrow: "Informativa cookie",
     title: "Cookie Policy",
-    updated: "Ultimo aggiornamento: 29 maggio 2026",
+    updated: "Ultimo aggiornamento: 19 settembre 2026",
     intro:
       "Questa pagina descrive l'uso di cookie e tecnologie simili su Midalot.",
     sections: [
       {
         title: "Cookie tecnici",
         body: [
-          "Il backend Laravel puo' usare cookie tecnici necessari per l'area amministrativa, la sicurezza e la gestione della sessione.",
+          "Il sito puo' usare cookie tecnici necessari per l'area amministrativa, la sicurezza e la gestione della sessione.",
           "Questi cookie sono necessari al funzionamento del servizio e non richiedono consenso preventivo."
         ],
       },
       {
         title: "Local storage",
         body: [
-          "Il frontend React puo' salvare localmente informazioni di accesso dell'utente, come token e dati profilo, per mantenere la sessione attiva.",
+          "Il sito puo' salvare localmente sul dispositivo informazioni di accesso dell'utente, come token e dati profilo, per mantenere la sessione attiva.",
           "Questi dati restano nel browser dell'utente finche' non effettua logout o cancella i dati del browser."
         ],
       },
       {
-        title: "Cookie analitici o marketing",
+        title: "Cookie analitici (Google Analytics)",
         body: [
-          "Al momento Midalot non usa cookie di profilazione, advertising o analytics di terze parti.",
-          "Se in futuro verranno aggiunti strumenti di analytics, pixel o marketing, questa pagina sara' aggiornata e, ove necessario, verra' richiesto consenso esplicito."
+          "Midalot usa Google Analytics 4, un servizio di analisi statistica fornito da Google Ireland Limited, per capire come viene usato il sito (pagine visitate, tempo di permanenza, provenienza del traffico) in forma aggregata.",
+          "Questi cookie (es. _ga, _ga_*) non sono tecnici: vengono attivati solo dopo che l'utente ha espresso consenso tramite il banner mostrato alla prima visita.",
+          "I dati raccolti sono conservati da Google per un periodo massimo di 14 mesi e possono essere trasferiti verso server negli Stati Uniti, nell'ambito del quadro giuridico previsto dal Data Privacy Framework UE-USA.",
+          "L'utente puo' revocare il consenso in qualsiasi momento tramite il pulsante \"Gestisci preferenze cookie\" in fondo a questa pagina, oppure installando il componente aggiuntivo di disattivazione di Google Analytics."
+        ],
+      },
+      {
+        title: "Cookie di marketing o profilazione",
+        body: [
+          "Midalot non usa cookie di profilazione pubblicitaria o remarketing.",
+          "Se in futuro verranno aggiunti ulteriori strumenti di marketing, questa pagina sara' aggiornata e verra' richiesto un nuovo consenso esplicito."
         ],
       },
       {
@@ -183,6 +193,7 @@ const pages = {
 
 function LegalPage({ type }) {
   const page = pages[type]
+  const { setConsent } = useCookieConsent()
 
   return (
     <section className={styles.page}>
@@ -209,6 +220,12 @@ function LegalPage({ type }) {
             </article>
           ))}
         </div>
+
+        {type === "cookies" && (
+          <button type="button" className="btn btn-outline-secondary mt-3" onClick={() => setConsent(null)}>
+            Gestisci preferenze cookie
+          </button>
+        )}
       </div>
     </section>
   )

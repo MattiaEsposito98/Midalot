@@ -1,4 +1,9 @@
-import { Routes, Route, Navigate } from "react-router-dom"
+import { useEffect } from "react"
+import { Routes, Route, Navigate, useLocation } from "react-router-dom"
+
+import { initAnalytics, trackPageview } from "./utils/analytics"
+import { useCookieConsent } from "./hooks/useCookieConsent"
+import CookieBanner from "./components/CookieBanner/CookieBanner"
 
 import PublicLayout from "./layouts/PublicLayout"
 import PrivateLayout from "./layouts/PrivateLayout"
@@ -32,58 +37,76 @@ import MinigiocoPlay from "./pages/Minigiochi/MinigiocoPlay"
 import MinigiocoReview from "./pages/Minigiochi/MinigiocoReview"
 
 function App() {
+  const location = useLocation()
+  const { consent } = useCookieConsent()
+
+  useEffect(() => {
+    if (consent === "accepted") {
+      initAnalytics()
+    }
+  }, [consent])
+
+  useEffect(() => {
+    if (consent === "accepted") {
+      trackPageview(location.pathname + location.search)
+    }
+  }, [location, consent])
+
   return (
-    <Routes>
-      {/* AREA PUBBLICA */}
-      <Route element={<PublicLayout />}>
-        <Route path="/" element={<Home />} />
-        <Route path="/chi-siamo" element={<ChiSiamo />} />
-        <Route path="/classifiche" element={<Classifiche />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/verifica-email" element={<VerificaEmail />} />
-        <Route path="/privacy" element={<LegalPage type="privacy" />} />
-        <Route path="/termini" element={<LegalPage type="terms" />} />
-        <Route path="/cookie" element={<LegalPage type="cookies" />} />
-        <Route path="/regolamento" element={<Regolamento />} />
-      </Route>
+    <>
+      <CookieBanner />
+      <Routes>
+        {/* AREA PUBBLICA */}
+        <Route element={<PublicLayout />}>
+          <Route path="/" element={<Home />} />
+          <Route path="/chi-siamo" element={<ChiSiamo />} />
+          <Route path="/classifiche" element={<Classifiche />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
+          <Route path="/verifica-email" element={<VerificaEmail />} />
+          <Route path="/privacy" element={<LegalPage type="privacy" />} />
+          <Route path="/termini" element={<LegalPage type="terms" />} />
+          <Route path="/cookie" element={<LegalPage type="cookies" />} />
+          <Route path="/regolamento" element={<Regolamento />} />
+        </Route>
 
-      {/* TRAINING PUBBLICO / UTENTI */}
-      <Route element={<TrainingLayout />}>
-        <Route path="/training" element={<Training />} />
-        <Route path="/training/:categorySlug" element={<Training />} />
-        <Route path="/training/play/:id" element={<TrainingPlay />} />
-        <Route path="/training/play/:id/leaderboard" element={<TrainingLeaderboard />} />
-      </Route>
+        {/* TRAINING PUBBLICO / UTENTI */}
+        <Route element={<TrainingLayout />}>
+          <Route path="/training" element={<Training />} />
+          <Route path="/training/:categorySlug" element={<Training />} />
+          <Route path="/training/play/:id" element={<TrainingPlay />} />
+          <Route path="/training/play/:id/leaderboard" element={<TrainingLeaderboard />} />
+        </Route>
 
-      {/* AREA PRIVATA */}
-      <Route
-        element={
-          <ProtectedRoute>
-            <PrivateLayout />
-          </ProtectedRoute>
-        }
-      >
-        <Route path="/quiz-one-shot" element={<QuizOneShot />} />
-        <Route path="/dashboard" element={<Navigate to="/quiz-one-shot" replace />} />
-        <Route path="/quiz/:id" element={<Quiz />} />
-        <Route path="/storico" element={<Storico />} />
-        <Route path="/profilo" element={<Profilo />} />
-        <Route path="/cambia-password" element={<CambiaPassword />} />
-        <Route path="/quiz/:id/leaderboard" element={<Leaderboard />} />
-        <Route path="/quiz/:id/review" element={<QuizReview />} />
-        <Route path="/midalario" element={<Midalario />} />
-        <Route path="/midalario/:id" element={<MidalarioRoom />} />
-        <Route path="/midalario/:id/leaderboard" element={<Leaderboard kind="midalario" />} />
-        <Route path="/midalario/:id/review" element={<QuizReview kind="midalario" />} />
-        <Route path="/minigiochi" element={<MinigiochiList />} />
-        <Route path="/minigiochi/:id" element={<MinigiocoPlay />} />
-        <Route path="/minigiochi/:id/leaderboard" element={<Leaderboard kind="minigioco" />} />
-        <Route path="/minigiochi/:id/review" element={<MinigiocoReview />} />
-      </Route>
-    </Routes>
+        {/* AREA PRIVATA */}
+        <Route
+          element={
+            <ProtectedRoute>
+              <PrivateLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route path="/quiz-one-shot" element={<QuizOneShot />} />
+          <Route path="/dashboard" element={<Navigate to="/quiz-one-shot" replace />} />
+          <Route path="/quiz/:id" element={<Quiz />} />
+          <Route path="/storico" element={<Storico />} />
+          <Route path="/profilo" element={<Profilo />} />
+          <Route path="/cambia-password" element={<CambiaPassword />} />
+          <Route path="/quiz/:id/leaderboard" element={<Leaderboard />} />
+          <Route path="/quiz/:id/review" element={<QuizReview />} />
+          <Route path="/midalario" element={<Midalario />} />
+          <Route path="/midalario/:id" element={<MidalarioRoom />} />
+          <Route path="/midalario/:id/leaderboard" element={<Leaderboard kind="midalario" />} />
+          <Route path="/midalario/:id/review" element={<QuizReview kind="midalario" />} />
+          <Route path="/minigiochi" element={<MinigiochiList />} />
+          <Route path="/minigiochi/:id" element={<MinigiocoPlay />} />
+          <Route path="/minigiochi/:id/leaderboard" element={<Leaderboard kind="minigioco" />} />
+          <Route path="/minigiochi/:id/review" element={<MinigiocoReview />} />
+        </Route>
+      </Routes>
+    </>
   )
 }
 

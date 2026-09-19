@@ -8,13 +8,16 @@ import "./index.css"
 
 import App from "./App"
 import { AuthProvider } from "./context/AuthContext"
+import { CookieConsentProvider } from "./context/CookieConsentContext"
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
+      <CookieConsentProvider>
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+      </CookieConsentProvider>
     </BrowserRouter>
   </React.StrictMode>
 )
