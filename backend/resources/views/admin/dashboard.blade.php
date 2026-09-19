@@ -32,6 +32,36 @@
     </div>
 
     <div class="admin-stat-group">
+        <h2 class="admin-stat-group-title">Consenso cookie (Google Analytics)</h2>
+        <div class="admin-stat-grid">
+            <div class="admin-stat-card">
+                <i class="bi bi-eye"></i>
+                <span>Banner mostrato</span>
+                <strong>{{ $cookieConsent['shown'] }}</strong>
+            </div>
+            <div class="admin-stat-card">
+                <i class="bi bi-check-circle"></i>
+                <span>Consenso accettato</span>
+                <strong>{{ $cookieConsent['accepted'] }}</strong>
+            </div>
+            <div class="admin-stat-card">
+                <i class="bi bi-x-circle"></i>
+                <span>Consenso rifiutato</span>
+                <strong>{{ $cookieConsent['rejected'] }}</strong>
+            </div>
+            <div class="admin-stat-card">
+                <i class="bi bi-percent"></i>
+                <span>Tasso di accettazione</span>
+                <strong>{{ $cookieConsent['acceptance_rate'] !== null ? $cookieConsent['acceptance_rate'] . '%' : '-' }}</strong>
+            </div>
+        </div>
+        <p class="admin-muted small mb-0 mt-2">
+            Chi rifiuta non viene mai conteggiato da Google Analytics: questi numeri servono solo a capire
+            quanta parte del traffico reale resta "invisibile" ad Analytics.
+        </p>
+    </div>
+
+    <div class="admin-stat-group">
         <h2 class="admin-stat-group-title">Quiz assegnati</h2>
         <div class="admin-stat-grid">
             <div class="admin-stat-card">

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CookieConsentEvent;
 use App\Models\Minigioco;
 use App\Models\MinigiocoAttempt;
 use App\Models\Question;
@@ -52,6 +53,20 @@ class DashboardController extends Controller
                 ->count('city_id'),
         ];
 
+        $consentCounts = CookieConsentEvent::selectRaw('event, COUNT(*) as total')
+            ->groupBy('event')
+            ->pluck('total', 'event');
+
+        $cookieConsent = [
+            'shown' => $consentCounts->get('shown', 0),
+            'accepted' => $consentCounts->get('accepted', 0),
+            'rejected' => $consentCounts->get('rejected', 0),
+        ];
+        $cookieConsent['decided'] = $cookieConsent['accepted'] + $cookieConsent['rejected'];
+        $cookieConsent['acceptance_rate'] = $cookieConsent['decided'] > 0
+            ? round($cookieConsent['accepted'] / $cookieConsent['decided'] * 100)
+            : null;
+
         $latestLogins = UserLogin::with('user.latestMonthlyBadge')
             ->whereHas('user', fn ($q) => $q->where('is_admin', false))
             ->latest('logged_in_at')
@@ -92,6 +107,7 @@ class DashboardController extends Controller
 
         return view('admin.dashboard', compact(
             'stats',
+            'cookieConsent',
             'latestLogins',
             'topCities',
             'recentQuizzes',
