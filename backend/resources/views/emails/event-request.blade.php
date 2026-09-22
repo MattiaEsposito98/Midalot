@@ -9,9 +9,9 @@
 
     <p><strong>Nome e cognome:</strong> {{ $eventRequest['name'] }}</p>
     <p><strong>Contatto:</strong> {{ $eventRequest['contact'] }}</p>
-    <p><strong>Tipo di evento:</strong> {{ $eventRequest['event_type'] ?: 'Non specificato' }}</p>
-    <p><strong>Data prevista:</strong> {{ $eventRequest['event_date'] ?: 'Non specificata' }}</p>
-    <p><strong>Utente registrato:</strong> {{ $eventRequest['user_email'] ?: 'No - richiesta da ospite' }}</p>
+    <p><strong>Tipo di evento:</strong> {{ $eventRequest['event_type'] ?? 'Non specificato' }}</p>
+    <p><strong>Data prevista:</strong> {{ $eventRequest['event_date'] ?? 'Non specificata' }}</p>
+    <p><strong>Utente registrato:</strong> {{ $eventRequest['user_email'] ?? 'No - richiesta da ospite' }}</p>
 
     <h2>Messaggio</h2>
     <p style="white-space: pre-wrap;">{{ $eventRequest['message'] }}</p>

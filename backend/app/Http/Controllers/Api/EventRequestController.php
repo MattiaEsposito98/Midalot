@@ -21,6 +21,12 @@ class EventRequestController extends Controller
             'message' => ['required', 'string', 'min:5', 'max:3000'],
         ]);
 
+        // Campi opzionali assenti dalla richiesta: valida() li omette del
+        // tutto dall'array (non li imposta a null), quindi vanno normalizzati
+        // qui per evitare "Undefined array key" nella vista dell'email.
+        $validated['event_type'] ??= null;
+        $validated['event_date'] ??= null;
+
         $user = Auth::guard('sanctum')->user();
 
         $eventRequest = EventRequest::create([
