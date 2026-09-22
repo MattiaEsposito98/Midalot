@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\EventRequest;
 use App\Models\TrainingQuestionReport;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\View;
@@ -31,6 +32,11 @@ class AppServiceProvider extends ServiceProvider
                     TrainingQuestionReport::STATUS_OPEN,
                     TrainingQuestionReport::STATUS_IN_PROGRESS,
                 ])->count()
+            );
+
+            $view->with(
+                'newEventRequestsCount',
+                EventRequest::where('status', EventRequest::STATUS_NEW)->count()
             );
         });
     }

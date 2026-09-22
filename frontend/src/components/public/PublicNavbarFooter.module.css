@@ -119,6 +119,39 @@
   margin-top: 10px;
 }
 
+.highlightItem {
+  display: flex !important;
+  align-items: center;
+  background: linear-gradient(135deg, #ffc107, #ffdb70) !important;
+  color: #182033 !important;
+  font-weight: 900;
+}
+
+.highlightItem:hover {
+  background: linear-gradient(135deg, #ffcd2e, #ffe38a) !important;
+  color: #182033 !important;
+}
+
+.infoDot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  padding-left: 8px;
+  color: #182033;
+  opacity: 0.7;
+  animation: infoDotPulse 1.8s ease-in-out infinite;
+}
+
+@keyframes infoDotPulse {
+  0%, 100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 .footer {
   background:
     linear-gradient(135deg, rgba(255, 193, 7, 0.09), transparent 32%),

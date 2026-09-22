@@ -1,0 +1,259 @@
+.page {
+  width: 100%;
+  padding: 42px 0 58px;
+}
+
+.wrap {
+  max-width: 1080px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  color: #182033;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.hero {
+  background: #182033;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 40px 32px;
+  box-shadow: 10px 10px 0 #ffc107, 0 18px 42px rgba(24, 32, 51, 0.2);
+  margin-bottom: 22px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 193, 7, 0.16);
+  border: 1px solid rgba(255, 193, 7, 0.5);
+  color: #ffc107;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-weight: 900;
+  margin-bottom: 14px;
+}
+
+.hero h1 {
+  font-size: clamp(1.9rem, 4vw, 2.8rem);
+  font-weight: 950;
+  margin: 0 0 14px;
+  max-width: 720px;
+}
+
+.heroText {
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.7;
+  margin: 0 0 22px;
+  max-width: 680px;
+}
+
+.heroCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffc107;
+  color: #182033;
+  border-radius: 8px;
+  padding: 12px 22px;
+  font-weight: 900;
+  text-decoration: none;
+  border: 2px solid #ffc107;
+  transition: transform 0.15s ease;
+}
+
+.heroCta:hover {
+  color: #182033;
+  transform: translateY(-2px);
+}
+
+.section {
+  background: #ffffff;
+  border: 1px solid #dce5ee;
+  border-radius: 8px;
+  padding: 26px;
+  box-shadow: 0 14px 34px rgba(24, 32, 51, 0.08);
+  margin-bottom: 18px;
+}
+
+.section h2 {
+  font-size: 1.5rem;
+  font-weight: 950;
+  margin-bottom: 18px;
+}
+
+.benefitsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.benefitCard {
+  border: 1px solid #dce5ee;
+  border-radius: 8px;
+  padding: 22px 18px;
+  text-align: center;
+}
+
+.benefitIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #fff4bf;
+  color: #7a5400;
+  font-size: 1.4rem;
+  margin-bottom: 14px;
+}
+
+.benefitCard h3 {
+  font-weight: 950;
+  margin-bottom: 8px;
+  font-size: 1.05rem;
+}
+
+.benefitCard p {
+  color: #647084;
+  line-height: 1.6;
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.stepsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.stepCard {
+  position: relative;
+  border: 1px solid #dce5ee;
+  border-radius: 8px;
+  padding: 24px 18px 18px;
+}
+
+.stepNumber {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #182033;
+  color: #ffc107;
+  font-weight: 950;
+  margin-bottom: 12px;
+}
+
+.stepCard h3 {
+  font-weight: 950;
+  margin-bottom: 8px;
+  font-size: 1.05rem;
+}
+
+.stepCard p {
+  color: #647084;
+  line-height: 1.6;
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.formSection {
+  background: #ffffff;
+  border: 2px solid #182033;
+  border-radius: 8px;
+  padding: 30px;
+  box-shadow: 10px 10px 0 #ffc107, 0 18px 42px rgba(24, 32, 51, 0.12);
+  scroll-margin-top: 90px;
+}
+
+.formSection h2 {
+  font-size: 1.5rem;
+  font-weight: 950;
+  margin-bottom: 8px;
+}
+
+.formIntro {
+  color: #647084;
+  margin-bottom: 24px;
+}
+
+.form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.formRow {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.formRowFull {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.submitBtn {
+  grid-column: 1 / -1;
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #182033;
+  color: #ffffff;
+  border: 2px solid #182033;
+  font-weight: 900;
+  padding: 12px 26px;
+  border-radius: 8px;
+  box-shadow: 0 3px 0 rgba(24, 32, 51, 0.45);
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #0f1728;
+  color: #ffffff;
+  transform: translateY(1px);
+}
+
+.successBox {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #eafaf0;
+  border: 1px solid #86e0ac;
+  color: #1d6b3e;
+  border-radius: 8px;
+  padding: 20px;
+  font-size: 1.4rem;
+}
+
+.successBox p {
+  color: #1d6b3e;
+  font-size: 0.95rem;
+}
+
+@media (max-width: 767.98px) {
+  .benefitsGrid,
+  .stepsGrid,
+  .form {
+    grid-template-columns: 1fr;
+  }
+
+  .hero {
+    padding: 28px 22px;
+  }
+
+  .formSection {
+    padding: 22px;
+  }
+}

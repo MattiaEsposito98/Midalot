@@ -87,6 +87,15 @@ function ChiSiamo() {
 
           <div className={styles.servicesGrid}>
             <div className={styles.serviceCard}>
+              <div className={styles.serviceBadge}>Novità</div>
+              <h3>Quiz personalizzati per eventi</h3>
+              <p>Compleanni, addii al nubilato/celibato, lauree o semplici serate tra amici: creiamo un quiz su misura per rendere unica la tua festa.</p>
+              <Link to="/crea-il-tuo-evento" className={styles.primaryBtn}>
+                Crea il tuo evento
+              </Link>
+            </div>
+
+            <div className={styles.serviceCard}>
               <div className={styles.serviceBadge}>Siti vetrina</div>
               <h3>Realizzazione siti vetrina</h3>
               <p>Siti vetrina moderni e professionali a un ottimo prezzo, su misura per la tua attivita' o il tuo brand.</p>

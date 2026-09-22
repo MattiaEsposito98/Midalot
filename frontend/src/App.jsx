@@ -29,6 +29,7 @@ import TrainingLeaderboard from "./pages/Training/TrainingLeaderboard"
 import LegalPage from "./pages/Legal/LegalPage"
 import Regolamento from "./pages/Regolamento/Regolamento"
 import ChiSiamo from "./pages/ChiSiamo/ChiSiamo"
+import CreaEvento from "./pages/CreaEvento/CreaEvento"
 import Classifiche from "./pages/Classifiche/Classifiche"
 import Midalario from "./pages/Midalario/Midalario"
 import MidalarioRoom from "./pages/Midalario/MidalarioRoom"
@@ -60,6 +61,7 @@ function App() {
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />
           <Route path="/chi-siamo" element={<ChiSiamo />} />
+          <Route path="/crea-il-tuo-evento" element={<CreaEvento />} />
           <Route path="/classifiche" element={<Classifiche />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />

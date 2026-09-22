@@ -60,6 +60,13 @@
                         <span class="admin-nav-count">{{ $openReportsCount }}</span>
                     @endif
                 </a>
+                <a href="{{ route('admin.event-requests.index') }}" class="admin-nav-link {{ Route::is('admin.event-requests.*') ? 'active' : '' }}">
+                    <i class="bi bi-stars"></i>
+                    <span>Richieste eventi</span>
+                    @if ($newEventRequestsCount > 0)
+                        <span class="admin-nav-count">{{ $newEventRequestsCount }}</span>
+                    @endif
+                </a>
                 <a href="{{ route('admin.showcase.index') }}" class="admin-nav-link {{ Route::is('admin.showcase.*') ? 'active' : '' }}">
                     <i class="bi bi-images"></i>
                     <span>Vetrina</span>

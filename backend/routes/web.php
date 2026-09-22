@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\EventRequestController;
 use App\Http\Controllers\Admin\ITunesController;
 use App\Http\Controllers\Admin\MidalarioController;
 use App\Http\Controllers\Admin\MinigiocoController;
@@ -119,6 +120,13 @@ Route::middleware(['auth', 'admin'])
             ->name('reports.update');
         Route::delete('reports/{report}', [TrainingQuestionReportController::class, 'destroy'])
             ->name('reports.destroy');
+
+        Route::get('event-requests', [EventRequestController::class, 'index'])
+            ->name('event-requests.index');
+        Route::patch('event-requests/{eventRequest}', [EventRequestController::class, 'update'])
+            ->name('event-requests.update');
+        Route::delete('event-requests/{eventRequest}', [EventRequestController::class, 'destroy'])
+            ->name('event-requests.destroy');
 
         // CRUD Quiz
         Route::resource('quizzes', QuizController::class);
