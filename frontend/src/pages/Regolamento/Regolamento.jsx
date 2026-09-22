@@ -59,6 +59,7 @@ const articles = [
           "Comunicazione di Data e Ora: Gli organizzatori comunicheranno preventivamente la data e l'orario esatto di svolgimento tramite avviso sul sito ufficiale midalot.live e attraverso i propri canali social ufficiali.",
           "Chiusura Iscrizioni e Accesso: Le iscrizioni e l'accesso alla stanza di gioco del Midalario si chiudono tassativamente pochi minuti prima dell'orario di inizio stabilito. Gli utenti che non si saranno collegati entro tale termine non potranno partecipare alla sessione in corso.",
           "Premio per la Competenza: Per premiare l'abilità, la velocità e la preparazione degli utenti, al termine di ciascun quiz del Midalario viene messo in palio per il vincitore (1° classificato) un premio di modico valore, la cui natura specifica è stabilita di volta in volta a insindacabile discrezione degli organizzatori e può variare da una sessione all'altra.",
+          "Badge del Vincitore: al termine di ciascuna sessione, il vincitore (o i co-vincitori) riceve automaticamente un badge digitale permanente dedicato a quella specifica sessione (es. \"Vincitore del Midalario: [Titolo Quiz]\"). Il badge resta acquisito in modo definitivo, si cumula con quelli ottenuti in eventuali altre sessioni Midalario vinte e può comparire insieme all'eventuale badge di vincitore del mese (Art. 2.1): i badge multipli sono tutti visibili contemporaneamente accanto al nickname dell'utente, ciascuno con la propria icona.",
           "Visibilità Esiti: Le risposte corrette e l'esito delle singole domande vengono mostrati solamente al termine del quiz e al momento della pubblicazione della classifica finale.",
         ],
       },
@@ -75,8 +76,9 @@ const articles = [
       {
         type: "ul",
         items: [
-          "Struttura: Sezione di giochi rapidi organizzati in round a tempo, tra cui la ricomposizione di parole cifrate, il riordino cronologico di una sequenza di elementi e l'individuazione dell'elemento intruso tra quattro proposti.",
+          "Struttura: Sezione di giochi rapidi organizzati in round a tempo, tra cui la ricomposizione di parole cifrate, il riordino cronologico di una sequenza di elementi, l'individuazione dell'elemento intruso tra quattro proposti e il giudizio di vero o falso su una singola affermazione.",
           "Formato dei contenuti: A seconda del round, gli elementi da riconoscere possono essere composti da solo testo oppure da sola immagine, a scelta degli organizzatori in fase di creazione dei contenuti.",
+          "Feedback e spiegazioni: per alcuni minigiochi (tra cui Trova l'Intruso e Vero o Falso) viene mostrata, subito dopo la risposta, una breve spiegazione dell'esito.",
           "Punteggio e Classifiche: Il punteggio ottenuto nei Minigiochi concorre alla Classifica Premi (Art. 2.1) ed è inoltre consultabile in un'apposita classifica dedicata a ciascun minigioco.",
           "Accessibilità: Riservati agli utenti registrati; non disponibili in modalità Ospite.",
         ],
@@ -299,7 +301,7 @@ function buildRegolamentoPdf() {
   doc.setFont("helvetica", "italic")
   doc.setFontSize(8.5)
   doc.setTextColor("#647084")
-  doc.text("Ultimo aggiornamento: 5 settembre 2026 — midalot.live", pageWidth / 2, y, { align: "center" })
+  doc.text("Ultimo aggiornamento: 22 settembre 2026 — midalot.live", pageWidth / 2, y, { align: "center" })
 
   const pageCount = doc.internal.getNumberOfPages()
   for (let i = 1; i <= pageCount; i++) {
