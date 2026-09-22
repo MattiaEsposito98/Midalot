@@ -39,7 +39,7 @@ class MinigiocoController extends Controller
             'title' => $request->title,
             'description' => $request->description,
             'tipo' => $request->tipo,
-            'max_score' => $request->input('max_score', 30),
+            'max_score' => $request->input('max_score', 50),
             'created_by' => Auth::id(),
             'is_active' => false,
             'leaderboard_visible' => true,

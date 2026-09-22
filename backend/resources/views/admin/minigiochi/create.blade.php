@@ -46,8 +46,8 @@
 
                     <div>
                         <label class="form-label">Punteggio massimo</label>
-                        <input type="number" name="max_score" class="form-control" value="{{ old('max_score', 30) }}" min="1" required>
-                        <small class="admin-muted">Punti massimi ottenibili in totale su un tentativo completo (default 30).</small>
+                        <input type="number" name="max_score" class="form-control" value="{{ old('max_score', 50) }}" min="1" required>
+                        <small class="admin-muted">Punti massimi ottenibili in totale su un tentativo completo (default 50).</small>
                     </div>
 
                     <div class="full">
