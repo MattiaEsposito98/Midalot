@@ -68,6 +68,13 @@ function PrivateNavbar() {
               </NavLink>
             </li>
 
+            <li className="nav-item">
+              <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/crea-il-tuo-evento">
+                <i className="bi bi-stars"></i>
+                Crea il tuo evento
+              </NavLink>
+            </li>
+
             <li className="nav-item dropdown ms-lg-3">
               <a
                 className={`${css.profileBtn} dropdown-toggle`}
@@ -81,20 +88,6 @@ function PrivateNavbar() {
               </a>
 
               <ul className={`dropdown-menu dropdown-menu-end shadow-sm border-0 ${css.profileMenu}`}>
-                <li>
-                  <Link className={`dropdown-item ${css.highlightItem}`} to="/crea-il-tuo-evento">
-                    <i className="bi bi-stars me-2"></i>
-                    Crea il tuo evento
-                    <span className={css.infoDot} title="Quiz personalizzato per il tuo evento: scopri come funziona">
-                      <i className="bi bi-info-circle-fill"></i>
-                    </span>
-                  </Link>
-                </li>
-
-                <li>
-                  <hr className="dropdown-divider" />
-                </li>
-
                 <li>
                   <Link className="dropdown-item" to="/profilo">
                     <i className="bi bi-person-lines-fill me-2"></i>

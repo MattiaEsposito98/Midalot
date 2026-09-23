@@ -86,9 +86,8 @@ function CreaEvento() {
           <h1>Crea il tuo evento con un quiz tutto tuo</h1>
           <p className={styles.heroText}>
             Vuoi rendere unica una festa di compleanno, un addio al nubilato/celibato, una laurea o una
-            semplice serata tra amici? Midalot crea un quiz 100% personalizzato sulle tue idee, con
-            domande dedicate ai festeggiati, temi su misura e un format interattivo che farà divertire
-            tutti gli ospiti.
+            semplice serata tra amici? Midalot crea un quiz 100% personalizzato con domande dedicate ai
+            festeggiati, temi su misura che farà divertire tutti gli ospiti!
           </p>
           <a href="#richiedi-preventivo" className={styles.heroCta}>
             <i className="bi bi-send-fill"></i>
@@ -105,8 +104,8 @@ function CreaEvento() {
               </div>
               <h3>Fatto su misura per te</h3>
               <p>
-                Scegli tu le domande, il tema (cinema, serie TV, nozioni sui tuoi amici, musica, anni
-                '90 e tanto altro) e lo stile della serata.
+                Decidi tu i temi della serata (cinema, musica, serie TV, anni '90 ecc ecc) o inserisci
+                domande divertenti basate su aneddoti e segreti dei tuoi amici.
               </p>
             </div>
 

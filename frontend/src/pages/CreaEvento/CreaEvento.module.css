@@ -21,8 +21,8 @@
   background: #182033;
   color: #ffffff;
   border-radius: 8px;
-  padding: 40px 32px;
-  box-shadow: 10px 10px 0 #ffc107, 0 18px 42px rgba(24, 32, 51, 0.2);
+  padding: 24px 28px;
+  box-shadow: 8px 8px 0 #ffc107, 0 18px 42px rgba(24, 32, 51, 0.2);
   margin-bottom: 22px;
 }
 
@@ -34,22 +34,25 @@
   border: 1px solid rgba(255, 193, 7, 0.5);
   color: #ffc107;
   border-radius: 8px;
-  padding: 7px 12px;
+  padding: 6px 11px;
   font-weight: 900;
-  margin-bottom: 14px;
+  font-size: 0.85rem;
+  margin-bottom: 10px;
 }
 
 .hero h1 {
-  font-size: clamp(1.9rem, 4vw, 2.8rem);
-  font-weight: 950;
-  margin: 0 0 14px;
+  font-family: "Fredoka", "Inter", sans-serif;
+  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  font-weight: 650;
+  color: #ffffff;
+  margin: 0 0 10px;
   max-width: 720px;
 }
 
 .heroText {
   color: rgba(255, 255, 255, 0.82);
-  line-height: 1.7;
-  margin: 0 0 22px;
+  line-height: 1.6;
+  margin: 0 0 16px;
   max-width: 680px;
 }
 
@@ -60,7 +63,7 @@
   background: #ffc107;
   color: #182033;
   border-radius: 8px;
-  padding: 12px 22px;
+  padding: 10px 20px;
   font-weight: 900;
   text-decoration: none;
   border: 2px solid #ffc107;
@@ -82,8 +85,9 @@
 }
 
 .section h2 {
-  font-size: 1.5rem;
-  font-weight: 950;
+  font-family: "Fredoka", "Inter", sans-serif;
+  font-size: 1.4rem;
+  font-weight: 600;
   margin-bottom: 18px;
 }
 
@@ -114,9 +118,10 @@
 }
 
 .benefitCard h3 {
-  font-weight: 950;
+  font-family: "Fredoka", "Inter", sans-serif;
+  font-weight: 600;
   margin-bottom: 8px;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
 }
 
 .benefitCard p {
@@ -153,9 +158,10 @@
 }
 
 .stepCard h3 {
-  font-weight: 950;
+  font-family: "Fredoka", "Inter", sans-serif;
+  font-weight: 600;
   margin-bottom: 8px;
-  font-size: 1.05rem;
+  font-size: 1.1rem;
 }
 
 .stepCard p {
@@ -175,8 +181,9 @@
 }
 
 .formSection h2 {
-  font-size: 1.5rem;
-  font-weight: 950;
+  font-family: "Fredoka", "Inter", sans-serif;
+  font-size: 1.4rem;
+  font-weight: 600;
   margin-bottom: 8px;
 }
 
