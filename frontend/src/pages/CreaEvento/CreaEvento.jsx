@@ -89,10 +89,21 @@ function CreaEvento() {
             semplice serata tra amici? Midalot crea un quiz 100% personalizzato con domande dedicate ai
             festeggiati, temi su misura che farà divertire tutti gli ospiti!
           </p>
-          <a href="#richiedi-preventivo" className={styles.heroCta}>
-            <i className="bi bi-send-fill"></i>
-            Richiedi un preventivo gratuito
-          </a>
+          <div className={styles.heroActions}>
+            <a href="#richiedi-preventivo" className={styles.heroCta}>
+              <i className="bi bi-send-fill"></i>
+              Richiedi un preventivo gratuito
+            </a>
+            <a
+              href="https://www.instagram.com/mida.lot/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.heroCtaSecondary}
+            >
+              <i className="bi bi-instagram"></i>
+              Contattaci su Instagram @mida.lot
+            </a>
+          </div>
         </div>
 
         <div className={styles.section}>
