@@ -115,8 +115,9 @@ function CreaEvento() {
               </div>
               <h3>Fatto su misura per te</h3>
               <p>
-                Decidi tu i temi della serata (cinema, musica, serie TV, anni '90 ecc ecc) o inserisci
-                domande divertenti basate su aneddoti e segreti dei tuoi amici.
+                Scegli i temi della serata (cinema, musica, serie TV, ecc.) o raccontaci i segreti e
+                gli aneddoti del tuo gruppo: scriveremo per te domande divertenti su misura, oppure
+                puoi inviarci direttamente le tue!
               </p>
             </div>
 
