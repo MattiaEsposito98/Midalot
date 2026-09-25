@@ -110,6 +110,7 @@
                             @if ($quiz->midalario_status === 'finished')
                                 <th>Punteggio</th>
                             @endif
+                            <th>Azioni</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -157,6 +158,11 @@
                                 @if ($quiz->midalario_status === 'finished')
                                     <td>{{ $participant['score'] !== null ? number_format($participant['score'] / 100, 2, ',', '.') : '-' }}</td>
                                 @endif
+                                <td>
+                                    <a href="{{ route('admin.midalario.participants.answers', [$quiz, $participant['user_id']]) }}" class="btn btn-sm btn-outline-primary">
+                                        Vedi risposte
+                                    </a>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

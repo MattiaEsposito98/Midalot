@@ -97,6 +97,10 @@ Route::middleware(['auth', 'admin'])
             ->name('midalario.destroy');
         Route::get('midalario/{quiz}/monitor', [MidalarioController::class, 'monitor'])
             ->name('midalario.monitor');
+        Route::get('midalario/{quiz}/participants/{user}/answers', [MidalarioController::class, 'participantAnswers'])
+            ->name('midalario.participants.answers');
+        Route::get('midalario/{quiz}/pdf-data', [MidalarioController::class, 'pdfData'])
+            ->name('midalario.pdf-data');
         Route::patch('midalario/{quiz}/close', [MidalarioController::class, 'closeParticipation'])
             ->name('midalario.close');
         Route::patch('midalario/{quiz}/reopen', [MidalarioController::class, 'reopenParticipation'])

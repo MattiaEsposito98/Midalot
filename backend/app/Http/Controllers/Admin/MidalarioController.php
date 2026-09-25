@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Quiz;
 use App\Models\QuizAnswer;
 use App\Models\QuizAttempt;
+use App\Models\User;
 use App\Services\MidalarioFinalizer;
 use App\Services\MidalarioTimeline;
 use Illuminate\Http\Request;
@@ -16,10 +17,12 @@ class MidalarioController extends Controller
 {
     /**
      * Margine tra il clic su "Avvia" e l'inizio effettivo della prima domanda.
-     * I giocatori interrogano il server ogni 2 secondi, quindi 5 garantisce a
-     * tutti almeno un giro utile per vedere il conto alla rovescia.
+     * I giocatori interrogano il server ogni 2 secondi: con un margine di soli
+     * 5 secondi il primo sondaggio utile puo' arrivare quando ne restano gia'
+     * 3, mostrando un conto alla rovescia incompleto. 7 secondi garantiscono a
+     * tutti di vedere l'intero "5, 4, 3, 2, 1" anche nel caso peggiore.
      */
-    public const SECONDI_DI_ATTESA_PRIMA_DEL_VIA = 5;
+    public const SECONDI_DI_ATTESA_PRIMA_DEL_VIA = 7;
 
     public function index()
     {
@@ -209,6 +212,7 @@ class MidalarioController extends Controller
                 }
 
                 return [
+                    'user_id' => $participant->user_id,
                     'nickname' => $participant->user->nickname ?? $participant->user->email ?? 'Utente',
                     'badge' => $participant->user->latestMonthlyBadge?->label,
                     'joined_at' => $participant->created_at,
@@ -226,6 +230,92 @@ class MidalarioController extends Controller
             'participants' => $participants,
             'totalQuestions' => $totalQuestions,
             'currentQuestionIndex' => $window['index'] ?? null,
+        ]);
+    }
+
+    public function participantAnswers(Quiz $quiz, User $user)
+    {
+        $this->ensureMidalario($quiz);
+
+        $attempt = QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        $quiz->load([
+            'questions' => function ($q) {
+                $q->orderBy('id')->select(
+                    'id', 'quiz_id', 'question_text',
+                    'image_path', 'audio_path', 'audio_source', 'itunes_preview_url', 'video_path',
+                );
+            },
+            'questions.answers:id,question_id,answer_text,is_correct',
+        ]);
+
+        $givenAnswers = $attempt
+            ? QuizAnswer::where('attempt_id', $attempt->id)->get()->keyBy('question_id')
+            : collect();
+
+        $orderedQuestions = $quiz->questions;
+
+        if ($attempt && ! empty($attempt->question_order)) {
+            $questionsById = $quiz->questions->keyBy('id');
+
+            $orderedQuestions = collect($attempt->question_order)
+                ->map(fn ($questionId) => $questionsById->get($questionId))
+                ->filter()
+                ->values();
+        }
+
+        $rows = $orderedQuestions->map(function ($question) use ($givenAnswers) {
+            $given = $givenAnswers->get($question->id);
+            $correctAnswer = $question->answers->firstWhere('is_correct', true);
+            $givenAnswer = $given?->answer_id
+                ? $question->answers->firstWhere('id', $given->answer_id)
+                : null;
+
+            return [
+                'question_text' => $question->question_text,
+                'given_answer_text' => $givenAnswer?->answer_text,
+                'correct_answer_text' => $correctAnswer?->answer_text,
+                'is_correct' => (bool) ($given?->is_correct ?? false),
+                'is_wrong' => (bool) ($given?->is_wrong ?? false),
+                'is_timeout' => (bool) ($given?->is_timeout ?? ! $given),
+                'time_taken' => $given?->time_taken,
+                'score' => $given?->score ?? 0,
+            ];
+        });
+
+        return view('admin.midalario.participant-answers', [
+            'quiz' => $quiz,
+            'user' => $user,
+            'attempt' => $attempt,
+            'rows' => $rows,
+        ]);
+    }
+
+    public function pdfData(Quiz $quiz)
+    {
+        $this->ensureMidalario($quiz);
+
+        $questions = $quiz->questions()
+            ->orderBy('id')
+            ->with('answers:id,question_id,answer_text')
+            ->get()
+            ->map(function ($question) {
+                $hasAudio = (bool) ($question->audio_path || $question->itunes_preview_url);
+
+                return [
+                    'question_text' => $question->question_text,
+                    'has_image' => (bool) $question->image_path,
+                    'has_audio' => $hasAudio,
+                    'has_video' => (bool) $question->video_path,
+                    'answers' => $question->answers->pluck('answer_text')->values(),
+                ];
+            });
+
+        return response()->json([
+            'title' => $quiz->title,
+            'questions' => $questions,
         ]);
     }
 

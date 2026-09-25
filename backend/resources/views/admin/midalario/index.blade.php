@@ -88,6 +88,10 @@
                                         <a href="{{ route('admin.midalario.monitor', $quiz) }}" class="btn btn-sm btn-outline-success">
                                             Sala
                                         </a>
+                                        <button type="button" class="btn btn-sm btn-outline-dark" onclick="generaMidalarioPdf({{ $quiz->id }})">
+                                            <i class="bi bi-file-earmark-pdf"></i>
+                                            Genera PDF
+                                        </button>
                                         <a href="{{ route('admin.midalario.edit', $quiz) }}" class="btn btn-sm btn-warning">
                                             Modifica
                                         </a>
