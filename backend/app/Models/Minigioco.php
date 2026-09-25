@@ -12,7 +12,6 @@ class Minigioco extends Model
         'title',
         'description',
         'tipo',
-        'minigioco_category_id',
         'max_score',
         'image_path',
         'created_by',
@@ -34,11 +33,6 @@ class Minigioco extends Model
     public function creator()
     {
         return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function category()
-    {
-        return $this->belongsTo(MinigiocoCategory::class, 'minigioco_category_id');
     }
 
     public function rounds()

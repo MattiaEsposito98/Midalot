@@ -16,9 +16,6 @@
                     <i class="bi bi-speedometer2"></i>
                     Dashboard
                 </a>
-                <a href="{{ route('admin.minigiochi.categories.index') }}" class="btn btn-outline-secondary btn-sm">
-                    Categorie
-                </a>
                 <a href="{{ route('admin.minigiochi.create') }}" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-lg"></i>
                     Crea minigioco
@@ -29,12 +26,10 @@
         <div class="admin-card-body">
             <form method="GET" action="{{ route('admin.minigiochi.index') }}" class="row g-2 align-items-center mb-3">
                 <div class="col-auto">
-                    <select class="form-select" name="category">
-                        <option value="">Tutte le categorie</option>
-                        @foreach ($categories as $category)
-                            <option value="{{ $category->id }}" {{ (string) $categoryId === (string) $category->id ? 'selected' : '' }}>
-                                {{ $category->name }}
-                            </option>
+                    <select class="form-select" name="tipo">
+                        <option value="">Tutti i tipi</option>
+                        @foreach (\App\Http\Controllers\Admin\MinigiocoController::TIPO_LABELS as $value => $label)
+                            <option value="{{ $value }}" {{ $tipo === $value ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -51,7 +46,7 @@
                         Filtra
                     </button>
                 </div>
-                @if ($categoryId || $status)
+                @if ($tipo || $status)
                     <div class="col-auto">
                         <a href="{{ route('admin.minigiochi.index') }}" class="btn btn-outline-secondary">
                             Azzera
@@ -65,7 +60,7 @@
             <div class="admin-empty">
                 <div>
                     <i class="bi bi-joystick fs-1 d-block mb-2"></i>
-                    @if ($categoryId || $status)
+                    @if ($tipo || $status)
                         <p class="mb-3">Nessun minigioco trovato con questi filtri.</p>
                     @else
                         <p class="mb-3">Nessun minigioco creato.</p>
@@ -80,7 +75,6 @@
                         <tr>
                             <th>Minigioco</th>
                             <th>Tipo</th>
-                            <th>Categoria</th>
                             <th>Stato</th>
                             <th>Domande</th>
                             <th>Tentativi</th>
@@ -108,20 +102,8 @@
                                 </td>
                                 <td>
                                     <span class="badge bg-info text-dark">
-                                        {{ [
-                                            'tastiera_rotta' => 'Tastiera Rotta',
-                                            'salto_temporale' => 'Salto Temporale',
-                                            'trova_intruso' => "Trova l'Intruso",
-                                            'vero_falso' => 'Vero o Falso',
-                                        ][$minigioco->tipo] ?? $minigioco->tipo }}
+                                        {{ \App\Http\Controllers\Admin\MinigiocoController::TIPO_LABELS[$minigioco->tipo] ?? $minigioco->tipo }}
                                     </span>
-                                </td>
-                                <td>
-                                    @if ($minigioco->category)
-                                        {{ $minigioco->category->name }}
-                                    @else
-                                        <span class="admin-muted">Nessuna</span>
-                                    @endif
                                 </td>
                                 <td>
                                     @if ($minigioco->is_active)

@@ -112,6 +112,14 @@
   background: #ff6b57;
 }
 
+.cardExpired::before {
+  background: #9aa5b1;
+}
+
+.cardExpired {
+  opacity: 0.72;
+}
+
 .cardTop {
   display: flex;
   justify-content: space-between;
@@ -151,6 +159,22 @@
 .statusCompleted {
   background: #eaf5ff;
   color: #1d55c7;
+}
+
+.statusExpired {
+  background: #eceff2;
+  color: #566270;
+}
+
+.typeSection {
+  margin-bottom: 2.5rem;
+}
+
+.typeTitle {
+  font-size: 1.4rem;
+  font-weight: 950;
+  color: #182033;
+  margin-bottom: 1rem;
 }
 
 .cardTitle {
