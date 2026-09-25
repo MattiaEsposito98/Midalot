@@ -131,8 +131,8 @@
                                             <i class="bi bi-check-circle-fill"></i>
                                             {{ $participant['room_entered_at']->format('H:i:s') }}
                                         </span>
-                                    @elseif ($participant['answered_count'] > 0 || $participant['completed'])
-                                        <span class="text-muted" title="Ha risposto ad almeno una domanda, ma e' entrato prima che iniziassimo a tracciare l'orario">
+                                    @elseif ($participant['real_answered_count'] > 0)
+                                        <span class="text-muted" title="Ha risposto davvero ad almeno una domanda (non solo timeout), ma e' entrato prima che iniziassimo a tracciare l'orario">
                                             <i class="bi bi-check-circle"></i>
                                             Sì (non tracciato)
                                         </span>

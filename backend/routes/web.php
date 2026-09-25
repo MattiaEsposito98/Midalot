@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EventRequestController;
 use App\Http\Controllers\Admin\ITunesController;
 use App\Http\Controllers\Admin\MidalarioController;
+use App\Http\Controllers\Admin\MinigiocoCategoryController;
 use App\Http\Controllers\Admin\MinigiocoController;
 use App\Http\Controllers\Admin\MinigiocoRoundController;
 use App\Http\Controllers\Admin\PeriodLeaderboardController;
@@ -180,6 +181,16 @@ Route::middleware(['auth', 'admin'])
         | MINIGIOCHI
         |--------------------------------------------------------------------------
         */
+
+        // Categorie minigiochi
+        Route::get('minigiochi/categories', [MinigiocoCategoryController::class, 'index'])
+            ->name('minigiochi.categories.index');
+        Route::post('minigiochi/categories', [MinigiocoCategoryController::class, 'store'])
+            ->name('minigiochi.categories.store');
+        Route::put('minigiochi/categories/{category}', [MinigiocoCategoryController::class, 'update'])
+            ->name('minigiochi.categories.update');
+        Route::delete('minigiochi/categories/{category}', [MinigiocoCategoryController::class, 'destroy'])
+            ->name('minigiochi.categories.destroy');
 
         // CRUD Minigiochi
         Route::resource('minigiochi', MinigiocoController::class)

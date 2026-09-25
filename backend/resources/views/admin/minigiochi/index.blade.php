@@ -16,6 +16,9 @@
                     <i class="bi bi-speedometer2"></i>
                     Dashboard
                 </a>
+                <a href="{{ route('admin.minigiochi.categories.index') }}" class="btn btn-outline-secondary btn-sm">
+                    Categorie
+                </a>
                 <a href="{{ route('admin.minigiochi.create') }}" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-lg"></i>
                     Crea minigioco
@@ -23,12 +26,51 @@
             </div>
         </div>
 
+        <div class="admin-card-body">
+            <form method="GET" action="{{ route('admin.minigiochi.index') }}" class="row g-2 align-items-center mb-3">
+                <div class="col-auto">
+                    <select class="form-select" name="category">
+                        <option value="">Tutte le categorie</option>
+                        @foreach ($categories as $category)
+                            <option value="{{ $category->id }}" {{ (string) $categoryId === (string) $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <select class="form-select" name="status">
+                        <option value="">Tutti gli stati</option>
+                        <option value="available" {{ $status === 'available' ? 'selected' : '' }}>Disponibili</option>
+                        <option value="unavailable" {{ $status === 'unavailable' ? 'selected' : '' }}>Non disponibili</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-outline-primary">
+                        <i class="bi bi-funnel"></i>
+                        Filtra
+                    </button>
+                </div>
+                @if ($categoryId || $status)
+                    <div class="col-auto">
+                        <a href="{{ route('admin.minigiochi.index') }}" class="btn btn-outline-secondary">
+                            Azzera
+                        </a>
+                    </div>
+                @endif
+            </form>
+        </div>
+
         @if ($minigiochi->isEmpty())
             <div class="admin-empty">
                 <div>
                     <i class="bi bi-joystick fs-1 d-block mb-2"></i>
-                    <p class="mb-3">Nessun minigioco creato.</p>
-                    <a href="{{ route('admin.minigiochi.create') }}" class="btn btn-primary">Crea il primo minigioco</a>
+                    @if ($categoryId || $status)
+                        <p class="mb-3">Nessun minigioco trovato con questi filtri.</p>
+                    @else
+                        <p class="mb-3">Nessun minigioco creato.</p>
+                        <a href="{{ route('admin.minigiochi.create') }}" class="btn btn-primary">Crea il primo minigioco</a>
+                    @endif
                 </div>
             </div>
         @else
@@ -38,6 +80,7 @@
                         <tr>
                             <th>Minigioco</th>
                             <th>Tipo</th>
+                            <th>Categoria</th>
                             <th>Stato</th>
                             <th>Domande</th>
                             <th>Tentativi</th>
@@ -74,10 +117,17 @@
                                     </span>
                                 </td>
                                 <td>
-                                    @if ($minigioco->is_active)
-                                        <span class="badge bg-success">Attivo</span>
+                                    @if ($minigioco->category)
+                                        {{ $minigioco->category->name }}
                                     @else
-                                        <span class="badge bg-secondary">Non attivo</span>
+                                        <span class="admin-muted">Nessuna</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if ($minigioco->is_active)
+                                        <span class="badge bg-success">Disponibile</span>
+                                    @else
+                                        <span class="badge bg-secondary">Non disponibile</span>
                                     @endif
                                 </td>
                                 <td>{{ $minigioco->rounds_count }}</td>

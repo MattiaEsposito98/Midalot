@@ -5,24 +5,36 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Minigioco;
 use App\Models\MinigiocoAttempt;
+use App\Models\MinigiocoCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class MinigiocoController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
+        $categoryId = $request->get('category');
+        $status = $request->get('status');
+
         $minigiochi = Minigioco::withCount(['rounds', 'attempts'])
+            ->with('category')
+            ->when($categoryId, fn ($query) => $query->where('minigioco_category_id', $categoryId))
+            ->when($status === 'available', fn ($query) => $query->where('is_active', true))
+            ->when($status === 'unavailable', fn ($query) => $query->where('is_active', false))
             ->latest()
             ->get();
 
-        return view('admin.minigiochi.index', compact('minigiochi'));
+        $categories = MinigiocoCategory::orderBy('name')->get();
+
+        return view('admin.minigiochi.index', compact('minigiochi', 'categories', 'categoryId', 'status'));
     }
 
     public function create()
     {
-        return view('admin.minigiochi.create');
+        $categories = MinigiocoCategory::orderBy('name')->get();
+
+        return view('admin.minigiochi.create', compact('categories'));
     }
 
     public function store(Request $request)
@@ -31,6 +43,7 @@ class MinigiocoController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'tipo' => 'required|in:tastiera_rotta,salto_temporale,trova_intruso,vero_falso',
+            'minigioco_category_id' => 'nullable|exists:minigioco_categories,id',
             'max_score' => 'nullable|integer|min:1',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
@@ -39,6 +52,7 @@ class MinigiocoController extends Controller
             'title' => $request->title,
             'description' => $request->description,
             'tipo' => $request->tipo,
+            'minigioco_category_id' => $request->minigioco_category_id,
             'max_score' => $request->input('max_score', 50),
             'created_by' => Auth::id(),
             'is_active' => false,
@@ -64,8 +78,9 @@ class MinigiocoController extends Controller
     public function edit(string $id)
     {
         $minigioco = Minigioco::findOrFail($id);
+        $categories = MinigiocoCategory::orderBy('name')->get();
 
-        return view('admin.minigiochi.edit', compact('minigioco'));
+        return view('admin.minigiochi.edit', compact('minigioco', 'categories'));
     }
 
     public function update(Request $request, string $id)
@@ -76,6 +91,7 @@ class MinigiocoController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_active' => 'required|boolean',
+            'minigioco_category_id' => 'nullable|exists:minigioco_categories,id',
             'max_score' => 'required|integer|min:1',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
@@ -84,6 +100,7 @@ class MinigiocoController extends Controller
             'title' => $request->title,
             'description' => $request->description,
             'is_active' => $request->is_active,
+            'minigioco_category_id' => $request->minigioco_category_id,
             'max_score' => $request->max_score,
         ];
 

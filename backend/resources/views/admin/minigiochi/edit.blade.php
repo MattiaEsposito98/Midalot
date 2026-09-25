@@ -55,6 +55,18 @@
                     </div>
 
                     <div>
+                        <label class="form-label">Categoria (opzionale)</label>
+                        <select name="minigioco_category_id" class="form-select">
+                            <option value="">Nessuna categoria</option>
+                            @foreach ($categories as $category)
+                                <option value="{{ $category->id }}" {{ (string) old('minigioco_category_id', $minigioco->minigioco_category_id) === (string) $category->id ? 'selected' : '' }}>
+                                    {{ $category->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div>
                         <label class="form-label">Punteggio massimo</label>
                         <input type="number" name="max_score" class="form-control" value="{{ old('max_score', $minigioco->max_score) }}" min="1" required>
                         <small class="admin-muted">Punti massimi ottenibili in totale su un tentativo completo.</small>

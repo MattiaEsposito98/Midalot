@@ -201,6 +201,15 @@ class MidalarioController extends Controller
                     ? QuizAnswer::where('attempt_id', $attempt->id)->count()
                     : 0;
 
+                // Allo scadere del tempo, MidalarioFinalizer riempie ogni domanda
+                // non risposta con una riga "timeout": a quiz finito TUTTI hanno
+                // answered_count pieno, anche chi non ha mai toccato il telefono.
+                // Solo una risposta non-timeout e' prova che il dispositivo ha
+                // davvero interagito.
+                $realAnsweredCount = $attempt
+                    ? QuizAnswer::where('attempt_id', $attempt->id)->where('is_timeout', false)->count()
+                    : 0;
+
                 $hasAnsweredCurrent = false;
 
                 if ($attempt && $window) {
@@ -219,6 +228,7 @@ class MidalarioController extends Controller
                     'ip_address' => $participant->ip_address,
                     'room_entered_at' => $participant->room_entered_at,
                     'answered_count' => $answeredCount,
+                    'real_answered_count' => $realAnsweredCount,
                     'has_answered_current' => $hasAnsweredCurrent,
                     'completed' => (bool) ($attempt?->completed ?? false),
                     'score' => $attempt?->completed ? $attempt->score : null,
