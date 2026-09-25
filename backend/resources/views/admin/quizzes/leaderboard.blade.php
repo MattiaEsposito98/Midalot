@@ -3,6 +3,11 @@
 @section('title', 'Classifica quiz')
 @section('kicker', 'Risultati')
 @section('page-title', 'Classifica')
+@section('activeNav', match ($quiz->type) {
+    'midalario' => 'midalario',
+    'training' => 'training',
+    default => 'quizzes',
+})
 
 @php
     $backRoute = match ($quiz->type) {
