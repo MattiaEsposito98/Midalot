@@ -35,6 +35,27 @@
             </form>
         </div>
 
+        @php
+            $sortLink = function (string $column) use ($sort, $direction) {
+                $newDirection = $sort === $column && $direction === 'asc' ? 'desc' : 'asc';
+
+                return route('admin.users.index', array_merge(
+                    request()->except(['sort', 'direction', 'page']),
+                    ['sort' => $column, 'direction' => $newDirection]
+                ));
+            };
+
+            $sortIcon = function (string $column) use ($sort, $direction) {
+                if ($sort !== $column) {
+                    return '<i class="bi bi-arrow-down-up admin-muted"></i>';
+                }
+
+                return $direction === 'asc'
+                    ? '<i class="bi bi-sort-alpha-down"></i>'
+                    : '<i class="bi bi-sort-alpha-up"></i>';
+            };
+        @endphp
+
         @if ($users->isEmpty())
             <div class="admin-empty">
                 <div>
@@ -51,14 +72,14 @@
                 <table class="table admin-table">
                     <thead>
                         <tr>
-                            <th>Nome</th>
-                            <th>Nickname</th>
-                            <th>Email</th>
+                            <th><a href="{{ $sortLink('name') }}" class="admin-sort-link">Nome {!! $sortIcon('name') !!}</a></th>
+                            <th><a href="{{ $sortLink('nickname') }}" class="admin-sort-link">Nickname {!! $sortIcon('nickname') !!}</a></th>
+                            <th><a href="{{ $sortLink('email') }}" class="admin-sort-link">Email {!! $sortIcon('email') !!}</a></th>
                             <th>Telefono</th>
-                            <th>Citta</th>
-                            <th>Data di nascita</th>
-                            <th>Registrato il</th>
-                            <th>Email verificata</th>
+                            <th><a href="{{ $sortLink('city') }}" class="admin-sort-link">Citta {!! $sortIcon('city') !!}</a></th>
+                            <th><a href="{{ $sortLink('birth_date') }}" class="admin-sort-link">Data di nascita {!! $sortIcon('birth_date') !!}</a></th>
+                            <th><a href="{{ $sortLink('created_at') }}" class="admin-sort-link">Registrato il {!! $sortIcon('created_at') !!}</a></th>
+                            <th><a href="{{ $sortLink('email_verified_at') }}" class="admin-sort-link">Email verificata {!! $sortIcon('email_verified_at') !!}</a></th>
                         </tr>
                     </thead>
                     <tbody>

@@ -8,24 +8,48 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
+    /**
+     * Colonne ordinabili dall'header della tabella: la chiave e' il valore
+     * accettato in ?sort=, il valore la colonna SQL reale su cui ordinare
+     * (city usa la colonna della tabella joinata, non della relazione).
+     */
+    private const SORTABLE_COLUMNS = [
+        'name' => 'users.name',
+        'nickname' => 'users.nickname',
+        'email' => 'users.email',
+        'city' => 'cities.name',
+        'birth_date' => 'users.birth_date',
+        'created_at' => 'users.created_at',
+        'email_verified_at' => 'users.email_verified_at',
+    ];
+
     public function index(Request $request)
     {
         $search = $request->get('search');
+        $sort = $request->get('sort', 'created_at');
+        $direction = $request->get('direction') === 'asc' ? 'asc' : 'desc';
 
-        $users = User::where('is_admin', false)
+        if (! array_key_exists($sort, self::SORTABLE_COLUMNS)) {
+            $sort = 'created_at';
+        }
+
+        $users = User::query()
+            ->select('users.*')
+            ->leftJoin('cities', 'cities.id', '=', 'users.city_id')
+            ->where('users.is_admin', false)
             ->with(['city', 'latestMonthlyBadge'])
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
-                    $query->where('name', 'like', "%{$search}%")
-                        ->orWhere('nickname', 'like', "%{$search}%")
-                        ->orWhere('email', 'like', "%{$search}%");
+                    $query->where('users.name', 'like', "%{$search}%")
+                        ->orWhere('users.nickname', 'like', "%{$search}%")
+                        ->orWhere('users.email', 'like', "%{$search}%");
                 });
             })
-            ->latest()
+            ->orderBy(self::SORTABLE_COLUMNS[$sort], $direction)
             ->paginate(20)
             ->withQueryString();
 
-        return view('admin.users.index', compact('users', 'search'));
+        return view('admin.users.index', compact('users', 'search', 'sort', 'direction'));
     }
 
     public function show(User $user)

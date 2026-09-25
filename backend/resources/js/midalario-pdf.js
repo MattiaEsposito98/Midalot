@@ -3,8 +3,9 @@ import jsPDF from 'jspdf'
 /**
  * Scarica un PDF con domande e risposte di un quiz Midalario, senza
  * indicare quale risposta e' corretta (foglio da consultare durante
- * l'evento senza spoilerare nulla). Per audio/immagini/video, che il
- * PDF non puo' mostrare, stampa solo una nota testuale.
+ * l'evento senza spoilerare nulla). Le immagini vengono incorporate nel
+ * PDF; per audio/video, che il PDF non puo' riprodurre, stampa solo una
+ * nota testuale.
  */
 export async function generaMidalarioPdf(quizId) {
     const response = await fetch(`/admin/midalario/${quizId}/pdf-data`, {
@@ -50,7 +51,7 @@ export async function generaMidalarioPdf(quizId) {
     doc.line(marginX, y, pageWidth - marginX, y)
     y += 28
 
-    data.questions.forEach((question, index) => {
+    for (const [index, question] of data.questions.entries()) {
         ensureSpace(60)
 
         doc.setFont('helvetica', 'bold')
@@ -69,6 +70,22 @@ export async function generaMidalarioPdf(quizId) {
             y += 16
         }
 
+        if (question.has_image && question.image_url) {
+            const image = await loadImage(question.image_url)
+
+            if (image) {
+                const maxWidth = contentWidth
+                const maxHeight = 220
+                const scale = Math.min(maxWidth / image.width, maxHeight / image.height, 1)
+                const drawWidth = image.width * scale
+                const drawHeight = image.height * scale
+
+                ensureSpace(drawHeight + 12)
+                doc.addImage(image.dataUrl, image.format, marginX, y, drawWidth, drawHeight)
+                y += drawHeight + 12
+            }
+        }
+
         doc.setFont('helvetica', 'normal')
         doc.setFontSize(11)
         doc.setTextColor('#222222')
@@ -82,7 +99,7 @@ export async function generaMidalarioPdf(quizId) {
         })
 
         y += 16
-    })
+    }
 
     const pageCount = doc.internal.getNumberOfPages()
     for (let i = 1; i <= pageCount; i++) {
@@ -99,9 +116,41 @@ export async function generaMidalarioPdf(quizId) {
 function mediaNote(question) {
     const notes = []
     if (question.has_audio) notes.push('🎵 Questa domanda contiene una canzone/audio')
-    if (question.has_image) notes.push('🖼️ Questa domanda contiene un\'immagine')
     if (question.has_video) notes.push('🎬 Questa domanda contiene un video')
     return notes.join(' — ')
+}
+
+/**
+ * Scarica l'immagine e la converte in data URL (richiesto da jsPDF), oltre
+ * a leggerne le dimensioni naturali per scalarla mantenendo le proporzioni.
+ * Ritorna null se il download fallisce, cosi' il PDF prosegue comunque.
+ */
+async function loadImage(url) {
+    try {
+        const response = await fetch(url)
+        if (!response.ok) return null
+
+        const blob = await response.blob()
+        const format = blob.type === 'image/png' ? 'PNG' : 'JPEG'
+
+        const dataUrl = await new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            reader.onload = () => resolve(reader.result)
+            reader.onerror = reject
+            reader.readAsDataURL(blob)
+        })
+
+        const { width, height } = await new Promise((resolve, reject) => {
+            const img = new Image()
+            img.onload = () => resolve({ width: img.naturalWidth, height: img.naturalHeight })
+            img.onerror = reject
+            img.src = dataUrl
+        })
+
+        return { dataUrl, format, width, height }
+    } catch {
+        return null
+    }
 }
 
 function slugify(text) {

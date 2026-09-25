@@ -307,6 +307,7 @@ class MidalarioController extends Controller
                 return [
                     'question_text' => $question->question_text,
                     'has_image' => (bool) $question->image_path,
+                    'image_url' => $question->image_path ? asset('storage/'.$question->image_path) : null,
                     'has_audio' => $hasAudio,
                     'has_video' => (bool) $question->video_path,
                     'answers' => $question->answers->pluck('answer_text')->values(),
