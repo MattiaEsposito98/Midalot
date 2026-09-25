@@ -101,6 +101,7 @@
                         <tr>
                             <th>Utente</th>
                             <th>Iscritto alle</th>
+                            <th>Entrato in sala</th>
                             @if ($quiz->midalario_status === 'running')
                                 <th>Domanda attuale</th>
                             @endif
@@ -123,6 +124,19 @@
                                     @endif
                                 </td>
                                 <td>{{ optional($participant['joined_at'])->format('d/m/Y H:i') }}</td>
+                                <td>
+                                    @if ($participant['room_entered_at'])
+                                        <span class="text-success" title="IP: {{ $participant['ip_address'] ?? 'n/d' }}">
+                                            <i class="bi bi-check-circle-fill"></i>
+                                            {{ $participant['room_entered_at']->format('H:i:s') }}
+                                        </span>
+                                    @else
+                                        <span class="text-danger" title="Non ha mai caricato la sala d'attesa">
+                                            <i class="bi bi-x-circle-fill"></i>
+                                            Mai
+                                        </span>
+                                    @endif
+                                </td>
                                 @if ($quiz->midalario_status === 'running')
                                     <td>
                                         @if ($participant['completed'])

@@ -90,6 +90,8 @@ class MidalarioController extends Controller
         QuizParticipant::firstOrCreate([
             'quiz_id' => $quiz->id,
             'user_id' => $user->id,
+        ], [
+            'ip_address' => $request->ip(),
         ]);
 
         return response()->json([
@@ -109,7 +111,15 @@ class MidalarioController extends Controller
         }
 
         $timeline = new MidalarioTimeline($quiz);
-        $isParticipant = $quiz->participants()->where('user_id', $user->id)->exists();
+        $participant = $quiz->participants()->where('user_id', $user->id)->first();
+        $isParticipant = $participant !== null;
+
+        // Prima prova reale che il dispositivo dell'utente ha caricato la sala,
+        // distinta dalla semplice iscrizione (join): utile per dispute tipo
+        // "mi hanno buttato fuori dalla sala" senza dover incrociare i log.
+        if ($participant && $participant->room_entered_at === null) {
+            $participant->update(['room_entered_at' => now()]);
+        }
 
         $base = [
             'quiz' => [

@@ -212,6 +212,8 @@ class MidalarioController extends Controller
                     'nickname' => $participant->user->nickname ?? $participant->user->email ?? 'Utente',
                     'badge' => $participant->user->latestMonthlyBadge?->label,
                     'joined_at' => $participant->created_at,
+                    'ip_address' => $participant->ip_address,
+                    'room_entered_at' => $participant->room_entered_at,
                     'answered_count' => $answeredCount,
                     'has_answered_current' => $hasAnsweredCurrent,
                     'completed' => (bool) ($attempt?->completed ?? false),
