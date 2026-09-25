@@ -19,6 +19,7 @@ function MinigiochiList() {
   const [minigiochi, setMinigiochi] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
+  const [activeTipo, setActiveTipo] = useState("")
 
   useEffect(() => {
     async function loadMinigiochi() {
@@ -72,19 +73,15 @@ function MinigiochiList() {
     })
   }, [minigiochi])
 
-  const groupedByTipo = useMemo(() => {
-    const groups = {}
-
-    sortedMinigiochi.forEach((m) => {
-      const key = m.tipo || "altro"
-      if (!groups[key]) groups[key] = []
-      groups[key].push(m)
-    })
-
-    return Object.keys(groups)
-      .sort((a, b) => (TIPO_LABELS[a] || a).localeCompare(TIPO_LABELS[b] || b))
-      .map((tipo) => ({ tipo, label: TIPO_LABELS[tipo] || tipo, items: groups[tipo] }))
+  const availableTipos = useMemo(() => {
+    const tipos = [...new Set(sortedMinigiochi.map((m) => m.tipo).filter(Boolean))]
+    return tipos.sort((a, b) => (TIPO_LABELS[a] || a).localeCompare(TIPO_LABELS[b] || b))
   }, [sortedMinigiochi])
+
+  const displayedMinigiochi = useMemo(() => {
+    if (!activeTipo) return sortedMinigiochi
+    return sortedMinigiochi.filter((m) => m.tipo === activeTipo)
+  }, [sortedMinigiochi, activeTipo])
 
   function getStatusLabel(status) {
     if (status === "completed") return "Completato"
@@ -227,79 +224,97 @@ function MinigiochiList() {
         />
       )}
 
-      {groupedByTipo.map((group) => (
-        <section className={styles.typeSection} key={group.tipo}>
-          <h2 className={styles.typeTitle}>{group.label}</h2>
-          <div className="row">
-            {group.items.map((m) => (
-              <div className="col-md-6 col-xl-4 mb-4" key={m.id}>
-                <div className={`${styles.card} ${getCardClass(m.status)}`}>
-                  <div className={styles.cardHeader}>
-                    {m.image && (
-                      <div className={styles.cardImageWrap}>
-                        <img src={m.image} alt="" className={styles.cardImage} />
-                      </div>
+      {availableTipos.length > 1 && (
+        <div className={styles.pillBar}>
+          <button
+            type="button"
+            className={`${styles.pill} ${!activeTipo ? styles.pillActive : ""}`}
+            onClick={() => setActiveTipo("")}
+          >
+            <span className={styles.pillLabel}>Tutte</span>
+          </button>
+
+          {availableTipos.map((tipo) => (
+            <button
+              type="button"
+              key={tipo}
+              className={`${styles.pill} ${activeTipo === tipo ? styles.pillActive : ""}`}
+              onClick={() => setActiveTipo(tipo)}
+            >
+              <span className={styles.pillLabel}>{TIPO_LABELS[tipo] || tipo}</span>
+            </button>
+          ))}
+        </div>
+      )}
+
+      <div className="row">
+        {displayedMinigiochi.map((m) => (
+          <div className="col-md-6 col-xl-4 mb-4" key={m.id}>
+            <div className={`${styles.card} ${getCardClass(m.status)}`}>
+              <div className={styles.cardHeader}>
+                {m.image && (
+                  <div className={styles.cardImageWrap}>
+                    <img src={m.image} alt="" className={styles.cardImage} />
+                  </div>
+                )}
+
+                <div className={styles.cardHeaderText}>
+                  <div className={styles.cardTop}>
+                    <span className={`${styles.statusBadge} ${getStatusClass(m.status)}`}>
+                      {getStatusLabel(m.status)}
+                    </span>
+
+                    {m.leaderboard_visible && (
+                      <span className={styles.leaderboardBadge}>
+                        <i className="bi bi-trophy-fill"></i>
+                        Classifica
+                      </span>
                     )}
-
-                    <div className={styles.cardHeaderText}>
-                      <div className={styles.cardTop}>
-                        <span className={`${styles.statusBadge} ${getStatusClass(m.status)}`}>
-                          {getStatusLabel(m.status)}
-                        </span>
-
-                        {m.leaderboard_visible && (
-                          <span className={styles.leaderboardBadge}>
-                            <i className="bi bi-trophy-fill"></i>
-                            Classifica
-                          </span>
-                        )}
-                      </div>
-
-                      <h3 className={styles.cardTitle}>{m.title}</h3>
-
-                      <p className={styles.cardDescription}>
-                        {m.description || "Nessuna descrizione"}
-                      </p>
-                    </div>
                   </div>
 
-                  <div className={styles.infoGrid}>
-                    <div className={styles.infoItem}>
-                      <span className={styles.infoLabel}>Domande</span>
-                      <strong className={styles.infoValue}>{m.rounds_count}</strong>
-                    </div>
+                  <h3 className={styles.cardTitle}>{m.title}</h3>
 
-                    <div className={styles.infoItem}>
-                      <span className={styles.infoLabel}>Durata stimata</span>
-                      <strong className={styles.infoValue}>
-                        {m.total_time ? `${Math.ceil(m.total_time / 60)} min` : "-"}
-                      </strong>
-                    </div>
-
-                    <div className={styles.infoItem}>
-                      <span className={styles.infoLabel}>Stato</span>
-                      <strong className={styles.infoValue}>
-                        {getStatusText(m.status)}
-                      </strong>
-                    </div>
-
-                    <div className={styles.infoItem}>
-                      <span className={styles.infoLabel}>Punteggio</span>
-                      <strong className={styles.infoValue}>
-                        {m.status === "completed" ? formatQuizScore(m.score) : "-"}
-                      </strong>
-                    </div>
-                  </div>
-
-                  <div className={styles.footer}>
-                    {getFooterContent(m)}
-                  </div>
+                  <p className={styles.cardDescription}>
+                    {m.description || "Nessuna descrizione"}
+                  </p>
                 </div>
               </div>
-            ))}
+
+              <div className={styles.infoGrid}>
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>Domande</span>
+                  <strong className={styles.infoValue}>{m.rounds_count}</strong>
+                </div>
+
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>Durata stimata</span>
+                  <strong className={styles.infoValue}>
+                    {m.total_time ? `${Math.ceil(m.total_time / 60)} min` : "-"}
+                  </strong>
+                </div>
+
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>Stato</span>
+                  <strong className={styles.infoValue}>
+                    {getStatusText(m.status)}
+                  </strong>
+                </div>
+
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>Punteggio</span>
+                  <strong className={styles.infoValue}>
+                    {m.status === "completed" ? formatQuizScore(m.score) : "-"}
+                  </strong>
+                </div>
+              </div>
+
+              <div className={styles.footer}>
+                {getFooterContent(m)}
+              </div>
+            </div>
           </div>
-        </section>
-      ))}
+        ))}
+      </div>
     </div>
   )
 }

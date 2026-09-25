@@ -166,15 +166,43 @@
   color: #566270;
 }
 
-.typeSection {
-  margin-bottom: 2.5rem;
+.pillBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 24px;
 }
 
-.typeTitle {
-  font-size: 1.4rem;
-  font-weight: 950;
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: 1px solid #dce5ee;
+  background: #ffffff;
   color: #182033;
-  margin-bottom: 1rem;
+  font-weight: 800;
+  font-size: 0.9rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.pill:hover {
+  border-color: #0f8b8d;
+  color: #0f8b8d;
+}
+
+.pillActive,
+.pillActive:hover {
+  border-color: #0f8b8d;
+  background: #0f8b8d;
+  color: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 139, 141, 0.3);
+  transform: scale(1.05);
+}
+
+.pillLabel {
+  white-space: nowrap;
 }
 
 .cardTitle {
