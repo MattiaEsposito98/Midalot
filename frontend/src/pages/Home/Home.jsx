@@ -5,6 +5,7 @@ import css from "./Home.module.css"
 import api from "../../service/api"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
+import { isScaduto } from "../../utils/disponibilita"
 import WeeklyLeaderboardBox from "../../components/WeeklyLeaderboardBox/WeeklyLeaderboardBox"
 import UserBadge from "../../components/UserBadge/UserBadge"
 import ComingSoon from "../../components/ComingSoon/ComingSoon"
@@ -122,7 +123,7 @@ function Home() {
     if (!isLoggedIn) return []
 
     const priority = { in_progress: 0, available: 1, completed: 2 }
-    const active = rawQuizzes.filter((q) => q.is_active)
+    const active = rawQuizzes.filter((q) => q.is_active && !isScaduto(q))
 
     active.sort((a, b) => (priority[a.status] ?? 99) - (priority[b.status] ?? 99))
 

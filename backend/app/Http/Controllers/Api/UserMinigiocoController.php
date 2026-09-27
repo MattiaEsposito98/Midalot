@@ -26,7 +26,7 @@ class UserMinigiocoController extends Controller
                     ->first();
 
                 $completed = (bool) ($attempt?->completed ?? false);
-                $isActive = (bool) $minigioco->is_active;
+                $isActive = $minigioco->isPlayable();
 
                 if ($completed) {
                     $status = 'completed';
@@ -48,6 +48,8 @@ class UserMinigiocoController extends Controller
                     'status' => $status,
                     'completed' => $completed,
                     'expired' => ! $isActive && ! $completed,
+                    'disponibile_fino_a' => $minigioco->disponibile_fino_a?->toIso8601String(),
+                    'archived' => $minigioco->isArchived(),
                     'rounds_count' => $minigioco->rounds_count,
                     'total_time' => $minigioco->rounds_sum_time_limit_seconds,
                     'score' => $attempt?->score,
@@ -89,7 +91,7 @@ class UserMinigiocoController extends Controller
             ], 403);
         }
 
-        if (! $minigioco->is_active) {
+        if (! $minigioco->isPlayable()) {
             return response()->json([
                 'message' => 'Questo minigioco è scaduto e non è stato completato',
             ], 403);

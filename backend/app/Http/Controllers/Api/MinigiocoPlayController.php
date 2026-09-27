@@ -45,7 +45,7 @@ class MinigiocoPlayController extends Controller
             ], 403);
         }
 
-        if (! $minigioco->is_active) {
+        if (! $minigioco->isPlayable()) {
             return response()->json([
                 'message' => 'Questo minigioco è scaduto e non è stato completato',
             ], 403);

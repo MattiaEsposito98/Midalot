@@ -5,6 +5,7 @@ import styles from "./MinigiochiList.module.css"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import { API_BASE } from "../../service/api"
+import { formatScadenza, isScaduto } from "../../utils/disponibilita"
 import ComingSoon from "../../components/ComingSoon/ComingSoon"
 
 const TIPO_LABELS = {
@@ -41,7 +42,7 @@ function MinigiochiList() {
           return
         }
 
-        setMinigiochi(data.minigiochi || [])
+        setMinigiochi((data.minigiochi || []).filter((m) => !m.archived))
       } catch (err) {
         logError("Errore caricamento minigiochi", err)
         setError("Errore di connessione durante il caricamento dei minigiochi")
@@ -86,7 +87,7 @@ function MinigiochiList() {
   function getStatusLabel(status) {
     if (status === "completed") return "Completato"
     if (status === "in_progress") return "In corso"
-    if (status === "expired") return "Non disponibile"
+    if (status === "expired") return "Terminato"
     return "Disponibile"
   }
 
@@ -107,7 +108,7 @@ function MinigiochiList() {
   function getStatusText(status) {
     if (status === "completed") return "Completato"
     if (status === "in_progress") return "Da completare"
-    if (status === "expired") return "Non disponibile"
+    if (status === "expired") return "Terminato"
     return "Pronto"
   }
 
@@ -146,7 +147,7 @@ function MinigiochiList() {
         <div className="d-flex flex-column gap-2 w-100">
           <button className="btn btn-outline-secondary w-100" disabled>
             <i className="bi bi-slash-circle"></i>
-            Non più disponibile
+            Minigioco terminato
           </button>
 
           {m.leaderboard_visible && (
@@ -277,6 +278,14 @@ function MinigiochiList() {
                   <p className={styles.cardDescription}>
                     {m.description || "Nessuna descrizione"}
                   </p>
+
+                  {m.disponibile_fino_a && (
+                    <p className={styles.cardScadenza}>
+                      <i className="bi bi-hourglass-split"></i>
+                      {isScaduto(m) ? "Terminato " : "Disponibile fino a "}
+                      {formatScadenza(m.disponibile_fino_a)}
+                    </p>
+                  )}
                 </div>
               </div>
 

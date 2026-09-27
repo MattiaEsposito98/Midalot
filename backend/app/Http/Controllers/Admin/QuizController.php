@@ -29,7 +29,9 @@ class QuizController extends Controller
      */
     public function create()
     {
-        return view('admin.quizzes.create');
+        return view('admin.quizzes.create', [
+            'defaultDisponibileFinoA' => Quiz::defaultDisponibileFinoA(),
+        ]);
     }
 
     /**
@@ -40,12 +42,14 @@ class QuizController extends Controller
         $request->validate([
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
+            'disponibile_fino_a' => 'nullable|date',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         $data = [
             'title' => $request->title,
             'description' => $request->description,
+            'disponibile_fino_a' => $request->input('disponibile_fino_a') ?: null,
             'type' => 'assigned',
             'restrict_to_specific_users' => $request->boolean('restrict_to_specific_users'),
             'created_by' => Auth::id(),
@@ -93,6 +97,7 @@ class QuizController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'is_active' => 'required|boolean',
+            'disponibile_fino_a' => 'nullable|date',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -100,6 +105,7 @@ class QuizController extends Controller
             'title' => $request->title,
             'description' => $request->description,
             'is_active' => $request->is_active,
+            'disponibile_fino_a' => $request->input('disponibile_fino_a') ?: null,
             'restrict_to_specific_users' => $request->boolean('restrict_to_specific_users'),
         ];
 

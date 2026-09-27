@@ -38,6 +38,12 @@
                         <small class="admin-muted">JPG o PNG, max 2MB. Se non caricata, il quiz appare senza immagine come oggi.</small>
                     </div>
 
+                    <div>
+                        <label class="form-label">Disponibile fino a</label>
+                        <input type="datetime-local" name="disponibile_fino_a" class="form-control" value="{{ old('disponibile_fino_a', $defaultDisponibileFinoA->format('Y-m-d\TH:i')) }}">
+                        <small class="admin-muted">Dopo questa data gli utenti lo vedono come "Terminato" e non possono più farlo. Lascia vuoto per nessuna scadenza.</small>
+                    </div>
+
                     <div class="full form-check">
                         <input type="checkbox" name="restrict_to_specific_users" value="1" id="restrictUsers" class="form-check-input" {{ old('restrict_to_specific_users') ? 'checked' : '' }}>
                         <label class="form-check-label" for="restrictUsers">

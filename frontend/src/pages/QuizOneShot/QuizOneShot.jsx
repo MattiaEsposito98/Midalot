@@ -5,6 +5,7 @@ import styles from "./QuizOneShot.module.css"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import { API_BASE } from "../../service/api"
+import { formatScadenza, isScaduto } from "../../utils/disponibilita"
 import WeeklyLeaderboardBox from "../../components/WeeklyLeaderboardBox/WeeklyLeaderboardBox"
 import ComingSoon from "../../components/ComingSoon/ComingSoon"
 
@@ -35,7 +36,7 @@ function QuizOneShot() {
         }
 
         const allQuizzes = data.quizzes || []
-        const activeQuizzes = allQuizzes.filter((q) => q.is_active)
+        const activeQuizzes = allQuizzes.filter((q) => q.is_active && !q.archived)
 
         setQuizzes(activeQuizzes)
       } catch (err) {
@@ -54,6 +55,7 @@ function QuizOneShot() {
       in_progress: 0,
       available: 1,
       completed: 2,
+      expired: 3,
     }
 
     return [...quizzes].sort((a, b) => {
@@ -71,24 +73,28 @@ function QuizOneShot() {
   function getStatusLabel(status) {
     if (status === "completed") return "Completato"
     if (status === "in_progress") return "In corso"
+    if (status === "expired") return "Terminato"
     return "Disponibile"
   }
 
   function getStatusClass(status) {
     if (status === "completed") return styles.statusCompleted
     if (status === "in_progress") return styles.statusInProgress
+    if (status === "expired") return styles.statusExpired
     return styles.statusAvailable
   }
 
   function getCardClass(status) {
     if (status === "completed") return styles.cardCompleted
     if (status === "in_progress") return styles.cardInProgress
+    if (status === "expired") return styles.cardExpired
     return ""
   }
 
   function getStatusText(status) {
     if (status === "completed") return "Completato"
     if (status === "in_progress") return "Da completare"
+    if (status === "expired") return "Terminato"
     return "Pronto"
   }
 
@@ -116,6 +122,27 @@ function QuizOneShot() {
             >
               <i className="bi bi-trophy-fill"></i>
               Vedi classifica
+            </Link>
+          )}
+        </div>
+      )
+    }
+
+    if (q.status === "expired") {
+      return (
+        <div className="d-flex flex-column gap-2 w-100">
+          <button className="btn btn-outline-secondary w-100" disabled>
+            <i className="bi bi-slash-circle"></i>
+            Quiz terminato
+          </button>
+
+          {q.leaderboard_visible && (
+            <Link
+              to={`/quiz/${q.id}/leaderboard`}
+              className="btn btn-outline-warning w-100"
+            >
+              <i className="bi bi-trophy-fill"></i>
+              Classifica
             </Link>
           )}
         </div>
@@ -220,6 +247,14 @@ function QuizOneShot() {
                   <p className={styles.cardDescription}>
                     {q.description || "Nessuna descrizione"}
                   </p>
+
+                  {q.disponibile_fino_a && (
+                    <p className={styles.cardScadenza}>
+                      <i className="bi bi-hourglass-split"></i>
+                      {isScaduto(q) ? "Terminato " : "Disponibile fino a "}
+                      {formatScadenza(q.disponibile_fino_a)}
+                    </p>
+                  )}
                 </div>
               </div>
 

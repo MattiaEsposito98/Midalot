@@ -34,10 +34,11 @@ class UserQuizController extends Controller
 
                 $completed = (bool) ($attempt?->completed ?? false);
                 $isActive = (bool) $quiz->is_active;
+                $isExpired = ! $quiz->isPlayable();
 
                 if ($completed) {
                     $status = 'completed';
-                } elseif (!$isActive) {
+                } elseif ($isExpired) {
                     $status = 'expired';
                 } elseif ($attempt) {
                     $status = 'in_progress';
@@ -53,7 +54,9 @@ class UserQuizController extends Controller
                     'is_active' => $isActive,
                     'status' => $status,
                     'completed' => $completed,
-                    'expired' => !$isActive && !$completed,
+                    'expired' => $isExpired && !$completed,
+                    'disponibile_fino_a' => $quiz->disponibile_fino_a?->toIso8601String(),
+                    'archived' => $quiz->isArchived(),
                     'questions_count' => $quiz->questions_count,
                     'avg_time' => $quiz->questions_avg_time_limit_seconds,
                     'total_time' => $quiz->questions_sum_time_limit_seconds,
@@ -115,7 +118,7 @@ class UserQuizController extends Controller
             ], 403);
         }
 
-        if (!$quiz->is_active) {
+        if (!$quiz->isPlayable()) {
             return response()->json([
                 'message' => 'Questo quiz è scaduto e non è stato completato'
             ], 403);

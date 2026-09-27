@@ -72,6 +72,12 @@
                         </select>
                     </div>
 
+                    <div>
+                        <label class="form-label">Disponibile fino a</label>
+                        <input type="datetime-local" name="disponibile_fino_a" class="form-control" value="{{ old('disponibile_fino_a', $quiz->disponibile_fino_a?->format('Y-m-d\TH:i')) }}">
+                        <small class="admin-muted">Dopo questa data gli utenti lo vedono come "Terminato". Vuoto = nessuna scadenza.</small>
+                    </div>
+
                     <div class="full form-check">
                         <input type="checkbox" name="restrict_to_specific_users" value="1" id="restrictUsers" class="form-check-input" {{ old('restrict_to_specific_users', $quiz->restrict_to_specific_users) ? 'checked' : '' }}>
                         <label class="form-check-label" for="restrictUsers">

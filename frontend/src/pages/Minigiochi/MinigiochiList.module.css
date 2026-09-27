@@ -219,6 +219,16 @@
   line-height: 1.55;
 }
 
+.cardScadenza {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -8px 0 18px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #566270;
+}
+
 .infoGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;

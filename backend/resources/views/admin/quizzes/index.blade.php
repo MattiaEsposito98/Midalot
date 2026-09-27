@@ -65,10 +65,15 @@
                                     </div>
                                 </td>
                                 <td>
-                                    @if ($quiz->is_active)
-                                        <span class="badge bg-success">Attivo</span>
-                                    @else
+                                    @if (! $quiz->is_active)
                                         <span class="badge bg-secondary">Non attivo</span>
+                                    @elseif ($quiz->isExpired())
+                                        <span class="badge bg-dark">Terminato</span>
+                                    @else
+                                        <span class="badge bg-success">Attivo</span>
+                                    @endif
+                                    @if ($quiz->disponibile_fino_a)
+                                        <div class="admin-muted small">fino al {{ $quiz->disponibile_fino_a->format('d/m/Y H:i') }}</div>
                                     @endif
                                 </td>
                                 <td>

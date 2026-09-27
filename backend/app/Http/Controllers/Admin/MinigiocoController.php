@@ -35,7 +35,9 @@ class MinigiocoController extends Controller
 
     public function create()
     {
-        return view('admin.minigiochi.create');
+        return view('admin.minigiochi.create', [
+            'defaultDisponibileFinoA' => Minigioco::defaultDisponibileFinoA(),
+        ]);
     }
 
     public function store(Request $request)
@@ -45,6 +47,7 @@ class MinigiocoController extends Controller
             'description' => 'nullable|string',
             'tipo' => 'required|in:tastiera_rotta,salto_temporale,trova_intruso,vero_falso',
             'max_score' => 'nullable|integer|min:1',
+            'disponibile_fino_a' => 'nullable|date',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -53,6 +56,7 @@ class MinigiocoController extends Controller
             'description' => $request->description,
             'tipo' => $request->tipo,
             'max_score' => $request->input('max_score', 50),
+            'disponibile_fino_a' => $request->input('disponibile_fino_a') ?: null,
             'created_by' => Auth::id(),
             'is_active' => false,
             'leaderboard_visible' => true,
@@ -90,6 +94,7 @@ class MinigiocoController extends Controller
             'description' => 'nullable|string',
             'is_active' => 'required|boolean',
             'max_score' => 'required|integer|min:1',
+            'disponibile_fino_a' => 'nullable|date',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
@@ -98,6 +103,7 @@ class MinigiocoController extends Controller
             'description' => $request->description,
             'is_active' => $request->is_active,
             'max_score' => $request->max_score,
+            'disponibile_fino_a' => $request->input('disponibile_fino_a') ?: null,
         ];
 
         if ($request->has('remove_image') && $minigioco->image_path) {

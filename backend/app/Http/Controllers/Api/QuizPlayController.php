@@ -54,7 +54,7 @@ class QuizPlayController extends Controller
             ], 403);
         }
 
-        if (! $quiz->is_active) {
+        if (! $quiz->isPlayable()) {
             return response()->json([
                 'message' => 'Questo quiz è scaduto e non è stato completato',
             ], 403);

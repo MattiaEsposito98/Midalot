@@ -2,11 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasDisponibilita;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
 
 class Quiz extends Model
 {
+    use HasDisponibilita;
+
     protected $fillable = [
         'title',
         'description',

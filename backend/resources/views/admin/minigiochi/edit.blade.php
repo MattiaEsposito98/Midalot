@@ -84,6 +84,12 @@
                             <option value="0" {{ !old('is_active', $minigioco->is_active) ? 'selected' : '' }}>Non attivo</option>
                         </select>
                     </div>
+
+                    <div>
+                        <label class="form-label">Disponibile fino a</label>
+                        <input type="datetime-local" name="disponibile_fino_a" class="form-control" value="{{ old('disponibile_fino_a', $minigioco->disponibile_fino_a?->format('Y-m-d\TH:i')) }}">
+                        <small class="admin-muted">Dopo questa data gli utenti lo vedono come "Terminato". Vuoto = nessuna scadenza.</small>
+                    </div>
                 </div>
 
                 <div class="d-flex justify-content-end gap-2 mt-4">

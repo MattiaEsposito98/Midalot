@@ -123,6 +123,14 @@
   background: #ff6b57;
 }
 
+.cardExpired::before {
+  background: #9aa5b1;
+}
+
+.cardExpired {
+  opacity: 0.72;
+}
+
 .cardTop {
   display: flex;
   justify-content: space-between;
@@ -165,8 +173,8 @@
 }
 
 .statusExpired {
-  background: #fee2e2;
-  color: #b91c1c;
+  background: #eceff2;
+  color: #566270;
 }
 
 .cardTitle {
@@ -181,6 +189,16 @@
   min-height: 48px;
   margin-bottom: 18px;
   line-height: 1.55;
+}
+
+.cardScadenza {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: -8px 0 18px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #566270;
 }
 
 .infoGrid {

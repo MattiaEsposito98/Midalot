@@ -106,10 +106,15 @@
                                     </span>
                                 </td>
                                 <td>
-                                    @if ($minigioco->is_active)
-                                        <span class="badge bg-success">Disponibile</span>
-                                    @else
+                                    @if (! $minigioco->is_active)
                                         <span class="badge bg-secondary">Non disponibile</span>
+                                    @elseif ($minigioco->isExpired())
+                                        <span class="badge bg-dark">Terminato</span>
+                                    @else
+                                        <span class="badge bg-success">Disponibile</span>
+                                    @endif
+                                    @if ($minigioco->disponibile_fino_a)
+                                        <div class="admin-muted small">fino al {{ $minigioco->disponibile_fino_a->format('d/m/Y H:i') }}</div>
                                     @endif
                                 </td>
                                 <td>{{ $minigioco->rounds_count }}</td>

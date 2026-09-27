@@ -50,6 +50,12 @@
                         <small class="admin-muted">Punti massimi ottenibili in totale su un tentativo completo (default 50).</small>
                     </div>
 
+                    <div>
+                        <label class="form-label">Disponibile fino a</label>
+                        <input type="datetime-local" name="disponibile_fino_a" class="form-control" value="{{ old('disponibile_fino_a', $defaultDisponibileFinoA->format('Y-m-d\TH:i')) }}">
+                        <small class="admin-muted">Dopo questa data gli utenti lo vedono come "Terminato" e non possono più giocarlo. Lascia vuoto per nessuna scadenza.</small>
+                    </div>
+
                     <div class="full">
                         <label class="form-label">Immagine di copertina (opzionale)</label>
                         <input type="file" name="image" class="form-control" accept=".jpg,.jpeg,.png,image/*">

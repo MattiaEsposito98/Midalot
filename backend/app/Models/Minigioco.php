@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasDisponibilita;
 use Illuminate\Database\Eloquent\Model;
 
 class Minigioco extends Model
 {
+    use HasDisponibilita;
+
     protected $table = 'minigiochi';
 
     protected $fillable = [
