@@ -8,11 +8,10 @@ use Carbon\Carbon;
 use Illuminate\Support\Str;
 
 /**
- * Logica del premio "Vincitore del mese", condivisa dal comando da console
- * (per quando/se il cron sul server verrà attivato) e dal bottone manuale nel
- * pannello admin (finché il cron non c'è): un solo punto che decide chi vince
- * e un solo registro (`monthly_badge_runs`) che impedisce di assegnare due
- * volte lo stesso mese, a prescindere da chi/come lo scatena.
+ * Logica del premio "Vincitore del mese", eseguita dal comando da console
+ * schedulato via cron (bootstrap/app.php, il 1° di ogni mese): un solo punto
+ * che decide chi vince e un solo registro (`monthly_badge_runs`) che impedisce
+ * di assegnare due volte lo stesso mese.
  */
 class MonthlyBadgeAssigner
 {

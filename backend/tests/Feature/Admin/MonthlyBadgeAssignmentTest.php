@@ -11,10 +11,9 @@ use Tests\Support\CreatesQuizData;
 use Tests\TestCase;
 
 /**
- * Il cron per il premio "Vincitore del mese" non e' attivabile su questo
- * hosting (vedi notes.md), quindi l'admin puo' farlo scattare a mano dal
- * pannello - ma una sola volta per il mese di competenza, per evitare doppie
- * assegnazioni o confusione su quale mese si sta assegnando.
+ * Il premio "Vincitore del mese" viene assegnato solo dal cron (comando
+ * app:assign-monthly-badges il 1° del mese); il pannello admin mostra solo
+ * l'anteprima e quando scattera' l'assegnazione.
  */
 class MonthlyBadgeAssignmentTest extends TestCase
 {
@@ -37,7 +36,7 @@ class MonthlyBadgeAssignmentTest extends TestCase
         ]);
     }
 
-    public function test_lanteprima_mostra_il_vincitore_del_mese_scorso_senza_assegnare_nulla(): void
+    public function test_lanteprima_mostra_il_vincitore_e_la_data_dellassegnazione_automatica(): void
     {
         $admin = $this->createAdmin();
         $vincitore = $this->createUser(['nickname' => 'vincitore_mese']);
@@ -49,64 +48,12 @@ class MonthlyBadgeAssignmentTest extends TestCase
 
         $risposta->assertOk();
         $risposta->assertSee('vincitore_mese');
-        $risposta->assertSee('Assegna il premio di');
+        $risposta->assertSee('verrà assegnato');
+        $risposta->assertDontSee('Assegna il premio di');
         $this->assertSame(0, MonthlyBadge::count(), 'La sola visualizzazione non deve scrivere nulla.');
     }
 
-    public function test_lassegnazione_crea_il_badge_e_registra_il_mese_come_fatto(): void
-    {
-        $admin = $this->createAdmin();
-        $vincitore = $this->createUser(['nickname' => 'vincitore_mese']);
-
-        $mesePassato = now()->subMonthNoOverflow()->startOfMonth()->addDays(3);
-        $this->puntiPerUtente($vincitore->id, 5000, $mesePassato);
-
-        $risposta = $this->actingAs($admin)
-            ->post(route('admin.period-leaderboard.assign-monthly-badge'));
-
-        $risposta->assertRedirect();
-        $risposta->assertSessionHas('success');
-
-        $badge = MonthlyBadge::where('user_id', $vincitore->id)->first();
-        $this->assertNotNull($badge);
-        $this->assertSame(5000, $badge->total_score);
-
-        $run = MonthlyBadgeRun::where('month', $mesePassato->format('Y-m'))->first();
-        $this->assertNotNull($run);
-        $this->assertSame($admin->id, $run->triggered_by);
-    }
-
-    public function test_non_si_puo_assegnare_due_volte_lo_stesso_mese(): void
-    {
-        $admin = $this->createAdmin();
-        $vincitore = $this->createUser(['nickname' => 'vincitore_mese']);
-
-        $mesePassato = now()->subMonthNoOverflow()->startOfMonth()->addDays(3);
-        $this->puntiPerUtente($vincitore->id, 5000, $mesePassato);
-
-        $this->actingAs($admin)->post(route('admin.period-leaderboard.assign-monthly-badge'));
-
-        // Secondo tentativo, anche da un admin diverso: deve essere bloccato.
-        $altroAdmin = $this->createAdmin();
-        $secondoTentativo = $this->actingAs($altroAdmin)
-            ->post(route('admin.period-leaderboard.assign-monthly-badge'));
-
-        $secondoTentativo->assertSessionHas('error');
-        $this->assertSame(1, MonthlyBadgeRun::count(), 'Non deve crearsi un secondo run per lo stesso mese.');
-        $this->assertSame(1, MonthlyBadge::count(), 'Il badge non deve raddoppiare.');
-    }
-
-    public function test_un_mese_senza_nessuna_attivita_viene_comunque_segnato_come_fatto(): void
-    {
-        $admin = $this->createAdmin();
-
-        $this->actingAs($admin)->post(route('admin.period-leaderboard.assign-monthly-badge'));
-
-        $this->assertSame(0, MonthlyBadge::count());
-        $this->assertSame(1, MonthlyBadgeRun::count(), 'Anche un mese vuoto va segnato, altrimenti il bottone resta cliccabile a vuoto.');
-    }
-
-    public function test_il_comando_da_console_usa_la_stessa_logica_condivisa(): void
+    public function test_il_comando_crea_il_badge_e_registra_il_mese_come_fatto(): void
     {
         $vincitore = $this->createUser(['nickname' => 'vincitore_cli']);
 
@@ -118,6 +65,31 @@ class MonthlyBadgeAssignmentTest extends TestCase
         $badge = MonthlyBadge::where('user_id', $vincitore->id)->first();
         $this->assertNotNull($badge);
         $this->assertSame(7000, $badge->total_score);
+
+        $run = MonthlyBadgeRun::where('month', $mesePassato->format('Y-m'))->first();
+        $this->assertNotNull($run);
+        $this->assertNull($run->triggered_by);
+    }
+
+    public function test_rieseguire_il_comando_non_duplica_il_badge(): void
+    {
+        $vincitore = $this->createUser(['nickname' => 'vincitore_mese']);
+
+        $mesePassato = now()->subMonthNoOverflow()->startOfMonth()->addDays(3);
+        $this->puntiPerUtente($vincitore->id, 5000, $mesePassato);
+
+        $this->artisan('app:assign-monthly-badges')->assertExitCode(0);
+        $this->artisan('app:assign-monthly-badges')->assertExitCode(0);
+
+        $this->assertSame(1, MonthlyBadgeRun::count(), 'Non deve crearsi un secondo run per lo stesso mese.');
+        $this->assertSame(1, MonthlyBadge::count(), 'Il badge non deve raddoppiare.');
+    }
+
+    public function test_un_mese_senza_nessuna_attivita_viene_comunque_segnato_come_fatto(): void
+    {
+        $this->artisan('app:assign-monthly-badges')->assertExitCode(0);
+
+        $this->assertSame(0, MonthlyBadge::count());
         $this->assertSame(1, MonthlyBadgeRun::count());
     }
 }

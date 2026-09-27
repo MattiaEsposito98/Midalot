@@ -18,8 +18,8 @@
             <div>
                 <h2 class="admin-section-title">Premio "Vincitore del mese"</h2>
                 <p class="admin-muted mb-0">
-                    Il cron automatico non è ancora attivabile su questo hosting: finché non lo sarà, questo bottone
-                    assegna manualmente il premio del mese scorso, una sola volta al mese.
+                    Assegnato automaticamente da un cron: ogni 1° del mese alle 00:10 viene premiato chi ha totalizzato
+                    più punti nel mese appena concluso.
                 </p>
             </div>
         </div>
@@ -48,11 +48,15 @@
                     </p>
                 </div>
             @else
-                @php $monthLabel = Illuminate\Support\Str::ucfirst($badgeTargetMonth->locale('it')->translatedFormat('F Y')); @endphp
-                <div class="alert alert-warning">
+                @php
+                    $monthLabel = Illuminate\Support\Str::ucfirst($badgeTargetMonth->locale('it')->translatedFormat('F Y'));
+                    $nextRun = $badgeTargetMonth->copy()->addMonth()->startOfMonth()->setTime(0, 10);
+                @endphp
+                <div class="alert alert-info">
                     <p class="mb-1">
-                        Premendo il bottone assegnerai <strong>ora</strong> il premio "Vincitore del mese" per
-                        <strong>{{ $monthLabel }}</strong> (il mese scorso rispetto ad oggi).
+                        <i class="bi bi-clock-history"></i>
+                        Il premio "Vincitore del mese" per <strong>{{ $monthLabel }}</strong> verrà assegnato
+                        automaticamente il <strong>{{ $nextRun->locale('it')->translatedFormat('d/m/Y \a\l\l\e H:i') }}</strong>.
                     </p>
                     @if (empty($badgePreview['winners']))
                         <p class="mb-0">Al momento non risulta nessuna attività registrata in quel mese: nessun badge verrebbe assegnato.</p>
@@ -66,15 +70,6 @@
                         </p>
                     @endif
                 </div>
-
-                <form method="POST" action="{{ route('admin.period-leaderboard.assign-monthly-badge') }}"
-                    onsubmit="return confirm('Confermi di voler assegnare ORA il premio Vincitore del mese per {{ $monthLabel }}? Una volta fatto non potrai rifarlo prima del mese prossimo.')">
-                    @csrf
-                    <button type="submit" class="btn btn-warning">
-                        <i class="bi bi-award-fill"></i>
-                        Assegna il premio di {{ $monthLabel }}
-                    </button>
-                </form>
             @endif
         </div>
     </section>
