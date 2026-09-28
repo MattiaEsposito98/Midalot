@@ -25,6 +25,7 @@ class Quiz extends Model
         'midalario_status',
         'midalario_scheduled_at',
         'midalario_started_at',
+        'midalario_reminder_sent_for',
     ];
 
     protected $casts = [
@@ -33,6 +34,7 @@ class Quiz extends Model
         'leaderboard_visible' => 'boolean',
         'midalario_scheduled_at' => 'datetime',
         'midalario_started_at' => 'datetime',
+        'midalario_reminder_sent_for' => 'datetime',
     ];
 
     public function getImageUrlAttribute(): ?string

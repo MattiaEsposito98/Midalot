@@ -17,6 +17,9 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withSchedule(function (Schedule $schedule) {
         // Il giorno 1 di ogni mese assegna il badge "vincitore" per il mese appena concluso.
         $schedule->command('app:assign-monthly-badges')->monthlyOn(1, '00:10');
+
+        // Promemoria email agli iscritti un'ora prima dell'inizio di ogni Midalario.
+        $schedule->command('app:send-midalario-reminders')->everyMinute()->withoutOverlapping();
     })
 
     ->withMiddleware(function (Middleware $middleware) {
