@@ -11,6 +11,15 @@
   margin-bottom: 6px;
 }
 
+.headerTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
 .sectionBadge {
   display: inline-flex;
   background: #eef4f7;
@@ -20,7 +29,30 @@
   font-weight: 900;
   font-size: .8rem;
   text-transform: uppercase;
-  margin-bottom: 10px;
+}
+
+.toggle {
+  display: inline-flex;
+  background: #eef1f5;
+  border-radius: 999px;
+  padding: 3px;
+}
+
+.toggleBtn {
+  border: none;
+  background: transparent;
+  color: #647084;
+  font-weight: 900;
+  font-size: .8rem;
+  padding: 6px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+
+.toggleBtnActive {
+  background: #182033;
+  color: #ffffff;
 }
 
 .leaderboardBoxTitle {

@@ -6,25 +6,54 @@ import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import UserBadge from "../UserBadge/UserBadge"
 
-function WeeklyLeaderboardBox() {
-  const [weeklyTop, setWeeklyTop] = useState([])
+const PERIODS = {
+  weekly: { label: "Settimana", title: "Top 5 della settimana", empty: "Nessun risultato per questa settimana." },
+  monthly: { label: "Mese", title: "Top 5 del mese", empty: "Nessun risultato per questo mese." },
+}
 
+function WeeklyLeaderboardBox() {
+  const [period, setPeriod] = useState("weekly")
+  const [tops, setTops] = useState({ weekly: [], monthly: [] })
+
+  // Entrambe le classifiche vengono caricate subito, cosi' il toggle e' istantaneo.
   useEffect(() => {
-    api.get("/leaderboard/weekly")
-      .then((res) => setWeeklyTop((res.data.results || []).slice(0, 5)))
-      .catch((err) => logError(err))
+    Object.keys(PERIODS).forEach((key) => {
+      api.get(`/leaderboard/${key}`)
+        .then((res) => setTops((prev) => ({ ...prev, [key]: (res.data.results || []).slice(0, 5) })))
+        .catch((err) => logError(err))
+    })
   }, [])
+
+  const current = PERIODS[period]
+  const top = tops[period]
 
   return (
     <div className={css.leaderboardBox}>
       <div className={css.leaderboardBoxHeader}>
-        <span className={css.sectionBadge}>Classifiche</span>
-        <h2 className={css.leaderboardBoxTitle}>Top 5 della settimana</h2>
+        <div className={css.headerTop}>
+          <span className={css.sectionBadge}>Classifiche</span>
+
+          <div className={css.toggle} role="tablist" aria-label="Periodo classifica">
+            {Object.entries(PERIODS).map(([key, p]) => (
+              <button
+                key={key}
+                type="button"
+                role="tab"
+                aria-selected={period === key}
+                className={`${css.toggleBtn} ${period === key ? css.toggleBtnActive : ""}`}
+                onClick={() => setPeriod(key)}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <h2 className={css.leaderboardBoxTitle}>{current.title}</h2>
       </div>
 
-      {weeklyTop.length > 0 ? (
+      {top.length > 0 ? (
         <ol className={css.leaderboardList}>
-          {weeklyTop.map((r) => (
+          {top.map((r) => (
             <li key={r.position} className={css.leaderboardRow}>
               <span className={css.leaderboardRank}>#{r.position}</span>
               <span className={css.leaderboardName}>{r.nickname}</span>
@@ -34,16 +63,12 @@ function WeeklyLeaderboardBox() {
           ))}
         </ol>
       ) : (
-        <div className={css.emptyBox}>Nessun risultato per questa settimana.</div>
+        <div className={css.emptyBox}>{current.empty}</div>
       )}
 
       <div className={css.leaderboardLinks}>
-        <Link to="/classifiche?tab=weekly" className={css.seeMoreLink}>
-          Settimanale
-          <i className="bi bi-arrow-right"></i>
-        </Link>
-        <Link to="/classifiche?tab=monthly" className={css.seeMoreLink}>
-          Mensile
+        <Link to={`/classifiche?tab=${period}`} className={css.seeMoreLink}>
+          Classifica completa
           <i className="bi bi-arrow-right"></i>
         </Link>
       </div>
