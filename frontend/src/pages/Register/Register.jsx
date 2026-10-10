@@ -10,7 +10,8 @@ function Register() {
   const navigate = useNavigate()
 
   const [form, setForm] = useState({
-    name: "",
+    first_name: "",
+    last_name: "",
     nickname: "",
     email: "",
     phone: "",
@@ -169,8 +170,12 @@ function Register() {
   const validateForm = () => {
     const newErrors = {}
 
-    if (!form.name.trim()) {
-      newErrors.name = "Il nome e' obbligatorio"
+    if (!form.first_name.trim()) {
+      newErrors.first_name = "Il nome e' obbligatorio"
+    }
+
+    if (!form.last_name.trim()) {
+      newErrors.last_name = "Il cognome e' obbligatorio"
     }
 
     if (!form.nickname.trim()) {
@@ -224,7 +229,10 @@ function Register() {
     setErrors({})
 
     try {
-      await axios.post(`${API_BASE}/api/register`, form)
+      const { first_name, last_name, ...rest } = form
+      const name = `${first_name.trim()} ${last_name.trim()}`
+
+      await axios.post(`${API_BASE}/api/register`, { ...rest, name })
 
       alert("Registrazione completata! Controlla la tua email, anche nella cartella spam, per verificare l'account.")
       navigate("/")
@@ -272,20 +280,36 @@ function Register() {
                 </div>
 
                 <div className="row">
-                  <div className="col-md-6 mb-3">
+                  <div className="col-6 mb-3">
                     <label className="form-label">Nome</label>
                     <input
                       className="form-control"
-                      name="name"
-                      value={form.name}
+                      name="first_name"
+                      value={form.first_name}
                       onChange={handleChange}
                       disabled={loading}
-                      autoComplete="name"
+                      autoComplete="given-name"
                     />
-                    {errors.name && <div className="text-danger small mt-1">{errors.name}</div>}
+                    {errors.first_name && <div className="text-danger small mt-1">{errors.first_name}</div>}
                   </div>
 
-                  <div className="col-md-6 mb-3">
+                  <div className="col-6 mb-3">
+                    <label className="form-label">Cognome</label>
+                    <input
+                      className="form-control"
+                      name="last_name"
+                      value={form.last_name}
+                      onChange={handleChange}
+                      disabled={loading}
+                      autoComplete="family-name"
+                    />
+                    {errors.last_name && <div className="text-danger small mt-1">{errors.last_name}</div>}
+                  </div>
+                  {errors.name && <div className="text-danger small mb-2">{errors.name}</div>}
+                </div>
+
+                <div className="row">
+                  <div className="col-12 mb-3">
                     <label className="form-label">Nickname</label>
                     <input
                       className="form-control"
