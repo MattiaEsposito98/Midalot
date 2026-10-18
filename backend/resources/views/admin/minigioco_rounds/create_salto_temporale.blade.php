@@ -13,9 +13,11 @@
                 <div class="admin-card-header">
                     <div>
                         <h2 class="admin-section-title">{{ $minigioco->title }}</h2>
-                        <p class="admin-muted mb-0">Inserisci i 4 elementi già in ordine cronologico corretto: il giocatore dovrà riordinarli.</p>
+                        <p class="admin-muted mb-0">Inserisci i 4 elementi già in ordine cronologico corretto: il giocatore
+                            dovrà riordinarli.</p>
                     </div>
-                    <a href="{{ route('admin.minigiochi.rounds.index', $minigioco->id) }}" class="btn btn-outline-secondary btn-sm">
+                    <a href="{{ route('admin.minigiochi.rounds.index', $minigioco->id) }}"
+                        class="btn btn-outline-secondary btn-sm">
                         <i class="bi bi-arrow-left"></i>
                         Torna ai puzzle
                     </a>
@@ -25,17 +27,21 @@
                         <div>
                             <label class="form-label">Tempo limite (secondi)</label>
                             <input type="number" name="time_limit_seconds" class="form-control"
-                                value="{{ old('time_limit_seconds', 30) }}" min="5" required>
+                                value="{{ old('time_limit_seconds', 20) }}" min="5" required>
                         </div>
                         <div>
                             <label class="form-label">Formato elementi</label>
                             <div class="d-flex gap-3 pt-2">
                                 <div class="form-check">
-                                    <input type="radio" name="content_mode" value="testo" class="form-check-input content-mode-radio" id="mode_testo" {{ old('content_mode', 'testo') === 'testo' ? 'checked' : '' }}>
+                                    <input type="radio" name="content_mode" value="testo"
+                                        class="form-check-input content-mode-radio" id="mode_testo"
+                                        {{ old('content_mode', 'testo') === 'testo' ? 'checked' : '' }}>
                                     <label class="form-check-label" for="mode_testo">Solo testo</label>
                                 </div>
                                 <div class="form-check">
-                                    <input type="radio" name="content_mode" value="immagine" class="form-check-input content-mode-radio" id="mode_immagine" {{ old('content_mode') === 'immagine' ? 'checked' : '' }}>
+                                    <input type="radio" name="content_mode" value="immagine"
+                                        class="form-check-input content-mode-radio" id="mode_immagine"
+                                        {{ old('content_mode') === 'immagine' ? 'checked' : '' }}>
                                     <label class="form-check-label" for="mode_immagine">Solo immagine</label>
                                 </div>
                             </div>
@@ -47,7 +53,8 @@
                     @for ($i = 0; $i < 4; $i++)
                         <div class="admin-form-grid mb-3">
                             <div class="full">
-                                <label class="form-label fw-bold">Elemento {{ $i + 1 }} (posizione {{ $i + 1 }} in ordine cronologico)</label>
+                                <label class="form-label fw-bold">Elemento {{ $i + 1 }} (posizione
+                                    {{ $i + 1 }} in ordine cronologico)</label>
                             </div>
                             <div class="mode-field mode-field-testo">
                                 <label class="form-label">Testo (data / citazione / didascalia)</label>
@@ -56,7 +63,8 @@
                             </div>
                             <div class="mode-field mode-field-immagine">
                                 <label class="form-label">Immagine</label>
-                                <input type="file" name="items[{{ $i }}][image]" class="form-control" accept=".jpg,.jpeg,.png,image/*">
+                                <input type="file" name="items[{{ $i }}][image]" class="form-control"
+                                    accept=".jpg,.jpeg,.png,image/*">
                             </div>
                         </div>
                     @endfor
