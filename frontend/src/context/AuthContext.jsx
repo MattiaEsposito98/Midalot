@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { AuthContext } from "./authStore"
 import { API_BASE } from "../service/api"
 import { logError } from "../utils/logger"
@@ -22,6 +22,49 @@ export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => {
     return localStorage.getItem("token")
   })
+
+  // Aggiorna il blocco XP dell'utente (dopo una partita o il bonus
+  // giornaliero) mantenendo allineato anche localStorage.
+  const updateXp = useCallback((xp) => {
+    if (!xp) return
+
+    setUser((prev) => {
+      if (!prev) return prev
+      const next = { ...prev, xp_info: xp }
+      localStorage.setItem("user", JSON.stringify(next))
+      return next
+    })
+  }, [])
+
+  // Ricarica il profilo dal server: l'utente salvato in localStorage puo'
+  // essere vecchio (es. senza il blocco XP introdotto dopo il suo login).
+  const refreshUser = useCallback(async () => {
+    const existingToken = localStorage.getItem("token")
+    if (!existingToken) return
+
+    try {
+      const res = await fetch(`${API_BASE}/api/user`, {
+        headers: {
+          Accept: "application/json",
+          Authorization: `Bearer ${existingToken}`,
+        },
+      })
+
+      if (!res.ok) return
+
+      const fresh = await res.json()
+      localStorage.setItem("user", JSON.stringify(fresh))
+      setUser(fresh)
+    } catch (err) {
+      logError(err)
+    }
+  }, [])
+
+  useEffect(() => {
+    // Sincronizzazione con il server all'avvio: il setState avviene dopo la fetch.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    refreshUser()
+  }, [refreshUser])
 
   useEffect(() => {
     // Il token API resta valido per giorni: chi apre il sito con una
@@ -57,6 +100,7 @@ export function AuthProvider({ children }) {
         // Il backend rinnova i token piu' vecchi di qualche giorno, cosi' chi
         // entra regolarmente non scade mai a 30 giorni dal primo login.
         const data = await res.json()
+        updateXp(data.xp)
         if (data.token && localStorage.getItem("token") === existingToken) {
           localStorage.setItem("token", data.token)
           setToken(data.token)
@@ -75,7 +119,7 @@ export function AuthProvider({ children }) {
     document.addEventListener("visibilitychange", onVisible)
 
     return () => document.removeEventListener("visibilitychange", onVisible)
-  }, [])
+  }, [updateXp])
 
   const login = (userData, tokenData) => {
 
@@ -114,7 +158,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout, updateXp, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )

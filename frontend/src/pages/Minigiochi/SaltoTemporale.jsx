@@ -1,4 +1,5 @@
 import { useState } from "react"
+import XpGain from "../../components/XpGain/XpGain"
 import { Link, useParams } from "react-router-dom"
 import { DndContext, closestCenter, PointerSensor, useSensor, useSensors } from "@dnd-kit/core"
 import { SortableContext, arrayMove, useSortable, verticalListSortingStrategy } from "@dnd-kit/sortable"
@@ -131,6 +132,7 @@ function SaltoTemporale() {
             <span className={shared.scoreLabel}>Punteggio finale</span>
             <strong className={shared.scoreValue}>{formatQuizScore(result.score)}</strong>
           </div>
+          <XpGain awarded={result.xpAwarded} xp={result.xp} />
           <button className="btn btn-primary" onClick={handleBackToMinigiochi}>
             Torna ai Minigiochi
           </button>

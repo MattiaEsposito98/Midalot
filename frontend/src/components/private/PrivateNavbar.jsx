@@ -1,6 +1,7 @@
 import { Link, NavLink, useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import css from "./PrivateNavbar.module.css"
+import XpBar from "../XpBar/XpBar"
 
 function PrivateNavbar() {
   const { logout, user } = useAuth()
@@ -13,7 +14,7 @@ function PrivateNavbar() {
 
   return (
     <nav className={`navbar navbar-expand-lg navbar-light border-bottom shadow-sm ${css.navbar}`}>
-      <div className="container">
+      <div className="container-fluid px-3 px-lg-4">
         <Link className={`navbar-brand fw-bold ${css.brand}`} to="/">
           <img
             src="/Midalot.png"
@@ -38,8 +39,16 @@ function PrivateNavbar() {
           <span className="navbar-toggler-icon"></span>
         </button>
 
+        <div className="w-100 d-lg-none">
+          <XpBar variant="navbar" />
+        </div>
+
         <div className="collapse navbar-collapse" id="privateNavbar">
-          <ul className="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+          <div className="d-none d-lg-flex flex-grow-1 justify-content-center">
+            <XpBar variant="navbar" />
+          </div>
+
+          <ul className="navbar-nav align-items-lg-center gap-lg-2">
             <li className="nav-item">
               <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/midalario">
                 <i className="bi bi-broadcast"></i>

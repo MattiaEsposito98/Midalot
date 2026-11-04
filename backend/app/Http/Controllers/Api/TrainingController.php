@@ -11,6 +11,7 @@ use App\Models\TrainingAttempt;
 use App\Models\TrainingCategory;
 use App\Models\TrainingSubcategory;
 use App\Services\AnswerTimer;
+use App\Services\XpService;
 use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -282,9 +283,24 @@ class TrainingController extends Controller
             'finished_at' => now(),
         ]);
 
+        // XP solo alla prima volta che si completa un dato training (il
+        // vincolo univoco su xp_events impedisce di riaccreditarli).
+        $xp = (new XpService())->award(
+            $request->user()->id,
+            'training',
+            $attempt->quiz_id,
+            XpService::fromScore(
+                'training',
+                $result['score'],
+                count($attempt->question_ids) * (self::CORRECT_ANSWER_BASE_SCORE + self::MAX_SPEED_BONUS)
+            )
+        );
+
         return response()->json([
             ...$result,
             'saved' => true,
+            'xp_awarded' => $xp['awarded'] ?? 0,
+            'xp' => $xp['xp'] ?? XpService::info((int) $request->user()->fresh()->xp_total),
         ]);
     }
 

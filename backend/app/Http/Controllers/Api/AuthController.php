@@ -6,10 +6,12 @@ use App\Http\Controllers\Controller;
 use App\Models\DailyLoginBonus;
 use App\Models\User;
 use App\Models\UserLogin;
+use App\Services\XpService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use Laravel\Sanctum\PersonalAccessToken;
 
 class AuthController extends Controller
 {
@@ -150,6 +152,15 @@ class AuthController extends Controller
             'updated_at' => now(),
         ]);
 
+        // Idempotente per giorno: chiamato anche se il bonus punti era gia'
+        // stato preso, cosi' non si perde l'XP del primo giorno dopo il rilascio.
+        (new XpService())->award(
+            $userId,
+            'login',
+            (int) now()->format('Ymd'),
+            (int) config('xp.games.login')
+        );
+
         return $inserted > 0;
     }
 
@@ -162,7 +173,7 @@ class AuthController extends Controller
         $user = $request->user();
         $granted = $this->grantDailyBonus($user->id);
 
-        $response = ['granted' => $granted];
+        $response = ['granted' => $granted, 'xp' => XpService::info((int) $user->fresh()->xp_total)];
 
         // Il token scade SANCTUM_TOKEN_EXPIRATION minuti dopo la creazione,
         // indipendentemente dall'uso: chi entra ogni giorno verrebbe buttato

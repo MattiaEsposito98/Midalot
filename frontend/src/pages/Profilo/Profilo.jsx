@@ -6,6 +6,7 @@ import styles from "./Profilo.module.css"
 import { logError } from "../../utils/logger"
 import { API_BASE } from "../../service/api"
 import UserBadge from "../../components/UserBadge/UserBadge"
+import XpBar from "../../components/XpBar/XpBar"
 
 function Profilo() {
   const { token, user } = useAuth()
@@ -201,6 +202,10 @@ function Profilo() {
     <div className={`container ${styles.page}`}>
       <div className={styles.header}>
         <h1 className={styles.title}>Il mio profilo</h1>
+
+        <div className="mb-4">
+          <XpBar variant="card" />
+        </div>
         <p className={styles.subtitle}>
           Qui puoi consultare i tuoi dati e un riepilogo della tua attività.
         </p>

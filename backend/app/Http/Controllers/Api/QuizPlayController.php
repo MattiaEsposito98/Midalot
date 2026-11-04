@@ -9,6 +9,7 @@ use App\Models\Quiz;
 use App\Models\QuizAnswer;
 use App\Models\QuizAttempt;
 use App\Services\AnswerTimer;
+use App\Services\XpService;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -223,8 +224,20 @@ class QuizPlayController extends Controller
             'finished_at' => now(),
         ]);
 
+        $maxScore = $attempt->quiz->questions()->count()
+            * (self::CORRECT_ANSWER_BASE_SCORE + self::MAX_SPEED_BONUS);
+
+        $xp = (new XpService())->award(
+            $user->id,
+            'quiz',
+            $attempt->id,
+            XpService::fromScore('quiz', (int) $totalScore, $maxScore)
+        );
+
         return response()->json([
             'score' => $totalScore,
+            'xp_awarded' => $xp['awarded'] ?? 0,
+            'xp' => $xp['xp'] ?? null,
         ]);
     }
 

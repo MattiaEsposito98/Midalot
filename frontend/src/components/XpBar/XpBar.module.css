@@ -1,0 +1,154 @@
+/* Stile "gioco": stella blu col livello e barra celeste su fondo blu scuro. */
+
+.navbarXp {
+  display: flex;
+  align-items: center;
+  min-width: 200px;
+  max-width: 340px;
+  flex: 1 1 240px;
+  margin: 0 24px;
+}
+
+.star {
+  position: relative;
+  z-index: 1;
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  margin-right: -14px;
+  color: #2f8cff;
+  filter: drop-shadow(0 2px 0 #0b2a5b) drop-shadow(0 0 1px #0b2a5b);
+}
+
+.star i {
+  font-size: 38px;
+  line-height: 1;
+  background: linear-gradient(180deg, #7fd3ff, #1f7bff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  -webkit-text-stroke: 2px #0b2a5b;
+}
+
+.star b {
+  position: absolute;
+  font-size: 14px;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 1px 0 #0b2a5b, 1px 0 0 #0b2a5b, -1px 0 0 #0b2a5b, 0 -1px 0 #0b2a5b;
+}
+
+.starLarge {
+  width: 56px;
+  height: 56px;
+  margin-right: 0;
+}
+
+.starLarge i {
+  font-size: 56px;
+}
+
+.starLarge b {
+  font-size: 20px;
+}
+
+.navTrack,
+.track {
+  position: relative;
+  flex: 1 1 auto;
+  height: 20px;
+  background: #0b2a5b;
+  border: 2px solid #06193a;
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.45);
+}
+
+.navTrack {
+  padding-left: 12px;
+}
+
+.fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  min-width: 6px;
+  background: linear-gradient(180deg, #8ff0ff 0%, #22c6ff 45%, #1688f5 100%);
+  border-radius: 999px;
+  box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.55);
+  transition: width 0.6s ease;
+}
+
+.navText,
+.trackText {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 900;
+  color: #ffffff;
+  text-shadow: 0 1px 0 #06193a, 1px 0 0 #06193a, -1px 0 0 #06193a, 0 -1px 0 #06193a;
+  letter-spacing: 0.3px;
+}
+
+.card {
+  padding: 16px 18px;
+  background: linear-gradient(180deg, #123a7a, #0b2a5b);
+  border: 3px solid #06193a;
+  border-radius: 12px;
+  box-shadow: 0 4px 0 rgba(6, 25, 58, 0.35);
+  color: #ffffff;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.cardTitle {
+  display: block;
+  font-size: 20px;
+  color: #ffffff;
+}
+
+.cardSub {
+  font-size: 13px;
+  font-weight: 700;
+  color: #9fd8ff;
+}
+
+.track {
+  height: 24px;
+  background: #06193a;
+}
+
+.trackText {
+  font-size: 13px;
+}
+
+.cardFooter {
+  margin-top: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #9fd8ff;
+}
+
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .navbarXp {
+    min-width: 150px;
+    margin: 0 12px;
+  }
+}
+
+@media (max-width: 991.98px) {
+  .navbarXp {
+    margin: 12px 0 8px;
+    max-width: none;
+  }
+}

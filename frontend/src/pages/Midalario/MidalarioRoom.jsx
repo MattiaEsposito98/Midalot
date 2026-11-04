@@ -5,6 +5,7 @@ import api from "../../service/api"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import QuestionAudio from "../../components/QuestionAudio/QuestionAudio"
+import XpGain from "../../components/XpGain/XpGain"
 
 const POLL_INTERVAL_MS = 2000
 const TICK_INTERVAL_MS = 250
@@ -342,6 +343,9 @@ function MidalarioRoom() {
         <div className={styles.card}>
           <h1 className={styles.cardTitle}>{quiz.title}</h1>
           <p className={styles.cardText}>Il quiz è terminato.</p>
+          {status.joined && status.completed && (
+            <XpGain awarded={status.xp_awarded} refresh />
+          )}
           <Link to="/midalario" className="btn btn-primary">Torna a Il Midalario</Link>
         </div>
       </div>

@@ -1,0 +1,33 @@
+.box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 16px 0;
+  text-align: left;
+}
+
+.gain {
+  align-self: center;
+  padding: 6px 16px;
+  background: #36a269;
+  color: #ffffff;
+  font-size: 22px;
+  font-weight: 900;
+  border: 2px solid #182033;
+  border-radius: 8px;
+  animation: pop 0.5s ease;
+}
+
+.hint {
+  align-self: center;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--midalot-muted, #647084);
+  text-align: center;
+}
+
+@keyframes pop {
+  0% { transform: scale(0.6); opacity: 0; }
+  70% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); }
+}

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react"
+import XpGain from "../../components/XpGain/XpGain"
 import { Link, useParams } from "react-router-dom"
 import styles from "./TastieraRotta.module.css"
 import { formatQuizScore } from "../../utils/quizScore"
@@ -110,6 +111,7 @@ function TastieraRotta() {
             <span className={styles.scoreLabel}>Punteggio finale</span>
             <strong className={styles.scoreValue}>{formatQuizScore(result.score)}</strong>
           </div>
+          <XpGain awarded={result.xpAwarded} xp={result.xp} />
           <button className="btn btn-primary" onClick={handleBackToMinigiochi}>
             Torna ai Minigiochi
           </button>

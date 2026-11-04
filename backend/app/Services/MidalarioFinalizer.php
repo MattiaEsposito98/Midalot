@@ -13,6 +13,9 @@ class MidalarioFinalizer
 {
     private const TIMEOUT_PENALTY_RATE = 0.05;
 
+    // 7000 base + 3000 bonus velocita', come negli altri quiz.
+    private const MAX_SCORE_PER_QUESTION = 10000;
+
     public function finalizeIfNeeded(Quiz $quiz): void
     {
         if ($quiz->midalario_status !== 'running') {
@@ -48,6 +51,7 @@ class MidalarioFinalizer
     private function finalize(Quiz $quiz, MidalarioTimeline $timeline): void
     {
         $questions = $timeline->questions();
+        $xpService = new XpService();
 
         $attempts = QuizAttempt::where('quiz_id', $quiz->id)
             ->where('completed', false)
@@ -93,6 +97,13 @@ class MidalarioFinalizer
                 'completed' => true,
                 'finished_at' => now(),
             ]);
+
+            $xpService->award(
+                $attempt->user_id,
+                'midalario',
+                $quiz->id,
+                XpService::fromScore('midalario', (int) $totalScore, $questions->count() * self::MAX_SCORE_PER_QUESTION)
+            );
         }
 
         $quiz->update(['midalario_status' => 'finished']);

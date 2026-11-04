@@ -147,6 +147,12 @@ class MidalarioController extends Controller
             'joined' => true,
             'completed' => (bool) ($attempt?->completed ?? false),
             'score' => $attempt?->completed ? $attempt->score : null,
+            'xp_awarded' => $attempt?->completed
+                ? (int) \App\Models\XpEvent::where('user_id', $user->id)
+                    ->where('source', 'midalario')
+                    ->where('source_id', $quiz->id)
+                    ->value('xp')
+                : null,
         ];
 
         if ($quiz->midalario_status === 'running' && $attempt && ! $attempt->completed) {

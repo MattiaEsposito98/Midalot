@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
+import XpGain from "../../components/XpGain/XpGain"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "../Quiz/Quiz.module.css"
@@ -339,7 +340,7 @@ function TrainingPlay() {
         return
       }
 
-      setResult(data)
+      setResult({ ...data, xpAwarded: data.xp_awarded, xp: data.xp })
     } catch (err) {
       logError(err)
       setError("Errore di connessione")
@@ -382,6 +383,7 @@ function TrainingPlay() {
             <span className={styles.scoreLabel}>Punteggio finale</span>
             <strong className={styles.scoreValue}>{formatQuizScore(result.score)}</strong>
           </div>
+          <XpGain awarded={result.xpAwarded} xp={result.xp} alreadyEarnedHint="XP già ottenuti la prima volta che hai completato questo training" />
           {!token && (
             <div className="alert alert-info">
               Registrati per salvare le tue sessioni di training e vedere i tuoi progressi.

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react"
+import XpGain from "../../components/XpGain/XpGain"
 import { Link, useNavigate, useParams } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import styles from "./Quiz.module.css"
@@ -365,6 +366,8 @@ function Quiz() {
 
       setResult({
         score: data.score,
+        xpAwarded: data.xp_awarded,
+        xp: data.xp,
       })
     } catch (err) {
       logError(err)
@@ -421,6 +424,7 @@ function Quiz() {
             <span className={styles.scoreLabel}>Punteggio finale</span>
             <strong className={styles.scoreValue}>{formatQuizScore(result.score)}</strong>
           </div>
+          <XpGain awarded={result.xpAwarded} xp={result.xp} />
           <button className="btn btn-primary" onClick={handleBackToQuizOneShot}>
             Torna ai Quiz One Shot
           </button>

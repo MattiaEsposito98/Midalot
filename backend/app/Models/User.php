@@ -35,6 +35,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     protected $appends = [
         'badges',
+        'xp_info',
     ];
 
     protected function casts(): array
@@ -125,6 +126,14 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return $badges;
+    }
+
+    /**
+     * Stato XP/livello calcolato da xp_total: nessuna query aggiuntiva.
+     */
+    public function getXpInfoAttribute(): array
+    {
+        return \App\Services\XpService::info((int) ($this->attributes['xp_total'] ?? 0));
     }
 
     public function sendEmailVerificationNotification()

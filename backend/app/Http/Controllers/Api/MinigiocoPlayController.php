@@ -9,6 +9,7 @@ use App\Models\MinigiocoRound;
 use App\Models\MinigiocoRoundRisposta;
 use App\Services\AnswerTimer;
 use App\Services\SaltoTemporaleItemOrder;
+use App\Services\XpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
@@ -140,8 +141,17 @@ class MinigiocoPlayController extends Controller
             'finished_at' => now(),
         ]);
 
+        $xp = (new XpService())->award(
+            $user->id,
+            'minigioco',
+            $attempt->id,
+            XpService::fromScore('minigioco', $totalScore, $attempt->minigioco->max_score * 100)
+        );
+
         return response()->json([
             'score' => $totalScore,
+            'xp_awarded' => $xp['awarded'] ?? 0,
+            'xp' => $xp['xp'] ?? null,
         ]);
     }
 

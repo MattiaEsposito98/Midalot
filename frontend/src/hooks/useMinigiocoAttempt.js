@@ -316,7 +316,7 @@ export function useMinigiocoAttempt(id, { retryOnWrong = false, getAdvanceDelayM
         return
       }
 
-      setResult({ score: data.score })
+      setResult({ score: data.score, xpAwarded: data.xp_awarded, xp: data.xp })
     } catch (err) {
       logError(err)
       setError("Errore di connessione durante la chiusura del minigioco")

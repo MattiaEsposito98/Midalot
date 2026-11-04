@@ -8,6 +8,7 @@ import { formatQuizScore } from "../../utils/quizScore"
 import { isScaduto } from "../../utils/disponibilita"
 import WeeklyLeaderboardBox from "../../components/WeeklyLeaderboardBox/WeeklyLeaderboardBox"
 import UserBadge from "../../components/UserBadge/UserBadge"
+import XpBar from "../../components/XpBar/XpBar"
 import ComingSoon from "../../components/ComingSoon/ComingSoon"
 
 const PLACEHOLDER_QUIZZES = [
@@ -190,6 +191,12 @@ function Home() {
           )}
 
           {isLoggedIn && <UserBadge badges={user?.badges} />}
+
+          {isLoggedIn && (
+            <div className="my-3">
+              <XpBar variant="card" />
+            </div>
+          )}
 
           <h1 className={css.title}>
             {isLoggedIn

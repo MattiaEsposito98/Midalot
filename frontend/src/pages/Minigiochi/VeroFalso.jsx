@@ -1,4 +1,5 @@
 import { useState } from "react"
+import XpGain from "../../components/XpGain/XpGain"
 import { Link, useParams } from "react-router-dom"
 import shared from "./TastieraRotta.module.css"
 import styles from "./VeroFalso.module.css"
@@ -90,6 +91,7 @@ function VeroFalso() {
             <span className={shared.scoreLabel}>Punteggio finale</span>
             <strong className={shared.scoreValue}>{formatQuizScore(result.score)}</strong>
           </div>
+          <XpGain awarded={result.xpAwarded} xp={result.xp} />
           <button className="btn btn-primary" onClick={handleBackToMinigiochi}>
             Torna ai Minigiochi
           </button>
