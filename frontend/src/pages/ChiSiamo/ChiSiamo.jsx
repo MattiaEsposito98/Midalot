@@ -96,9 +96,9 @@ function ChiSiamo() {
             </div>
 
             <div className={styles.serviceCard}>
-              <div className={styles.serviceBadge}>Siti vetrina</div>
-              <h3>Realizzazione siti vetrina</h3>
-              <p>Siti vetrina moderni e professionali a un ottimo prezzo, su misura per la tua attivita' o il tuo brand.</p>
+              <div className={styles.serviceBadge}>Sviluppo web</div>
+              <h3>Realizzazione siti web e dashboard</h3>
+              <p>Dal sito vetrina al progetto completo: siti moderni con frontend curato, dashboard e gestionali di ogni tipo, fino alle piattaforme web su misura. Qualunque sia la tua idea, la realizziamo a un ottimo prezzo.</p>
               <a
                 href="https://www.instagram.com/mida.lot/"
                 target="_blank"
