@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AudioProxyController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\ChallengeController;
 use App\Http\Controllers\Api\CookieConsentController;
 use App\Http\Controllers\Api\EventRequestController;
 use App\Http\Controllers\Api\EmailVerificationController;
@@ -136,6 +137,21 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/training/progress', [TrainingController::class, 'progress']);
     Route::get('/training/categories/{categorySlug}/leaderboard', [TrainingController::class, 'leaderboard']);
     Route::get('/training/quizzes/{quiz}/leaderboard', [TrainingController::class, 'quizLeaderboard']);
+
+    Route::get('/challenges', [ChallengeController::class, 'index']);
+    Route::get('/challenges/summary', [ChallengeController::class, 'summaryCount']);
+    Route::get('/challenges/categories', [ChallengeController::class, 'categories']);
+    Route::get('/challenges/users', [ChallengeController::class, 'searchUsers'])
+        ->middleware('throttle:60,1');
+    Route::put('/challenges/settings', [ChallengeController::class, 'updateSettings']);
+    Route::post('/challenges', [ChallengeController::class, 'store'])
+        ->middleware('throttle:20,1');
+    Route::get('/challenges/{challenge}', [ChallengeController::class, 'show']);
+    Route::post('/challenges/{challenge}/decline', [ChallengeController::class, 'decline']);
+    Route::post('/challenges/{challenge}/start', [ChallengeController::class, 'start']);
+    Route::post('/challenges/{challenge}/answer', [ChallengeController::class, 'answer']);
+    Route::post('/challenges/{challenge}/finish', [ChallengeController::class, 'finish']);
+    Route::get('/challenges/{challenge}/review', [ChallengeController::class, 'review']);
 
     Route::get('/midalario/quizzes', [MidalarioController::class, 'index']);
     Route::post('/midalario/quizzes/{quiz}/join', [MidalarioController::class, 'join']);

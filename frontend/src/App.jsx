@@ -23,6 +23,10 @@ import VerificaEmail from "./pages/VerificaEmail/VerificaEmail"
 import Storico from "./pages/Storico/Storico"
 import CambiaPassword from "./pages/CambiaPassword/CambiaPassword"
 import Leaderboard from "./pages/Leaderboard/Leaderboard"
+import Sfide from "./pages/Sfide/Sfide"
+import NuovaSfida from "./pages/Sfide/NuovaSfida"
+import SfidaDettaglio from "./pages/Sfide/SfidaDettaglio"
+import SfidaPlay from "./pages/Sfide/SfidaPlay"
 import Training from "./pages/Training/Training"
 import TrainingPlay from "./pages/Training/TrainingPlay"
 import TrainingLeaderboard from "./pages/Training/TrainingLeaderboard"
@@ -102,6 +106,10 @@ function App() {
           <Route path="/midalario/:id" element={<MidalarioRoom />} />
           <Route path="/midalario/:id/leaderboard" element={<Leaderboard kind="midalario" />} />
           <Route path="/midalario/:id/review" element={<QuizReview kind="midalario" />} />
+          <Route path="/sfide" element={<Sfide />} />
+          <Route path="/sfide/nuova" element={<NuovaSfida />} />
+          <Route path="/sfide/:id" element={<SfidaDettaglio />} />
+          <Route path="/sfide/:id/gioca" element={<SfidaPlay />} />
           <Route path="/minigiochi" element={<MinigiochiList />} />
           <Route path="/minigiochi/:id" element={<MinigiocoPlay />} />
           <Route path="/minigiochi/:id/leaderboard" element={<Leaderboard kind="minigioco" />} />

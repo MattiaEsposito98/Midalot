@@ -1,0 +1,243 @@
+.page {
+  padding: 8px 0 48px;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.title {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 950;
+  color: #182033;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  color: #647084;
+}
+
+.section {
+  margin-bottom: 28px;
+}
+
+.sectionTitle {
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #182033;
+  margin-bottom: 10px;
+}
+
+.empty {
+  padding: 18px;
+  border: 2px dashed #dce5ee;
+  border-radius: 8px;
+  color: #647084;
+  background: #ffffff;
+}
+
+.card {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 16px;
+  margin-bottom: 10px;
+  background: #ffffff;
+  border: 2px solid #182033;
+  border-radius: 8px;
+  box-shadow: 0 4px 0 rgba(24, 32, 51, 0.12);
+}
+
+.cardMain {
+  min-width: 0;
+}
+
+.versus {
+  font-weight: 900;
+  color: #182033;
+  font-size: 1.05rem;
+}
+
+.meta {
+  font-size: 0.85rem;
+  color: #647084;
+}
+
+.pill {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 900;
+  border: 2px solid #182033;
+  background: #fff4bf;
+  color: #182033;
+}
+
+.won {
+  background: #36a269;
+  color: #ffffff;
+}
+
+.lost {
+  background: #ff6b57;
+  color: #ffffff;
+}
+
+.draw {
+  background: #eaf5ff;
+}
+
+.panel {
+  max-width: 640px;
+  margin: 0 auto 24px;
+  padding: 24px;
+  background: #ffffff;
+  border: 2px solid #182033;
+  border-radius: 8px;
+  box-shadow: 8px 8px 0 #ffc107, 0 18px 42px rgba(24, 32, 51, 0.12);
+}
+
+.panelWide {
+  max-width: 860px;
+}
+
+.scoreRow {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  margin: 18px 0;
+}
+
+.player {
+  font-weight: 900;
+  color: #182033;
+}
+
+.playerScore {
+  display: block;
+  margin-top: 4px;
+  font-size: 1.8rem;
+  font-weight: 950;
+}
+
+.vs {
+  font-weight: 950;
+  color: #647084;
+}
+
+.resultBanner {
+  text-align: center;
+  font-size: 1.6rem;
+  font-weight: 950;
+  margin-bottom: 4px;
+}
+
+.userResult {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  background: #ffffff;
+  border: 2px solid #dce5ee;
+  border-radius: 8px;
+  text-align: left;
+  font-weight: 800;
+}
+
+.userResult:hover {
+  border-color: #182033;
+}
+
+.categoryGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+  margin: 8px 0 4px;
+}
+
+.categoryChip {
+  padding: 10px 12px;
+  background: #ffffff;
+  border: 2px solid #dce5ee;
+  border-radius: 8px;
+  text-align: left;
+  font-weight: 800;
+  color: #182033;
+}
+
+.categoryChipActive {
+  border-color: #182033;
+  background: #fff4bf;
+  box-shadow: 0 3px 0 #182033;
+}
+
+.reviewItem {
+  padding: 14px;
+  margin-bottom: 12px;
+  border: 2px solid #dce5ee;
+  border-radius: 8px;
+  background: #ffffff;
+}
+
+.reviewQuestion {
+  font-weight: 900;
+  color: #182033;
+  margin-bottom: 8px;
+}
+
+.reviewAnswer {
+  padding: 6px 10px;
+  margin-bottom: 4px;
+  border-radius: 6px;
+  border: 1px solid #dce5ee;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.reviewCorrect {
+  background: #e3f6ec;
+  border-color: #36a269;
+}
+
+.reviewWrongPick {
+  background: #ffe6e2;
+  border-color: #ff6b57;
+}
+
+.tag {
+  font-size: 0.75rem;
+  font-weight: 900;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #182033;
+  color: #ffffff;
+}
+
+.badge {
+  display: inline-block;
+  min-width: 20px;
+  margin-left: 6px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #ff3b30;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 900;
+  line-height: 20px;
+  text-align: center;
+}

@@ -2,10 +2,12 @@ import { Link, NavLink, useNavigate } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import css from "./PrivateNavbar.module.css"
 import XpBar from "../XpBar/XpBar"
+import { useChallengeCount } from "../../hooks/useChallengeCount"
 
 function PrivateNavbar() {
   const { logout, user } = useAuth()
   const navigate = useNavigate()
+  const challengeCount = useChallengeCount(!!user)
 
   const handleLogout = () => {
     logout()
@@ -13,8 +15,8 @@ function PrivateNavbar() {
   }
 
   return (
-    <nav className={`navbar navbar-expand-lg navbar-light border-bottom shadow-sm ${css.navbar}`}>
-      <div className="container-fluid px-3 px-lg-4">
+    <nav className={`navbar navbar-expand-xl navbar-light border-bottom shadow-sm ${css.navbar}`}>
+      <div className="container-fluid px-3 px-xl-4">
         <Link className={`navbar-brand fw-bold ${css.brand}`} to="/">
           <img
             src="/Midalot.png"
@@ -39,16 +41,16 @@ function PrivateNavbar() {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        <div className="w-100 d-lg-none">
+        <div className="w-100 d-xl-none">
           <XpBar variant="navbar" />
         </div>
 
         <div className="collapse navbar-collapse" id="privateNavbar">
-          <div className="d-none d-lg-flex flex-grow-1 justify-content-center">
+          <div className="d-none d-xl-flex flex-grow-1 justify-content-center">
             <XpBar variant="navbar" />
           </div>
 
-          <ul className="navbar-nav align-items-lg-center gap-lg-2">
+          <ul className="navbar-nav align-items-xl-center gap-xl-2">
             <li className="nav-item">
               <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/midalario">
                 <i className="bi bi-broadcast"></i>
@@ -78,13 +80,23 @@ function PrivateNavbar() {
             </li>
 
             <li className="nav-item">
+              <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/sfide">
+                <i className="bi bi-lightning-charge"></i>
+                Sfide
+                {challengeCount > 0 && (
+                  <span className="badge rounded-pill text-bg-danger">{challengeCount}</span>
+                )}
+              </NavLink>
+            </li>
+
+            <li className="nav-item">
               <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/crea-il-tuo-evento">
                 <i className="bi bi-stars"></i>
                 Crea il tuo evento
               </NavLink>
             </li>
 
-            <li className="nav-item dropdown ms-lg-3">
+            <li className="nav-item dropdown ms-xl-3">
               <a
                 className={`${css.profileBtn} dropdown-toggle`}
                 href="#"

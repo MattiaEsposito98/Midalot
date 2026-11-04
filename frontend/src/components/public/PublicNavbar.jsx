@@ -3,11 +3,13 @@ import { useAuth } from "../../context/useAuth"
 import css from "./PublicNavbarFooter.module.css"
 import UserBadge from "../UserBadge/UserBadge"
 import XpBar from "../XpBar/XpBar"
+import { useChallengeCount } from "../../hooks/useChallengeCount"
 
 function PublicNavbar() {
   const { user, token, logout } = useAuth()
   const navigate = useNavigate()
   const isLoggedIn = !!(user && token)
+  const challengeCount = useChallengeCount(isLoggedIn)
 
   const handleLogout = () => {
     logout()
@@ -15,8 +17,8 @@ function PublicNavbar() {
   }
 
   return (
-    <nav className={`navbar navbar-expand-lg navbar-light ${css.publicNavbar}`}>
-      <div className={isLoggedIn ? "container-fluid px-3 px-lg-4" : "container"}>
+    <nav className={`navbar ${isLoggedIn ? "navbar-expand-xl" : "navbar-expand-lg"} navbar-light ${css.publicNavbar} ${isLoggedIn ? css.loggedIn : ""}`}>
+      <div className={isLoggedIn ? "container-fluid px-3 px-xl-4" : "container"}>
 
         <Link className={`navbar-brand fw-bold ${css.brand}`} to="/">
           <img
@@ -43,14 +45,14 @@ function PublicNavbar() {
         </button>
 
         {isLoggedIn && (
-          <div className="w-100 d-lg-none">
+          <div className="w-100 d-xl-none">
             <XpBar variant="navbar" />
           </div>
         )}
 
         <div className="collapse navbar-collapse" id="publicNavbar">
           {isLoggedIn && (
-            <div className="d-none d-lg-flex flex-grow-1 justify-content-center">
+            <div className="d-none d-xl-flex flex-grow-1 justify-content-center">
               <XpBar variant="navbar" />
             </div>
           )}
@@ -77,6 +79,14 @@ function PublicNavbar() {
                 <NavLink to="/minigiochi" className={css.navPill}>
                   <i className="bi bi-joystick"></i>
                   Minigiochi
+                </NavLink>
+
+                <NavLink to="/sfide" className={css.navPill}>
+                  <i className="bi bi-lightning-charge"></i>
+                  Sfide
+                  {challengeCount > 0 && (
+                    <span className="badge rounded-pill text-bg-danger">{challengeCount}</span>
+                  )}
                 </NavLink>
 
                 <NavLink to="/crea-il-tuo-evento" className={css.navPill}>

@@ -94,3 +94,15 @@
     justify-content: space-between;
   }
 }
+
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+  .brandName {
+    display: none;
+  }
+
+  .navLink {
+    padding: 8px 9px;
+    font-size: 14px;
+    gap: 5px;
+  }
+}

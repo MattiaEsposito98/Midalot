@@ -244,3 +244,42 @@
     justify-content: center;
   }
 }
+
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+  .midalot {
+    display: none;
+  }
+
+  .publicActions {
+    gap: 2px;
+  }
+
+  .navPill {
+    padding: 8px 9px;
+    font-size: 14px;
+    gap: 5px;
+  }
+
+  .brand {
+    gap: 8px;
+  }
+}
+
+/* Utente loggato: la navbar si comprime sotto i 1200px (piu' voci + barra XP). */
+@media (min-width: 992px) and (max-width: 1199.98px) {
+  .loggedIn .publicActions {
+    align-items: stretch;
+    flex-direction: column;
+    padding-top: 14px;
+  }
+
+  .loggedIn .navPill,
+  .loggedIn .profileBtn {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .loggedIn .publicActions > .dropdown {
+    width: 100%;
+  }
+}
