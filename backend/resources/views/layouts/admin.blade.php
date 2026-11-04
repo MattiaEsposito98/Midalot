@@ -53,6 +53,10 @@
                     <i class="bi bi-trophy"></i>
                     <span>Classifica premi</span>
                 </a>
+                <a href="{{ route('admin.challenges.index') }}" class="admin-nav-link {{ Route::is('admin.challenges.*') ? 'active' : '' }}">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                    <span>Sfide</span>
+                </a>
                 <a href="{{ route('admin.reports.index') }}" class="admin-nav-link {{ Route::is('admin.reports.*') ? 'active' : '' }}">
                     <i class="bi bi-flag"></i>
                     <span>Segnalazioni</span>

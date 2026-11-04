@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ChallengeController as AdminChallengeController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EventRequestController;
 use App\Http\Controllers\Admin\ITunesController;
@@ -124,6 +125,11 @@ Route::middleware(['auth', 'admin'])
             ->name('reports.update');
         Route::delete('reports/{report}', [TrainingQuestionReportController::class, 'destroy'])
             ->name('reports.destroy');
+
+        Route::get('challenges', [AdminChallengeController::class, 'index'])
+            ->name('challenges.index');
+        Route::get('challenges/{challenge}', [AdminChallengeController::class, 'show'])
+            ->name('challenges.show');
 
         Route::get('event-requests', [EventRequestController::class, 'index'])
             ->name('event-requests.index');
