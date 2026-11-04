@@ -5,6 +5,7 @@ import quizStyles from "../Quiz/Quiz.module.css"
 import { logError } from "../../utils/logger"
 import QuestionAudio from "../../components/QuestionAudio/QuestionAudio"
 import { notifyChallengesChanged } from "../../hooks/useChallengeCount"
+import QuestionCategory from "./QuestionCategory"
 import styles from "./Sfide.module.css"
 
 const POLL_MS = 1000
@@ -319,6 +320,8 @@ function SfidaLive() {
             <div className={quizStyles.questionHeader}>
               <h2 className={quizStyles.questionText}>{q.question_text}</h2>
             </div>
+
+            <QuestionCategory category={q.category} subcategory={q.subcategory} />
 
             {q.image && (
               <div className={quizStyles.mediaWrap}>

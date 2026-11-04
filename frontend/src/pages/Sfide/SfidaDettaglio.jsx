@@ -5,6 +5,7 @@ import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import XpGain from "../../components/XpGain/XpGain"
 import { notifyChallengesChanged } from "../../hooks/useChallengeCount"
+import QuestionCategory from "./QuestionCategory"
 import styles from "./Sfide.module.css"
 
 const CLOSED_LABEL = {
@@ -49,6 +50,8 @@ function Review({ review }) {
           <div className={styles.reviewQuestion}>
             {index + 1}. {q.question_text}
           </div>
+
+          <QuestionCategory category={q.category} subcategory={q.subcategory} />
 
           {q.image && <img src={q.image} alt="Domanda" className="img-fluid mb-2" style={{ maxHeight: 180 }} />}
 

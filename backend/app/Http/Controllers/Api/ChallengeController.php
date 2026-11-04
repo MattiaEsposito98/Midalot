@@ -346,7 +346,7 @@ class ChallengeController extends Controller
             return response()->json(['message' => 'Hai gia giocato questa sfida'], 403);
         }
 
-        $questions = $challenge->questions()->with('answers')->get();
+        $questions = $challenge->questions()->with(['answers', 'quiz.trainingCategory', 'quiz.trainingSubcategory'])->get();
 
         return response()->json([
             'challenge_id' => $challenge->id,
@@ -361,6 +361,8 @@ class ChallengeController extends Controller
                 'audio_end_seconds' => $question->audio_end_seconds,
                 'video' => $question->video_path ? asset('storage/'.$question->video_path) : null,
                 'time_limit_seconds' => $question->time_limit_seconds,
+                'category' => $question->quiz?->trainingCategory?->name,
+                'subcategory' => $question->quiz?->trainingSubcategory?->name,
                 'answers' => $question->answers->shuffle()->map(fn ($answer) => [
                     'id' => $answer->id,
                     'answer_text' => $answer->answer_text,
@@ -499,7 +501,7 @@ class ChallengeController extends Controller
 
         $challenge->load(['challenger', 'participants.user', 'attempts.answers']);
 
-        $questions = $challenge->questions()->with('answers')->get();
+        $questions = $challenge->questions()->with(['answers', 'quiz.trainingCategory', 'quiz.trainingSubcategory'])->get();
 
         return response()->json([
             ...$this->detail($challenge, $user->id),
@@ -507,6 +509,8 @@ class ChallengeController extends Controller
                 return [
                     'id' => $question->id,
                     'question_text' => $question->question_text,
+                    'category' => $question->quiz?->trainingCategory?->name,
+                    'subcategory' => $question->quiz?->trainingSubcategory?->name,
                     'image' => $question->image_path ? asset('storage/'.$question->image_path) : null,
                     'answers' => $question->answers->map(fn ($a) => [
                         'id' => $a->id,
@@ -684,6 +688,8 @@ class ChallengeController extends Controller
                 'video' => $question->video_path ? asset('storage/'.$question->video_path) : null,
                 'starts_at' => $window['starts_at']->toISOString(),
                 'ends_at' => $window['ends_at']->toISOString(),
+                'category' => $question->quiz?->trainingCategory?->name,
+                'subcategory' => $question->quiz?->trainingSubcategory?->name,
                 'answers' => $question->answers->map(fn ($a) => [
                     'id' => $a->id,
                     'answer_text' => $a->answer_text,

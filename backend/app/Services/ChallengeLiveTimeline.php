@@ -21,7 +21,7 @@ class ChallengeLiveTimeline
     public function questions(): Collection
     {
         if ($this->questions === null) {
-            $this->questions = $this->challenge->questions()->with('answers')->get();
+            $this->questions = $this->challenge->questions()->with(['answers', 'quiz.trainingCategory', 'quiz.trainingSubcategory'])->get();
         }
 
         return $this->questions;

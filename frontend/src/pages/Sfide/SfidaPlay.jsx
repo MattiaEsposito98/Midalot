@@ -5,6 +5,7 @@ import styles from "../Quiz/Quiz.module.css"
 import { logError } from "../../utils/logger"
 import QuestionAudio from "../../components/QuestionAudio/QuestionAudio"
 import { notifyChallengesChanged } from "../../hooks/useChallengeCount"
+import QuestionCategory from "./QuestionCategory"
 
 // Reti mobili instabili: si riprova qualche volta prima di dare errore. Se la
 // prima richiesta era in realta' arrivata, il "gia' risposto" conta come successo.
@@ -246,6 +247,8 @@ function SfidaPlay() {
           <div className={styles.questionHeader}>
             <h2 className={styles.questionText}>{currentQuestion.question_text}</h2>
           </div>
+
+          <QuestionCategory category={currentQuestion.category} subcategory={currentQuestion.subcategory} />
 
           {currentQuestion.image && (
             <div className={styles.mediaWrap}>
