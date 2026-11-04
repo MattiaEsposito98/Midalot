@@ -9,6 +9,9 @@ import "./index.css"
 import App from "./App"
 import { AuthProvider } from "./context/AuthContext"
 import { CookieConsentProvider } from "./context/CookieConsentContext"
+import { installSessionGuard } from "./utils/sessionGuard"
+
+installSessionGuard()
 
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>

@@ -159,9 +159,22 @@ class AuthController extends Controller
      */
     public function dailyBonus(Request $request)
     {
-        $granted = $this->grantDailyBonus($request->user()->id);
+        $user = $request->user();
+        $granted = $this->grantDailyBonus($user->id);
 
-        return response()->json(['granted' => $granted]);
+        $response = ['granted' => $granted];
+
+        // Il token scade SANCTUM_TOKEN_EXPIRATION minuti dopo la creazione,
+        // indipendentemente dall'uso: chi entra ogni giorno verrebbe buttato
+        // fuori comunque. Passati 7 giorni se ne emette uno nuovo; il vecchio
+        // resta valido pochi minuti per non rompere altre schede gia' aperte.
+        $current = $user->currentAccessToken();
+        if ($current instanceof PersonalAccessToken && $current->expires_at === null && $current->created_at?->lt(now()->subDays(7))) {
+            $response['token'] = $user->createToken('react')->plainTextToken;
+            $current->forceFill(['expires_at' => now()->addMinutes(10)])->save();
+        }
+
+        return response()->json($response);
     }
 
     public function user(Request $request)

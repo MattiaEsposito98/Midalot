@@ -28,18 +28,53 @@ export function AuthProvider({ children }) {
     // sessione gia' attiva non passa mai da login(), quindi senza questa
     // chiamata il bonus giornaliero scatterebbe solo il giorno in cui
     // l'utente reinserisce le credenziali. Qui si segnala "sono entrato
-    // oggi" ad ogni apertura dell'app.
-    const existingToken = localStorage.getItem("token")
-    if (!existingToken) return
+    // oggi" ad ogni apertura dell'app e quando la scheda torna visibile in
+    // un giorno nuovo (scheda lasciata aperta oltre la mezzanotte).
+    let lastBonusDay = null
 
-    fetch(`${API_BASE}/api/daily-bonus`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${existingToken}`,
-      },
-    }).catch(logError)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const claimDailyBonus = async () => {
+      const existingToken = localStorage.getItem("token")
+      if (!existingToken) return
+
+      const today = new Date().toDateString()
+      if (lastBonusDay === today) return
+      lastBonusDay = today
+
+      try {
+        const res = await fetch(`${API_BASE}/api/daily-bonus`, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${existingToken}`,
+          },
+        })
+
+        if (!res.ok) {
+          lastBonusDay = null
+          return
+        }
+
+        // Il backend rinnova i token piu' vecchi di qualche giorno, cosi' chi
+        // entra regolarmente non scade mai a 30 giorni dal primo login.
+        const data = await res.json()
+        if (data.token && localStorage.getItem("token") === existingToken) {
+          localStorage.setItem("token", data.token)
+          setToken(data.token)
+        }
+      } catch (err) {
+        lastBonusDay = null
+        logError(err)
+      }
+    }
+
+    const onVisible = () => {
+      if (document.visibilityState === "visible") claimDailyBonus()
+    }
+
+    claimDailyBonus()
+    document.addEventListener("visibilitychange", onVisible)
+
+    return () => document.removeEventListener("visibilitychange", onVisible)
   }, [])
 
   const login = (userData, tokenData) => {

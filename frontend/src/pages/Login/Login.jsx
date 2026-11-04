@@ -23,6 +23,15 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false)
 
   useEffect(() => {
+    try {
+      if (sessionStorage.getItem("sessionExpired")) {
+        sessionStorage.removeItem("sessionExpired")
+        setError("Sessione scaduta. Accedi di nuovo.")
+      }
+    } catch {
+      // storage non disponibile
+    }
+
     if (searchParams.get("verified")) {
       setSuccess("Email verificata con successo. Ora puoi accedere.")
       window.history.replaceState({}, document.title, "/login")
