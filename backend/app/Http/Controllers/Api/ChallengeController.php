@@ -7,13 +7,14 @@ use App\Mail\ChallengeInviteMail;
 use App\Models\Challenge;
 use App\Models\ChallengeAnswer;
 use App\Models\ChallengeAttempt;
+use App\Models\ChallengeParticipant;
 use App\Models\TrainingCategory;
 use App\Models\User;
 use App\Models\XpEvent;
+use App\Services\ChallengeLiveTimeline;
 use App\Services\ChallengeService;
 use App\Services\XpService;
 use Illuminate\Database\UniqueConstraintViolationException;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -22,8 +23,6 @@ use Illuminate\Support\Facades\Mail;
 
 class ChallengeController extends Controller
 {
-    private const EXPIRES_AFTER_HOURS = 72;
-
     private const MAX_OPEN_SENT = 5;
 
     public function __construct(private ChallengeService $service)
@@ -37,10 +36,10 @@ class ChallengeController extends Controller
     {
         $user = $request->user();
 
-        $this->expireOpenFor($user->id);
+        $this->refreshOpenFor($user->id);
 
-        $challenges = Challenge::with(['challenger', 'opponent', 'attempts'])
-            ->where(fn ($q) => $q->where('challenger_id', $user->id)->orWhere('opponent_id', $user->id))
+        $challenges = Challenge::with(['challenger', 'participants.user', 'attempts'])
+            ->whereHas('participants', fn ($q) => $q->where('user_id', $user->id))
             ->orderByDesc('id')
             ->limit(60)
             ->get();
@@ -61,10 +60,10 @@ class ChallengeController extends Controller
     {
         $user = $request->user();
 
-        $this->expireOpenFor($user->id);
+        $this->refreshOpenFor($user->id);
 
         $count = Challenge::where('status', 'open')
-            ->where(fn ($q) => $q->where('challenger_id', $user->id)->orWhere('opponent_id', $user->id))
+            ->whereHas('participants', fn ($q) => $q->where('user_id', $user->id)->whereIn('status', ['invited', 'accepted']))
             ->whereDoesntHave('attempts', fn ($a) => $a->where('user_id', $user->id)->where('completed', true))
             ->count();
 
@@ -92,6 +91,7 @@ class ChallengeController extends Controller
             'categories' => $categories,
             'all_questions_count' => $this->service->poolQuery(null)->count(),
             'required_questions' => Challenge::QUESTIONS_COUNT,
+            'max_invitees' => Challenge::MAX_PARTICIPANTS - 1,
         ]);
     }
 
@@ -133,44 +133,50 @@ class ChallengeController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'opponent_id' => ['required', 'integer', 'exists:users,id'],
+            'opponent_ids' => ['required', 'array', 'min:1', 'max:'.(Challenge::MAX_PARTICIPANTS - 1)],
+            'opponent_ids.*' => ['integer', 'distinct', 'exists:users,id'],
             'category_ids' => ['nullable', 'array'],
             'category_ids.*' => ['integer', 'exists:training_categories,id'],
+            'mode' => ['nullable', 'in:async,live'],
         ]);
 
+        $mode = $validated['mode'] ?? 'async';
         $user = $request->user();
-        $opponent = User::findOrFail($validated['opponent_id']);
 
-        if ($opponent->id === $user->id) {
-            return response()->json(['message' => 'Non puoi sfidare te stesso'], 422);
+        $opponents = User::whereIn('id', $validated['opponent_ids'])->get();
+
+        foreach ($opponents as $opponent) {
+            if ($opponent->id === $user->id) {
+                return response()->json(['message' => 'Non puoi sfidare te stesso'], 422);
+            }
+
+            if (! $opponent->hasVerifiedEmail() || ! $opponent->accepts_challenges) {
+                return response()->json(['message' => $opponent->nickname.' non puo ricevere sfide'], 422);
+            }
         }
 
-        if (! $opponent->hasVerifiedEmail() || ! $opponent->accepts_challenges) {
-            return response()->json(['message' => 'Questo utente non puo ricevere sfide'], 422);
-        }
-
-        $this->expireOpenFor($user->id);
+        $this->refreshOpenFor($user->id);
 
         if (Challenge::where('challenger_id', $user->id)->where('status', 'open')->count() >= self::MAX_OPEN_SENT) {
             return response()->json(['message' => 'Hai gia troppe sfide in attesa: aspetta che vengano giocate'], 422);
         }
 
-        $alreadyOpen = Challenge::where('status', 'open')
-            ->where(function ($q) use ($user, $opponent) {
-                $q->where(fn ($x) => $x->where('challenger_id', $user->id)->where('opponent_id', $opponent->id))
-                    ->orWhere(fn ($x) => $x->where('challenger_id', $opponent->id)->where('opponent_id', $user->id));
-            })
-            ->exists();
+        foreach ($opponents as $opponent) {
+            $alreadyOpen = Challenge::where('status', 'open')
+                ->whereHas('participants', fn ($q) => $q->where('user_id', $user->id))
+                ->whereHas('participants', fn ($q) => $q->where('user_id', $opponent->id))
+                ->exists();
 
-        if ($alreadyOpen) {
-            return response()->json(['message' => 'Hai gia una sfida aperta con questo utente'], 422);
+            if ($alreadyOpen) {
+                return response()->json(['message' => 'Hai gia una sfida aperta con '.$opponent->nickname], 422);
+            }
         }
 
         $categoryIds = ! empty($validated['category_ids'])
             ? array_values(array_unique(array_map('intval', $validated['category_ids'])))
             : null;
 
-        $questionIds = $this->service->pickQuestions($categoryIds, $user->id, $opponent->id);
+        $questionIds = $this->service->pickQuestions($categoryIds, [$user->id, ...$opponents->pluck('id')->all()]);
 
         if ($questionIds === null) {
             return response()->json([
@@ -178,15 +184,27 @@ class ChallengeController extends Controller
             ], 422);
         }
 
-        $challenge = DB::transaction(function () use ($user, $opponent, $categoryIds, $questionIds) {
+        $challenge = DB::transaction(function () use ($user, $opponents, $categoryIds, $questionIds, $mode) {
             $challenge = Challenge::create([
                 'challenger_id' => $user->id,
-                'opponent_id' => $opponent->id,
-                'mode' => 'async',
+                'opponent_id' => $opponents->first()->id,
+                'mode' => $mode,
                 'status' => 'open',
                 'category_ids' => $categoryIds,
-                'expires_at' => now()->addHours(self::EXPIRES_AFTER_HOURS),
+                'expires_at' => $mode === 'live'
+                    ? now()->addMinutes(ChallengeService::LIVE_INVITE_MINUTES)
+                    : now()->addHours(ChallengeService::ASYNC_HOURS),
             ]);
+
+            $challenge->participants()->create([
+                'user_id' => $user->id,
+                'status' => 'accepted',
+                'accepted_at' => now(),
+            ]);
+
+            foreach ($opponents as $opponent) {
+                $challenge->participants()->create(['user_id' => $opponent->id, 'status' => 'invited']);
+            }
 
             $rows = [];
             foreach ($questionIds as $position => $questionId) {
@@ -203,15 +221,33 @@ class ChallengeController extends Controller
             return $challenge;
         });
 
-        try {
-            $challenge->load(['challenger', 'opponent']);
-            Mail::to($opponent->email)->send(new ChallengeInviteMail($challenge));
-        } catch (\Throwable $e) {
-            // L'email e' un di piu': la sfida resta valida anche se l'invio fallisce.
-            Log::warning('Invio email sfida fallito: '.$e->getMessage());
-        }
+        $this->sendInvites($challenge, $user, $opponents->all());
 
         return response()->json(['id' => $challenge->id], 201);
+    }
+
+    /**
+     * Le email partono subito dopo la risposta all'utente (non rallentano la
+     * richiesta e non aspettano nessun worker): una per ogni invitato.
+     *
+     * @param  User[]  $opponents
+     */
+    private function sendInvites(Challenge $challenge, User $challenger, array $opponents): void
+    {
+        $challenge->setRelation('challenger', $challenger);
+
+        app()->terminating(function () use ($challenge, $opponents) {
+            foreach ($opponents as $opponent) {
+                try {
+                    $others = collect($opponents)->where('id', '!=', $opponent->id)->pluck('nickname')->all();
+
+                    Mail::to($opponent->email)->send(new ChallengeInviteMail($challenge, $opponent, $others));
+                } catch (\Throwable $e) {
+                    // L'email e' un di piu': la sfida resta valida anche se l'invio fallisce.
+                    Log::warning('Invio email sfida fallito: '.$e->getMessage());
+                }
+            }
+        });
     }
 
     public function show(Request $request, Challenge $challenge)
@@ -220,11 +256,15 @@ class ChallengeController extends Controller
         $this->authorizeParticipant($challenge, $user->id);
         $this->service->refreshStatus($challenge);
 
-        $challenge->load(['challenger', 'opponent', 'attempts']);
+        $challenge->load(['challenger', 'participants.user', 'attempts']);
 
         return response()->json($this->detail($challenge, $user->id));
     }
 
+    /**
+     * Lo sfidato rifiuta, lo sfidante annulla: possibile solo finche' gli
+     * altri non hanno iniziato a giocare.
+     */
     public function decline(Request $request, Challenge $challenge)
     {
         $user = $request->user();
@@ -235,26 +275,39 @@ class ChallengeController extends Controller
             return response()->json(['message' => 'Sfida non piu aperta'], 422);
         }
 
-        // Lo sfidato puo' rifiutare, lo sfidante annullare: in entrambi i casi
-        // solo se l'altro non ha ancora iniziato a giocare.
-        $otherStarted = $challenge->attempts()
-            ->where('user_id', $challenge->otherUserId($user->id))
-            ->exists();
+        if ($challenge->isChallenger($user->id)) {
+            $othersStarted = $challenge->live_started_at !== null
+                || $challenge->attempts()->where('user_id', '!=', $user->id)->exists();
 
-        if ($otherStarted) {
-            return response()->json(['message' => 'L\'altro giocatore ha gia iniziato la sfida'], 422);
+            if ($othersStarted) {
+                return response()->json(['message' => 'Gli altri giocatori hanno gia iniziato la sfida'], 422);
+            }
+
+            $challenge->update(['status' => 'cancelled']);
+
+            return response()->json(['status' => 'cancelled']);
         }
 
-        $challenge->update([
-            'status' => (int) $challenge->opponent_id === $user->id ? 'declined' : 'cancelled',
-        ]);
+        $participant = $challenge->participants()->where('user_id', $user->id)->firstOrFail();
 
-        return response()->json(['status' => $challenge->status]);
+        if (! $participant->isActive() || $challenge->attempts()->where('user_id', $user->id)->exists()) {
+            return response()->json(['message' => 'Hai gia iniziato questa sfida'], 422);
+        }
+
+        $participant->update(['status' => 'declined']);
+
+        if ($challenge->mode === 'live' && $challenge->live_started_at === null) {
+            $this->service->evaluateLobby($challenge);
+        } else {
+            $this->service->evaluateAfterDecline($challenge);
+        }
+
+        return response()->json(['status' => $challenge->refresh()->status]);
     }
 
     /**
-     * Inizia (o riprende) la propria partita. Le domande non contengono mai
-     * l'indicazione della risposta corretta.
+     * Inizia (o riprende) la propria partita differita. Le domande non
+     * contengono mai l'indicazione della risposta corretta.
      */
     public function start(Request $request, Challenge $challenge)
     {
@@ -266,6 +319,16 @@ class ChallengeController extends Controller
             return response()->json(['message' => 'Questa sfida non e piu giocabile'], 403);
         }
 
+        if ($challenge->mode === 'live') {
+            return response()->json(['message' => 'Questa e una sfida live: entra dalla sala live'], 403);
+        }
+
+        $participant = $this->activeParticipant($challenge, $user->id);
+
+        if (! $participant) {
+            return response()->json(['message' => 'Non puoi piu giocare questa sfida'], 403);
+        }
+
         try {
             $attempt = ChallengeAttempt::firstOrCreate(
                 ['challenge_id' => $challenge->id, 'user_id' => $user->id],
@@ -273,6 +336,10 @@ class ChallengeController extends Controller
             );
         } catch (UniqueConstraintViolationException) {
             $attempt = ChallengeAttempt::where('challenge_id', $challenge->id)->where('user_id', $user->id)->firstOrFail();
+        }
+
+        if ($participant->status === 'invited') {
+            $participant->update(['status' => 'accepted', 'accepted_at' => now()]);
         }
 
         if ($attempt->completed) {
@@ -320,7 +387,7 @@ class ChallengeController extends Controller
 
         $attempt = ChallengeAttempt::where('challenge_id', $challenge->id)->where('user_id', $user->id)->first();
 
-        if ($challenge->status !== 'open' || ! $attempt || $attempt->completed) {
+        if ($challenge->status !== 'open' || $challenge->mode === 'live' || ! $attempt || $attempt->completed) {
             return response()->json(['message' => 'Tentativo non valido'], 403);
         }
 
@@ -375,7 +442,7 @@ class ChallengeController extends Controller
 
         $attempt = ChallengeAttempt::where('challenge_id', $challenge->id)->where('user_id', $user->id)->first();
 
-        if ($challenge->status !== 'open' || ! $attempt || $attempt->completed) {
+        if ($challenge->status !== 'open' || $challenge->mode === 'live' || ! $attempt || $attempt->completed) {
             return response()->json(['message' => 'Tentativo non valido'], 403);
         }
 
@@ -404,18 +471,10 @@ class ChallengeController extends Controller
             }
         }
 
-        $answers = $attempt->answers()->get();
-
-        $attempt->update([
-            'score' => (int) $answers->sum('score'),
-            'total_time' => (int) $answers->sum('time_taken'),
-            'correct_answers' => $answers->where('is_correct', true)->count(),
-            'completed' => true,
-            'finished_at' => now(),
-        ]);
-
+        $this->service->closeAttempt($attempt);
         $this->service->completeIfReady($challenge);
-        $challenge->refresh()->load(['challenger', 'opponent', 'attempts']);
+
+        $challenge->refresh()->load(['challenger', 'participants.user', 'attempts']);
 
         return response()->json([
             'completed' => true,
@@ -438,19 +497,13 @@ class ChallengeController extends Controller
             ], 403);
         }
 
-        $challenge->load(['challenger', 'opponent', 'attempts.answers']);
-
-        $mine = $challenge->attempts->firstWhere('user_id', $user->id);
-        $theirs = $challenge->attempts->firstWhere('user_id', $challenge->otherUserId($user->id));
+        $challenge->load(['challenger', 'participants.user', 'attempts.answers']);
 
         $questions = $challenge->questions()->with('answers')->get();
 
         return response()->json([
             ...$this->detail($challenge, $user->id),
-            'questions' => $questions->map(function ($question) use ($mine, $theirs) {
-                $myAnswer = $mine?->answers->firstWhere('question_id', $question->id);
-                $theirAnswer = $theirs?->answers->firstWhere('question_id', $question->id);
-
+            'questions' => $questions->map(function ($question) use ($challenge) {
                 return [
                     'id' => $question->id,
                     'question_text' => $question->question_text,
@@ -460,11 +513,253 @@ class ChallengeController extends Controller
                         'answer_text' => $a->answer_text,
                         'is_correct' => (bool) $a->is_correct,
                     ])->values(),
-                    'mine' => $this->answerRow($myAnswer),
-                    'theirs' => $this->answerRow($theirAnswer),
+                    'results' => $challenge->attempts->map(function (ChallengeAttempt $attempt) use ($question) {
+                        $row = $this->answerRow($attempt->answers->firstWhere('question_id', $question->id));
+
+                        return $row ? ['user_id' => $attempt->user_id, ...$row] : null;
+                    })->filter()->values(),
                 ];
             })->values(),
         ]);
+    }
+
+    /**
+     * Un invitato accetta la sfida live. Quando tutti gli invitati hanno
+     * risposto la partita parte da sola.
+     */
+    public function liveAccept(Request $request, Challenge $challenge)
+    {
+        $user = $request->user();
+        $this->authorizeParticipant($challenge, $user->id);
+        $this->service->refreshStatus($challenge);
+
+        if ($challenge->mode !== 'live' || $challenge->status !== 'open' || $challenge->live_started_at !== null) {
+            return response()->json(['message' => 'Questa sfida live non e piu disponibile'], 422);
+        }
+
+        if ($challenge->isChallenger($user->id)) {
+            return response()->json(['message' => 'Sei gia dentro: avvia la sfida quando vuoi'], 403);
+        }
+
+        $participant = $challenge->participants()->where('user_id', $user->id)->firstOrFail();
+
+        if ($participant->status !== 'invited') {
+            return response()->json(['message' => 'Non puoi accettare questa sfida'], 422);
+        }
+
+        $participant->update(['status' => 'accepted', 'accepted_at' => now()]);
+
+        $this->service->evaluateLobby($challenge);
+
+        return response()->json([
+            'accepted' => true,
+            'started' => $challenge->refresh()->live_started_at !== null,
+        ]);
+    }
+
+    /**
+     * Lo sfidante avvia subito la live con chi ha gia accettato.
+     */
+    public function liveStart(Request $request, Challenge $challenge)
+    {
+        $user = $request->user();
+        $this->authorizeParticipant($challenge, $user->id);
+        $this->service->refreshStatus($challenge);
+
+        if (! $challenge->isChallenger($user->id)) {
+            return response()->json(['message' => 'Solo chi ha lanciato la sfida puo avviarla'], 403);
+        }
+
+        if (! $this->service->startLive($challenge)) {
+            return response()->json(['message' => 'Serve almeno un giocatore che ha accettato'], 422);
+        }
+
+        return response()->json(['started' => true]);
+    }
+
+    /**
+     * Stato della sala live (polling): attesa, conto alla rovescia, domanda
+     * corrente o fine. Non rivela mai l'esito delle risposte.
+     */
+    public function liveState(Request $request, Challenge $challenge)
+    {
+        $user = $request->user();
+        $this->authorizeParticipant($challenge, $user->id);
+        $this->service->refreshStatus($challenge);
+        $challenge->refresh()->load(['challenger', 'participants.user', 'attempts']);
+
+        $base = [
+            'server_time' => now()->toISOString(),
+            'challenge' => $this->summary($challenge, $user->id),
+        ];
+
+        if ($challenge->status === 'completed') {
+            return response()->json([...$base, 'phase' => 'finished']);
+        }
+
+        if ($challenge->status !== 'open') {
+            return response()->json([...$base, 'phase' => 'closed']);
+        }
+
+        if ($challenge->mode !== 'live') {
+            return response()->json([...$base, 'phase' => 'converted']);
+        }
+
+        $me = $challenge->participants->firstWhere('user_id', $user->id);
+
+        if (! $me->isActive()) {
+            return response()->json([...$base, 'phase' => 'missed']);
+        }
+
+        $roster = $challenge->participants->map(fn (ChallengeParticipant $p) => [
+            ...$this->playerPayload($p->user),
+            'status' => $p->status,
+            'is_me' => (int) $p->user_id === $user->id,
+        ])->values();
+
+        if ($challenge->live_started_at === null) {
+            $acceptedInvitees = $challenge->participants
+                ->where('status', 'accepted')
+                ->where('user_id', '!=', $challenge->challenger_id)
+                ->count();
+
+            return response()->json([
+                ...$base,
+                'phase' => 'lobby',
+                'role' => $challenge->isChallenger($user->id) ? 'challenger' : 'invitee',
+                'my_status' => $me->status,
+                'players' => $roster,
+                'can_start' => $challenge->isChallenger($user->id) && $acceptedInvitees >= 1,
+                'expires_at' => $challenge->expires_at->toISOString(),
+            ]);
+        }
+
+        $timeline = new ChallengeLiveTimeline($challenge);
+
+        if (! $timeline->hasStarted()) {
+            return response()->json([
+                ...$base,
+                'phase' => 'countdown',
+                'players' => $roster->where('status', 'accepted')->values(),
+                'starting_in_ms' => (int) now()->diffInMilliseconds($challenge->live_started_at),
+            ]);
+        }
+
+        $myAttempt = $challenge->attempts->firstWhere('user_id', $user->id);
+
+        if (! $myAttempt) {
+            return response()->json([...$base, 'phase' => 'missed']);
+        }
+
+        $window = $timeline->currentWindow();
+
+        if (! $window) {
+            // Tutte le finestre chiuse: refreshStatus ha gia' provato a chiudere.
+            return response()->json([...$base, 'phase' => 'finishing']);
+        }
+
+        foreach ($challenge->attempts as $attempt) {
+            $this->service->syncLiveTimeouts($timeline, $attempt);
+        }
+
+        $question = $window['question'];
+        $others = $challenge->attempts->where('user_id', '!=', $user->id);
+
+        $answeredOthers = $others->filter(
+            fn (ChallengeAttempt $a) => $a->answers()->where('question_id', $question->id)->where('is_timeout', false)->exists()
+        )->count();
+
+        return response()->json([
+            ...$base,
+            'phase' => 'question',
+            'total_questions' => $timeline->questions()->count(),
+            'question' => [
+                'index' => $window['index'],
+                'id' => $question->id,
+                'question_text' => $question->question_text,
+                'image' => $question->image_path ? asset('storage/'.$question->image_path) : null,
+                'audio' => $question->resolvedAudioUrl(),
+                'audio_start_seconds' => $question->audio_start_seconds,
+                'audio_end_seconds' => $question->audio_end_seconds,
+                'video' => $question->video_path ? asset('storage/'.$question->video_path) : null,
+                'starts_at' => $window['starts_at']->toISOString(),
+                'ends_at' => $window['ends_at']->toISOString(),
+                'answers' => $question->answers->map(fn ($a) => [
+                    'id' => $a->id,
+                    'answer_text' => $a->answer_text,
+                ])->values(),
+            ],
+            'has_answered' => $myAttempt->answers()->where('question_id', $question->id)->where('is_timeout', false)->exists(),
+            'others_answered' => $answeredOthers,
+            'others_total' => $others->count(),
+        ]);
+    }
+
+    /**
+     * Risposta live: il tempo lo misura il server dall'inizio della finestra
+     * della domanda, non il client.
+     */
+    public function liveAnswer(Request $request, Challenge $challenge)
+    {
+        $validated = $request->validate([
+            'question_id' => ['required', 'integer'],
+            'answer_id' => ['required', 'integer'],
+        ]);
+
+        $user = $request->user();
+        $this->authorizeParticipant($challenge, $user->id);
+        $this->service->refreshStatus($challenge);
+
+        if ($challenge->status !== 'open' || $challenge->mode !== 'live' || $challenge->live_started_at === null) {
+            return response()->json(['message' => 'Sfida live non attiva'], 403);
+        }
+
+        $timeline = new ChallengeLiveTimeline($challenge);
+        $window = $timeline->currentWindow();
+
+        if (! $window || (int) $window['question']->id !== (int) $validated['question_id']) {
+            return response()->json(['message' => 'Tempo scaduto per questa domanda'], 403);
+        }
+
+        $attempt = ChallengeAttempt::where('challenge_id', $challenge->id)->where('user_id', $user->id)->first();
+
+        if (! $attempt || $attempt->completed) {
+            return response()->json(['message' => 'Tentativo non valido'], 403);
+        }
+
+        $question = $window['question'];
+
+        if (! $question->answers->contains('id', (int) $validated['answer_id'])) {
+            return response()->json(['message' => 'Risposta non valida'], 422);
+        }
+
+        $this->service->syncLiveTimeouts($timeline, $attempt);
+
+        if ($attempt->answers()->where('question_id', $question->id)->exists()) {
+            return response()->json(['message' => 'Hai gia risposto a questa domanda'], 403);
+        }
+
+        $elapsedMs = (int) $window['starts_at']->diffInMilliseconds(now());
+
+        $scored = $this->service->scoreAnswer(
+            $question,
+            (int) $validated['answer_id'],
+            $elapsedMs,
+            null,
+            (int) $attempt->answers()->sum('score')
+        );
+
+        try {
+            ChallengeAnswer::create([
+                'challenge_attempt_id' => $attempt->id,
+                'question_id' => $question->id,
+                ...$scored,
+            ]);
+        } catch (UniqueConstraintViolationException) {
+            return response()->json(['message' => 'Hai gia risposto a questa domanda'], 403);
+        }
+
+        return response()->json(['recorded' => true]);
     }
 
     private function answerRow(?ChallengeAnswer $answer): ?array
@@ -487,12 +782,23 @@ class ChallengeController extends Controller
         abort_unless($challenge->involves($userId), 404);
     }
 
-    private function expireOpenFor(int $userId): void
+    private function activeParticipant(Challenge $challenge, int $userId): ?ChallengeParticipant
+    {
+        $participant = $challenge->participants()->where('user_id', $userId)->first();
+
+        return $participant && $participant->isActive() ? $participant : null;
+    }
+
+    /**
+     * Aggiorna lo stato delle sfide aperte dell'utente (scadenze, inviti live
+     * non accettati, chiusura delle live finite).
+     */
+    private function refreshOpenFor(int $userId): void
     {
         Challenge::where('status', 'open')
-            ->where('expires_at', '<', now())
-            ->where(fn ($q) => $q->where('challenger_id', $userId)->orWhere('opponent_id', $userId))
-            ->update(['status' => 'expired']);
+            ->whereHas('participants', fn ($q) => $q->where('user_id', $userId))
+            ->get()
+            ->each(fn (Challenge $c) => $this->service->refreshStatus($c));
     }
 
     private function categoryNames(Challenge $challenge): array
@@ -515,22 +821,48 @@ class ChallengeController extends Controller
 
     private function summary(Challenge $challenge, int $userId): array
     {
-        $other = (int) $challenge->challenger_id === $userId ? $challenge->opponent : $challenge->challenger;
+        $me = $challenge->participants->firstWhere('user_id', $userId);
         $myAttempt = $challenge->attempts->firstWhere('user_id', $userId);
         $closed = $challenge->isClosed();
+
+        $others = $challenge->participants
+            ->where('user_id', '!=', $userId)
+            ->map(fn (ChallengeParticipant $p) => [...$this->playerPayload($p->user), 'status' => $p->status])
+            ->values();
+
+        $result = null;
+        $myRank = null;
+
+        if ($challenge->status === 'completed') {
+            $ranked = $this->service->ranking($challenge->attempts);
+            $myRank = $ranked->first(fn ($row) => (int) $row['attempt']->user_id === $userId)['rank'] ?? null;
+
+            if ($myRank === 1) {
+                $result = $challenge->winner_id === null ? 'draw' : 'won';
+            } elseif ($myRank !== null) {
+                $result = 'lost';
+            }
+        }
+
+        $myTurn = $challenge->status === 'open'
+            && $me
+            && $me->isActive()
+            && ! ($myAttempt?->completed);
 
         return [
             'id' => $challenge->id,
             'status' => $challenge->status,
             'mode' => $challenge->mode,
-            'direction' => (int) $challenge->challenger_id === $userId ? 'sent' : 'received',
-            'other' => $this->playerPayload($other),
+            'direction' => $challenge->isChallenger($userId) ? 'sent' : 'received',
+            'challenger' => $this->playerPayload($challenge->challenger),
+            'others' => $others,
+            'participants_count' => $challenge->participants->count(),
             'expires_at' => $challenge->expires_at->toISOString(),
-            'my_turn' => $challenge->status === 'open' && ! ($myAttempt?->completed),
+            'my_turn' => (bool) $myTurn,
             'my_started' => (bool) $myAttempt,
-            'result' => $closed && $challenge->status === 'completed'
-                ? ($challenge->winner_id === null ? 'draw' : ((int) $challenge->winner_id === $userId ? 'won' : 'lost'))
-                : null,
+            'live_started' => $challenge->live_started_at !== null,
+            'result' => $closed ? $result : null,
+            'my_rank' => $myRank,
             'categories' => $this->categoryNames($challenge),
         ];
     }
@@ -538,28 +870,46 @@ class ChallengeController extends Controller
     private function detail(Challenge $challenge, int $userId): array
     {
         $payload = $this->summary($challenge, $userId);
+        $closed = $challenge->isClosed();
+        $ranked = $closed ? $this->service->ranking($challenge->attempts) : collect();
 
-        $mine = $challenge->attempts->firstWhere('user_id', $userId);
-        $theirs = $challenge->attempts->firstWhere('user_id', $challenge->otherUserId($userId));
+        $players = $challenge->participants->map(function (ChallengeParticipant $p) use ($challenge, $userId, $closed, $ranked) {
+            $attempt = $challenge->attempts->firstWhere('user_id', $p->user_id);
 
-        $payload['me'] = [
-            'completed' => (bool) $mine?->completed,
-        ];
-        $payload['opponent_state'] = [
-            'started' => (bool) $theirs,
-            'completed' => (bool) $theirs?->completed,
-        ];
+            $row = [
+                ...$this->playerPayload($p->user),
+                'status' => $p->status,
+                'is_me' => (int) $p->user_id === $userId,
+                'is_challenger' => $challenge->isChallenger((int) $p->user_id),
+                'started' => (bool) $attempt,
+                'completed' => (bool) $attempt?->completed,
+            ];
+
+            // I punteggi (anche il proprio) restano nascosti finche' la sfida e'
+            // aperta: il totale rivelerebbe quante risposte sono giuste.
+            if ($closed && $attempt?->completed) {
+                $row['score'] = $attempt->score;
+                $row['total_time'] = $attempt->total_time;
+                $row['correct_answers'] = $attempt->correct_answers;
+                $row['rank'] = $ranked->first(fn ($r) => (int) $r['attempt']->user_id === (int) $p->user_id)['rank'] ?? null;
+            }
+
+            return $row;
+        })->values();
+
+        $payload['players'] = $closed
+            ? $players->sortBy(fn ($p) => $p['rank'] ?? 99)->values()
+            : $players;
+        $payload['me'] = $players->firstWhere('is_me', true);
         $payload['total_questions'] = Challenge::QUESTIONS_COUNT;
 
-        // I punteggi (anche il proprio) restano nascosti finche' la sfida e'
-        // aperta: il totale rivelerebbe quante risposte sono giuste.
-        if ($challenge->isClosed()) {
-            $payload['me']['score'] = $mine?->score;
-            $payload['me']['total_time'] = $mine?->total_time;
-            $payload['me']['correct_answers'] = $mine?->correct_answers;
-            $payload['opponent_state']['score'] = $theirs?->score;
-            $payload['opponent_state']['total_time'] = $theirs?->total_time;
-            $payload['opponent_state']['correct_answers'] = $theirs?->correct_answers;
+        $iAmChallenger = $challenge->isChallenger($userId);
+        $payload['can_give_up'] = $challenge->status === 'open'
+            && ($iAmChallenger
+                ? $challenge->live_started_at === null && ! $challenge->attempts->where('user_id', '!=', $userId)->count()
+                : ($payload['me']['status'] ?? null) === 'invited' && ! $payload['me']['started']);
+
+        if ($closed) {
             $payload['xp_awarded'] = (int) XpEvent::where('user_id', $userId)
                 ->where('source', 'challenge')
                 ->where('source_id', $challenge->id)

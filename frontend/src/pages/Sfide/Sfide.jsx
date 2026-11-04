@@ -22,14 +22,18 @@ function formatDeadline(iso) {
 }
 
 function ChallengeCard({ challenge }) {
-  const { other, direction, my_turn: myTurn, result, status } = challenge
+  const { challenger, others, direction, my_turn: myTurn, result, status, mode } = challenge
+  const live = mode === "live" && status === "open"
 
   return (
     <div className={styles.card}>
       <div className={styles.cardMain}>
         <div className={styles.versus}>
-          <i className="bi bi-lightning-charge-fill"></i> {direction === "sent" ? "Sfida a" : "Sfida da"}{" "}
-          {other.nickname} <span className={styles.meta}>(Lv {other.level})</span>
+          <i className="bi bi-lightning-charge-fill"></i>{" "}
+          {direction === "sent"
+            ? `Sfida a ${others.map((o) => o.nickname).join(", ")}`
+            : `Sfida da ${challenger.nickname}${others.length > 1 ? ` + ${others.length - 1} altri` : ""}`}
+          {others.length > 1 && direction === "sent" && <span className={styles.meta}> ({others.length + 1} giocatori)</span>}
         </div>
         <div className={styles.meta}>
           {challenge.categories.join(", ")}
@@ -38,12 +42,16 @@ function ChallengeCard({ challenge }) {
       </div>
 
       <div className="d-flex align-items-center gap-2">
+        {live && <span className={`${styles.pill} ${styles.livePill}`}>LIVE</span>}
         {result && (
           <span className={`${styles.pill} ${styles[result]}`}>{RESULT_LABEL[result]}</span>
         )}
         {STATUS_LABEL[status] && <span className={styles.pill}>{STATUS_LABEL[status]}</span>}
-        <Link className={`btn btn-sm ${myTurn ? "btn-warning fw-bold" : "btn-outline-dark"}`} to={`/sfide/${challenge.id}`}>
-          {myTurn ? "Gioca" : "Apri"}
+        <Link
+          className={`btn btn-sm ${myTurn ? "btn-warning fw-bold" : "btn-outline-dark"}`}
+          to={live && myTurn ? `/sfide/${challenge.id}/live` : `/sfide/${challenge.id}`}
+        >
+          {myTurn ? (live ? "Entra" : "Gioca") : "Apri"}
         </Link>
       </div>
     </div>

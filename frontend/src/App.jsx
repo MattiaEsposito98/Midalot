@@ -27,6 +27,7 @@ import Sfide from "./pages/Sfide/Sfide"
 import NuovaSfida from "./pages/Sfide/NuovaSfida"
 import SfidaDettaglio from "./pages/Sfide/SfidaDettaglio"
 import SfidaPlay from "./pages/Sfide/SfidaPlay"
+import SfidaLive from "./pages/Sfide/SfidaLive"
 import Training from "./pages/Training/Training"
 import TrainingPlay from "./pages/Training/TrainingPlay"
 import TrainingLeaderboard from "./pages/Training/TrainingLeaderboard"
@@ -110,6 +111,7 @@ function App() {
           <Route path="/sfide/nuova" element={<NuovaSfida />} />
           <Route path="/sfide/:id" element={<SfidaDettaglio />} />
           <Route path="/sfide/:id/gioca" element={<SfidaPlay />} />
+          <Route path="/sfide/:id/live" element={<SfidaLive />} />
           <Route path="/minigiochi" element={<MinigiochiList />} />
           <Route path="/minigiochi/:id" element={<MinigiocoPlay />} />
           <Route path="/minigiochi/:id/leaderboard" element={<Leaderboard kind="minigioco" />} />

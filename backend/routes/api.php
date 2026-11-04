@@ -152,6 +152,10 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/challenges/{challenge}/answer', [ChallengeController::class, 'answer']);
     Route::post('/challenges/{challenge}/finish', [ChallengeController::class, 'finish']);
     Route::get('/challenges/{challenge}/review', [ChallengeController::class, 'review']);
+    Route::post('/challenges/{challenge}/live/accept', [ChallengeController::class, 'liveAccept']);
+    Route::post('/challenges/{challenge}/live/start', [ChallengeController::class, 'liveStart']);
+    Route::get('/challenges/{challenge}/live', [ChallengeController::class, 'liveState']);
+    Route::post('/challenges/{challenge}/live/answer', [ChallengeController::class, 'liveAnswer']);
 
     Route::get('/midalario/quizzes', [MidalarioController::class, 'index']);
     Route::post('/midalario/quizzes/{quiz}/join', [MidalarioController::class, 'join']);

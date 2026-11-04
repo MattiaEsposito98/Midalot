@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import api from "../service/api"
 
-const REFRESH_MS = 60000
+const REFRESH_MS = 20000
 
 // Da emettere dopo aver creato, giocato o chiuso una sfida: aggiorna subito il badge.
 export const CHALLENGES_CHANGED = "challenges:changed"

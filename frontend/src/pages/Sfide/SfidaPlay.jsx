@@ -6,6 +6,28 @@ import { logError } from "../../utils/logger"
 import QuestionAudio from "../../components/QuestionAudio/QuestionAudio"
 import { notifyChallengesChanged } from "../../hooks/useChallengeCount"
 
+// Reti mobili instabili: si riprova qualche volta prima di dare errore. Se la
+// prima richiesta era in realta' arrivata, il "gia' risposto" conta come successo.
+async function postWithRetry(path, body) {
+  let lastError
+
+  for (let attempt = 0; attempt < 3; attempt++) {
+    try {
+      return await api.post(path, body)
+    } catch (err) {
+      lastError = err
+      const status = err.response?.status
+
+      if (status === 403 && /gia risposto/.test(err.response?.data?.message || "")) return null
+      if (status && status < 500) throw err
+
+      await new Promise((resolve) => setTimeout(resolve, 600))
+    }
+  }
+
+  throw lastError
+}
+
 // Gioco di una sfida: come il Training ma senza mai mostrare se la risposta
 // e' giusta, cosi' le soluzioni non escono prima della chiusura della sfida.
 function SfidaPlay() {
@@ -90,7 +112,7 @@ function SfidaPlay() {
     clearInterval(timerRef.current)
 
     try {
-      await api.post(`/challenges/${id}/answer`, {
+      await postWithRetry(`/challenges/${id}/answer`, {
         question_id: question.id,
         answer_id: answerId,
         time_taken: timeTaken,

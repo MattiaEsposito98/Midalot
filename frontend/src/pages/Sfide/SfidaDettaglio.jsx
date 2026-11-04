@@ -9,8 +9,15 @@ import styles from "./Sfide.module.css"
 
 const CLOSED_LABEL = {
   expired: "Sfida scaduta: nessuno può più giocarla.",
-  declined: "Sfida rifiutata.",
+  declined: "Sfida rifiutata da tutti.",
   cancelled: "Sfida annullata.",
+}
+
+const STATUS_TAG = {
+  invited: { label: "Invitato", cls: "" },
+  accepted: { label: "In gioco", cls: styles.statusOk },
+  declined: { label: "Ha rifiutato", cls: styles.statusOut },
+  missed: { label: "Non ha giocato", cls: styles.statusOut },
 }
 
 function formatDeadline(iso) {
@@ -23,7 +30,16 @@ function formatDeadline(iso) {
   })
 }
 
+function resultBanner(challenge) {
+  if (challenge.status !== "completed") return CLOSED_LABEL[challenge.status] || null
+  if (challenge.result === "won") return "Hai vinto! 🏆"
+  if (challenge.result === "draw") return "Pareggio al primo posto"
+  return `Sei arrivato ${challenge.my_rank}° su ${challenge.players.filter((p) => p.rank).length}`
+}
+
 function Review({ review }) {
+  const nicknames = Object.fromEntries(review.players.map((p) => [p.id, p.is_me ? "Tu" : p.nickname]))
+
   return (
     <div className="mt-4">
       <h2 className={styles.sectionTitle}>Domande e risposte</h2>
@@ -37,13 +53,8 @@ function Review({ review }) {
           {q.image && <img src={q.image} alt="Domanda" className="img-fluid mb-2" style={{ maxHeight: 180 }} />}
 
           {q.answers.map((a) => {
-            const pickedByMe = q.mine?.answer_id === a.id
-            const pickedByThem = q.theirs?.answer_id === a.id
-            const cls = a.is_correct
-              ? styles.reviewCorrect
-              : pickedByMe || pickedByThem
-                ? styles.reviewWrongPick
-                : ""
+            const pickers = q.results.filter((r) => r.answer_id === a.id)
+            const cls = a.is_correct ? styles.reviewCorrect : pickers.length ? styles.reviewWrongPick : ""
 
             return (
               <div key={a.id} className={`${styles.reviewAnswer} ${cls}`}>
@@ -51,20 +62,56 @@ function Review({ review }) {
                   {a.is_correct && <i className="bi bi-check-circle-fill text-success me-1"></i>}
                   {a.answer_text}
                 </span>
-                <span>
-                  {pickedByMe && <span className={styles.tag}>Tu</span>}{" "}
-                  {pickedByThem && <span className={styles.tag}>{review.other.nickname}</span>}
+                <span className="d-flex flex-wrap gap-1">
+                  {pickers.map((r) => (
+                    <span key={r.user_id} className={styles.tag}>
+                      {nicknames[r.user_id]}
+                    </span>
+                  ))}
                 </span>
               </div>
             )
           })}
 
-          <div className={`${styles.meta} mt-1`}>
-            {q.mine?.is_timeout && "Tu: tempo scaduto. "}
-            {q.theirs?.is_timeout && `${review.other.nickname}: tempo scaduto.`}
-          </div>
+          {q.results.some((r) => r.is_timeout) && (
+            <div className={`${styles.meta} mt-1`}>
+              Tempo scaduto:{" "}
+              {q.results
+                .filter((r) => r.is_timeout)
+                .map((r) => nicknames[r.user_id])
+                .join(", ")}
+            </div>
+          )}
         </div>
       ))}
+    </div>
+  )
+}
+
+function PlayerRow({ player, closed }) {
+  const tag = STATUS_TAG[player.status]
+  const showTag = player.status === "declined" || player.status === "missed" || (!closed && !player.completed)
+
+  return (
+    <div className={`${styles.playerRow} ${player.is_me ? styles.playerRowMe : ""}`}>
+      <span className="d-flex align-items-center gap-2">
+        {closed && player.rank ? (
+          <span className={`${styles.rankBadge} ${player.rank === 1 ? styles.rankFirst : ""}`}>{player.rank}</span>
+        ) : null}
+        <span>
+          {player.is_me ? "Tu" : player.nickname} <span className={styles.meta}>Lv {player.level}</span>
+          {player.is_challenger && <span className={styles.meta}> · ha lanciato la sfida</span>}
+        </span>
+      </span>
+
+      <span className="d-flex align-items-center gap-2">
+        {closed && player.score !== undefined && <strong>{formatQuizScore(player.score)}</strong>}
+        {!closed && player.completed && <span className={`${styles.statusTag} ${styles.statusOk}`}>Ha finito</span>}
+        {!closed && !player.completed && player.started && <span className={styles.statusTag}>Sta giocando</span>}
+        {showTag && tag && !(!closed && player.started) && (
+          <span className={`${styles.statusTag} ${tag.cls}`}>{tag.label}</span>
+        )}
+      </span>
     </div>
   )
 }
@@ -105,7 +152,7 @@ function SfidaDettaglio() {
     }
   }, [id])
 
-  async function decline() {
+  async function giveUp() {
     setBusy(true)
 
     try {
@@ -138,44 +185,42 @@ function SfidaDettaglio() {
     )
   }
 
-  const { other, status } = challenge
+  const { status, me } = challenge
   const closed = status !== "open"
-  const canGiveUp = status === "open" && !challenge.opponent_state.started
-  const meScore = challenge.me.score
-  const otherScore = challenge.opponent_state.score
+  const others = challenge.players.filter((p) => !p.is_me)
+  const waitingFor = others.filter((p) => ["invited", "accepted"].includes(p.status) && !p.completed)
+  const banner = resultBanner(challenge)
 
   return (
     <div className={`container ${styles.page}`}>
       <div className={`${styles.panel} ${styles.panelWide}`}>
-        <div className={styles.meta}>{challenge.categories.join(", ")}</div>
+        <div className={styles.meta}>
+          {challenge.categories.join(", ")} · {challenge.mode === "live" ? "Live" : "Differita"} ·{" "}
+          {challenge.players.length} giocatori
+        </div>
 
-        {status === "completed" && (
-          <div className={styles.resultBanner}>
-            {challenge.result === "won" && "Hai vinto! 🏆"}
-            {challenge.result === "lost" && "Hai perso"}
-            {challenge.result === "draw" && "Pareggio"}
-          </div>
-        )}
+        {banner && <div className={styles.resultBanner}>{banner}</div>}
 
-        {CLOSED_LABEL[status] && <div className={styles.resultBanner}>{CLOSED_LABEL[status]}</div>}
-
-        <div className={styles.scoreRow}>
-          <div className={styles.player}>
-            Tu
-            {closed && <span className={styles.playerScore}>{formatQuizScore(meScore)}</span>}
-          </div>
-          <div className={styles.vs}>VS</div>
-          <div className={styles.player}>
-            {other.nickname} <span className={styles.meta}>Lv {other.level}</span>
-            {closed && <span className={styles.playerScore}>{formatQuizScore(otherScore)}</span>}
-          </div>
+        <div className="my-3">
+          {challenge.players.map((p) => (
+            <PlayerRow key={p.id} player={p} closed={closed} />
+          ))}
         </div>
 
         {status === "completed" && <XpGain awarded={challenge.xp_awarded} xp={challenge.xp} />}
 
         {status === "open" && (
           <div className="text-center">
-            {!challenge.me.completed ? (
+            {!me.completed && challenge.mode === "live" ? (
+              <>
+                <p className={styles.meta}>
+                  Sfida live: si gioca in diretta con gli altri giocatori, con le domande in contemporanea.
+                </p>
+                <Link to={`/sfide/${id}/live`} className="btn btn-warning btn-lg fw-bold">
+                  <i className="bi bi-lightning-charge-fill"></i> Entra nella sala live
+                </Link>
+              </>
+            ) : !me.completed ? (
               <>
                 <p className={styles.meta}>
                   7 domande a tempo, più sei veloce più punti fai. Le risposte giuste si vedranno a sfida conclusa.
@@ -187,14 +232,14 @@ function SfidaDettaglio() {
               </>
             ) : (
               <p className="fw-bold">
-                Hai finito! In attesa che {other.nickname} giochi: risultati e risposte appariranno a sfida conclusa
-                (entro {formatDeadline(challenge.expires_at)}).
+                Hai finito! In attesa di {waitingFor.map((p) => p.nickname).join(", ") || "gli altri giocatori"}:
+                risultati e risposte appariranno a sfida conclusa (entro {formatDeadline(challenge.expires_at)}).
               </p>
             )}
 
-            {canGiveUp && (
+            {challenge.can_give_up && (
               <div className="mt-3">
-                <button className="btn btn-outline-danger btn-sm" disabled={busy} onClick={decline}>
+                <button className="btn btn-outline-danger btn-sm" disabled={busy} onClick={giveUp}>
                   {challenge.direction === "sent" ? "Annulla sfida" : "Rifiuta sfida"}
                 </button>
               </div>
