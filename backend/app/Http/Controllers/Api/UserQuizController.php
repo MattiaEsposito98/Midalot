@@ -296,6 +296,7 @@ class UserQuizController extends Controller
             return [
                 'user' => [
                     'nickname' => $attempt->user->nickname ?? 'Utente',
+                    'avatar_url' => $attempt->user?->avatar_url,
                     'badges' => $attempt->user->badges ?? [],
                 ],
                 'score' => $attempt->score ?? 0,

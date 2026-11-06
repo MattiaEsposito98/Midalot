@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom"
 import { useAuth } from "../../context/useAuth"
 import css from "./XpBar.module.css"
 
@@ -33,6 +34,12 @@ function XpBar({ variant = "card", xp: xpProp }) {
             {xp.into_level}/{xp.level_span}
           </span>
         </div>
+        {!xpProp && user?.coins != null && (
+          <Link to="/avatar?vista=negozio" className={css.navCoins} title="Le tue monete: vai al negozio">
+            <i className="bi bi-coin"></i>
+            {user.coins}
+          </Link>
+        )}
       </div>
     )
   }

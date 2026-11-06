@@ -27,6 +27,11 @@ function XpGain({ awarded, xp, alreadyEarnedHint, refresh = false }) {
       {awarded > 0 ? (
         <strong className={css.gain}>
           <i className="bi bi-stars"></i> +{awarded} XP
+          {xp?.coins_awarded > 0 && (
+            <span className={css.coins}>
+              <i className="bi bi-coin"></i> +{xp.coins_awarded} monete
+            </span>
+          )}
         </strong>
       ) : (
         alreadyEarnedHint && <span className={css.hint}>{alreadyEarnedHint}</span>

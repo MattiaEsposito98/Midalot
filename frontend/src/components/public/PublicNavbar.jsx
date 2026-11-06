@@ -3,6 +3,7 @@ import { useAuth } from "../../context/useAuth"
 import css from "./PublicNavbarFooter.module.css"
 import UserBadge from "../UserBadge/UserBadge"
 import XpBar from "../XpBar/XpBar"
+import UserAvatar from "../UserAvatar/UserAvatar"
 import { useChallengeCount } from "../../hooks/useChallengeCount"
 
 function PublicNavbar() {
@@ -102,7 +103,7 @@ function PublicNavbar() {
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                   >
-                    <i className="bi bi-person-circle"></i>
+                    <UserAvatar url={user?.avatar_url} name={user?.nickname || user?.name} size={26} />
                     {user?.name || user?.nickname || "Profilo"}
                     <UserBadge badges={user?.badges} />
                   </a>
@@ -112,6 +113,20 @@ function PublicNavbar() {
                       <Link className="dropdown-item" to="/profilo">
                         <i className="bi bi-person-lines-fill me-2"></i>
                         Il mio profilo
+                      </Link>
+                    </li>
+
+                    <li>
+                      <Link className="dropdown-item" to="/avatar">
+                        <i className="bi bi-person-badge me-2"></i>
+                        Il mio avatar
+                      </Link>
+                    </li>
+
+                    <li>
+                      <Link className="dropdown-item" to="/avatar?vista=negozio">
+                        <i className="bi bi-shop me-2"></i>
+                        Negozio
                       </Link>
                     </li>
 

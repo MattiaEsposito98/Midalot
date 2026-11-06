@@ -1,9 +1,10 @@
-import { useEffect } from "react"
+import { lazy, Suspense, useEffect } from "react"
 import { Routes, Route, Navigate, useLocation } from "react-router-dom"
 
 import { initAnalytics, trackPageview } from "./utils/analytics"
 import { useCookieConsent } from "./hooks/useCookieConsent"
 import CookieBanner from "./components/CookieBanner/CookieBanner"
+import AvatarNews from "./components/AvatarNews/AvatarNews"
 
 import PublicLayout from "./layouts/PublicLayout"
 import PrivateLayout from "./layouts/PrivateLayout"
@@ -42,6 +43,8 @@ import MinigiochiList from "./pages/Minigiochi/MinigiochiList"
 import MinigiocoPlay from "./pages/Minigiochi/MinigiocoPlay"
 import MinigiocoReview from "./pages/Minigiochi/MinigiocoReview"
 
+// Il 3D (three.js) pesa: si scarica solo quando si apre la pagina avatar.
+const Avatar = lazy(() => import("./pages/Avatar/Avatar"))
 function App() {
   const location = useLocation()
   const { consent } = useCookieConsent()
@@ -61,6 +64,7 @@ function App() {
   return (
     <>
       <CookieBanner />
+      <AvatarNews />
       <Routes>
         {/* AREA PUBBLICA */}
         <Route element={<PublicLayout />}>
@@ -100,6 +104,14 @@ function App() {
           <Route path="/quiz/:id" element={<Quiz />} />
           <Route path="/storico" element={<Storico />} />
           <Route path="/profilo" element={<Profilo />} />
+          <Route
+            path="/avatar"
+            element={
+              <Suspense fallback={<div className="container py-5 text-center">Caricamento avatar...</div>}>
+                <Avatar />
+              </Suspense>
+            }
+          />
           <Route path="/cambia-password" element={<CambiaPassword />} />
           <Route path="/quiz/:id/leaderboard" element={<Leaderboard />} />
           <Route path="/quiz/:id/review" element={<QuizReview />} />

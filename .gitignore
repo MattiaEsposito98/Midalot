@@ -6,3 +6,6 @@ SECURITY-AUDIT.md
 # non devono mai finire su GitHub.
 backups/
 *.sql
+
+# Pacchetti 3D originali (Quaternius, CC0): solo materiale di lavoro, nel sito vanno i modelli convertiti
+assets-src/

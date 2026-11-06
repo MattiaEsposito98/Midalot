@@ -5,6 +5,7 @@ import api from "../../service/api"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import UserBadge from "../UserBadge/UserBadge"
+import UserAvatar from "../UserAvatar/UserAvatar"
 
 const PERIODS = {
   weekly: { label: "Settimana", title: "Top 5 della settimana", empty: "Nessun risultato per questa settimana." },
@@ -56,6 +57,7 @@ function WeeklyLeaderboardBox() {
           {top.map((r) => (
             <li key={r.position} className={css.leaderboardRow}>
               <span className={css.leaderboardRank}>#{r.position}</span>
+              <UserAvatar url={r.avatar_url} name={r.nickname} size={26} />
               <span className={css.leaderboardName}>{r.nickname}</span>
               <UserBadge badges={r.badges} />
               <span className={css.leaderboardScore}>{formatQuizScore(r.total_score)}</span>

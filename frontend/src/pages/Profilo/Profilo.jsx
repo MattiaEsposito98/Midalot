@@ -7,6 +7,7 @@ import { logError } from "../../utils/logger"
 import { API_BASE } from "../../service/api"
 import UserBadge from "../../components/UserBadge/UserBadge"
 import XpBar from "../../components/XpBar/XpBar"
+import UserAvatar from "../../components/UserAvatar/UserAvatar"
 
 function Profilo() {
   const { token, user } = useAuth()
@@ -203,8 +204,14 @@ function Profilo() {
       <div className={styles.header}>
         <h1 className={styles.title}>Il mio profilo</h1>
 
-        <div className="mb-4">
-          <XpBar variant="card" />
+        <div className={`mb-4 ${styles.avatarRow}`}>
+          <Link to="/avatar" className={styles.avatarLink} title="Modifica il tuo avatar">
+            <UserAvatar url={user?.avatar_url} name={user?.nickname || user?.name} size={96} />
+            <span>{user?.avatar_url ? "Modifica avatar" : "Crea il tuo avatar"}</span>
+          </Link>
+          <div className="flex-grow-1">
+            <XpBar variant="card" />
+          </div>
         </div>
         <p className={styles.subtitle}>
           Qui puoi consultare i tuoi dati e un riepilogo della tua attività.

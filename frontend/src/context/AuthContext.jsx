@@ -31,6 +31,18 @@ export function AuthProvider({ children }) {
     setUser((prev) => {
       if (!prev) return prev
       const next = { ...prev, xp_info: xp }
+      // Dopo una partita il backend manda anche il nuovo saldo di monete.
+      if (xp.coins != null) next.coins = xp.coins
+      localStorage.setItem("user", JSON.stringify(next))
+      return next
+    })
+  }, [])
+
+  // Aggiorna alcuni campi dell'utente (es. avatar_url dopo il salvataggio dell'avatar).
+  const updateUser = useCallback((patch) => {
+    setUser((prev) => {
+      if (!prev) return prev
+      const next = { ...prev, ...patch }
       localStorage.setItem("user", JSON.stringify(next))
       return next
     })
@@ -158,7 +170,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, updateXp, refreshUser }}>
+    <AuthContext.Provider value={{ user, token, login, logout, updateXp, updateUser, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )

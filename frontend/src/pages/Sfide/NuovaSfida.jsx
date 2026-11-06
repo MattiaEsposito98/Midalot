@@ -4,6 +4,7 @@ import api from "../../service/api"
 import { logError } from "../../utils/logger"
 import { notifyChallengesChanged } from "../../hooks/useChallengeCount"
 import styles from "./Sfide.module.css"
+import UserAvatar from "../../components/UserAvatar/UserAvatar"
 
 function NuovaSfida() {
   const navigate = useNavigate()
@@ -215,7 +216,7 @@ function NuovaSfida() {
           <div className="d-flex flex-wrap gap-2 mb-2">
             {opponents.map((o) => (
               <span key={o.id} className={styles.opponentChip}>
-                {o.nickname} <span className={styles.meta}>Lv {o.level}</span>
+                <UserAvatar url={o.avatar_url} name={o.nickname} size={22} /> {o.nickname} <span className={styles.meta}>Lv {o.level}</span>
                 <button
                   type="button"
                   className={styles.chipRemove}
@@ -243,7 +244,10 @@ function NuovaSfida() {
             <div className="mt-2">
               {visibleResults.map((u) => (
                 <button key={u.id} type="button" className={styles.userResult} onClick={() => addOpponent(u)}>
-                  <span>{u.nickname}</span>
+                  <span className="d-flex align-items-center gap-2">
+                    <UserAvatar url={u.avatar_url} name={u.nickname} size={28} />
+                    {u.nickname}
+                  </span>
                   <span className={styles.meta}>Lv {u.level}</span>
                 </button>
               ))}

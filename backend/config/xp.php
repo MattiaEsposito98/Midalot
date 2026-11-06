@@ -32,4 +32,10 @@ return [
 
     'level_base' => 100,
     'level_step' => 25,
+
+    // Monete del negozio avatar: arrivano insieme agli XP (stessa fonte, una
+    // volta sola) piu' un bonus a ogni livello raggiunto.
+    'coins_per_xp' => 0.2,
+    'level_up_coins' => 20,
+    'level_up_coins_step' => 5, // bonus livello = level_up_coins + step * livello
 ];

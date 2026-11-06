@@ -7,6 +7,7 @@ import XpGain from "../../components/XpGain/XpGain"
 import { notifyChallengesChanged } from "../../hooks/useChallengeCount"
 import QuestionCategory from "./QuestionCategory"
 import styles from "./Sfide.module.css"
+import UserAvatar from "../../components/UserAvatar/UserAvatar"
 
 const CLOSED_LABEL = {
   expired: "Sfida scaduta: nessuno può più giocarla.",
@@ -101,6 +102,7 @@ function PlayerRow({ player, closed }) {
         {closed && player.rank ? (
           <span className={`${styles.rankBadge} ${player.rank === 1 ? styles.rankFirst : ""}`}>{player.rank}</span>
         ) : null}
+        <UserAvatar url={player.avatar_url} name={player.nickname} size={34} />
         <span>
           {player.is_me ? "Tu" : player.nickname} <span className={styles.meta}>Lv {player.level}</span>
           {player.is_challenger && <span className={styles.meta}> · ha lanciato la sfida</span>}

@@ -1,0 +1,327 @@
+.next {
+  display: inline-block;
+  margin-bottom: 12px;
+  background: #fff7dc;
+  border: 1px solid #f2c230;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 0.92rem;
+}
+
+.stageCard {
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 6px 24px rgba(24, 32, 51, 0.12);
+  background: #ece9ff;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.tab {
+  border: 1px solid rgba(24, 32, 51, 0.15);
+  background: #fff;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.tabActive {
+  background: #6c4bd8;
+  border-color: #6c4bd8;
+  color: #fff;
+}
+
+.panel {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 18px rgba(24, 32, 51, 0.08);
+  min-height: 300px;
+}
+
+.label {
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.subLabel {
+  font-size: 0.82rem;
+  color: #6c7a92;
+  margin: 6px 0 4px;
+}
+
+.chip {
+  border: 1px solid rgba(24, 32, 51, 0.18);
+  background: #fff;
+  border-radius: 999px;
+  padding: 5px 14px;
+  font-weight: 600;
+}
+
+.chipActive {
+  background: #182033;
+  border-color: #182033;
+  color: #fff;
+}
+
+.swatches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.swatch {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 1px rgba(24, 32, 51, 0.25);
+}
+
+.swatchActive {
+  box-shadow: 0 0 0 3px #6c4bd8;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.item {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 2px solid rgba(24, 32, 51, 0.1);
+  border-left: 6px solid var(--rarity);
+  background: #fff;
+  transition: transform 0.1s;
+}
+
+.item:not(:disabled):hover {
+  transform: translateY(-2px);
+}
+
+.itemActive {
+  border-color: var(--rarity);
+  background: #f5f2ff;
+}
+
+.itemLocked {
+  opacity: 0.55;
+  filter: grayscale(0.7);
+}
+
+.rarity {
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--rarity);
+  letter-spacing: 0.04em;
+}
+
+.itemName {
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.itemLevel {
+  font-size: 0.8rem;
+  color: #6c7a92;
+}
+
+.modeSwitch {
+  display: inline-flex;
+  background: #fff;
+  border-radius: 999px;
+  padding: 4px;
+  box-shadow: 0 2px 10px rgba(24, 32, 51, 0.1);
+}
+
+.modeSwitch button {
+  border: 0;
+  background: transparent;
+  border-radius: 999px;
+  padding: 7px 16px;
+  font-weight: 700;
+  color: #182033;
+}
+
+.modeSwitch .modeActive {
+  background: #6c4bd8;
+  color: #fff;
+}
+
+.levelTag {
+  background: #0d2a5c;
+  color: #3fd3ff;
+  font-weight: 800;
+  border-radius: 999px;
+  padding: 5px 12px;
+}
+
+.wallet {
+  background: #fff7dc;
+  border: 1px solid #f2c230;
+  border-radius: 999px;
+  padding: 5px 12px;
+  font-weight: 700;
+}
+
+.coins {
+  white-space: nowrap;
+  font-weight: 800;
+  color: #b07d00;
+}
+
+.coins :global(.bi) {
+  color: #f0a020;
+}
+
+.stageWrap {
+  position: sticky;
+  top: 90px;
+}
+
+.tryOnBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #f5f2ff;
+  border-radius: 12px;
+  font-size: 0.9rem;
+}
+
+.saveBar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.saveBtn {
+  border: 0;
+  border-radius: 999px;
+  padding: 9px 22px;
+  font-weight: 800;
+  background: #182033;
+  color: #fff;
+}
+
+.saveBtn:disabled {
+  background: #c9cbd6;
+}
+
+.msgOk {
+  color: #1f7a42;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.msgErr {
+  color: #c42828;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.hint {
+  font-size: 0.9rem;
+  color: #6c7a92;
+}
+
+.newBadge {
+  margin-left: 6px;
+  background: #e23b3b;
+  color: #fff;
+  border-radius: 999px;
+  padding: 1px 7px;
+  font-size: 0.65rem;
+}
+
+.ownedTag {
+  font-size: 0.82rem;
+  color: #1f7a42;
+  font-weight: 700;
+}
+
+.smallBtn {
+  border: 1px solid rgba(24, 32, 51, 0.2);
+  background: #fff;
+  border-radius: 999px;
+  padding: 3px 12px;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.buyBtn {
+  background: #f2c230;
+  border-color: #e0a800;
+}
+
+.smallBtn:disabled {
+  opacity: 0.5;
+}
+
+@media (max-width: 991px) {
+  .stageWrap {
+    position: static;
+  }
+
+  /* Su telefono, con modifiche da salvare, il pulsante resta sempre a portata */
+  .saveBarDirty {
+    position: fixed;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 50;
+    margin: 0;
+    padding: 8px 10px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 999px;
+    box-shadow: 0 6px 24px rgba(24, 32, 51, 0.25);
+  }
+}
+
+.hairGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  gap: 8px;
+}
+
+.hairCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 6px;
+  border-radius: 14px;
+  border: 2px solid rgba(24, 32, 51, 0.12);
+  background: #fff;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.hairCard i {
+  font-size: 1.2rem;
+  color: #6c4bd8;
+}
+
+.hairCardActive {
+  border-color: #6c4bd8;
+  background: #f5f2ff;
+}

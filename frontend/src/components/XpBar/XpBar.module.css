@@ -156,3 +156,29 @@
     max-width: none;
   }
 }
+
+/* Monete accanto alla barra XP (porta al negozio dell'avatar) */
+.navCoins {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  margin-left: 8px;
+  padding: 1px 9px;
+  border-radius: 999px;
+  background: #fff7dc;
+  border: 2px solid #06193a;
+  color: #7a5200;
+  font-weight: 800;
+  font-size: 0.8rem;
+  text-decoration: none;
+}
+
+.navCoins i {
+  color: #f0a020;
+}
+
+.navCoins:hover {
+  background: #ffe9a3;
+  color: #7a5200;
+}

@@ -6,6 +6,7 @@ import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import { API_BASE } from "../../service/api"
 import UserBadge from "../../components/UserBadge/UserBadge"
+import UserAvatar from "../../components/UserAvatar/UserAvatar"
 
 function Leaderboard({ kind = "quiz" }) {
   const { id } = useParams()
@@ -160,6 +161,7 @@ function Leaderboard({ kind = "quiz" }) {
               <div className={styles.mainCol}>
                 <div className={styles.topLine}>
                   <div className={styles.nameWrap}>
+                    <UserAvatar url={r.user.avatar_url} name={r.user.nickname} size={34} />
                     <span className={styles.name}>{r.user.nickname}</span>
                     {isMe && <span className={styles.meTag}>Tu</span>}
                     <UserBadge badges={r.user.badges} />

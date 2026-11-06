@@ -1,0 +1,172 @@
+import {
+  Cappellino,
+  ToccoLaureato,
+  CappelloEsploratore,
+  CappelloSapiente,
+  Elmo,
+  CoronaAlloro,
+  CoronaLeggenda,
+  OcchialiTondi,
+  OcchialiAviatore,
+  OcchialiMezzaluna,
+  LogoMidalot,
+  Camicia,
+  Gilet,
+  Armatura,
+  Sciarpa,
+  TascheCargo,
+  Gambali,
+  Matita,
+  Torcia,
+  PennaOca,
+  Spada,
+  Bacchetta,
+  Libro,
+  Bussola,
+  Lanterna,
+  Pergamena,
+  Scudo,
+  Zainetto,
+  Mantello,
+  Ali,
+  Gufo,
+  AuraScintille,
+  AuraFiamme,
+  Righe,
+  Felpa,
+  StrisceTuta,
+  Fiocco,
+  Berretto,
+  Cuffie,
+  CappelloPirata,
+  OcchialiSole,
+  OcchialiCuore,
+  Gelato,
+  Palloncino,
+  Microfono,
+  Trofeo,
+  Pulcino,
+  Gatto,
+  AuraCuori,
+} from "./itemModels"
+
+// ---------------------------------------------------------------- catalogo (grafica)
+/*
+ * Grafica degli oggetti per key. Nome, livello, prezzo e rarita' arrivano
+ * dal backend (database/data/avatar_items.php).
+ */
+
+const shirt = (color) => ({ slot: "torso", look: { shirt: color } })
+const pants = (color, extra = {}) => ({ slot: "legs", look: { pants: color, ...extra } })
+const shoes = (shoe, sole, tall = false) => ({ slot: "feet", look: { shoe, sole, tall } })
+
+export const ITEM_MODELS = {
+  // Set Apprendista
+  maglietta_bianca: shirt("#f4f4f6"),
+  jeans: pants("#3d5f9e"),
+  sneakers: shoes("#ffffff", "#e23b3b"),
+  occhiali_tondi: { slot: "face", Model: OcchialiTondi },
+  matita: { slot: "handR", Model: Matita },
+  cappellino: { slot: "head", Model: Cappellino },
+  libro_appunti: { slot: "handL", Model: Libro },
+  maglietta_midalot: { ...shirt("#6c4bd8"), Model: LogoMidalot },
+  zainetto: { slot: "back", Model: Zainetto },
+  scarpe_colorate: shoes("#2ec4e6", "#ff4fa3"),
+  sciarpa: { slot: "neck", Model: Sciarpa },
+  tocco_laureato: { slot: "head", Model: ToccoLaureato },
+  mantellina: { slot: "back", Model: () => <Mantello color="#2b2b48" inner="#6c4bd8" height={0.38} /> },
+
+  // Set Esploratore
+  pantaloni_cargo: { ...pants("#8a7a4a"), Model: TascheCargo },
+  torcia: { slot: "handR", Model: Torcia },
+  cappello_esploratore: { slot: "head", Model: CappelloEsploratore },
+  bussola: { slot: "handL", Model: Bussola },
+  lanterna: { slot: "handL", Model: Lanterna },
+  stivali_trekking: shoes("#7a5230", "#3a2a1a", true),
+  gilet_esploratore: { ...shirt("#efe6cf"), Model: Gilet },
+  occhiali_aviatore: { slot: "face", Model: OcchialiAviatore },
+  mantello_viaggio: { slot: "back", Model: () => <Mantello color="#6b4a2b" inner="#a0784a" height={0.72} /> },
+  sfondo_foresta: { slot: "background" },
+
+  // Set Studioso
+  camicia_studioso: { ...shirt("#a9c8ec"), Model: Camicia },
+  pergamena: { slot: "handL", Model: Pergamena },
+  occhiali_mezzaluna: { slot: "face", Model: OcchialiMezzaluna },
+  penna_oca: { slot: "handR", Model: PennaOca },
+  gufo: { slot: "pet", Model: Gufo },
+  pantaloni_eleganti: pants("#2b2b3a"),
+  scarpe_cuoio: shoes("#4a2c1a", "#22140b"),
+  cappello_sapiente: { slot: "head", Model: CappelloSapiente },
+  tomo_antico: { slot: "handL", Model: () => <Libro cover="#5b2a86" big glow="#c77dff" /> },
+  sfondo_biblioteca: { slot: "background" },
+
+  // Set Cavaliere
+  spada_legno: { slot: "handR", Model: () => <Spada blade="#c8955a" guard="#8a5a2b" grip="#5a3a1b" length={0.42} /> },
+  elmo_leggero: { slot: "head", Model: Elmo, hidesHair: true },
+  scudo: { slot: "handL", Model: Scudo },
+  armatura_cuoio: { slot: "armor", Model: () => <Armatura main="#8a5a34" dark="#5e3b20" /> },
+  spada_acciaio: { slot: "handR", Model: () => <Spada blade="#d7dde6" guard="#d9a520" grip="#5a3a1b" /> },
+  gambali: { ...pants("#59627a"), Model: Gambali },
+  stivali_ferro: shoes("#aab3c2", "#5d6678", true),
+  mantello_rosso: { slot: "back", Model: () => <Mantello color="#c42828" inner="#ffd54a" height={0.74} collar="#d9a520" /> },
+  armatura_piastre: { slot: "armor", Model: () => <Armatura main="#c3cad6" dark="#8b95a6" /> },
+  sfondo_castello: { slot: "background" },
+
+  // Set Leggenda
+  corona_alloro: { slot: "head", Model: CoronaAlloro },
+  guanti_oro: { slot: "hands", look: { gloves: "#f2c230" } },
+  bacchetta: { slot: "handR", Model: Bacchetta },
+  aura_scintille: { slot: "aura", Model: AuraScintille },
+  spada_cristallo: { slot: "handR", Model: () => <Spada blade="#9be8ff" guard="#f2c230" grip="#3a2a6b" length={0.62} glow="#49d6ff" /> },
+  armatura_dorata: { slot: "armor", Model: () => <Armatura main="#f2c230" dark="#c9951a" gem="#3dd6ff" /> },
+  ali: { slot: "back", Model: Ali },
+  elmo_dorato: { slot: "head", Model: () => <Elmo gold />, hidesHair: true },
+  aura_fiamme: { slot: "aura", Model: AuraFiamme },
+  corona_leggenda: { slot: "head", Model: CoronaLeggenda },
+  sfondo_leggenda: { slot: "background" },
+
+  // Negozio
+  maglietta_rossa: shirt("#e23b3b"),
+  maglietta_blu: shirt("#2f6fd0"),
+  maglietta_verde: shirt("#2f9b5a"),
+  maglietta_gialla: shirt("#f2c230"),
+  maglietta_rosa: shirt("#ff8fc0"),
+  maglietta_nera: shirt("#2b2b3a"),
+  maglia_righe: { ...shirt("#f4f4f6"), Model: Righe },
+  felpa_cappuccio: { ...shirt("#8a8fa3"), Model: Felpa },
+
+  jeans_neri: pants("#2b2b3a"),
+  pantaloni_tuta: { ...pants("#3a3f55"), Model: StrisceTuta },
+  pantaloncini: pants("#c9a96e", { shorts: true }),
+  gonna_rossa: pants("#e23b3b", { skirt: true }),
+  gonna_blu: pants("#2f6fd0", { skirt: true }),
+
+  sneakers_nere: shoes("#2b2b3a", "#ffffff"),
+  stivaletti_rosa: shoes("#ff8fc0", "#c2185b", true),
+  scarpe_oro: shoes("#f2c230", "#c9951a"),
+
+  fiocco: { slot: "head", Model: Fiocco },
+  cappellino_blu: { slot: "head", Model: () => <Cappellino color="#2f6fd0" visor="#1f4fa8" /> },
+  cappellino_verde: { slot: "head", Model: () => <Cappellino color="#2f9b5a" visor="#1f7a42" /> },
+  berretto_lana: { slot: "head", Model: Berretto },
+  cuffie: { slot: "head", Model: Cuffie },
+  cappello_pirata: { slot: "head", Model: CappelloPirata },
+
+  occhiali_sole: { slot: "face", Model: OcchialiSole },
+  occhiali_cuore: { slot: "face", Model: OcchialiCuore },
+
+  gelato: { slot: "handL", Model: Gelato },
+  palloncino: { slot: "handR", Model: Palloncino },
+  microfono: { slot: "handR", Model: Microfono },
+  trofeo: { slot: "handL", Model: Trofeo },
+
+  mantello_viola: { slot: "back", Model: () => <Mantello color="#6c4bd8" inner="#ffd54a" height={0.74} collar="#f2c230" /> },
+
+  pulcino: { slot: "pet", Model: Pulcino },
+  gatto: { slot: "pet", Model: Gatto },
+
+  aura_cuori: { slot: "aura", Model: AuraCuori },
+
+  sfondo_spiaggia: { slot: "background" },
+  sfondo_spazio: { slot: "background" },
+}

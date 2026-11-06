@@ -366,6 +366,7 @@ class TrainingController extends Controller
             'results' => $attempts->map(fn ($attempt, $index) => [
                 'position' => $index + 1,
                 'nickname' => $attempt->user->nickname ?? $attempt->user->name,
+                'avatar_url' => $attempt->user?->avatar_url,
                 'badges' => $attempt->user->badges ?? [],
                 'score' => $attempt->score,
                 'correct_answers' => $attempt->correct_answers,
@@ -409,6 +410,7 @@ class TrainingController extends Controller
             'results' => $attempts->map(fn ($attempt, $index) => [
                 'position' => $index + 1,
                 'nickname' => $attempt->user->nickname ?? $attempt->user->name,
+                'avatar_url' => $attempt->user?->avatar_url,
                 'badges' => $attempt->user->badges ?? [],
                 'score' => $attempt->score,
                 'correct_answers' => $attempt->correct_answers,

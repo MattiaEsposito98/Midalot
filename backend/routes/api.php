@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AudioProxyController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AvatarController;
 use App\Http\Controllers\Api\ChallengeController;
 use App\Http\Controllers\Api\CookieConsentController;
 use App\Http\Controllers\Api\EventRequestController;
@@ -137,6 +138,14 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/training/progress', [TrainingController::class, 'progress']);
     Route::get('/training/categories/{categorySlug}/leaderboard', [TrainingController::class, 'leaderboard']);
     Route::get('/training/quizzes/{quiz}/leaderboard', [TrainingController::class, 'quizLeaderboard']);
+
+    // Avatar, oggetti e negozio
+    Route::get('/avatar', [AvatarController::class, 'show']);
+    Route::put('/avatar', [AvatarController::class, 'update'])->middleware('throttle:30,1');
+    Route::post('/avatar/portrait', [AvatarController::class, 'portrait'])->middleware('throttle:30,1');
+    Route::get('/avatar/news', [AvatarController::class, 'news']);
+    Route::post('/avatar/news/seen', [AvatarController::class, 'seen']);
+    Route::post('/avatar/shop/{key}', [AvatarController::class, 'buy'])->middleware('throttle:20,1');
 
     Route::get('/challenges', [ChallengeController::class, 'index']);
     Route::get('/challenges/summary', [ChallengeController::class, 'summaryCount']);

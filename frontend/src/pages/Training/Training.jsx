@@ -6,6 +6,7 @@ import styles from "./Training.module.css"
 import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import { API_BASE } from "../../service/api"
+import UserAvatar from "../../components/UserAvatar/UserAvatar"
 
 function Training() {
   const { categorySlug } = useParams()
@@ -330,7 +331,7 @@ function Training() {
               {(leaderboard.results || []).slice(0, 10).map((row) => (
                 <div className={styles.leaderboardRow} key={`${row.position}-${row.nickname}-${row.score}`}>
                   <span>
-                    <strong>#{row.position}</strong> {row.nickname}
+                    <strong>#{row.position}</strong> <UserAvatar url={row.avatar_url} name={row.nickname} size={26} /> {row.nickname}
                   </span>
                   <span>
                     {formatQuizScore(row.score)} punti · {row.correct_answers}/{row.total_questions}

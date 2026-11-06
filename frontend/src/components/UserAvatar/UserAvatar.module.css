@@ -1,0 +1,18 @@
+.avatar {
+  flex: 0 0 auto;
+  display: inline-block;
+  border-radius: 50%;
+  border: 2px solid #182033;
+  object-fit: cover;
+  background: #ece9ff;
+  vertical-align: middle;
+}
+
+.fallback {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 800;
+  line-height: 1;
+}

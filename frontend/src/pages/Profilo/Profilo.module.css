@@ -219,3 +219,25 @@
     width: 100%;
   }
 }
+
+.avatarRow {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.avatarLink {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #6c4bd8;
+  text-decoration: none;
+}
+
+.avatarLink:hover {
+  color: #4f32b5;
+}

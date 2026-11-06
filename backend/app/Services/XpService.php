@@ -51,11 +51,40 @@ class XpService
                 return null;
             }
 
+            $before = (int) User::whereKey($userId)->lockForUpdate()->value('xp_total');
             User::whereKey($userId)->increment('xp_total', $xp);
+
+            $oldLevel = self::info($before)['level'];
+            $info = self::info($before + $xp);
+
+            // Monete: una quota degli XP (stessa fonte, quindi una volta sola)
+            // piu' il bonus di ogni livello raggiunto e i regali di livello.
+            $avatar = app(AvatarService::class);
+            $coins = (int) round($xp * (float) config('xp.coins_per_xp', 0));
+            $coinsAwarded = $avatar->addCoins($userId, $source, $sourceId, $coins) ? $coins : 0;
+            $unlocked = collect();
+
+            if ($info['level'] > $oldLevel) {
+                for ($level = $oldLevel + 1; $level <= $info['level']; $level++) {
+                    $bonus = AvatarService::levelUpCoins($level);
+                    if ($avatar->addCoins($userId, 'level', $level, $bonus)) {
+                        $coinsAwarded += $bonus;
+                    }
+                }
+
+                $unlocked = $avatar->grantLevelItems($userId, $info['level']);
+            }
+
+            $coinsTotal = (int) User::whereKey($userId)->value('coins');
 
             return [
                 'awarded' => $xp,
-                'xp' => self::info((int) User::whereKey($userId)->value('xp_total')),
+                // Le monete viaggiano anche dentro `xp`, che le schermate di fine partita ricevono gia'.
+                'xp' => $info + ['coins_awarded' => $coinsAwarded, 'coins' => $coinsTotal],
+                'coins_awarded' => $coinsAwarded,
+                'coins' => $coinsTotal,
+                'level_up' => $info['level'] > $oldLevel,
+                'unlocked' => $unlocked->map->toCatalog()->values()->all(),
             ];
         });
     }

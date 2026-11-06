@@ -151,13 +151,14 @@ class ChallengeController extends Controller
             ->where('nickname', 'like', $term.'%')
             ->orderBy('nickname')
             ->limit(8)
-            ->get(['id', 'nickname', 'xp_total']);
+            ->get(['id', 'nickname', 'xp_total', 'avatar_url']);
 
         return response()->json([
             'users' => $users->map(fn (User $u) => [
                 'id' => $u->id,
                 'nickname' => $u->nickname,
                 'level' => XpService::info((int) $u->xp_total)['level'],
+                'avatar_url' => $u->avatar_url,
             ]),
         ]);
     }
@@ -888,6 +889,7 @@ class ChallengeController extends Controller
             'id' => $user->id,
             'nickname' => $user->nickname,
             'level' => XpService::info((int) $user->xp_total)['level'],
+            'avatar_url' => $user->avatar_url,
         ];
     }
 

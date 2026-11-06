@@ -7,6 +7,7 @@ import QuestionAudio from "../../components/QuestionAudio/QuestionAudio"
 import { notifyChallengesChanged } from "../../hooks/useChallengeCount"
 import QuestionCategory from "./QuestionCategory"
 import styles from "./Sfide.module.css"
+import UserAvatar from "../../components/UserAvatar/UserAvatar"
 
 const POLL_MS = 1000
 const TICK_MS = 200
@@ -180,8 +181,11 @@ function SfidaLive() {
           <div className="text-start my-3">
             {state.players.map((p) => (
               <div key={p.id} className={`${styles.playerRow} ${p.is_me ? styles.playerRowMe : ""}`}>
-                <span>
-                  {p.is_me ? "Tu" : p.nickname} <span className={styles.meta}>Lv {p.level}</span>
+                <span className="d-flex align-items-center gap-2">
+                  <UserAvatar url={p.avatar_url} name={p.nickname} size={32} />
+                  <span>
+                    {p.is_me ? "Tu" : p.nickname} <span className={styles.meta}>Lv {p.level}</span>
+                  </span>
                 </span>
                 <span
                   className={`${styles.statusTag} ${
@@ -260,9 +264,18 @@ function SfidaLive() {
     return (
       <div className={quizStyles.centerBox}>
         <div className={`${styles.panel} text-center`}>
-          <p className={styles.subtitle}>
-            Sfida live: {state.players.map((p) => (p.is_me ? "tu" : p.nickname)).join(", ")}
-          </p>
+          <p className={styles.subtitle}>Sfida live</p>
+          <div className={styles.versusRow}>
+            {state.players.map((p, i) => (
+              <span key={p.id} className="d-flex align-items-center gap-2">
+                {i > 0 && <span className={styles.vs}>VS</span>}
+                <span className={styles.versusPlayer}>
+                  <UserAvatar url={p.avatar_url} name={p.nickname} size={state.players.length > 3 ? 56 : 72} />
+                  <span>{p.is_me ? "Tu" : p.nickname}</span>
+                </span>
+              </span>
+            ))}
+          </div>
           <div className="display-1 fw-bold">{remaining || "Via!"}</div>
           <p className={styles.meta}>Preparati: le domande compaiono in contemporanea.</p>
         </div>

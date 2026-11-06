@@ -4,6 +4,7 @@ import api from "../../service/api"
 import { useAuth } from "../../context/useAuth"
 import { logError } from "../../utils/logger"
 import styles from "./Sfide.module.css"
+import UserAvatar from "../../components/UserAvatar/UserAvatar"
 
 const RESULT_LABEL = { won: "Vinta", lost: "Persa", draw: "Pareggio" }
 const STATUS_LABEL = {
@@ -29,7 +30,11 @@ function ChallengeCard({ challenge }) {
     <div className={styles.card}>
       <div className={styles.cardMain}>
         <div className={styles.versus}>
-          <i className="bi bi-lightning-charge-fill"></i>{" "}
+          <span className={styles.avatarStack}>
+            {(direction === "sent" ? others : [challenger]).slice(0, 4).map((p) => (
+              <UserAvatar key={p.id} url={p.avatar_url} name={p.nickname} size={30} />
+            ))}
+          </span>{" "}
           {direction === "sent"
             ? `Sfida a ${others.map((o) => o.nickname).join(", ")}`
             : `Sfida da ${challenger.nickname}${others.length > 1 ? ` + ${others.length - 1} altri` : ""}`}
