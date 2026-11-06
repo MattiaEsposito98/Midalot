@@ -26,6 +26,38 @@
 
             @php
                 $activeNav = trim($__env->yieldContent('activeNav'));
+
+                // Menu raggruppato per sezioni: ogni voce = [rotta, pattern attivo, icona, etichetta, contatore].
+                $navGroups = [
+                    'giochi' => [
+                        'label' => 'Giochi',
+                        'icon' => 'bi-controller',
+                        'items' => [
+                            ['admin.midalario.index', Route::is('admin.midalario.*') || $activeNav === 'midalario', 'bi-broadcast', 'Il Midalario', 0],
+                            ['admin.quizzes.index', Route::is('admin.quizzes.*') && $activeNav !== 'midalario' && $activeNav !== 'training', 'bi-ui-checks-grid', 'Quiz', 0],
+                            ['admin.training.quizzes.index', Route::is('admin.training.*') || $activeNav === 'training', 'bi-lightning-charge', 'Training', 0],
+                            ['admin.minigiochi.index', Route::is('admin.minigiochi.*'), 'bi-joystick', 'Minigiochi', 0],
+                            ['admin.challenges.index', Route::is('admin.challenges.*'), 'bi-lightning-charge-fill', 'Sfide', 0],
+                        ],
+                    ],
+                    'premi' => [
+                        'label' => 'Premi e avatar',
+                        'icon' => 'bi-trophy',
+                        'items' => [
+                            ['admin.period-leaderboard.index', Route::is('admin.period-leaderboard.*'), 'bi-trophy', 'Classifica premi', 0],
+                            ['admin.avatar.index', Route::is('admin.avatar.*'), 'bi-person-badge', 'Avatar e negozio', 0],
+                        ],
+                    ],
+                    'richieste' => [
+                        'label' => 'Richieste',
+                        'icon' => 'bi-inbox',
+                        'items' => [
+                            ['admin.reports.index', Route::is('admin.reports.*'), 'bi-flag', 'Segnalazioni', $openReportsCount],
+                            ['admin.event-requests.index', Route::is('admin.event-requests.*'), 'bi-stars', 'Richieste eventi', $newEventRequestsCount],
+                            ['admin.showcase.index', Route::is('admin.showcase.*'), 'bi-images', 'Vetrina', 0],
+                        ],
+                    ],
+                ];
             @endphp
 
             <nav class="admin-nav" aria-label="Menu amministrazione">
@@ -33,70 +65,64 @@
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="{{ route('admin.midalario.index') }}" class="admin-nav-link {{ Route::is('admin.midalario.*') || $activeNav === 'midalario' ? 'active' : '' }}">
-                    <i class="bi bi-broadcast"></i>
-                    <span>Il Midalario</span>
-                </a>
-                <a href="{{ route('admin.quizzes.index') }}" class="admin-nav-link {{ Route::is('admin.quizzes.*') && $activeNav !== 'midalario' && $activeNav !== 'training' ? 'active' : '' }}">
-                    <i class="bi bi-ui-checks-grid"></i>
-                    <span>Quiz</span>
-                </a>
-                <a href="{{ route('admin.training.quizzes.index') }}" class="admin-nav-link {{ Route::is('admin.training.*') || $activeNav === 'training' ? 'active' : '' }}">
-                    <i class="bi bi-lightning-charge"></i>
-                    <span>Training</span>
-                </a>
-                <a href="{{ route('admin.minigiochi.index') }}" class="admin-nav-link {{ Route::is('admin.minigiochi.*') ? 'active' : '' }}">
-                    <i class="bi bi-joystick"></i>
-                    <span>Minigiochi</span>
-                </a>
-                <a href="{{ route('admin.period-leaderboard.index') }}" class="admin-nav-link {{ Route::is('admin.period-leaderboard.*') ? 'active' : '' }}">
-                    <i class="bi bi-trophy"></i>
-                    <span>Classifica premi</span>
-                </a>
-                <a href="{{ route('admin.challenges.index') }}" class="admin-nav-link {{ Route::is('admin.challenges.*') ? 'active' : '' }}">
-                    <i class="bi bi-lightning-charge-fill"></i>
-                    <span>Sfide</span>
-                </a>
-                <a href="{{ route('admin.avatar.index') }}" class="admin-nav-link {{ Route::is('admin.avatar.*') ? 'active' : '' }}">
-                    <i class="bi bi-person-badge"></i>
-                    <span>Avatar e negozio</span>
-                </a>
-                <a href="{{ route('admin.reports.index') }}" class="admin-nav-link {{ Route::is('admin.reports.*') ? 'active' : '' }}">
-                    <i class="bi bi-flag"></i>
-                    <span>Segnalazioni</span>
-                    @if ($openReportsCount > 0)
-                        <span class="admin-nav-count">{{ $openReportsCount }}</span>
-                    @endif
-                </a>
-                <a href="{{ route('admin.event-requests.index') }}" class="admin-nav-link {{ Route::is('admin.event-requests.*') ? 'active' : '' }}">
-                    <i class="bi bi-stars"></i>
-                    <span>Richieste eventi</span>
-                    @if ($newEventRequestsCount > 0)
-                        <span class="admin-nav-count">{{ $newEventRequestsCount }}</span>
-                    @endif
-                </a>
-                <a href="{{ route('admin.showcase.index') }}" class="admin-nav-link {{ Route::is('admin.showcase.*') ? 'active' : '' }}">
-                    <i class="bi bi-images"></i>
-                    <span>Vetrina</span>
-                </a>
-                <a href="{{ route('profile.edit') }}" class="admin-nav-link">
-                    <i class="bi bi-person-circle"></i>
-                    <span>Profilo</span>
-                </a>
+
+                @foreach ($navGroups as $groupKey => $group)
+                    @php
+                        $groupActive = collect($group['items'])->contains(fn ($item) => $item[1]);
+                        $groupCount = collect($group['items'])->sum(fn ($item) => $item[4]);
+                    @endphp
+                    <div class="dropdown">
+                        <button type="button" class="admin-nav-link admin-nav-button dropdown-toggle {{ $groupActive ? 'active' : '' }}"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi {{ $group['icon'] }}"></i>
+                            <span>{{ $group['label'] }}</span>
+                            @if ($groupCount > 0)
+                                <span class="admin-nav-count">{{ $groupCount }}</span>
+                            @endif
+                        </button>
+                        <ul class="dropdown-menu admin-nav-menu">
+                            @foreach ($group['items'] as [$route, $active, $icon, $label, $count])
+                                <li>
+                                    <a href="{{ route($route) }}" class="dropdown-item {{ $active ? 'active' : '' }}">
+                                        <i class="bi {{ $icon }}"></i>
+                                        {{ $label }}
+                                        @if ($count > 0)
+                                            <span class="admin-nav-count ms-auto">{{ $count }}</span>
+                                        @endif
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endforeach
             </nav>
 
-            <div class="admin-topnav-right">
-                <div class="admin-user">
-                    <span>{{ Auth::user()->name }}</span>
-                    <small>Admin</small>
-                </div>
-                <form action="{{ route('logout') }}" method="POST" class="admin-logout">
-                    @csrf
-                    <button type="submit" class="admin-nav-link admin-nav-button">
-                        <i class="bi bi-box-arrow-right"></i>
-                        <span>Logout</span>
-                    </button>
-                </form>
+            <div class="admin-topnav-right dropdown">
+                <button type="button" class="admin-nav-link admin-nav-button admin-user-btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="bi bi-person-circle"></i>
+                    <span class="admin-user">
+                        <span>{{ Auth::user()->name }}</span>
+                        <small>Admin</small>
+                    </span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end admin-nav-menu">
+                    <li>
+                        <a href="{{ route('profile.edit') }}" class="dropdown-item">
+                            <i class="bi bi-person-circle"></i>
+                            Profilo
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <form action="{{ route('logout') }}" method="POST" class="admin-logout">
+                            @csrf
+                            <button type="submit" class="dropdown-item">
+                                <i class="bi bi-box-arrow-right"></i>
+                                Logout
+                            </button>
+                        </form>
+                    </li>
+                </ul>
             </div>
         </header>
 
