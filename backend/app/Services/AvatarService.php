@@ -207,14 +207,18 @@ class AvatarService
                 throw ValidationException::withMessages(['item' => 'Monete insufficienti.']);
             }
 
-            $this->addCoins($user->id, 'shop', $item->id, -$item->price);
-
-            UserAvatarItem::create([
+            $owned = UserAvatarItem::create([
                 'user_id' => $user->id,
                 'avatar_item_id' => $item->id,
                 'source' => 'shop',
                 'seen_at' => now(),
             ]);
+
+            // Il pagamento e' legato a questo acquisto (non all'oggetto): se l'admin
+            // toglie l'oggetto e l'utente lo ricompra, paga di nuovo.
+            if ($item->price > 0) {
+                $this->addCoins($user->id, 'shop', $owned->id, -$item->price);
+            }
         });
     }
 

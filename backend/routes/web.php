@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AvatarController as AdminAvatarController;
 use App\Http\Controllers\Admin\ChallengeController as AdminChallengeController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\EventRequestController;
@@ -125,6 +126,19 @@ Route::middleware(['auth', 'admin'])
             ->name('reports.update');
         Route::delete('reports/{report}', [TrainingQuestionReportController::class, 'destroy'])
             ->name('reports.destroy');
+
+        Route::get('avatar', [AdminAvatarController::class, 'index'])
+            ->name('avatar.index');
+        Route::get('avatar/items/{item}/edit', [AdminAvatarController::class, 'edit'])
+            ->name('avatar.edit');
+        Route::put('avatar/items/{item}', [AdminAvatarController::class, 'update'])
+            ->name('avatar.update');
+        Route::post('avatar/gift', [AdminAvatarController::class, 'gift'])
+            ->name('avatar.gift');
+        Route::get('avatar/users/{user}', [AdminAvatarController::class, 'user'])
+            ->name('avatar.user');
+        Route::delete('avatar/users/{user}/items/{item}', [AdminAvatarController::class, 'revoke'])
+            ->name('avatar.revoke');
 
         Route::get('challenges', [AdminChallengeController::class, 'index'])
             ->name('challenges.index');

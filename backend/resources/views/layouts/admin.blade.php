@@ -57,6 +57,10 @@
                     <i class="bi bi-lightning-charge-fill"></i>
                     <span>Sfide</span>
                 </a>
+                <a href="{{ route('admin.avatar.index') }}" class="admin-nav-link {{ Route::is('admin.avatar.*') ? 'active' : '' }}">
+                    <i class="bi bi-person-badge"></i>
+                    <span>Avatar e negozio</span>
+                </a>
                 <a href="{{ route('admin.reports.index') }}" class="admin-nav-link {{ Route::is('admin.reports.*') ? 'active' : '' }}">
                     <i class="bi bi-flag"></i>
                     <span>Segnalazioni</span>
