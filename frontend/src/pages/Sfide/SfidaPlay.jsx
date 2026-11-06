@@ -248,7 +248,7 @@ function SfidaPlay() {
             <h2 className={styles.questionText}>{currentQuestion.question_text}</h2>
           </div>
 
-          <QuestionCategory category={currentQuestion.category} subcategory={currentQuestion.subcategory} />
+          <QuestionCategory category={currentQuestion.category} subcategory={currentQuestion.subcategory} training={currentQuestion.training} />
 
           {currentQuestion.image && (
             <div className={styles.mediaWrap}>

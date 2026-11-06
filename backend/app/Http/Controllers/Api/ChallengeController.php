@@ -430,6 +430,7 @@ class ChallengeController extends Controller
                 'time_limit_seconds' => $question->time_limit_seconds,
                 'category' => $question->quiz?->trainingCategory?->name,
                 'subcategory' => $question->quiz?->trainingSubcategory?->name,
+                'training' => $question->quiz?->title,
                 'answers' => $question->answers->shuffle()->map(fn ($answer) => [
                     'id' => $answer->id,
                     'answer_text' => $answer->answer_text,
@@ -578,6 +579,7 @@ class ChallengeController extends Controller
                     'question_text' => $question->question_text,
                     'category' => $question->quiz?->trainingCategory?->name,
                     'subcategory' => $question->quiz?->trainingSubcategory?->name,
+                    'training' => $question->quiz?->title,
                     'image' => $question->image_path ? asset('storage/'.$question->image_path) : null,
                     'answers' => $question->answers->map(fn ($a) => [
                         'id' => $a->id,
@@ -757,6 +759,7 @@ class ChallengeController extends Controller
                 'ends_at' => $window['ends_at']->toISOString(),
                 'category' => $question->quiz?->trainingCategory?->name,
                 'subcategory' => $question->quiz?->trainingSubcategory?->name,
+                'training' => $question->quiz?->title,
                 'answers' => $question->answers->map(fn ($a) => [
                     'id' => $a->id,
                     'answer_text' => $a->answer_text,

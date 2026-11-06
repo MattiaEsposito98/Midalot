@@ -51,7 +51,7 @@ function Review({ review }) {
             {index + 1}. {q.question_text}
           </div>
 
-          <QuestionCategory category={q.category} subcategory={q.subcategory} />
+          <QuestionCategory category={q.category} subcategory={q.subcategory} training={q.training} />
 
           {q.image && <img src={q.image} alt="Domanda" className="img-fluid mb-2" style={{ maxHeight: 180 }} />}
 

@@ -321,7 +321,7 @@ function SfidaLive() {
               <h2 className={quizStyles.questionText}>{q.question_text}</h2>
             </div>
 
-            <QuestionCategory category={q.category} subcategory={q.subcategory} />
+            <QuestionCategory category={q.category} subcategory={q.subcategory} training={q.training} />
 
             {q.image && (
               <div className={quizStyles.mediaWrap}>
