@@ -17,6 +17,7 @@ function NuovaSfida() {
   const [allCount, setAllCount] = useState(0)
   const [selected, setSelected] = useState([])
   const [selectedSubs, setSelectedSubs] = useState([])
+  const [selectedQuizzes, setSelectedQuizzes] = useState([])
   const [expanded, setExpanded] = useState([])
   const [mode, setMode] = useState("async")
   const [sending, setSending] = useState(false)
@@ -67,32 +68,67 @@ function NuovaSfida() {
     setOpponents((prev) => prev.filter((o) => o.id !== id))
   }
 
-  // Sottocategorie scegliibili: se c'e' solo una sottocategoria con lo stesso nome
-  // della categoria non aggiunge nulla e si nasconde.
+  // Sottocategorie: se ce n'e' una sola con lo stesso nome della categoria non
+  // aggiunge nulla e si nasconde (i suoi Training restano nell'elenco piatto).
   function subsOf(category) {
     const subs = category.subcategories || []
     if (subs.length === 1 && subs[0].name.trim().toLowerCase() === category.name.trim().toLowerCase()) return []
     return subs
   }
 
+  const quizzesOf = (category) => category.quizzes || []
+  const hasDetail = (category) => subsOf(category).length > 0 || quizzesOf(category).length > 1
+
+  // Toglie dalla selezione tutto il dettaglio di una categoria (sottocategorie e Training).
+  function dropDetail(category) {
+    const subIds = (category.subcategories || []).map((sub) => sub.id)
+    const quizIds = quizzesOf(category).map((quiz) => quiz.id)
+
+    setSelectedSubs((prev) => prev.filter((id) => !subIds.includes(id)))
+    setSelectedQuizzes((prev) => prev.filter((id) => !quizIds.includes(id)))
+  }
+
   // Categoria intera: se era scelta nel dettaglio passa a "tutta la categoria".
   function toggleCategory(category) {
-    setSelectedSubs((prev) => prev.filter((id) => !(category.subcategories || []).some((sub) => sub.id === id)))
+    dropDetail(category)
     setSelected((prev) => (prev.includes(category.id) ? prev.filter((c) => c !== category.id) : [...prev, category.id]))
   }
 
-  // Sottocategoria: scegliere una sottocategoria toglie la categoria intera.
+  // Sottocategoria intera. Dentro una categoria scelta per intero passa a "solo questa".
   function toggleSub(category, sub) {
     if (selected.includes(category.id)) {
       setSelected((prev) => prev.filter((c) => c !== category.id))
-      setSelectedSubs((prev) => [
-        ...prev.filter((id) => !(category.subcategories || []).some((s) => s.id === id)),
-        sub.id,
-      ])
+      dropDetail(category)
+      setSelectedSubs((prev) => [...prev, sub.id])
       return
     }
 
-    setSelectedSubs((prev) => (prev.includes(sub.id) ? prev.filter((id) => id !== sub.id) : [...prev, sub.id]))
+    if (selectedSubs.includes(sub.id)) {
+      setSelectedSubs((prev) => prev.filter((id) => id !== sub.id))
+      return
+    }
+
+    const subQuizIds = quizzesOf(category).filter((q) => q.subcategory_id === sub.id).map((q) => q.id)
+    setSelectedQuizzes((prev) => prev.filter((id) => !subQuizIds.includes(id)))
+    setSelectedSubs((prev) => [...prev, sub.id])
+  }
+
+  // Singolo Training. Dentro una scelta piu' ampia passa a "solo questo".
+  function toggleQuiz(category, quiz) {
+    if (selected.includes(category.id)) {
+      setSelected((prev) => prev.filter((c) => c !== category.id))
+      dropDetail(category)
+      setSelectedQuizzes((prev) => [...prev, quiz.id])
+      return
+    }
+
+    if (quiz.subcategory_id && selectedSubs.includes(quiz.subcategory_id)) {
+      setSelectedSubs((prev) => prev.filter((id) => id !== quiz.subcategory_id))
+      setSelectedQuizzes((prev) => [...prev, quiz.id])
+      return
+    }
+
+    setSelectedQuizzes((prev) => (prev.includes(quiz.id) ? prev.filter((id) => id !== quiz.id) : [...prev, quiz.id]))
   }
 
   function toggleExpanded(id) {
@@ -100,8 +136,17 @@ function NuovaSfida() {
   }
 
   const selectedSubsOf = (category) => (category.subcategories || []).filter((sub) => selectedSubs.includes(sub.id))
+  const selectedQuizzesOf = (category) => quizzesOf(category).filter((quiz) => selectedQuizzes.includes(quiz.id))
 
-  const hasSelection = selected.length > 0 || selectedSubs.length > 0
+  const isSubActive = (category, sub) => selected.includes(category.id) || selectedSubs.includes(sub.id)
+  const isQuizActive = (category, quiz) =>
+    selected.includes(category.id) ||
+    selectedQuizzes.includes(quiz.id) ||
+    (quiz.subcategory_id != null && selectedSubs.includes(quiz.subcategory_id))
+
+  const detailCount = (category) => selectedSubsOf(category).length + selectedQuizzesOf(category).length
+
+  const hasSelection = selected.length > 0 || selectedSubs.length > 0 || selectedQuizzes.length > 0
 
   const availableQuestions = hasSelection
     ? categories.reduce(
@@ -109,15 +154,19 @@ function NuovaSfida() {
           sum +
           (selected.includes(c.id)
             ? c.questions_count
-            : selectedSubsOf(c).reduce((n, sub) => n + sub.questions_count, 0)),
+            : selectedSubsOf(c).reduce((n, sub) => n + sub.questions_count, 0) +
+              selectedQuizzesOf(c)
+                .filter((q) => !(q.subcategory_id != null && selectedSubs.includes(q.subcategory_id)))
+                .reduce((n, quiz) => n + quiz.questions_count, 0)),
         0
       )
     : allCount
 
-  // Etichette della selezione: "Disney" oppure "Disney › Peter Pan".
+  // Etichette della selezione: "Disney", "Disney › Marvel" o "Geografia › Capitali d'Europa".
   const selectionLabels = [
     ...categories.filter((c) => selected.includes(c.id)).map((c) => c.name),
     ...categories.flatMap((c) => selectedSubsOf(c).map((sub) => `${c.name} › ${sub.name}`)),
+    ...categories.flatMap((c) => selectedQuizzesOf(c).map((quiz) => `${c.name} › ${quiz.title}`)),
   ]
 
   const visibleResults = results.filter((u) => !opponents.some((o) => o.id === u.id))
@@ -133,6 +182,7 @@ function NuovaSfida() {
         opponent_ids: opponents.map((o) => o.id),
         category_ids: selected.length ? selected : null,
         subcategory_ids: selectedSubs.length ? selectedSubs : null,
+        quiz_ids: selectedQuizzes.length ? selectedQuizzes : null,
         mode,
       })
       notifyChallengesChanged()
@@ -216,8 +266,8 @@ function NuovaSfida() {
             ) : (
               <>
                 <strong>Tutte le categorie.</strong> Non hai selezionato nulla, quindi le domande saranno pescate da
-                tutti i Training. Tocca una categoria per restringere la scelta, e la freccia accanto per scegliere una
-                sottocategoria precisa (es. Disney › Peter Pan).
+                tutti i Training. Tocca una categoria per restringere la scelta, e la freccia accanto per scegliere un
+                Training preciso (es. Disney › Peter Pan).
               </>
             )}
           </span>
@@ -225,26 +275,23 @@ function NuovaSfida() {
 
         <div className={styles.categoryGrid}>
           {categories.map((c) => {
-            const subs = subsOf(c)
-            const chosenSubs = selectedSubsOf(c)
-            const active = selected.includes(c.id) || chosenSubs.length > 0
+            const count = detailCount(c)
+            const active = selected.includes(c.id) || count > 0
 
             return (
               <div key={c.id} className={`${styles.categoryChipWrap} ${active ? styles.categoryChipActive : ""}`}>
                 <button type="button" className={styles.categoryChipMain} onClick={() => toggleCategory(c)}>
                   {c.name}
                   <span className={styles.meta}>
-                    {chosenSubs.length > 0
-                      ? ` · ${chosenSubs.length} ${chosenSubs.length === 1 ? "sottocategoria" : "sottocategorie"}`
-                      : ` · ${c.questions_count} domande`}
+                    {count > 0 ? ` · ${count} ${count === 1 ? "scelta" : "scelte"}` : ` · ${c.questions_count} domande`}
                   </span>
                 </button>
 
-                {subs.length > 0 && (
+                {hasDetail(c) && (
                   <button
                     type="button"
                     className={styles.categoryChipCaret}
-                    aria-label={`Scegli la sottocategoria di ${c.name}`}
+                    aria-label={`Scegli nel dettaglio dentro ${c.name}`}
                     aria-expanded={expanded.includes(c.id)}
                     onClick={() => toggleExpanded(c.id)}
                   >
@@ -257,35 +304,69 @@ function NuovaSfida() {
         </div>
 
         {categories
-          .filter((c) => expanded.includes(c.id) && subsOf(c).length > 0)
-          .map((c) => (
-            <div key={c.id} className={styles.subPanel}>
-              <div className={styles.subPanelTitle}>
-                {c.name}: scegli nel dettaglio <span className={styles.meta}>(facoltativo)</span>
-              </div>
-              <div className={styles.categoryGrid}>
-                <button
-                  type="button"
-                  className={`${styles.categoryChip} ${selected.includes(c.id) ? styles.categoryChipActive : ""}`}
-                  onClick={() => toggleCategory(c)}
-                >
-                  Tutto {c.name}
-                  <span className={styles.meta}> · {c.questions_count} domande</span>
-                </button>
-                {subsOf(c).map((sub) => (
+          .filter((c) => expanded.includes(c.id) && hasDetail(c))
+          .map((c) => {
+            const subs = subsOf(c)
+            const grouped = new Set(subs.map((sub) => sub.id))
+            const loose = quizzesOf(c).filter((quiz) => !grouped.has(quiz.subcategory_id))
+
+            const quizChip = (quiz) => (
+              <button
+                key={quiz.id}
+                type="button"
+                className={`${styles.categoryChip} ${isQuizActive(c, quiz) ? styles.categoryChipActive : ""}`}
+                onClick={() => toggleQuiz(c, quiz)}
+              >
+                {quiz.title}
+                <span className={styles.meta}> · {quiz.questions_count} domande</span>
+              </button>
+            )
+
+            return (
+              <div key={c.id} className={styles.subPanel}>
+                <div className={styles.subPanelTitle}>
+                  {c.name}: scegli nel dettaglio <span className={styles.meta}>(facoltativo)</span>
+                </div>
+
+                <div className={styles.categoryGrid}>
                   <button
-                    key={sub.id}
                     type="button"
-                    className={`${styles.categoryChip} ${selectedSubs.includes(sub.id) ? styles.categoryChipActive : ""}`}
-                    onClick={() => toggleSub(c, sub)}
+                    className={`${styles.categoryChip} ${selected.includes(c.id) ? styles.categoryChipActive : ""}`}
+                    onClick={() => toggleCategory(c)}
                   >
-                    {sub.name}
-                    <span className={styles.meta}> · {sub.questions_count} domande</span>
+                    Tutto {c.name}
+                    <span className={styles.meta}> · {c.questions_count} domande</span>
                   </button>
+                </div>
+
+                {subs.map((sub) => (
+                  <div key={sub.id} className={styles.subGroup}>
+                    <div className={styles.categoryGrid}>
+                      <button
+                        type="button"
+                        className={`${styles.categoryChip} ${styles.groupChip} ${
+                          isSubActive(c, sub) ? styles.categoryChipActive : ""
+                        }`}
+                        onClick={() => toggleSub(c, sub)}
+                      >
+                        <i className="bi bi-collection"></i> Tutto {sub.name}
+                        <span className={styles.meta}> · {sub.questions_count} domande</span>
+                      </button>
+                      {quizzesOf(c)
+                        .filter((quiz) => quiz.subcategory_id === sub.id)
+                        .map(quizChip)}
+                    </div>
+                  </div>
                 ))}
+
+                {loose.length > 0 && (
+                  <div className={styles.subGroup}>
+                    <div className={styles.categoryGrid}>{loose.map(quizChip)}</div>
+                  </div>
+                )}
               </div>
-            </div>
-          ))}
+            )
+          })}
 
         <div className={`${styles.meta} mt-2`}>Domande disponibili: {availableQuestions}</div>
 

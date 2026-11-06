@@ -38,27 +38,31 @@ class ChallengeService
 
     /**
      * Domande dei Training attivi che hanno una risposta corretta. Una
-     * categoria in $categoryIds include tutte le sue sottocategorie; una
-     * sottocategoria in $subcategoryIds restringe a quella soltanto. Entrambi
-     * vuoti = tutte le categorie.
+     * categoria in $categoryIds include tutto il suo contenuto, una
+     * sottocategoria in $subcategoryIds tutti i suoi Training, un Training in
+     * $quizIds solo se stesso. Tutti vuoti = tutte le categorie.
      */
-    public function poolQuery(?array $categoryIds, ?array $subcategoryIds = null)
+    public function poolQuery(?array $categoryIds, ?array $subcategoryIds = null, ?array $quizIds = null)
     {
         return Question::query()
             ->whereHas('answers', fn ($q) => $q->where('is_correct', true))
-            ->whereHas('quiz', function ($quiz) use ($categoryIds, $subcategoryIds) {
+            ->whereHas('quiz', function ($quiz) use ($categoryIds, $subcategoryIds, $quizIds) {
                 $quiz->where('type', 'training')
                     ->where('is_active', true)
                     ->whereHas('trainingCategory', fn ($c) => $c->where('is_active', true));
 
-                if ($categoryIds || $subcategoryIds) {
-                    $quiz->where(function ($selection) use ($categoryIds, $subcategoryIds) {
+                if ($categoryIds || $subcategoryIds || $quizIds) {
+                    $quiz->where(function ($selection) use ($categoryIds, $subcategoryIds, $quizIds) {
                         if ($categoryIds) {
-                            $selection->whereIn('training_category_id', $categoryIds);
+                            $selection->orWhereIn('training_category_id', $categoryIds);
                         }
 
                         if ($subcategoryIds) {
                             $selection->orWhereIn('training_subcategory_id', $subcategoryIds);
+                        }
+
+                        if ($quizIds) {
+                            $selection->orWhereIn('id', $quizIds);
                         }
                     });
                 }
@@ -73,9 +77,9 @@ class ChallengeService
      * @param  int[]  $userIds
      * @return int[]|null
      */
-    public function pickQuestions(?array $categoryIds, array $userIds, ?array $subcategoryIds = null): ?array
+    public function pickQuestions(?array $categoryIds, array $userIds, ?array $subcategoryIds = null, ?array $quizIds = null): ?array
     {
-        $poolIds = $this->poolQuery($categoryIds, $subcategoryIds)->pluck('questions.id')->all();
+        $poolIds = $this->poolQuery($categoryIds, $subcategoryIds, $quizIds)->pluck('questions.id')->all();
 
         if (count($poolIds) < Challenge::QUESTIONS_COUNT) {
             return null;

@@ -8,6 +8,7 @@ use App\Models\Challenge;
 use App\Models\ChallengeAnswer;
 use App\Models\ChallengeAttempt;
 use App\Models\ChallengeParticipant;
+use App\Models\Quiz;
 use App\Models\TrainingCategory;
 use App\Models\TrainingSubcategory;
 use App\Models\User;
@@ -76,33 +77,60 @@ class ChallengeController extends Controller
      */
     public function categories()
     {
+        // Domande usabili per ogni Training attivo (una sola query).
+        $perQuiz = DB::table('questions as q')
+            ->join('quizzes as z', 'z.id', '=', 'q.quiz_id')
+            ->where('z.type', 'training')
+            ->where('z.is_active', true)
+            ->whereExists(fn ($e) => $e->select(DB::raw(1))
+                ->from('answers as a')
+                ->whereColumn('a.question_id', 'q.id')
+                ->where('a.is_correct', true))
+            ->groupBy('z.id')
+            ->selectRaw('z.id as quiz_id, COUNT(*) as total')
+            ->pluck('total', 'quiz_id');
+
         $categories = TrainingCategory::where('is_active', true)
+            ->with(['subcategories' => fn ($q) => $q->where('is_active', true)->orderBy('name')])
             ->orderBy('name')
             ->get()
-            ->map(fn (TrainingCategory $category) => [
-                'id' => $category->id,
-                'name' => $category->name,
-                'image' => $category->image_url,
-                'questions_count' => $this->service->poolQuery([$category->id])->count(),
-                // Sottocategorie scegliibili nel dettaglio (con almeno una domanda usabile).
-                'subcategories' => $category->subcategories()
+            ->map(function (TrainingCategory $category) use ($perQuiz) {
+                $quizzes = Quiz::where('training_category_id', $category->id)
+                    ->where('type', 'training')
                     ->where('is_active', true)
-                    ->orderBy('name')
-                    ->get()
-                    ->map(fn ($sub) => [
-                        'id' => $sub->id,
-                        'name' => $sub->name,
-                        'questions_count' => $this->service->poolQuery(null, [$sub->id])->count(),
+                    ->orderBy('title')
+                    ->get(['id', 'title', 'training_subcategory_id'])
+                    ->map(fn ($quiz) => [
+                        'id' => $quiz->id,
+                        'title' => $quiz->title,
+                        'subcategory_id' => $quiz->training_subcategory_id,
+                        'questions_count' => (int) ($perQuiz[$quiz->id] ?? 0),
                     ])
-                    ->filter(fn ($s) => $s['questions_count'] > 0)
-                    ->values(),
-            ])
+                    ->filter(fn ($quiz) => $quiz['questions_count'] > 0)
+                    ->values();
+
+                return [
+                    'id' => $category->id,
+                    'name' => $category->name,
+                    'image' => $category->image_url,
+                    'questions_count' => $quizzes->sum('questions_count'),
+                    'subcategories' => $category->subcategories
+                        ->map(fn ($sub) => [
+                            'id' => $sub->id,
+                            'name' => $sub->name,
+                            'questions_count' => $quizzes->where('subcategory_id', $sub->id)->sum('questions_count'),
+                        ])
+                        ->filter(fn ($s) => $s['questions_count'] > 0)
+                        ->values(),
+                    'quizzes' => $quizzes,
+                ];
+            })
             ->filter(fn ($c) => $c['questions_count'] > 0)
             ->values();
 
         return response()->json([
             'categories' => $categories,
-            'all_questions_count' => $this->service->poolQuery(null)->count(),
+            'all_questions_count' => $categories->sum('questions_count'),
             'required_questions' => Challenge::QUESTIONS_COUNT,
             'max_invitees' => Challenge::MAX_PARTICIPANTS - 1,
         ]);
@@ -152,6 +180,8 @@ class ChallengeController extends Controller
             'category_ids.*' => ['integer', 'exists:training_categories,id'],
             'subcategory_ids' => ['nullable', 'array'],
             'subcategory_ids.*' => ['integer', 'exists:training_subcategories,id'],
+            'quiz_ids' => ['nullable', 'array'],
+            'quiz_ids.*' => ['integer', 'exists:quizzes,id'],
             'mode' => ['nullable', 'in:async,live'],
         ]);
 
@@ -200,7 +230,18 @@ class ChallengeController extends Controller
             : [];
         $subcategoryIds = $subcategoryIds ?: null;
 
-        $questionIds = $this->service->pickQuestions($categoryIds, [$user->id, ...$opponents->pluck('id')->all()], $subcategoryIds);
+        // Un singolo Training gia' incluso da una scelta piu' ampia si scarta.
+        $quizIds = ! empty($validated['quiz_ids'])
+            ? Quiz::whereIn('id', $validated['quiz_ids'])
+                ->where('type', 'training')
+                ->whereNotIn('training_category_id', $categoryIds ?? [])
+                ->where(fn ($q) => $q->whereNull('training_subcategory_id')->orWhereNotIn('training_subcategory_id', $subcategoryIds ?? []))
+                ->pluck('id')
+                ->all()
+            : [];
+        $quizIds = $quizIds ?: null;
+
+        $questionIds = $this->service->pickQuestions($categoryIds, [$user->id, ...$opponents->pluck('id')->all()], $subcategoryIds, $quizIds);
 
         if ($questionIds === null) {
             return response()->json([
@@ -208,7 +249,7 @@ class ChallengeController extends Controller
             ], 422);
         }
 
-        $challenge = DB::transaction(function () use ($user, $opponents, $categoryIds, $subcategoryIds, $questionIds, $mode) {
+        $challenge = DB::transaction(function () use ($user, $opponents, $categoryIds, $subcategoryIds, $quizIds, $questionIds, $mode) {
             $challenge = Challenge::create([
                 'challenger_id' => $user->id,
                 'opponent_id' => $opponents->first()->id,
@@ -216,6 +257,7 @@ class ChallengeController extends Controller
                 'status' => 'open',
                 'category_ids' => $categoryIds,
                 'subcategory_ids' => $subcategoryIds,
+                'quiz_ids' => $quizIds,
                 'expires_at' => $mode === 'live'
                     ? now()->addMinutes(ChallengeService::LIVE_INVITE_MINUTES)
                     : now()->addHours(ChallengeService::ASYNC_HOURS),

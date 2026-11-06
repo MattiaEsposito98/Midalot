@@ -19,6 +19,7 @@ class Challenge extends Model
         'status',
         'category_ids',
         'subcategory_ids',
+        'quiz_ids',
         'expires_at',
         'live_started_at',
         'completed_at',
@@ -28,6 +29,7 @@ class Challenge extends Model
     protected $casts = [
         'category_ids' => 'array',
         'subcategory_ids' => 'array',
+        'quiz_ids' => 'array',
         'expires_at' => 'datetime',
         'live_started_at' => 'datetime',
         'completed_at' => 'datetime',
@@ -73,7 +75,7 @@ class Challenge extends Model
      */
     public function selectionLabels(): array
     {
-        if (empty($this->category_ids) && empty($this->subcategory_ids)) {
+        if (empty($this->category_ids) && empty($this->subcategory_ids) && empty($this->quiz_ids)) {
             return ['Tutte le categorie'];
         }
 
@@ -89,6 +91,15 @@ class Challenge extends Model
 
             foreach ($subs as $sub) {
                 $labels[] = ($sub->category?->name ?? '?').' › '.$sub->name;
+            }
+        }
+
+        if (! empty($this->quiz_ids)) {
+            $quizzes = Quiz::with('trainingCategory')->whereIn('id', $this->quiz_ids)->get()
+                ->sortBy(fn ($q) => ($q->trainingCategory?->name ?? '').' '.$q->title);
+
+            foreach ($quizzes as $quiz) {
+                $labels[] = ($quiz->trainingCategory?->name ?? '?').' › '.$quiz->title;
             }
         }
 
