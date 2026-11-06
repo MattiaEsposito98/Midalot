@@ -37,20 +37,30 @@ class ChallengeService
     public const LIVE_COUNTDOWN_SECONDS = 5;
 
     /**
-     * Domande dei Training attivi (nelle categorie richieste) che hanno una
-     * risposta corretta. $categoryIds null = tutte le categorie.
+     * Domande dei Training attivi che hanno una risposta corretta. Una
+     * categoria in $categoryIds include tutte le sue sottocategorie; una
+     * sottocategoria in $subcategoryIds restringe a quella soltanto. Entrambi
+     * vuoti = tutte le categorie.
      */
-    public function poolQuery(?array $categoryIds)
+    public function poolQuery(?array $categoryIds, ?array $subcategoryIds = null)
     {
         return Question::query()
             ->whereHas('answers', fn ($q) => $q->where('is_correct', true))
-            ->whereHas('quiz', function ($quiz) use ($categoryIds) {
+            ->whereHas('quiz', function ($quiz) use ($categoryIds, $subcategoryIds) {
                 $quiz->where('type', 'training')
                     ->where('is_active', true)
                     ->whereHas('trainingCategory', fn ($c) => $c->where('is_active', true));
 
-                if ($categoryIds) {
-                    $quiz->whereIn('training_category_id', $categoryIds);
+                if ($categoryIds || $subcategoryIds) {
+                    $quiz->where(function ($selection) use ($categoryIds, $subcategoryIds) {
+                        if ($categoryIds) {
+                            $selection->whereIn('training_category_id', $categoryIds);
+                        }
+
+                        if ($subcategoryIds) {
+                            $selection->orWhereIn('training_subcategory_id', $subcategoryIds);
+                        }
+                    });
                 }
             });
     }
@@ -63,9 +73,9 @@ class ChallengeService
      * @param  int[]  $userIds
      * @return int[]|null
      */
-    public function pickQuestions(?array $categoryIds, array $userIds): ?array
+    public function pickQuestions(?array $categoryIds, array $userIds, ?array $subcategoryIds = null): ?array
     {
-        $poolIds = $this->poolQuery($categoryIds)->pluck('questions.id')->all();
+        $poolIds = $this->poolQuery($categoryIds, $subcategoryIds)->pluck('questions.id')->all();
 
         if (count($poolIds) < Challenge::QUESTIONS_COUNT) {
             return null;

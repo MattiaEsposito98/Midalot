@@ -9,6 +9,7 @@ use App\Models\ChallengeAnswer;
 use App\Models\ChallengeAttempt;
 use App\Models\ChallengeParticipant;
 use App\Models\TrainingCategory;
+use App\Models\TrainingSubcategory;
 use App\Models\User;
 use App\Models\XpEvent;
 use App\Services\ChallengeLiveTimeline;
@@ -83,6 +84,18 @@ class ChallengeController extends Controller
                 'name' => $category->name,
                 'image' => $category->image_url,
                 'questions_count' => $this->service->poolQuery([$category->id])->count(),
+                // Sottocategorie scegliibili nel dettaglio (con almeno una domanda usabile).
+                'subcategories' => $category->subcategories()
+                    ->where('is_active', true)
+                    ->orderBy('name')
+                    ->get()
+                    ->map(fn ($sub) => [
+                        'id' => $sub->id,
+                        'name' => $sub->name,
+                        'questions_count' => $this->service->poolQuery(null, [$sub->id])->count(),
+                    ])
+                    ->filter(fn ($s) => $s['questions_count'] > 0)
+                    ->values(),
             ])
             ->filter(fn ($c) => $c['questions_count'] > 0)
             ->values();
@@ -137,6 +150,8 @@ class ChallengeController extends Controller
             'opponent_ids.*' => ['integer', 'distinct', 'exists:users,id'],
             'category_ids' => ['nullable', 'array'],
             'category_ids.*' => ['integer', 'exists:training_categories,id'],
+            'subcategory_ids' => ['nullable', 'array'],
+            'subcategory_ids.*' => ['integer', 'exists:training_subcategories,id'],
             'mode' => ['nullable', 'in:async,live'],
         ]);
 
@@ -176,7 +191,16 @@ class ChallengeController extends Controller
             ? array_values(array_unique(array_map('intval', $validated['category_ids'])))
             : null;
 
-        $questionIds = $this->service->pickQuestions($categoryIds, [$user->id, ...$opponents->pluck('id')->all()]);
+        // Una categoria scelta in generale include gia' tutte le sue sottocategorie.
+        $subcategoryIds = ! empty($validated['subcategory_ids'])
+            ? TrainingSubcategory::whereIn('id', $validated['subcategory_ids'])
+                ->whereNotIn('training_category_id', $categoryIds ?? [])
+                ->pluck('id')
+                ->all()
+            : [];
+        $subcategoryIds = $subcategoryIds ?: null;
+
+        $questionIds = $this->service->pickQuestions($categoryIds, [$user->id, ...$opponents->pluck('id')->all()], $subcategoryIds);
 
         if ($questionIds === null) {
             return response()->json([
@@ -184,13 +208,14 @@ class ChallengeController extends Controller
             ], 422);
         }
 
-        $challenge = DB::transaction(function () use ($user, $opponents, $categoryIds, $questionIds, $mode) {
+        $challenge = DB::transaction(function () use ($user, $opponents, $categoryIds, $subcategoryIds, $questionIds, $mode) {
             $challenge = Challenge::create([
                 'challenger_id' => $user->id,
                 'opponent_id' => $opponents->first()->id,
                 'mode' => $mode,
                 'status' => 'open',
                 'category_ids' => $categoryIds,
+                'subcategory_ids' => $subcategoryIds,
                 'expires_at' => $mode === 'live'
                     ? now()->addMinutes(ChallengeService::LIVE_INVITE_MINUTES)
                     : now()->addHours(ChallengeService::ASYNC_HOURS),
@@ -809,11 +834,7 @@ class ChallengeController extends Controller
 
     private function categoryNames(Challenge $challenge): array
     {
-        if (empty($challenge->category_ids)) {
-            return ['Tutte le categorie'];
-        }
-
-        return TrainingCategory::whereIn('id', $challenge->category_ids)->orderBy('name')->pluck('name')->all();
+        return $challenge->selectionLabels();
     }
 
     private function playerPayload(User $user): array

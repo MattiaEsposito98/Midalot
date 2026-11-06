@@ -244,9 +244,7 @@
                                 $overdue = $challenge->status === 'open' && $challenge->live_started_at === null && $challenge->expires_at->isPast();
                                 $invitees = $challenge->participants->where('user_id', '!=', $challenge->challenger_id);
                                 $winner = $challenge->participants->firstWhere('user_id', $challenge->winner_id);
-                                $cats = empty($challenge->category_ids)
-                                    ? 'Tutte'
-                                    : collect($challenge->category_ids)->map(fn ($id) => $categoryNames[$id] ?? '?')->implode(', ');
+                                $cats = implode(', ', $challenge->selectionLabels());
                             @endphp
                             <tr>
                                 <td class="fw-bold">{{ $challenge->id }}</td>

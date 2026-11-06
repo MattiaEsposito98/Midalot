@@ -18,6 +18,7 @@ class Challenge extends Model
         'mode',
         'status',
         'category_ids',
+        'subcategory_ids',
         'expires_at',
         'live_started_at',
         'completed_at',
@@ -26,6 +27,7 @@ class Challenge extends Model
 
     protected $casts = [
         'category_ids' => 'array',
+        'subcategory_ids' => 'array',
         'expires_at' => 'datetime',
         'live_started_at' => 'datetime',
         'completed_at' => 'datetime',
@@ -61,6 +63,36 @@ class Challenge extends Model
     public function isChallenger(int $userId): bool
     {
         return (int) $this->challenger_id === $userId;
+    }
+
+    /**
+     * Etichette della selezione: categorie scelte in generale e sottocategorie
+     * scelte nel dettaglio ("Disney › Peter Pan"). Vuoto = tutte le categorie.
+     *
+     * @return string[]
+     */
+    public function selectionLabels(): array
+    {
+        if (empty($this->category_ids) && empty($this->subcategory_ids)) {
+            return ['Tutte le categorie'];
+        }
+
+        $labels = [];
+
+        if (! empty($this->category_ids)) {
+            $labels = TrainingCategory::whereIn('id', $this->category_ids)->orderBy('name')->pluck('name')->all();
+        }
+
+        if (! empty($this->subcategory_ids)) {
+            $subs = TrainingSubcategory::with('category')->whereIn('id', $this->subcategory_ids)->get()
+                ->sortBy(fn ($s) => ($s->category?->name ?? '').' '.$s->name);
+
+            foreach ($subs as $sub) {
+                $labels[] = ($sub->category?->name ?? '?').' › '.$sub->name;
+            }
+        }
+
+        return $labels;
     }
 
     /**

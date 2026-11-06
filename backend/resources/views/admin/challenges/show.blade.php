@@ -21,9 +21,7 @@
             'missed' => 'Assente',
         ];
 
-        $cats = empty($challenge->category_ids)
-            ? 'Tutte le categorie'
-            : collect($challenge->category_ids)->map(fn ($id) => $categoryNames[$id] ?? '?')->implode(', ');
+        $cats = implode(', ', $challenge->selectionLabels());
 
         $rankByUser = $ranked->mapWithKeys(fn ($row) => [$row['attempt']->user_id => $row['rank']]);
     @endphp

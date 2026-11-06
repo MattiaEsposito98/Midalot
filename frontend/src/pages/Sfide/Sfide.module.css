@@ -367,3 +367,51 @@
 .questionCategory i {
   font-size: 0.8rem;
 }
+
+.categoryChipWrap {
+  display: flex;
+  align-items: stretch;
+  background: #ffffff;
+  border: 2px solid #dce5ee;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.categoryChipWrap.categoryChipActive {
+  border-color: #182033;
+  background: #fff4bf;
+  box-shadow: 0 3px 0 #182033;
+}
+
+.categoryChipMain {
+  flex: 1 1 auto;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  font-weight: 800;
+  color: #182033;
+}
+
+.categoryChipCaret {
+  flex: 0 0 auto;
+  width: 38px;
+  border: 0;
+  border-left: 2px solid rgba(24, 32, 51, 0.15);
+  background: rgba(24, 32, 51, 0.06);
+  color: #182033;
+}
+
+.subPanel {
+  margin: 10px 0 4px;
+  padding: 12px;
+  border: 2px dashed #182033;
+  border-radius: 8px;
+  background: #fffdf2;
+}
+
+.subPanelTitle {
+  margin-bottom: 4px;
+  font-weight: 900;
+  color: #182033;
+}
