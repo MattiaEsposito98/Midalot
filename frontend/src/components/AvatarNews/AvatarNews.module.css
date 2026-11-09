@@ -120,3 +120,25 @@
   color: #6c7a92;
   font-weight: 600;
 }
+
+.goalIcon {
+  font-size: 1.3rem;
+  color: #2f9b5a;
+}
+
+.goalDesc {
+  display: block;
+  font-size: 0.82rem;
+  color: #6c7a92;
+}
+
+.goalReward {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #b07d00;
+}
+
+.list + .sub {
+  margin-top: 12px;
+}

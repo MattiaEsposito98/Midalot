@@ -5,6 +5,7 @@ import { useAuth } from "../../context/useAuth"
 import { logError } from "../../utils/logger"
 import AvatarStage from "../../components/Avatar3D/AvatarStage"
 import PortraitCapture from "../../components/Avatar3D/PortraitCapture"
+import Achievements from "./Achievements"
 import UserAvatar from "../../components/UserAvatar/UserAvatar"
 import UserTitle from "../../components/UserAvatar/UserTitle"
 import {
@@ -75,7 +76,8 @@ function apiError(err, fallback) {
 export default function Avatar() {
   const { user, refreshUser, updateUser } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
-  const mode = searchParams.get("vista") === "negozio" ? "shop" : "wardrobe"
+  const vista = searchParams.get("vista")
+  const mode = vista === "negozio" ? "shop" : vista === "obiettivi" ? "goals" : "wardrobe"
 
   const [data, setData] = useState(null)
   const [draft, setDraft] = useState(null)
@@ -159,7 +161,7 @@ export default function Avatar() {
     setConfirmBuy(null)
     setMessage(null)
     setTab(next === "shop" ? "all" : "look")
-    setSearchParams(next === "shop" ? { vista: "negozio" } : {}, { replace: true })
+    setSearchParams(next === "shop" ? { vista: "negozio" } : next === "goals" ? { vista: "obiettivi" } : {}, { replace: true })
   }
 
   async function save() {
@@ -219,7 +221,8 @@ export default function Avatar() {
     let status
     if (mine) status = active ? <><i className="bi bi-check-circle-fill"></i> Indossato</> : "Tocca per indossare"
     else if (it.unlock_level) status = <><i className="bi bi-lock-fill"></i> Si sblocca al Lv {it.unlock_level}</>
-    else status = <><i className="bi bi-shop"></i> Nel negozio · <Coins value={it.price} /></>
+    else if (it.price != null) status = <><i className="bi bi-shop"></i> Nel negozio · <Coins value={it.price} /></>
+    else status = <><i className="bi bi-award"></i> {data.achievement_items?.[it.key] || "Premio di un obiettivo"}</>
 
     return (
       <button
@@ -317,6 +320,9 @@ export default function Avatar() {
           <button type="button" className={mode === "shop" ? styles.modeActive : ""} onClick={() => switchMode("shop")}>
             <i className="bi bi-shop"></i> Negozio
           </button>
+          <button type="button" className={mode === "goals" ? styles.modeActive : ""} onClick={() => switchMode("goals")}>
+            <i className="bi bi-award"></i> Obiettivi
+          </button>
         </div>
 
         <div className="d-flex flex-wrap align-items-center gap-2">
@@ -365,7 +371,8 @@ export default function Avatar() {
         </div>
 
         <div className="col-lg-7">
-          <div className={styles.tabs}>
+          {mode === "goals" && <Achievements />}
+          <div className={styles.tabs} hidden={mode === "goals"}>
             {mode === "wardrobe" ? (
               <>
                 <button type="button" className={`${styles.tab} ${tab === "look" ? styles.tabActive : ""}`} onClick={() => setTab("look")}>
@@ -394,7 +401,7 @@ export default function Avatar() {
             )}
           </div>
 
-          <div className={styles.panel}>
+          <div className={styles.panel} hidden={mode === "goals"}>
             {mode === "shop" ? (
               <>
                 <p className={styles.hint}>

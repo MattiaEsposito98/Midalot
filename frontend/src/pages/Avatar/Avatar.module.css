@@ -349,3 +349,90 @@
   font-size: 0.8rem;
   color: #6c7a92;
 }
+
+/* ------------------------------------------------------------ obiettivi */
+
+.goalGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.goal {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 2px solid rgba(24, 32, 51, 0.1);
+  background: #fff;
+}
+
+.goalDone {
+  border-color: #2f9b5a;
+  background: #f1fbf4;
+}
+
+.goalIcon {
+  flex: 0 0 auto;
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  color: #6c4bd8;
+  background: #f0ecff;
+}
+
+.goalDone .goalIcon {
+  color: #fff;
+  background: #2f9b5a;
+}
+
+.goalBar {
+  position: relative;
+  height: 16px;
+  margin-top: 6px;
+  border-radius: 999px;
+  background: #e8e6f2;
+  overflow: hidden;
+}
+
+.goalBar > div {
+  position: absolute;
+  inset: 0 auto 0 0;
+  min-width: 4px;
+  background: linear-gradient(90deg, #8ff0ff, #6c4bd8);
+}
+
+.goalBar > span {
+  position: relative;
+  display: block;
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  line-height: 16px;
+  color: #182033;
+}
+
+.goalDate {
+  margin-top: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1f7a42;
+}
+
+.goalRewards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+  font-size: 0.82rem;
+}
+
+.goalItem {
+  font-weight: 700;
+  color: var(--rarity);
+}

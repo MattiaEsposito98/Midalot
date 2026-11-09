@@ -37,7 +37,7 @@ class XpService
             return null;
         }
 
-        return DB::transaction(function () use ($userId, $source, $sourceId, $xp) {
+        $result = DB::transaction(function () use ($userId, $source, $sourceId, $xp) {
             $inserted = XpEvent::insertOrIgnore([
                 'user_id' => $userId,
                 'source' => $source,
@@ -87,6 +87,18 @@ class XpService
                 'unlocked' => $unlocked->map->toCatalog()->values()->all(),
             ];
         });
+
+        // Obiettivi (partite giocate, giorni di fila, ...): un errore qui non
+        // deve mai far perdere gli XP appena accreditati.
+        if ($result) {
+            try {
+                $result['achievements'] = app(AchievementService::class)->check($userId);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
+        return $result;
     }
 
     /**

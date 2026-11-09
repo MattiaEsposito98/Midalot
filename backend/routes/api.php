@@ -144,6 +144,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::put('/avatar', [AvatarController::class, 'update'])->middleware('throttle:30,1');
     Route::post('/avatar/portrait', [AvatarController::class, 'portrait'])->middleware('throttle:30,1');
     Route::get('/avatar/news', [AvatarController::class, 'news']);
+    Route::get('/avatar/achievements', [AvatarController::class, 'achievements']);
     Route::post('/avatar/news/seen', [AvatarController::class, 'seen']);
     Route::post('/avatar/shop/{key}', [AvatarController::class, 'buy'])->middleware('throttle:20,1');
 

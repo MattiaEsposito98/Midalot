@@ -193,4 +193,14 @@ export const ITEM_MODELS = {
   cornice_stelle: { slot: "frame" },
   cornice_neon: { slot: "frame" },
   cornice_fiamme: { slot: "frame" },
+
+  // Esclusivi degli obiettivi
+  titolo_duellante: { slot: "title" },
+  titolo_campione_sfide: { slot: "title" },
+  titolo_instancabile: { slot: "title" },
+  titolo_secchione: { slot: "title" },
+  titolo_veterano_midalario: { slot: "title" },
+  cornice_costanza: { slot: "frame" },
+  guanti_duellante: { slot: "hands", look: { gloves: "#c42828" } },
+  mantello_maratoneta: { slot: "back", Model: () => <Mantello color="#2f9b5a" inner="#f4f4f6" height={0.74} collar="#f2c230" /> },
 }

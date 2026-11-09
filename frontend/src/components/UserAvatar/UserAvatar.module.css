@@ -187,3 +187,13 @@
   white-space: nowrap;
   vertical-align: middle;
 }
+
+/* Cornice esclusiva dell'obiettivo "Costanza" (7 giorni di fila) */
+.frame[data-frame="cornice_costanza"] {
+  background: linear-gradient(135deg, #7ff0d4, #1d8f9c 55%, #2fd6a8);
+  box-shadow: 0 0 6px rgba(47, 214, 168, 0.6);
+}
+
+.frame[data-frame="cornice_costanza"]::after {
+  content: "📅";
+}

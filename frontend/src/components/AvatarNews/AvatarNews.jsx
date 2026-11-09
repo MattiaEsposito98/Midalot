@@ -6,17 +6,17 @@ import { RARITY } from "../Avatar3D/catalog"
 import css from "./AvatarNews.module.css"
 
 /**
- * Avviso globale "Hai sbloccato nuovi oggetti!": si controlla all'accesso e
- * ogni volta che cambia il livello (fine partita, bonus giornaliero, ...).
+ * Avviso globale "Obiettivo raggiunto!" / "Hai sbloccato nuovi oggetti!":
+ * si controlla all'accesso e dopo ogni partita (cambiano gli XP totali).
  */
 export default function AvatarNews() {
   const { user, token, refreshUser } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
-  const [items, setItems] = useState([])
-  const prevLevel = useRef(null)
+  const [news, setNews] = useState({ items: [], achievements: [] })
+  const prevXp = useRef(null)
 
-  const level = user?.xp_info?.level
+  const xpTotal = user?.xp_info?.total
   const onAvatarPage = location.pathname.startsWith("/avatar")
 
   useEffect(() => {
@@ -26,61 +26,100 @@ export default function AvatarNews() {
     api
       .get("/avatar/news")
       .then((res) => {
-        if (alive) setItems(res.data.items || [])
+        if (!alive) return
+        const next = { items: res.data.items || [], achievements: res.data.achievements || [] }
+        setNews(next)
+        // Obiettivi e livelli portano monete: aggiorna il saldo in navbar.
+        if (next.achievements.length) refreshUser?.()
       })
       .catch(() => {})
 
-    // Salendo di livello arrivano anche monete: aggiorna il saldo in navbar.
-    if (prevLevel.current != null && level !== prevLevel.current) refreshUser?.()
-    prevLevel.current = level
+    if (prevXp.current != null && xpTotal !== prevXp.current) refreshUser?.()
+    prevXp.current = xpTotal
 
     return () => {
       alive = false
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, user?.id, level])
+  }, [token, user?.id, xpTotal])
 
-  if (!items.length || onAvatarPage) return null
+  const { items, achievements } = news
+  if ((!items.length && !achievements.length) || onAvatarPage) return null
 
-  const close = () => {
-    setItems([])
+  const markSeen = () => {
+    setNews({ items: [], achievements: [] })
     api.post("/avatar/news/seen").catch(() => {})
   }
 
   const open = () => {
-    setItems([])
-    navigate("/avatar")
+    markSeen()
+    navigate(achievements.length && !items.length ? "/avatar?vista=obiettivi" : "/avatar")
   }
 
-  const shown = items.slice(0, 6)
+  const shownItems = items.slice(0, 5)
+  const title = achievements.length
+    ? achievements.length === 1
+      ? "Obiettivo raggiunto!"
+      : `${achievements.length} obiettivi raggiunti!`
+    : items.length === 1
+      ? "Nuovo oggetto sbloccato!"
+      : `Hai sbloccato ${items.length} nuovi oggetti!`
 
   return (
     <div className={css.backdrop} role="dialog" aria-modal="true" aria-labelledby="avatar-news-title">
       <div className={css.box}>
         <div className={css.gift}>
-          <i className="bi bi-gift-fill"></i>
+          <i className={`bi ${achievements.length ? "bi-award-fill" : "bi-gift-fill"}`}></i>
         </div>
         <h2 id="avatar-news-title" className={css.title}>
-          {items.length === 1 ? "Nuovo oggetto sbloccato!" : `Hai sbloccato ${items.length} nuovi oggetti!`}
+          {title}
         </h2>
-        <p className={css.sub}>Salendo di livello hai ricevuto nuovi oggetti per il tuo avatar.</p>
 
-        <ul className={css.list}>
-          {shown.map((it) => (
-            <li key={it.key} style={{ "--rarity": (RARITY[it.rarity] || RARITY.comune).color }}>
-              <span className={css.rarity}>{(RARITY[it.rarity] || RARITY.comune).label}</span>
-              <strong>{it.name}</strong>
-              {it.unlock_level && <span className={css.level}>Lv {it.unlock_level}</span>}
-            </li>
-          ))}
-        </ul>
-        {items.length > shown.length && <p className={css.more}>... e altri {items.length - shown.length}</p>}
+        {achievements.length > 0 && (
+          <ul className={css.list}>
+            {achievements.map((a) => (
+              <li key={a.key} style={{ "--rarity": "#2f9b5a" }}>
+                <i className={`bi ${a.icon} ${css.goalIcon}`}></i>
+                <span>
+                  <strong>{a.name}</strong>
+                  <span className={css.goalDesc}>{a.description}</span>
+                  <span className={css.goalReward}>
+                    {a.coins > 0 && (
+                      <>
+                        <i className="bi bi-coin"></i> +{a.coins} monete
+                      </>
+                    )}
+                    {a.item && <> · {a.item.name}</>}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {items.length > 0 && (
+          <>
+            <p className={css.sub}>
+              {achievements.length ? "E salendo di livello hai ricevuto:" : "Salendo di livello hai ricevuto nuovi oggetti per il tuo avatar."}
+            </p>
+            <ul className={css.list}>
+              {shownItems.map((it) => (
+                <li key={it.key} style={{ "--rarity": (RARITY[it.rarity] || RARITY.comune).color }}>
+                  <span className={css.rarity}>{(RARITY[it.rarity] || RARITY.comune).label}</span>
+                  <strong>{it.name}</strong>
+                  {it.unlock_level && <span className={css.level}>Lv {it.unlock_level}</span>}
+                </li>
+              ))}
+            </ul>
+            {items.length > shownItems.length && <p className={css.more}>... e altri {items.length - shownItems.length}</p>}
+          </>
+        )}
 
         <div className={css.actions}>
           <button type="button" className={css.primary} onClick={open}>
-            Indossali ora
+            {items.length ? "Indossali ora" : "Vedi i tuoi obiettivi"}
           </button>
-          <button type="button" className={css.secondary} onClick={close}>
+          <button type="button" className={css.secondary} onClick={markSeen}>
             Più tardi
           </button>
         </div>

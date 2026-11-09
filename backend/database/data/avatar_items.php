@@ -151,4 +151,14 @@ return [
     ['cornice_stelle', 'Cornice di stelle', 'frame', 'raro', null, 400, 5],
     ['cornice_neon', 'Cornice neon', 'frame', 'raro', null, 500, 8],
     ['cornice_fiamme', 'Cornice di fiamme', 'frame', 'epico', null, 900, 15],
+
+    // ---------------------------------------------------- Esclusivi degli obiettivi (config/achievements.php)
+    ['titolo_duellante', 'Duellante', 'title', 'raro', null, null, 1],
+    ['titolo_campione_sfide', 'Campione delle Sfide', 'title', 'leggendario', null, null, 1],
+    ['titolo_instancabile', 'Instancabile', 'title', 'epico', null, null, 1],
+    ['titolo_secchione', 'Secchione', 'title', 'raro', null, null, 1],
+    ['titolo_veterano_midalario', 'Veterano del Midalario', 'title', 'epico', null, null, 1],
+    ['guanti_duellante', 'Guanti da duellante', 'hands', 'epico', null, null, 1],
+    ['cornice_costanza', 'Cornice della costanza', 'frame', 'raro', null, null, 1],
+    ['mantello_maratoneta', 'Mantello del maratoneta', 'back', 'epico', null, null, 1],
 ];

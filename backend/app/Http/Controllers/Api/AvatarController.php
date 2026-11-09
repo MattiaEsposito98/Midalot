@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\AvatarItem;
+use App\Services\AchievementService;
 use App\Services\AvatarService;
 use App\Services\XpService;
 use Illuminate\Http\Request;
@@ -13,7 +14,7 @@ use Illuminate\Validation\Rule;
 
 class AvatarController extends Controller
 {
-    public function __construct(private AvatarService $avatar)
+    public function __construct(private AvatarService $avatar, private AchievementService $achievements)
     {
     }
 
@@ -24,6 +25,7 @@ class AvatarController extends Controller
     {
         $user = $request->user();
         $this->avatar->syncUnlocks($user);
+        $this->achievements->check($user->id);
 
         return response()->json($this->payload($user));
     }
@@ -73,6 +75,7 @@ class AvatarController extends Controller
         $item = AvatarItem::where('key', $key)->where('is_active', true)->firstOrFail();
 
         $this->avatar->buy($request->user(), $item);
+        $this->achievements->check($request->user()->id);
 
         return response()->json([
             'message' => "Hai comprato: {$item->name}",
@@ -114,8 +117,10 @@ class AvatarController extends Controller
     {
         $user = $request->user();
         $this->avatar->syncUnlocks($user);
+        $this->achievements->check($user->id);
 
         return response()->json([
+            'achievements' => $this->achievements->unseen($user),
             'items' => $this->avatar->unseen($user)->map->toCatalog()->values(),
             'level' => XpService::info((int) $user->xp_total)['level'],
         ]);
@@ -124,8 +129,23 @@ class AvatarController extends Controller
     public function seen(Request $request)
     {
         $this->avatar->markSeen($request->user());
+        $this->achievements->markSeen($request->user());
 
         return response()->json(['ok' => true]);
+    }
+
+    /**
+     * Obiettivi con progresso e premi.
+     */
+    public function achievements(Request $request)
+    {
+        $user = $request->user();
+        $this->achievements->check($user->id);
+
+        return response()->json([
+            'achievements' => $this->achievements->listFor($user),
+            'coins' => (int) $user->fresh()->coins,
+        ]);
     }
 
     private function payload($user): array
@@ -139,6 +159,7 @@ class AvatarController extends Controller
             'coins' => (int) $user->fresh()->coins,
             'level' => XpService::info((int) $user->xp_total)['level'],
             'unseen' => $this->avatar->unseen($user)->pluck('key'),
+            'achievement_items' => AchievementService::itemSources(),
         ];
     }
 }
