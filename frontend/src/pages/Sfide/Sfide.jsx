@@ -32,7 +32,7 @@ function ChallengeCard({ challenge }) {
         <div className={styles.versus}>
           <span className={styles.avatarStack}>
             {(direction === "sent" ? others : [challenger]).slice(0, 4).map((p) => (
-              <UserAvatar key={p.id} url={p.avatar_url} name={p.nickname} size={30} />
+              <UserAvatar key={p.id} url={p.avatar_url} frame={p.avatar_frame} name={p.nickname} size={30} />
             ))}
           </span>{" "}
           {direction === "sent"

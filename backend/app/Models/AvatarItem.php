@@ -8,7 +8,7 @@ class AvatarItem extends Model
 {
     public const SLOTS = [
         'head', 'face', 'torso', 'armor', 'neck', 'hands', 'legs', 'feet',
-        'handR', 'handL', 'back', 'pet', 'aura', 'background',
+        'handR', 'handL', 'back', 'pet', 'aura', 'background', 'title', 'frame',
     ];
 
     // Slot che non possono restare vuoti (si torna al vestito base).

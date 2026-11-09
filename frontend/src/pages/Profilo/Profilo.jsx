@@ -8,6 +8,7 @@ import { API_BASE } from "../../service/api"
 import UserBadge from "../../components/UserBadge/UserBadge"
 import XpBar from "../../components/XpBar/XpBar"
 import UserAvatar from "../../components/UserAvatar/UserAvatar"
+import UserTitle from "../../components/UserAvatar/UserTitle"
 
 function Profilo() {
   const { token, user } = useAuth()
@@ -206,7 +207,8 @@ function Profilo() {
 
         <div className={`mb-4 ${styles.avatarRow}`}>
           <Link to="/avatar" className={styles.avatarLink} title="Modifica il tuo avatar">
-            <UserAvatar url={user?.avatar_url} name={user?.nickname || user?.name} size={96} />
+            <UserAvatar url={user?.avatar_url} frame={user?.avatar_frame} name={user?.nickname || user?.name} size={96} />
+            <UserTitle title={user?.avatar_title_label} />
             <span>{user?.avatar_url ? "Modifica avatar" : "Crea il tuo avatar"}</span>
           </Link>
           <div className="flex-grow-1">

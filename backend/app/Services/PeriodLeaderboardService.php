@@ -49,8 +49,8 @@ class PeriodLeaderboardService
             ->fromSub($this->completedAttemptsUnion(), 'attempts')
             ->join('users', 'users.id', '=', 'attempts.user_id')
             ->whereBetween('attempts.finished_at', [$start, $end])
-            ->groupBy('attempts.user_id', 'users.nickname', 'users.avatar_url')
-            ->selectRaw("attempts.user_id as user_id, users.nickname as nickname, users.avatar_url as avatar_url, SUM(attempts.score) as total_score, SUM(CASE WHEN attempts.source != 'login' THEN 1 ELSE 0 END) as quizzes_completed")
+            ->groupBy('attempts.user_id', 'users.nickname', 'users.avatar_url', 'users.avatar_frame', 'users.avatar_title')
+            ->selectRaw("attempts.user_id as user_id, users.nickname as nickname, users.avatar_url as avatar_url, users.avatar_frame as avatar_frame, users.avatar_title as avatar_title, SUM(attempts.score) as total_score, SUM(CASE WHEN attempts.source != 'login' THEN 1 ELSE 0 END) as quizzes_completed")
             ->orderByDesc('total_score')
             ->limit(50)
             ->get()
@@ -64,6 +64,7 @@ class PeriodLeaderboardService
                 'user_id' => (int) $row->user_id,
                 'nickname' => $row->nickname,
                 'avatar_url' => $row->avatar_url,
+                ...AvatarService::look($row->avatar_frame, $row->avatar_title),
                 'total_score' => (int) $row->total_score,
                 'quizzes_completed' => (int) $row->quizzes_completed,
                 'badges' => $badgesByUserId->get((int) $row->user_id, []),

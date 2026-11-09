@@ -169,4 +169,28 @@ export const ITEM_MODELS = {
 
   sfondo_spiaggia: { slot: "background" },
   sfondo_spazio: { slot: "background" },
+
+  // Titoli e cornici: niente 3D, si vedono accanto a nickname e ritratto (UserTitle, UserAvatar).
+  titolo_matricola: { slot: "title" },
+  titolo_apprendista: { slot: "title" },
+  titolo_esploratore: { slot: "title" },
+  titolo_sapiente: { slot: "title" },
+  titolo_cavaliere: { slot: "title" },
+  titolo_leggenda: { slot: "title" },
+  titolo_curioso: { slot: "title" },
+  titolo_cervellone: { slot: "title" },
+  titolo_inarrestabile: { slot: "title" },
+  titolo_mago_trivia: { slot: "title" },
+  titolo_asso_quiz: { slot: "title" },
+  titolo_enciclopedia: { slot: "title" },
+  cornice_bronzo: { slot: "frame" },
+  cornice_argento: { slot: "frame" },
+  cornice_oro: { slot: "frame" },
+  cornice_diamante: { slot: "frame" },
+  cornice_arcobaleno: { slot: "frame" },
+  cornice_leggenda: { slot: "frame" },
+  cornice_cuori: { slot: "frame" },
+  cornice_stelle: { slot: "frame" },
+  cornice_neon: { slot: "frame" },
+  cornice_fiamme: { slot: "frame" },
 }

@@ -57,7 +57,7 @@ function WeeklyLeaderboardBox() {
           {top.map((r) => (
             <li key={r.position} className={css.leaderboardRow}>
               <span className={css.leaderboardRank}>#{r.position}</span>
-              <UserAvatar url={r.avatar_url} name={r.nickname} size={26} />
+              <UserAvatar url={r.avatar_url} frame={r.avatar_frame} name={r.nickname} size={26} />
               <span className={css.leaderboardName}>{r.nickname}</span>
               <UserBadge badges={r.badges} />
               <span className={css.leaderboardScore}>{formatQuizScore(r.total_score)}</span>

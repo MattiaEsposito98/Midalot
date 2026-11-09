@@ -103,7 +103,7 @@ function PublicNavbar() {
                     data-bs-toggle="dropdown"
                     aria-expanded="false"
                   >
-                    <UserAvatar url={user?.avatar_url} name={user?.nickname || user?.name} size={26} />
+                    <UserAvatar url={user?.avatar_url} frame={user?.avatar_frame} name={user?.nickname || user?.name} size={26} />
                     {user?.name || user?.nickname || "Profilo"}
                     <UserBadge badges={user?.badges} />
                   </a>

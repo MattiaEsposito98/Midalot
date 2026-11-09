@@ -7,6 +7,7 @@ import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import UserBadge from "../../components/UserBadge/UserBadge"
 import UserAvatar from "../../components/UserAvatar/UserAvatar"
+import UserTitle from "../../components/UserAvatar/UserTitle"
 
 const MONTH_NAMES = [
   "Gennaio", "Febbraio", "Marzo", "Aprile", "Maggio", "Giugno",
@@ -215,8 +216,9 @@ function Classifiche() {
 
               <div className={styles.mainCol}>
                 <div className={styles.nameWrap}>
-                  <UserAvatar url={r.avatar_url} name={r.nickname} size={34} />
+                  <UserAvatar url={r.avatar_url} frame={r.avatar_frame} name={r.nickname} size={34} />
                   <span className={styles.name}>{r.nickname}</span>
+                  <UserTitle title={r.avatar_title} />
                   {isMe && <span className={styles.meTag}>Tu</span>}
                   <UserBadge badges={r.badges} />
                 </div>

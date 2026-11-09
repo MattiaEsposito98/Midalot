@@ -48,6 +48,29 @@ class AvatarService
         return true;
     }
 
+    /** @var array{frames: array<string, true>, titles: array<string, string>}|null */
+    private static ?array $looks = null;
+
+    /**
+     * Cornice e titolo da mostrare agli altri. Oggetti disattivati o
+     * inesistenti diventano null. Una sola query per richiesta.
+     */
+    public static function look(?string $frame, ?string $title): array
+    {
+        if (self::$looks === null) {
+            $items = AvatarItem::where('is_active', true)->whereIn('slot', ['frame', 'title'])->get(['key', 'name', 'slot']);
+            self::$looks = [
+                'frames' => $items->where('slot', 'frame')->mapWithKeys(fn ($i) => [$i->key => true])->all(),
+                'titles' => $items->where('slot', 'title')->pluck('name', 'key')->all(),
+            ];
+        }
+
+        return [
+            'avatar_frame' => $frame && isset(self::$looks['frames'][$frame]) ? $frame : null,
+            'avatar_title' => $title ? (self::$looks['titles'][$title] ?? null) : null,
+        ];
+    }
+
     public static function levelUpCoins(int $level): int
     {
         return (int) config('xp.level_up_coins', 0) + (int) config('xp.level_up_coins_step', 0) * $level;
@@ -178,6 +201,13 @@ class AvatarService
         ];
 
         UserAvatar::updateOrCreate(['user_id' => $user->id], ['config' => $config]);
+
+        // Cornice e titolo si copiano sull'utente: cosi' sfide e classifiche li
+        // mostrano senza leggere la configurazione completa dell'avatar.
+        $user->forceFill([
+            'avatar_frame' => $equipped['frame'] ?? null,
+            'avatar_title' => $equipped['title'] ?? null,
+        ])->save();
 
         return $this->config($user);
     }

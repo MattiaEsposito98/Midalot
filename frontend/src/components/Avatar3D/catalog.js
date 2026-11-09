@@ -15,6 +15,8 @@ export const SLOTS = [
   { key: "pet", label: "Compagno", icon: "bi-heart" },
   { key: "aura", label: "Aura", icon: "bi-stars" },
   { key: "background", label: "Sfondo", icon: "bi-image" },
+  { key: "title", label: "Titolo", icon: "bi-patch-check" },
+  { key: "frame", label: "Cornice", icon: "bi-circle-square" },
 ]
 
 // Colore del cielo di ogni sfondo (scena 3D e ritratto).

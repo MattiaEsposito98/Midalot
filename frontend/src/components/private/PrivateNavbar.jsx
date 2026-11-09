@@ -105,7 +105,7 @@ function PrivateNavbar() {
                 data-bs-toggle="dropdown"
                 aria-expanded="false"
               >
-                <UserAvatar url={user?.avatar_url} name={user?.nickname || user?.name} size={26} />
+                <UserAvatar url={user?.avatar_url} frame={user?.avatar_frame} name={user?.nickname || user?.name} size={26} />
                 {user?.name || user?.username || "Profilo"}
               </a>
 

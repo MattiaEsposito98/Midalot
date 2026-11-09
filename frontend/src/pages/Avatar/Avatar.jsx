@@ -5,6 +5,8 @@ import { useAuth } from "../../context/useAuth"
 import { logError } from "../../utils/logger"
 import AvatarStage from "../../components/Avatar3D/AvatarStage"
 import PortraitCapture from "../../components/Avatar3D/PortraitCapture"
+import UserAvatar from "../../components/UserAvatar/UserAvatar"
+import UserTitle from "../../components/UserAvatar/UserTitle"
 import {
   BEARDS,
   BROWS,
@@ -71,7 +73,7 @@ function apiError(err, fallback) {
 }
 
 export default function Avatar() {
-  const { refreshUser, updateUser } = useAuth()
+  const { user, refreshUser, updateUser } = useAuth()
   const [searchParams, setSearchParams] = useSearchParams()
   const mode = searchParams.get("vista") === "negozio" ? "shop" : "wardrobe"
 
@@ -168,6 +170,11 @@ export default function Avatar() {
       setData(res.data)
       setDraft(res.data.config)
       setMessage({ ok: true, text: "Avatar salvato!" })
+      const eq = res.data.config.equipped || {}
+      updateUser?.({
+        avatar_frame: eq.frame || null,
+        avatar_title_label: res.data.catalog.find((it) => it.key === eq.title)?.name || null,
+      })
       // Foto del nuovo avatar per sfide e classifiche (vedi uploadPortrait).
       setPortraitConfig(res.data.config)
     } catch (err) {
@@ -233,7 +240,8 @@ export default function Avatar() {
           {rarity.label}
           {unseen.has(it.key) && <span className={styles.newBadge}>Nuovo</span>}
         </span>
-        <span className={styles.itemName}>{it.name}</span>
+        {it.slot === "frame" && <UserAvatar url={user?.avatar_url} name={user?.nickname} frame={it.key} size={44} className="my-1" />}
+        <span className={styles.itemName}>{it.slot === "title" ? <UserTitle title={it.name} /> : it.name}</span>
         <span className={styles.itemLevel}>{status}</span>
       </button>
     )
@@ -254,7 +262,8 @@ export default function Avatar() {
     return (
       <div key={it.key} className={`${styles.item} ${trying ? styles.itemActive : ""}`} style={{ "--rarity": rarity.color }}>
         <span className={styles.rarity}>{rarity.label}</span>
-        <span className={styles.itemName}>{it.name}</span>
+        {it.slot === "frame" && <UserAvatar url={user?.avatar_url} name={user?.nickname} frame={it.key} size={44} className="my-1" />}
+        <span className={styles.itemName}>{it.slot === "title" ? <UserTitle title={it.name} /> : it.name}</span>
         <span className={styles.itemLevel}>
           <Coins value={it.price} />
           {tooLow && <> · Lv {it.shop_min_level}</>}
@@ -329,6 +338,14 @@ export default function Avatar() {
           <div className={styles.stageWrap}>
             <div className={styles.stageCard}>
               <AvatarStage config={preview} height={compact ? 340 : 460} focus={focus} />
+            </div>
+            <div className={styles.lookCard}>
+              <UserAvatar url={user?.avatar_url} name={user?.nickname} frame={preview.equipped?.frame} size={52} />
+              <div>
+                <div className={styles.lookLabel}>Come ti vedono gli altri</div>
+                <strong>{user?.nickname}</strong> <UserTitle title={catalog.find((it) => it.key === preview.equipped?.title)?.name} />
+                {!user?.avatar_url && <div className={styles.lookHint}>Salva l&apos;avatar per creare il tuo ritratto.</div>}
+              </div>
             </div>
             {tryOn && (
               <div className={styles.tryOnBar}>

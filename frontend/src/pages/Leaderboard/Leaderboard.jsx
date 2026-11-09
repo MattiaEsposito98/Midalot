@@ -7,6 +7,7 @@ import { formatQuizScore } from "../../utils/quizScore"
 import { API_BASE } from "../../service/api"
 import UserBadge from "../../components/UserBadge/UserBadge"
 import UserAvatar from "../../components/UserAvatar/UserAvatar"
+import UserTitle from "../../components/UserAvatar/UserTitle"
 
 function Leaderboard({ kind = "quiz" }) {
   const { id } = useParams()
@@ -161,8 +162,9 @@ function Leaderboard({ kind = "quiz" }) {
               <div className={styles.mainCol}>
                 <div className={styles.topLine}>
                   <div className={styles.nameWrap}>
-                    <UserAvatar url={r.user.avatar_url} name={r.user.nickname} size={34} />
+                    <UserAvatar url={r.user.avatar_url} frame={r.user.avatar_frame} name={r.user.nickname} size={34} />
                     <span className={styles.name}>{r.user.nickname}</span>
+                    <UserTitle title={r.user.avatar_title} />
                     {isMe && <span className={styles.meTag}>Tu</span>}
                     <UserBadge badges={r.user.badges} />
                   </div>

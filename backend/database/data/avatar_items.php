@@ -125,4 +125,30 @@ return [
 
     ['sfondo_spiaggia', 'Spiaggia', 'background', 'raro', null, 500, 8],
     ['sfondo_spazio', 'Spazio', 'background', 'epico', null, 1200, 20],
+
+    // ---------------------------------------------------- Titoli (scritta accanto al nickname)
+    ['titolo_matricola', 'Matricola', 'title', 'comune', 3, null, 1],
+    ['titolo_apprendista', 'Apprendista', 'title', 'epico', 10, null, 1],
+    ['titolo_esploratore', 'Esploratore', 'title', 'epico', 20, null, 1],
+    ['titolo_sapiente', 'Sapiente', 'title', 'epico', 30, null, 1],
+    ['titolo_cavaliere', 'Cavaliere del Sapere', 'title', 'epico', 40, null, 1],
+    ['titolo_leggenda', 'Leggenda di Midalot', 'title', 'leggendario', 50, null, 1],
+    ['titolo_curioso', 'Curioso', 'title', 'comune', null, 150, 1],
+    ['titolo_cervellone', 'Cervellone', 'title', 'comune', null, 300, 3],
+    ['titolo_inarrestabile', 'Inarrestabile', 'title', 'raro', null, 400, 5],
+    ['titolo_mago_trivia', 'Mago della Trivia', 'title', 'raro', null, 600, 8],
+    ['titolo_asso_quiz', 'Asso dei Quiz', 'title', 'epico', null, 800, 10],
+    ['titolo_enciclopedia', 'Enciclopedia vivente', 'title', 'epico', null, 1200, 15],
+
+    // ---------------------------------------------------- Cornici (intorno al ritratto)
+    ['cornice_bronzo', 'Cornice di bronzo', 'frame', 'raro', 5, null, 1],
+    ['cornice_argento', "Cornice d'argento", 'frame', 'raro', 15, null, 1],
+    ['cornice_oro', "Cornice d'oro", 'frame', 'epico', 25, null, 1],
+    ['cornice_diamante', 'Cornice di diamante', 'frame', 'epico', 35, null, 1],
+    ['cornice_arcobaleno', 'Cornice arcobaleno', 'frame', 'epico', 45, null, 1],
+    ['cornice_leggenda', 'Cornice della Leggenda', 'frame', 'leggendario', 50, null, 1],
+    ['cornice_cuori', 'Cornice di cuori', 'frame', 'comune', null, 300, 3],
+    ['cornice_stelle', 'Cornice di stelle', 'frame', 'raro', null, 400, 5],
+    ['cornice_neon', 'Cornice neon', 'frame', 'raro', null, 500, 8],
+    ['cornice_fiamme', 'Cornice di fiamme', 'frame', 'epico', null, 900, 15],
 ];

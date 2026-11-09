@@ -216,7 +216,7 @@ function NuovaSfida() {
           <div className="d-flex flex-wrap gap-2 mb-2">
             {opponents.map((o) => (
               <span key={o.id} className={styles.opponentChip}>
-                <UserAvatar url={o.avatar_url} name={o.nickname} size={22} /> {o.nickname} <span className={styles.meta}>Lv {o.level}</span>
+                <UserAvatar url={o.avatar_url} frame={o.avatar_frame} name={o.nickname} size={22} /> {o.nickname} <span className={styles.meta}>Lv {o.level}</span>
                 <button
                   type="button"
                   className={styles.chipRemove}
@@ -245,7 +245,7 @@ function NuovaSfida() {
               {visibleResults.map((u) => (
                 <button key={u.id} type="button" className={styles.userResult} onClick={() => addOpponent(u)}>
                   <span className="d-flex align-items-center gap-2">
-                    <UserAvatar url={u.avatar_url} name={u.nickname} size={28} />
+                    <UserAvatar url={u.avatar_url} frame={u.avatar_frame} name={u.nickname} size={28} />
                     {u.nickname}
                   </span>
                   <span className={styles.meta}>Lv {u.level}</span>

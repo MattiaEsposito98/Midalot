@@ -9,19 +9,28 @@ function colorFor(name = "") {
 }
 
 /**
- * Ritratto dell'avatar di un utente (immagine generata quando salva l'avatar).
- * Chi non l'ha ancora creato vede la sua iniziale su un cerchio colorato.
+ * Ritratto dell'avatar di un utente (immagine generata quando salva l'avatar),
+ * con la cornice scelta. Chi non l'ha ancora creato vede la sua iniziale.
  */
-function UserAvatar({ url, name, size = 32, className = "" }) {
+function UserAvatar({ url, name, size = 32, frame, className = "" }) {
+  const framed = !!frame
+  const pad = framed ? Math.max(2, Math.round(size * 0.09)) : 0
   const style = { width: size, height: size, fontSize: Math.round(size * 0.45) }
+  const innerClass = `${css.avatar} ${framed ? css.inFrame : className}`
 
-  if (url) {
-    return <img src={url} alt="" className={`${css.avatar} ${className}`} style={style} loading="lazy" />
-  }
+  const inner = url ? (
+    <img src={url} alt="" className={innerClass} style={style} loading="lazy" />
+  ) : (
+    <span className={`${innerClass} ${css.fallback}`} style={{ ...style, background: colorFor(name) }} aria-hidden="true">
+      {(name || "?").trim().charAt(0).toUpperCase()}
+    </span>
+  )
+
+  if (!framed) return inner
 
   return (
-    <span className={`${css.avatar} ${css.fallback} ${className}`} style={{ ...style, background: colorFor(name) }} aria-hidden="true">
-      {(name || "?").trim().charAt(0).toUpperCase()}
+    <span className={`${css.frame} ${className}`} data-frame={frame} style={{ padding: pad, "--s": `${size}px` }}>
+      {inner}
     </span>
   )
 }

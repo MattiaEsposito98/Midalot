@@ -8,6 +8,7 @@ import { notifyChallengesChanged } from "../../hooks/useChallengeCount"
 import QuestionCategory from "./QuestionCategory"
 import styles from "./Sfide.module.css"
 import UserAvatar from "../../components/UserAvatar/UserAvatar"
+import UserTitle from "../../components/UserAvatar/UserTitle"
 
 const POLL_MS = 1000
 const TICK_MS = 200
@@ -182,9 +183,9 @@ function SfidaLive() {
             {state.players.map((p) => (
               <div key={p.id} className={`${styles.playerRow} ${p.is_me ? styles.playerRowMe : ""}`}>
                 <span className="d-flex align-items-center gap-2">
-                  <UserAvatar url={p.avatar_url} name={p.nickname} size={32} />
+                  <UserAvatar url={p.avatar_url} frame={p.avatar_frame} name={p.nickname} size={32} />
                   <span>
-                    {p.is_me ? "Tu" : p.nickname} <span className={styles.meta}>Lv {p.level}</span>
+                    {p.is_me ? "Tu" : p.nickname} <UserTitle title={p.avatar_title} /> <span className={styles.meta}>Lv {p.level}</span>
                   </span>
                 </span>
                 <span
@@ -270,8 +271,9 @@ function SfidaLive() {
               <span key={p.id} className="d-flex align-items-center gap-2">
                 {i > 0 && <span className={styles.vs}>VS</span>}
                 <span className={styles.versusPlayer}>
-                  <UserAvatar url={p.avatar_url} name={p.nickname} size={state.players.length > 3 ? 56 : 72} />
+                  <UserAvatar url={p.avatar_url} frame={p.avatar_frame} name={p.nickname} size={state.players.length > 3 ? 56 : 72} />
                   <span>{p.is_me ? "Tu" : p.nickname}</span>
+                  <UserTitle title={p.avatar_title} />
                 </span>
               </span>
             ))}

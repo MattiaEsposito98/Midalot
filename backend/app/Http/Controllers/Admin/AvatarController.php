@@ -35,6 +35,8 @@ class AvatarController extends Controller
         'pet' => 'Compagno',
         'aura' => 'Aura',
         'background' => 'Sfondo',
+        'title' => 'Titolo',
+        'frame' => 'Cornice',
     ];
 
     public const RARITIES = ['base', 'comune', 'raro', 'epico', 'leggendario'];
@@ -188,6 +190,13 @@ class AvatarController extends Controller
         }
 
         UserAvatarItem::where('user_id', $user->id)->where('avatar_item_id', $item->id)->delete();
+
+        if ($user->avatar_frame === $item->key) {
+            $user->forceFill(['avatar_frame' => null])->save();
+        }
+        if ($user->avatar_title === $item->key) {
+            $user->forceFill(['avatar_title' => null])->save();
+        }
 
         return back()->with('success', "Tolto {$item->name} a {$user->nickname}.");
     }

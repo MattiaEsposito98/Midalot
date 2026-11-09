@@ -7,6 +7,7 @@ import { formatQuizScore } from "../../utils/quizScore"
 import { API_BASE } from "../../service/api"
 import UserBadge from "../../components/UserBadge/UserBadge"
 import UserAvatar from "../../components/UserAvatar/UserAvatar"
+import UserTitle from "../../components/UserAvatar/UserTitle"
 
 function TrainingLeaderboard() {
   const { id } = useParams()
@@ -107,7 +108,7 @@ function TrainingLeaderboard() {
 
         {results.map((row) => (
           <div className={styles.leaderboardRow} key={`${row.position}-${row.nickname}-${row.score}`}>
-            <span><strong>#{row.position}</strong> <UserAvatar url={row.avatar_url} name={row.nickname} size={28} /> {row.nickname} <UserBadge badges={row.badges} /></span>
+            <span><strong>#{row.position}</strong> <UserAvatar url={row.avatar_url} frame={row.avatar_frame} name={row.nickname} size={28} /> {row.nickname} <UserTitle title={row.avatar_title} /> <UserBadge badges={row.badges} /></span>
             <span>{formatQuizScore(row.score)} punti · {row.correct_answers}/{row.total_questions}</span>
           </div>
         ))}

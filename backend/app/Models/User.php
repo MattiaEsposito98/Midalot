@@ -36,6 +36,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $appends = [
         'badges',
         'xp_info',
+        'avatar_title_label',
     ];
 
     protected function casts(): array
@@ -134,6 +135,26 @@ class User extends Authenticatable implements MustVerifyEmail
     public function getXpInfoAttribute(): array
     {
         return \App\Services\XpService::info((int) ($this->attributes['xp_total'] ?? 0));
+    }
+
+    /**
+     * Ritratto, cornice e titolo dell'avatar come li vedono gli altri
+     * (sfide, classifiche). Il titolo e' gia' il testo da mostrare.
+     */
+    public function publicAvatar(): array
+    {
+        return [
+            'avatar_url' => $this->avatar_url,
+            ...\App\Services\AvatarService::look($this->avatar_frame, $this->avatar_title),
+        ];
+    }
+
+    /**
+     * Testo del titolo scelto (per l'utente collegato, es. nel profilo).
+     */
+    public function getAvatarTitleLabelAttribute(): ?string
+    {
+        return \App\Services\AvatarService::look(null, $this->attributes['avatar_title'] ?? null)['avatar_title'];
     }
 
     public function sendEmailVerificationNotification()
