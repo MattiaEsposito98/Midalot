@@ -52,6 +52,8 @@ class AvatarController extends Controller
             'emblem.symbol' => ['required', Rule::in(config('avatar.emblem_symbols'))],
             'equipped' => ['required', 'array'],
             'equipped.*' => ['nullable', 'string', 'max:60'],
+            'itemColors' => ['nullable', 'array'],
+            'itemColors.*' => ['nullable', 'string', 'max:30'],
         ]);
 
         $unknown = array_diff(array_keys($data['equipped']), AvatarItem::SLOTS);
@@ -160,6 +162,8 @@ class AvatarController extends Controller
             'level' => XpService::info((int) $user->xp_total)['level'],
             'unseen' => $this->avatar->unseen($user)->pluck('key'),
             'achievement_items' => AchievementService::itemSources(),
+            // Colori degli oggetti con tavolozza e quali sono sbloccati per questo utente.
+            'palettes' => $this->avatar->palettesFor($user),
         ];
     }
 }

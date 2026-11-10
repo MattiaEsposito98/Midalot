@@ -126,28 +126,17 @@ export const ITEM_MODELS = {
   sfondo_leggenda: { slot: "background" },
 
   // Negozio
-  maglietta_rossa: shirt("#e23b3b"),
-  maglietta_blu: shirt("#2f6fd0"),
-  maglietta_verde: shirt("#2f9b5a"),
-  maglietta_gialla: shirt("#f2c230"),
-  maglietta_rosa: shirt("#ff8fc0"),
-  maglietta_nera: shirt("#2b2b3a"),
   maglia_righe: { ...shirt("#f4f4f6"), Model: Righe },
   felpa_cappuccio: { ...shirt("#8a8fa3"), Model: Felpa },
 
-  jeans_neri: pants("#2b2b3a"),
   pantaloni_tuta: { ...pants("#3a3f55"), Model: StrisceTuta },
   pantaloncini: pants("#c9a96e", { shorts: true }),
   gonna_rossa: pants("#e23b3b", { skirt: true }),
-  gonna_blu: pants("#2f6fd0", { skirt: true }),
 
-  sneakers_nere: shoes("#2b2b3a", "#ffffff"),
   stivaletti_rosa: shoes("#ff8fc0", "#c2185b", true),
   scarpe_oro: shoes("#f2c230", "#c9951a"),
 
   fiocco: { slot: "head", Model: Fiocco },
-  cappellino_blu: { slot: "head", Model: () => <Cappellino color="#2f6fd0" visor="#1f4fa8" /> },
-  cappellino_verde: { slot: "head", Model: () => <Cappellino color="#2f9b5a" visor="#1f7a42" /> },
   berretto_lana: { slot: "head", Model: Berretto },
   cuffie: { slot: "head", Model: Cuffie },
   cappello_pirata: { slot: "head", Model: CappelloPirata },

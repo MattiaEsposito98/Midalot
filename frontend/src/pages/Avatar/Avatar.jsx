@@ -20,6 +20,7 @@ import {
 } from "../../components/Avatar3D/options"
 import { FACE_SHAPES } from "../../components/Avatar3D/head"
 import { ITEM_MODELS } from "../../components/Avatar3D/items"
+import { PALETTES, swatchColor, variantFor } from "../../components/Avatar3D/palettes"
 import { RARITY, SLOTS } from "../../components/Avatar3D/catalog"
 import styles from "./Avatar.module.css"
 
@@ -212,6 +213,48 @@ export default function Avatar() {
 
   const wardrobeItems = catalog.filter((it) => it.slot === tab)
   const nextUnlock = catalog.find((it) => it.unlock_level && it.unlock_level > level)
+
+  // Colori dell'oggetto indossato nella scheda aperta (se ha una tavolozza).
+  function colorPicker() {
+    const itemKey = draft.equipped[tab]
+    const palette = PALETTES[itemKey]
+    const status = data.palettes?.[itemKey]
+    if (!palette || !status) return null
+
+    const current = variantFor(itemKey, draft.itemColors).key
+    const name = catalog.find((it) => it.key === itemKey)?.name
+
+    return (
+      <div className={styles.colorBox}>
+        <div className={styles.label}>Colore: {name}</div>
+        <div className={styles.swatches}>
+          {palette.map((c) => {
+            const info = status.find((x) => x.key === c.key)
+            const locked = !info?.unlocked
+            return (
+              <button
+                key={c.key}
+                type="button"
+                disabled={locked}
+                title={locked ? `${c.label}: si sblocca al livello ${info?.level}` : c.label}
+                aria-label={c.label}
+                className={`${styles.swatch} ${current === c.key ? styles.swatchActive : ""} ${locked ? styles.swatchLocked : ""}`}
+                style={{ background: swatchColor(c) }}
+                onClick={() => setDraft((prev) => ({ ...prev, itemColors: { ...(prev.itemColors || {}), [itemKey]: c.key } }))}
+              >
+                {locked && <i className="bi bi-lock-fill"></i>}
+              </button>
+            )
+          })}
+        </div>
+        {status.some((x) => !x.unlocked) && (
+          <div className={styles.subLabel}>
+            Altri colori si sbloccano salendo di livello (prossimo: Lv {Math.min(...status.filter((x) => !x.unlocked).map((x) => x.level))}).
+          </div>
+        )}
+      </div>
+    )
+  }
 
   function wardrobeCard(it) {
     const mine = owned.has(it.key)
@@ -506,10 +549,13 @@ export default function Avatar() {
                 )}
               </div>
             ) : (
+              <>
+              {colorPicker()}
               <div className={styles.grid}>
                 {wardrobeItems.map(wardrobeCard)}
                 {wardrobeItems.length === 0 && <div className="text-muted">Nessun oggetto in questa categoria.</div>}
               </div>
+              </>
             )}
           </div>
         </div>

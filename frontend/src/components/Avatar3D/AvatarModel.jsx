@@ -2,6 +2,7 @@ import { useRef } from "react"
 import { useFrame } from "@react-three/fiber"
 import { Ball, Box, Cap, Cone, Cyl, M, Ring } from "./parts"
 import { ITEM_MODELS } from "./items"
+import { variantFor } from "./palettes"
 import { BASE_ITEMS, DEFAULT_AVATAR } from "./options"
 import { faceZ, headGeometry, radiusAt } from "./head"
 
@@ -303,7 +304,15 @@ export default function AvatarModel({ config, animate = true, ...props }) {
 
   const cfg = { ...DEFAULT_AVATAR, ...config }
   const equipped = { ...BASE_ITEMS, ...(cfg.equipped || {}) }
-  const item = (slot) => (equipped[slot] ? ITEM_MODELS[equipped[slot]] : null)
+  // Oggetto indossato in una zona, con il colore scelto se ha una tavolozza.
+  const item = (slot) => {
+    const key = equipped[slot]
+    const base = key ? ITEM_MODELS[key] : null
+    const variant = base && variantFor(key, cfg.itemColors)
+    if (!variant) return base
+    const { key: _k, label: _l, color, visor, ...look } = variant
+    return { ...base, look: { ...base.look, ...look }, props: color ? { color, visor } : undefined }
+  }
 
   const female = cfg.gender === "f"
   const skin = cfg.skin
@@ -341,7 +350,7 @@ export default function AvatarModel({ config, animate = true, ...props }) {
     const it = item(slot)
     if (!it?.Model) return null
     const C = it.Model
-    return <C emblem={cfg.emblem} body={{ torsoW, female }} />
+    return <C emblem={cfg.emblem} body={{ torsoW, female }} {...(it.props || {})} />
   }
 
   return (

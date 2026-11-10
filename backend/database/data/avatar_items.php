@@ -12,18 +12,19 @@
 | La key deve esistere anche nel frontend (src/components/Avatar3D/items.jsx),
 | dove c'e' la grafica. Per aggiungere oggetti: si aggiunge la riga qui e il
 | modello nel frontend, poi `php artisan db:seed --class=AvatarItemSeeder`.
+| Colori: gli oggetti con tavolozza sono in config/avatar.php (palettes).
 | Il seeder inserisce solo le key nuove: prezzi e livelli cambiati dall'admin
 | non vengono sovrascritti.
 */
 
 return [
     // ---------------------------------------------------- Set Apprendista (1-10)
-    ['maglietta_bianca', 'Maglietta bianca', 'torso', 'base', 1, null, 1],
+    ['maglietta_bianca', 'Maglietta', 'torso', 'base', 1, null, 1],
     ['jeans', 'Jeans', 'legs', 'base', 1, null, 1],
     ['sneakers', 'Scarpe da ginnastica', 'feet', 'base', 1, null, 1],
     ['occhiali_tondi', 'Occhiali tondi', 'face', 'comune', 2, null, 1],
     ['matita', 'Matita gigante', 'handR', 'comune', 3, null, 1],
-    ['cappellino', 'Cappellino rosso', 'head', 'comune', 4, null, 1],
+    ['cappellino', 'Cappellino', 'head', 'comune', 4, null, 1],
     ['libro_appunti', 'Libro degli Appunti', 'handL', 'raro', 5, null, 1],
     ['maglietta_midalot', 'Maglietta Midalot', 'torso', 'comune', 6, null, 1],
     ['zainetto', 'Zainetto', 'back', 'comune', 7, null, 1],
@@ -82,28 +83,17 @@ return [
     ['sfondo_leggenda', 'Piedistallo della Leggenda', 'background', 'leggendario', 50, null, 1],
 
     // ---------------------------------------------------- Negozio
-    ['maglietta_rossa', 'Maglietta rossa', 'torso', 'comune', null, 120, 1],
-    ['maglietta_blu', 'Maglietta blu', 'torso', 'comune', null, 120, 1],
-    ['maglietta_verde', 'Maglietta verde', 'torso', 'comune', null, 120, 1],
-    ['maglietta_gialla', 'Maglietta gialla', 'torso', 'comune', null, 120, 1],
-    ['maglietta_rosa', 'Maglietta rosa', 'torso', 'comune', null, 120, 1],
-    ['maglietta_nera', 'Maglietta nera', 'torso', 'comune', null, 150, 3],
     ['maglia_righe', 'Maglia a righe', 'torso', 'raro', null, 250, 4],
     ['felpa_cappuccio', 'Felpa con cappuccio', 'torso', 'raro', null, 300, 5],
 
-    ['jeans_neri', 'Jeans neri', 'legs', 'comune', null, 150, 2],
     ['pantaloni_tuta', 'Pantaloni della tuta', 'legs', 'comune', null, 150, 2],
     ['pantaloncini', 'Pantaloncini', 'legs', 'comune', null, 150, 2],
-    ['gonna_rossa', 'Gonna rossa', 'legs', 'comune', null, 150, 2],
-    ['gonna_blu', 'Gonna blu', 'legs', 'comune', null, 150, 2],
+    ['gonna_rossa', 'Gonna', 'legs', 'comune', null, 150, 2],
 
-    ['sneakers_nere', 'Sneakers nere', 'feet', 'comune', null, 150, 2],
     ['stivaletti_rosa', 'Stivaletti rosa', 'feet', 'comune', null, 200, 3],
     ['scarpe_oro', "Scarpe d'oro", 'feet', 'epico', null, 900, 15],
 
     ['fiocco', 'Fiocco', 'head', 'comune', null, 150, 2],
-    ['cappellino_blu', 'Cappellino blu', 'head', 'comune', null, 150, 4],
-    ['cappellino_verde', 'Cappellino verde', 'head', 'comune', null, 150, 4],
     ['berretto_lana', 'Berretto di lana', 'head', 'raro', null, 250, 6],
     ['cuffie', 'Cuffie', 'head', 'raro', null, 350, 8],
     ['cappello_pirata', 'Cappello da pirata', 'head', 'epico', null, 900, 15],

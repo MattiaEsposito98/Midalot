@@ -436,3 +436,23 @@
   font-weight: 700;
   color: var(--rarity);
 }
+
+/* Selettore colore degli oggetti con tavolozza */
+.colorBox {
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #f7f6fc;
+}
+
+.swatchLocked {
+  position: relative;
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.swatchLocked i {
+  font-size: 0.75rem;
+  color: #fff;
+  text-shadow: 0 0 2px #000;
+}

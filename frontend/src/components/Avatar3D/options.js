@@ -75,5 +75,6 @@ export const DEFAULT_AVATAR = {
   hairColor: "#5a3825",
   eyes: EYE_COLORS[0],
   equipped: { ...BASE_ITEMS },
+  itemColors: {},
   emblem: { bg: "#2f5fd0", fg: "#ffd54a", symbol: "star" },
 }

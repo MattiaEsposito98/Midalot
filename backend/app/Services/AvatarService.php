@@ -123,12 +123,107 @@ class AvatarService
      */
     public function ownedKeys(User $user): array
     {
-        return AvatarItem::query()
+        $keys = AvatarItem::query()
             ->join('user_avatar_items', 'user_avatar_items.avatar_item_id', '=', 'avatar_items.id')
             ->where('user_avatar_items.user_id', $user->id)
             ->where('avatar_items.is_active', true)
             ->pluck('avatar_items.key')
             ->all();
+
+        // Chi aveva un vecchio oggetto-colore (es. "Gonna blu") possiede l'oggetto con tavolozza.
+        $legacy = self::legacyMap();
+        foreach ($this->legacyOwned($user) as $old) {
+            $keys[] = $legacy[$old][0];
+        }
+
+        return array_values(array_unique($keys));
+    }
+
+    // ------------------------------------------------------------ colori (tavolozze)
+
+    /**
+     * Vecchio oggetto separato -> [oggetto con tavolozza, colore].
+     *
+     * @return array<string, array{0: string, 1: string}>
+     */
+    public static function legacyMap(): array
+    {
+        $map = [];
+        foreach (config('avatar.palettes', []) as $itemKey => $colors) {
+            foreach ($colors as [$color, , $old]) {
+                if ($old) {
+                    $map[$old] = [$itemKey, $color];
+                }
+            }
+        }
+
+        return $map;
+    }
+
+    /**
+     * Vecchi oggetti-colore posseduti (anche se ora sono disattivati).
+     *
+     * @return string[]
+     */
+    public function legacyOwned(User $user): array
+    {
+        $legacy = array_keys(self::legacyMap());
+        if (! $legacy) {
+            return [];
+        }
+
+        return AvatarItem::query()
+            ->join('user_avatar_items', 'user_avatar_items.avatar_item_id', '=', 'avatar_items.id')
+            ->where('user_avatar_items.user_id', $user->id)
+            ->whereIn('avatar_items.key', $legacy)
+            ->pluck('avatar_items.key')
+            ->all();
+    }
+
+    /**
+     * Colori di ogni oggetto con tavolozza e se l'utente li ha sbloccati.
+     *
+     * @return array<string, array<int, array{key: string, level: int, unlocked: bool}>>
+     */
+    public function palettesFor(User $user): array
+    {
+        $level = XpService::info((int) $user->xp_total)['level'];
+        $legacyOwned = array_flip($this->legacyOwned($user));
+        $out = [];
+
+        foreach (config('avatar.palettes', []) as $itemKey => $colors) {
+            foreach ($colors as [$color, $minLevel, $old]) {
+                $out[$itemKey][] = [
+                    'key' => $color,
+                    'level' => $minLevel,
+                    'unlocked' => $level >= $minLevel || ($old && isset($legacyOwned[$old])),
+                ];
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * Tiene solo i colori validi e sbloccati degli oggetti posseduti.
+     */
+    private function cleanColors(array $itemColors, array $palettes, array $owned): array
+    {
+        $clean = [];
+
+        foreach ($itemColors as $itemKey => $color) {
+            if (! isset($owned[$itemKey], $palettes[$itemKey]) || ! is_string($color)) {
+                continue;
+            }
+
+            foreach ($palettes[$itemKey] as $option) {
+                if ($option['key'] === $color && $option['unlocked']) {
+                    $clean[$itemKey] = $color;
+                }
+            }
+        }
+
+        return $clean;
     }
 
     /**
@@ -142,6 +237,17 @@ class AvatarService
 
         $config = array_merge(config('avatar.default'), $saved ?: []);
         $equipped = array_merge(config('avatar.base_items'), $saved['equipped'] ?? []);
+        $itemColors = is_array($saved['itemColors'] ?? null) ? $saved['itemColors'] : [];
+
+        // Avatar salvati prima delle tavolozze: "maglietta_rossa" -> maglietta + colore rosso.
+        $legacy = self::legacyMap();
+        foreach ($equipped as $slot => $key) {
+            if (isset($legacy[$key])) {
+                [$newKey, $color] = $legacy[$key];
+                $equipped[$slot] = $newKey;
+                $itemColors[$newKey] ??= $color;
+            }
+        }
 
         $owned = array_flip($ownedKeys ?? $this->ownedKeys($user));
         foreach ($equipped as $slot => $key) {
@@ -155,6 +261,7 @@ class AvatarService
         }
 
         $config['equipped'] = $equipped;
+        $config['itemColors'] = (object) $this->cleanColors($itemColors, $this->palettesFor($user), $owned);
 
         return $config;
     }
@@ -198,6 +305,7 @@ class AvatarService
             'eyes' => $data['eyes'],
             'emblem' => $data['emblem'],
             'equipped' => $equipped,
+            'itemColors' => $this->cleanColors($data['itemColors'] ?? [], $this->palettesFor($user), $owned),
         ];
 
         UserAvatar::updateOrCreate(['user_id' => $user->id], ['config' => $config]);
