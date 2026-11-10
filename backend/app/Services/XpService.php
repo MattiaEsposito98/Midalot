@@ -51,8 +51,11 @@ class XpService
                 return null;
             }
 
-            $before = (int) User::whereKey($userId)->lockForUpdate()->value('xp_total');
+            // Incremento atomico, senza blocco della riga utente: un lock qui
+            // andava in deadlock con due accrediti simultanei (es. due schede
+            // aperte al login). Gli XP prima dell'accredito si ricavano dopo.
             User::whereKey($userId)->increment('xp_total', $xp);
+            $before = (int) User::whereKey($userId)->value('xp_total') - $xp;
 
             $oldLevel = self::info($before)['level'];
             $info = self::info($before + $xp);
@@ -86,7 +89,7 @@ class XpService
                 'level_up' => $info['level'] > $oldLevel,
                 'unlocked' => $unlocked->map->toCatalog()->values()->all(),
             ];
-        });
+        }, 3); // fino a 3 tentativi se il database segnala un deadlock
 
         // Obiettivi (partite giocate, giorni di fila, ...): un errore qui non
         // deve mai far perdere gli XP appena accreditati.
