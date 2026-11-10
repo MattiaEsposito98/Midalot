@@ -23,6 +23,13 @@ return [
 
     'emblem_symbols' => ['star', 'cross', 'circle', 'book'],
 
+    // Vestiti indossati da chi non ha ancora salvato l'avatar.
+    'base_items' => [
+        'torso' => 'maglietta_bianca',
+        'legs' => 'jeans',
+        'feet' => 'sneakers',
+    ],
+
     /*
     | Colori degli oggetti con tavolozza: [colore, livello, vecchio oggetto].
     | - livello: dal quale il colore e' disponibile (1 = subito, se si possiede l'oggetto).
