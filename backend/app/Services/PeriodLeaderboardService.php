@@ -36,6 +36,29 @@ class PeriodLeaderboardService
         return $quizAttempts->unionAll($minigiocoAttempts)->unionAll($loginBonuses);
     }
 
+    /**
+     * Punti del periodo per un gruppo di utenti (stessi criteri della
+     * classifica premi). Chi non ha punti non compare: valgono 0.
+     *
+     * @param  array<int>  $userIds
+     * @return Collection<int, int> user_id => punti
+     */
+    public function pointsForUsers(array $userIds, Carbon $start, Carbon $end): Collection
+    {
+        if (! $userIds) {
+            return collect();
+        }
+
+        return DB::query()
+            ->fromSub($this->completedAttemptsUnion(), 'attempts')
+            ->whereIn('attempts.user_id', $userIds)
+            ->whereBetween('attempts.finished_at', [$start, $end])
+            ->groupBy('attempts.user_id')
+            ->selectRaw('attempts.user_id as user_id, SUM(attempts.score) as total_score')
+            ->pluck('total_score', 'user_id')
+            ->map(fn ($v) => (int) round((float) $v));
+    }
+
     public function finishedDates(): Collection
     {
         return DB::query()

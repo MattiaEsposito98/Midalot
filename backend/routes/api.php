@@ -151,6 +151,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::get('/challenges', [ChallengeController::class, 'index']);
     Route::get('/challenges/summary', [ChallengeController::class, 'summaryCount']);
     Route::get('/challenges/categories', [ChallengeController::class, 'categories']);
+    Route::get('/challenges/members', [ChallengeController::class, 'members'])
+        ->middleware('throttle:60,1');
     Route::get('/challenges/users', [ChallengeController::class, 'searchUsers'])
         ->middleware('throttle:60,1');
     Route::put('/challenges/settings', [ChallengeController::class, 'updateSettings']);

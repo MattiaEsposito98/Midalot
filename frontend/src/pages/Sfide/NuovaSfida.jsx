@@ -5,6 +5,7 @@ import { logError } from "../../utils/logger"
 import { notifyChallengesChanged } from "../../hooks/useChallengeCount"
 import styles from "./Sfide.module.css"
 import UserAvatar from "../../components/UserAvatar/UserAvatar"
+import MembersBrowser from "./MembersBrowser"
 
 function NuovaSfida() {
   const navigate = useNavigate()
@@ -255,6 +256,8 @@ function NuovaSfida() {
                 <div className={styles.meta}>Nessun giocatore trovato.</div>
               )}
             </div>
+
+            <MembersBrowser opponents={opponents} full={full} onAdd={addOpponent} />
           </>
         )}
 

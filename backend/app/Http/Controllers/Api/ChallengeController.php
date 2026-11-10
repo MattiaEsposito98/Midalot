@@ -163,6 +163,77 @@ class ChallengeController extends Controller
         ]);
     }
 
+    /**
+     * Elenco sfogliabile dei membri sfidabili, con livello e punti del mese,
+     * per scegliere l'avversario senza conoscerne il nickname a memoria.
+     */
+    public function members(Request $request)
+    {
+        $validated = $request->validate([
+            'q' => ['nullable', 'string', 'max:50'],
+            'sort' => ['nullable', 'in:points,level,name'],
+            'page' => ['nullable', 'integer', 'min:1'],
+        ]);
+
+        $sort = $validated['sort'] ?? 'points';
+        $page = (int) ($validated['page'] ?? 1);
+        $perPage = 12;
+
+        $query = User::whereNotNull('email_verified_at')
+            ->where('accepts_challenges', true)
+            ->where('id', '!=', $request->user()->id)
+            ->whereNotNull('nickname');
+
+        $term = trim((string) ($validated['q'] ?? ''));
+        if ($term !== '') {
+            $query->where('nickname', 'like', '%'.str_replace(['%', '_'], ['\\%', '\\_'], $term).'%');
+        }
+
+        // Solo le colonne che servono: l'ordinamento si fa in memoria dopo aver
+        // calcolato i punti del mese (qualche migliaio di utenti al massimo).
+        $all = $query->get(['id', 'nickname', 'xp_total']);
+
+        $start = now()->startOfMonth();
+        $points = app(\App\Services\PeriodLeaderboardService::class)->pointsForUsers($all->pluck('id')->all(), $start, now()->endOfMonth());
+
+        $rows = $all->map(fn (User $u) => [
+            'id' => $u->id,
+            'nickname' => $u->nickname,
+            'xp_total' => (int) $u->xp_total,
+            'points' => (int) ($points[$u->id] ?? 0),
+        ]);
+
+        $rows = match ($sort) {
+            'level' => $rows->sortBy([['xp_total', 'desc'], ['nickname', 'asc']]),
+            'name' => $rows->sortBy(fn ($r) => mb_strtolower($r['nickname'])),
+            default => $rows->sortBy([['points', 'desc'], ['xp_total', 'desc'], ['nickname', 'asc']]),
+        };
+
+        $total = $rows->count();
+        $pageIds = $rows->values()->slice(($page - 1) * $perPage, $perPage)->pluck('id')->all();
+        $users = User::whereIn('id', $pageIds)->get(['id', 'nickname', 'xp_total', 'avatar_url', 'avatar_frame', 'avatar_title'])->keyBy('id');
+
+        $items = collect($pageIds)->map(function ($id) use ($users, $points) {
+            $u = $users[$id];
+
+            return [
+                'id' => $u->id,
+                'nickname' => $u->nickname,
+                'level' => XpService::info((int) $u->xp_total)['level'],
+                'points' => (int) ($points[$u->id] ?? 0),
+                ...$u->publicAvatar(),
+            ];
+        })->values();
+
+        return response()->json([
+            'users' => $items,
+            'page' => $page,
+            'last_page' => max(1, (int) ceil($total / $perPage)),
+            'total' => $total,
+            'month' => $start->locale('it')->translatedFormat('F'),
+        ]);
+    }
+
     public function updateSettings(Request $request)
     {
         $validated = $request->validate(['accepts_challenges' => ['required', 'boolean']]);

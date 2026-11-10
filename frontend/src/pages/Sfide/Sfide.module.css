@@ -460,3 +460,115 @@
   font-size: 1.2rem;
   color: #e23b3b;
 }
+
+/* ------------------------------------------------------------ elenco membri */
+
+.membersWrap {
+  margin-top: 10px;
+}
+
+.membersToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border: 2px solid #182033;
+  border-radius: 10px;
+  background: #eaf5ff;
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: #182033;
+}
+
+.membersToggle:disabled {
+  opacity: 0.5;
+}
+
+.membersPanel {
+  margin-top: 8px;
+  padding: 12px;
+  border: 2px solid rgba(24, 32, 51, 0.15);
+  border-radius: 12px;
+  background: #fff;
+}
+
+.memberList {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.memberListBusy {
+  opacity: 0.55;
+}
+
+.memberRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid rgba(24, 32, 51, 0.15);
+  border-radius: 10px;
+  background: #f9f9fd;
+  text-align: left;
+}
+
+.memberRow:not(:disabled):hover {
+  background: #eef0ff;
+  border-color: #6c4bd8;
+}
+
+.memberAdded {
+  background: #f1fbf4;
+  opacity: 0.8;
+}
+
+.memberName {
+  flex: 1 1 auto;
+  min-width: 0;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.memberStats {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.memberLevel {
+  white-space: nowrap;
+  font-weight: 800;
+  font-size: 0.82rem;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: #0d2a5c;
+  color: #3fd3ff;
+}
+
+.memberAction {
+  font-size: 1.3rem;
+  color: #6c4bd8;
+}
+
+.memberAdded .memberAction {
+  color: #2f9b5a;
+}
+
+.membersPage {
+  border: 1px solid rgba(24, 32, 51, 0.2);
+  background: #fff;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.membersPage:disabled {
+  opacity: 0.4;
+}
