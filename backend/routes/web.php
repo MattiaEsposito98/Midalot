@@ -133,6 +133,18 @@ Route::middleware(['auth', 'admin'])
             ->name('avatar.edit');
         Route::put('avatar/items/{item}', [AdminAvatarController::class, 'update'])
             ->name('avatar.update');
+        Route::get('avatar/vetrina', [AdminAvatarController::class, 'showcase'])
+            ->name('avatar.showcase');
+        Route::post('avatar/vetrina', [AdminAvatarController::class, 'saveShowcase'])
+            ->name('avatar.showcase.save');
+        Route::put('avatar/vetrina/impostazioni', [AdminAvatarController::class, 'saveSettings'])
+            ->name('avatar.settings.save');
+        Route::post('avatar/promozioni', [AdminAvatarController::class, 'storePromotion'])
+            ->name('avatar.promo.store');
+        Route::post('avatar/promozioni/{promotion}/toggle', [AdminAvatarController::class, 'togglePromotion'])
+            ->name('avatar.promo.toggle');
+        Route::delete('avatar/promozioni/{promotion}', [AdminAvatarController::class, 'deletePromotion'])
+            ->name('avatar.promo.delete');
         Route::post('avatar/gift', [AdminAvatarController::class, 'gift'])
             ->name('avatar.gift');
         Route::get('avatar/users/{user}', [AdminAvatarController::class, 'user'])

@@ -86,6 +86,8 @@ class AvatarController extends Controller
             'item' => $item,
             'slotLabels' => self::SLOT_LABELS,
             'rarities' => self::RARITIES,
+            'defaultPrices' => config('avatar.default_prices'),
+            'showcase' => app(AvatarService::class)->showcase(),
             'owners' => UserAvatarItem::where('avatar_item_id', $item->id)->count(),
             'purchases' => UserAvatarItem::where('avatar_item_id', $item->id)->where('source', 'shop')->count(),
         ]);
@@ -99,10 +101,27 @@ class AvatarController extends Controller
             'unlock_level' => ['nullable', 'integer', 'min:1', 'max:500'],
             'price' => ['nullable', 'integer', 'min:0', 'max:1000000'],
             'shop_min_level' => ['required', 'integer', 'min:1', 'max:500'],
+            'exclusive_until' => ['nullable', 'date'],
             'sort_order' => ['nullable', 'integer'],
         ]);
 
         $data['is_active'] = $request->boolean('is_active');
+        $data['is_exclusive'] = $request->boolean('is_exclusive');
+        $data['exclusive_open'] = $data['is_exclusive'] && $request->boolean('exclusive_open');
+
+        // La scadenza vale solo per gli esclusivi aperti.
+        if (! $data['exclusive_open']) {
+            $data['exclusive_until'] = null;
+        }
+
+        if ($data['exclusive_open'] && ! empty($data['exclusive_until']) && \Illuminate\Support\Carbon::parse($data['exclusive_until'])->isPast()) {
+            return back()->withInput()->withErrors(['exclusive_until' => 'La scadenza è già passata.']);
+        }
+
+        // Un esclusivo senza prezzo usa quello proposto per la sua rarità.
+        if ($data['is_exclusive'] && ($data['unlock_level'] ?? null) === null && $data['price'] === null) {
+            $data['price'] = (int) config('avatar.default_prices.'.$data['rarity'], 150);
+        }
         $data['sort_order'] ??= $item->sort_order;
 
         // I vestiti base (livello 1) devono restare sempre disponibili.
@@ -113,6 +132,120 @@ class AvatarController extends Controller
         $item->update($data);
 
         return redirect()->route('admin.avatar.index')->with('success', "Oggetto aggiornato: {$item->name}");
+    }
+
+    /**
+     * Vetrina settimanale: questa settimana e la prossima (automatica o scelta a mano).
+     */
+    public function showcase(AvatarService $avatar)
+    {
+        $weeks = [];
+        foreach (['this' => now(), 'next' => now()->addWeek()] as $name => $date) {
+            $show = $avatar->showcase($date);
+            $weeks[$name] = $show + [
+                'items' => AvatarItem::whereIn('key', $show['keys'])->get(),
+                'start' => $date->copy()->startOfWeek(),
+            ];
+        }
+
+        return view('admin.avatar.showcase', [
+            'weeks' => $weeks,
+            'shopItems' => AvatarItem::where('is_active', true)->where('is_exclusive', false)->whereNotNull('price')->orderBy('name')->get(['key', 'name', 'slot', 'price']),
+            'slotLabels' => self::SLOT_LABELS,
+            'count' => $avatar->settings()['count'],
+            'discount' => $avatar->settings()['discount'],
+            'defaults' => config('avatar.showcase'),
+            'activePromo' => $avatar->promotion(),
+            'promotions' => DB::table('avatar_promotions')->orderByDesc('starts_at')->get()->map(function ($p) {
+                $p->starts_at = \Illuminate\Support\Carbon::parse($p->starts_at);
+                $p->ends_at = \Illuminate\Support\Carbon::parse($p->ends_at);
+
+                return $p;
+            }),
+        ]);
+    }
+
+    /**
+     * Impostazioni di base della vetrina (sconto e numero di oggetti).
+     */
+    public function saveSettings(Request $request)
+    {
+        $data = $request->validate([
+            'discount' => ['required', 'integer', 'min:1', 'max:90'],
+            'count' => ['required', 'integer', 'min:1', 'max:12'],
+        ]);
+
+        foreach (['showcase_discount' => $data['discount'], 'showcase_count' => $data['count']] as $key => $value) {
+            DB::table('avatar_settings')->updateOrInsert(['key' => $key], ['value' => (string) $value, 'updated_at' => now(), 'created_at' => now()]);
+        }
+
+        return redirect()->route('admin.avatar.showcase')->with('success', 'Impostazioni della vetrina salvate.');
+    }
+
+    /**
+     * Promozione a tempo (es. saldi di Natale).
+     */
+    public function storePromotion(Request $request)
+    {
+        $data = $request->validate([
+            'name' => ['required', 'string', 'max:80'],
+            'discount' => ['required', 'integer', 'min:1', 'max:90'],
+            'scope' => ['required', Rule::in(['showcase', 'all'])],
+            'starts_at' => ['required', 'date'],
+            'ends_at' => ['required', 'date', 'after:starts_at'],
+        ]);
+
+        DB::table('avatar_promotions')->insert($data + ['is_active' => true, 'created_at' => now(), 'updated_at' => now()]);
+
+        return redirect()->route('admin.avatar.showcase')->with('success', "Promozione creata: {$data['name']}.");
+    }
+
+    public function togglePromotion(int $promotion)
+    {
+        $row = DB::table('avatar_promotions')->where('id', $promotion)->first();
+        abort_unless($row, 404);
+        DB::table('avatar_promotions')->where('id', $promotion)->update(['is_active' => ! $row->is_active, 'updated_at' => now()]);
+
+        return redirect()->route('admin.avatar.showcase')->with('success', $row->is_active ? 'Promozione sospesa.' : 'Promozione riattivata.');
+    }
+
+    public function deletePromotion(int $promotion)
+    {
+        DB::table('avatar_promotions')->where('id', $promotion)->delete();
+
+        return redirect()->route('admin.avatar.showcase')->with('success', 'Promozione eliminata.');
+    }
+
+    /**
+     * Sceglie a mano gli oggetti di una settimana (o torna alla rotazione automatica).
+     */
+    public function saveShowcase(Request $request)
+    {
+        $data = $request->validate([
+            'week' => ['required', Rule::in(['this', 'next'])],
+            'items' => ['nullable', 'array', 'max:12'],
+            'items.*' => ['string', 'exists:avatar_items,key'],
+        ]);
+
+        $weekStart = ($data['week'] === 'next' ? now()->addWeek() : now())->startOfWeek()->toDateString();
+        $ids = AvatarItem::whereIn('key', $data['items'] ?? [])
+            ->where('is_exclusive', false)
+            ->whereNotNull('price')
+            ->pluck('id');
+
+        DB::transaction(function () use ($weekStart, $ids) {
+            DB::table('avatar_showcase_picks')->where('week_start', $weekStart)->delete();
+            DB::table('avatar_showcase_picks')->insert($ids->map(fn ($id) => [
+                'week_start' => $weekStart,
+                'avatar_item_id' => $id,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ])->all());
+        });
+
+        return redirect()->route('admin.avatar.showcase')->with('success', $ids->isEmpty()
+            ? 'Vetrina tornata alla rotazione automatica.'
+            : 'Vetrina salvata: '.$ids->count().' oggetti scelti a mano.');
     }
 
     /**

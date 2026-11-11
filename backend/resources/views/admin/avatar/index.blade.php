@@ -20,6 +20,17 @@
         .bg-purple { background: #9b4dde; }
     </style>
 
+    <div class="alert alert-info d-flex flex-wrap gap-3 align-items-center justify-content-between">
+        <div>
+            <strong><i class="bi bi-stars"></i> Come funziona il negozio</strong>
+            <ul class="mb-0 small">
+                <li><b>Vetrina settimanale:</b> ogni lunedì cambiano da soli alcuni oggetti del negozio, con uno sconto fino a domenica (numero e sconto si cambiano nella pagina Vetrina, dove si possono creare anche promozioni a tempo, come i saldi di Natale).</li>
+                <li><b>Esclusivi:</b> non stanno nel negozio né in vetrina finché non li apri (in "Modifica"); si comprano solo finché sono aperti o fino alla scadenza. Chi li ha comprati li tiene.</li>
+            </ul>
+        </div>
+        <a href="{{ route('admin.avatar.showcase') }}" class="btn btn-primary"><i class="bi bi-calendar-week"></i> Vetrina settimanale</a>
+    </div>
+
     <div class="admin-stat-group">
         <h2 class="admin-stat-group-title">Panoramica</h2>
         <div class="admin-stat-grid">
@@ -226,6 +237,14 @@
                                 <td>{{ $owners[$item->id] ?? 0 }}</td>
                                 <td>{{ $purchases[$item->id] ?? 0 }}</td>
                                 <td>
+                                    @if ($item->is_exclusive)
+                                        <span class="badge {{ $item->exclusiveOnSale() ? 'bg-warning text-dark' : 'bg-dark' }}">
+                                            Esclusivo · {{ $item->exclusiveOnSale() ? 'in vendita' : 'chiuso' }}
+                                        </span>
+                                        @if ($item->exclusiveOnSale() && $item->exclusive_until)
+                                            <div class="small admin-muted">fino al {{ $item->exclusive_until->format('d/m H:i') }}</div>
+                                        @endif
+                                    @endif
                                     @if ($item->is_active)
                                         <span class="badge bg-success">Attivo</span>
                                     @else

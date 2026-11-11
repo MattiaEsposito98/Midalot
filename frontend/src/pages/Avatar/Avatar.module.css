@@ -456,3 +456,68 @@
   color: #fff;
   text-shadow: 0 0 2px #000;
 }
+
+/* ------------------------------------------------------------ vetrina del negozio */
+
+.showcase {
+  margin-bottom: 18px;
+  padding: 12px;
+  border: 2px solid #ffc107;
+  border-radius: 14px;
+  background: #fffbe8;
+}
+
+.showcaseHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+  margin-bottom: 10px;
+  font-size: 0.9rem;
+}
+
+.showcaseNote {
+  margin: 10px 0 0;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.oldPrice {
+  opacity: 0.55;
+  font-size: 0.85em;
+}
+
+.saleTag,
+.exclusiveTag {
+  margin-left: 6px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.saleTag {
+  background: #e23b3b;
+}
+
+.exclusiveTag {
+  background: #6c4bd8;
+}
+
+.promoBanner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, #e23b3b, #ff8a3d);
+  color: #fff;
+  font-size: 0.92rem;
+}
+
+.promoBanner i {
+  font-size: 1.3rem;
+}

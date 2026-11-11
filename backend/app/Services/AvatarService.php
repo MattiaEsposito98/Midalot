@@ -329,7 +329,9 @@ class AvatarService
             $fresh = User::whereKey($user->id)->lockForUpdate()->first();
             $level = XpService::info((int) $fresh->xp_total)['level'];
 
-            if (! $item->is_active || $item->price === null) {
+            $price = $this->priceFor($item);
+
+            if (! $item->is_active || $price === null) {
                 throw ValidationException::withMessages(['item' => 'Questo oggetto non è in vendita.']);
             }
 
@@ -341,7 +343,7 @@ class AvatarService
                 throw ValidationException::withMessages(['item' => 'Hai già questo oggetto.']);
             }
 
-            if ($fresh->coins < $item->price) {
+            if ($fresh->coins < $price) {
                 throw ValidationException::withMessages(['item' => 'Monete insufficienti.']);
             }
 
@@ -354,8 +356,8 @@ class AvatarService
 
             // Il pagamento e' legato a questo acquisto (non all'oggetto): se l'admin
             // toglie l'oggetto e l'utente lo ricompra, paga di nuovo.
-            if ($item->price > 0) {
-                $this->addCoins($user->id, 'shop', $owned->id, -$item->price);
+            if ($price > 0) {
+                $this->addCoins($user->id, 'shop', $owned->id, -$price);
             }
         });
     }
@@ -380,13 +382,227 @@ class AvatarService
         UserAvatarItem::where('user_id', $user->id)->whereNull('seen_at')->update(['seen_at' => now()]);
     }
 
-    public function catalog(): Collection
+    // ------------------------------------------------------------ vetrina e prezzi
+
+    /** @var array{discount: int, count: int}|null */
+    private ?array $settingsCache = null;
+
+    private ?array $promoCache = null;
+
+    /**
+     * Impostazioni di base della vetrina: quelle salvate dall'admin, altrimenti
+     * i valori di config/avatar.php.
+     *
+     * @return array{discount: int, count: int}
+     */
+    public function settings(): array
     {
+        if ($this->settingsCache === null) {
+            $saved = DB::table('avatar_settings')->pluck('value', 'key');
+
+            $this->settingsCache = [
+                'discount' => (int) ($saved['showcase_discount'] ?? config('avatar.showcase.discount', 30)),
+                'count' => (int) ($saved['showcase_count'] ?? config('avatar.showcase.count', 4)),
+            ];
+        }
+
+        return $this->settingsCache;
+    }
+
+    /**
+     * Promozione a tempo attiva adesso (es. saldi di Natale); se ce ne sono
+     * piu' di una vale quella con lo sconto maggiore.
+     *
+     * @return array{name: string, discount: int, scope: string, ends_at: string}|null
+     */
+    public function promotion(): ?array
+    {
+        if ($this->promoCache === null) {
+            $now = now();
+            $promo = DB::table('avatar_promotions')
+                ->where('is_active', true)
+                ->where('starts_at', '<=', $now)
+                ->where('ends_at', '>', $now)
+                ->orderByDesc('discount')
+                ->first();
+
+            $this->promoCache = $promo ? [
+                'name' => $promo->name,
+                'discount' => (int) $promo->discount,
+                'scope' => $promo->scope,
+                'ends_at' => \Carbon\Carbon::parse($promo->ends_at)->toIso8601String(),
+            ] : ['none' => true];
+        }
+
+        return isset($this->promoCache['none']) ? null : $this->promoCache;
+    }
+
+    /**
+     * Sconto della vetrina: quello di base, o quello della promozione se maggiore.
+     */
+    public function showcaseDiscount(): int
+    {
+        return max($this->settings()['discount'], $this->promotion()['discount'] ?? 0);
+    }
+
+    /** @var array<string, array>  cache per richiesta, per settimana */
+    private array $showcaseCache = [];
+
+    /**
+     * Vetrina della settimana che contiene $date.
+     * Se l'admin ha scelto gli oggetti a mano si usano quelli, altrimenti la
+     * rotazione e' automatica: ogni settimana l'ordine degli oggetti del
+     * negozio si rimescola (sempre uguale per tutti nella stessa settimana).
+     *
+     * @return array{week_start: string, ends_at: string, discount: int, keys: string[], manual: bool}
+     */
+    public function showcase(?\Carbon\Carbon $date = null): array
+    {
+        $weekStart = ($date ?? now())->copy()->startOfWeek();
+        $cacheKey = $weekStart->toDateString();
+
+        if (isset($this->showcaseCache[$cacheKey])) {
+            return $this->showcaseCache[$cacheKey];
+        }
+
+        $manual = AvatarItem::query()
+            ->join('avatar_showcase_picks as p', 'p.avatar_item_id', '=', 'avatar_items.id')
+            ->where('p.week_start', $cacheKey)
+            ->where('avatar_items.is_active', true)
+            ->where('avatar_items.is_exclusive', false)
+            ->whereNotNull('avatar_items.price')
+            ->orderBy('avatar_items.name')
+            ->pluck('avatar_items.key')
+            ->all();
+
+        $isManual = $manual !== [];
+        $keys = $manual;
+
+        if (! $isManual) {
+            $keys = $this->rotationKeys($weekStart);
+        }
+
+        return $this->showcaseCache[$cacheKey] = [
+            'week_start' => $cacheKey,
+            'ends_at' => $weekStart->copy()->addWeek()->toIso8601String(),
+            'discount' => $this->showcaseDiscount(),
+            'keys' => $keys,
+            'manual' => $isManual,
+        ];
+    }
+
+    /**
+     * Rotazione automatica: gli oggetti a pagamento escono a gruppi, uno dopo
+     * l'altro, finche' non sono usciti tutti (nessuna ripetizione nel giro);
+     * poi si rimescola e il giro riparte.
+     *
+     * @return string[]
+     */
+    private function rotationKeys(\Carbon\Carbon $weekStart): array
+    {
+        $all = AvatarItem::where('is_active', true)
+            ->where('is_exclusive', false)
+            ->whereNotNull('price')
+            ->orderBy('id')
+            ->pluck('key')
+            ->all();
+
+        $count = max(1, $this->settings()['count']);
+        $total = count($all);
+
+        if ($total <= $count) {
+            return $all;
+        }
+
+        $perCycle = (int) ceil($total / $count);
+        $week = intdiv($weekStart->copy()->startOfDay()->diffInDays(\Carbon\Carbon::parse('2024-01-01')->startOfDay(), true), 7);
+        $cycle = intdiv($week, $perCycle);
+        $slot = $week % $perCycle;
+
+        $order = collect($all)->sortBy(fn ($key) => crc32($cycle.'|'.$key))->values()->all();
+
+        $keys = [];
+        for ($i = 0; $i < $count; $i++) {
+            $keys[] = $order[($slot * $count + $i) % $total];
+        }
+
+        return $keys;
+    }
+
+    /**
+     * Prezzo di listino (senza sconto): quello dell'oggetto, oppure quello
+     * proposto per la sua rarita'. Null se l'oggetto non e' acquistabile.
+     */
+    public function listPrice(AvatarItem $item): ?int
+    {
+        if ($item->is_exclusive) {
+            if (! $item->exclusiveOnSale()) {
+                return null;
+            }
+
+            return $item->price ?? (int) config('avatar.default_prices.'.$item->rarity, 150);
+        }
+
+        return $item->price;
+    }
+
+    /**
+     * Prezzo che l'utente paga adesso (con lo sconto della vetrina, se in vetrina).
+     */
+    public function priceFor(AvatarItem $item): ?int
+    {
+        $price = $this->listPrice($item);
+
+        if ($price === null || $item->is_exclusive) {
+            return $price;
+        }
+
+        $promo = $this->promotion();
+
+        // In vetrina: sconto di base o della promozione (il maggiore).
+        // Fuori vetrina: sconto solo se la promozione vale per tutto il negozio.
+        if (in_array($item->key, $this->showcase()['keys'], true)) {
+            $discount = $this->showcaseDiscount();
+        } elseif ($promo && $promo['scope'] === 'all') {
+            $discount = $promo['discount'];
+        } else {
+            return $price;
+        }
+
+        return (int) round($price * (100 - $discount) / 100);
+    }
+
+    /**
+     * Catalogo visibile all'utente: gli esclusivi non in vendita restano
+     * nascosti, tranne a chi li possiede gia'.
+     */
+    public function catalog(?User $user = null): Collection
+    {
+        $ownedIds = $user
+            ? UserAvatarItem::where('user_id', $user->id)->pluck('avatar_item_id')->flip()
+            : collect();
+        $showcase = $this->showcase()['keys'];
+
         return AvatarItem::where('is_active', true)
             ->orderByRaw('unlock_level IS NULL')
             ->orderBy('unlock_level')
             ->orderBy('sort_order')
             ->get()
-            ->map(fn (AvatarItem $item) => $item->toCatalog());
+            ->filter(fn (AvatarItem $item) => ! $item->is_exclusive || $item->exclusiveOnSale() || isset($ownedIds[$item->id]))
+            ->map(function (AvatarItem $item) use ($showcase) {
+                $row = $item->toCatalog();
+                $list = $this->listPrice($item);
+                $price = $this->priceFor($item);
+
+                $row['price'] = $price;
+                $row['original_price'] = $price !== null && $price !== $list ? $list : null;
+                $row['discount'] = $price !== null && $list ? (int) round((1 - $price / $list) * 100) : 0;
+                $row['showcase'] = in_array($item->key, $showcase, true) && ! $item->is_exclusive;
+                $row['exclusive'] = (bool) $item->is_exclusive;
+                $row['until'] = $item->is_exclusive && $item->exclusive_until ? $item->exclusive_until->toIso8601String() : null;
+
+                return $row;
+            })
+            ->values();
     }
 }

@@ -70,6 +70,26 @@ function Coins({ value }) {
   )
 }
 
+// "2 g 5 h", "5 h 10 min": quanto manca a una data.
+function timeLeft(iso) {
+  const ms = new Date(iso).getTime() - Date.now()
+  if (!(ms > 0)) return "meno di un minuto"
+  const min = Math.floor(ms / 60000)
+  const d = Math.floor(min / 1440)
+  const h = Math.floor((min % 1440) / 60)
+  if (d > 0) return `${d} g ${h} h`
+  if (h > 0) return `${h} h ${min % 60} min`
+  return `${Math.max(1, min)} min`
+}
+
+function Price({ it }) {
+  return (
+    <>
+      {it.original_price != null && <s className={styles.oldPrice}>{it.original_price}</s>} <Coins value={it.price} />
+    </>
+  )
+}
+
 function apiError(err, fallback) {
   return err?.response?.data?.message || fallback
 }
@@ -82,7 +102,7 @@ export default function Avatar() {
 
   const [data, setData] = useState(null)
   const [draft, setDraft] = useState(null)
-  const [tab, setTab] = useState("look")
+  const [tab, setTab] = useState(vista === "negozio" ? "all" : "look")
   const [tryOn, setTryOn] = useState(null) // oggetto del negozio in prova
   const [confirmBuy, setConfirmBuy] = useState(null)
   const [busy, setBusy] = useState(false)
@@ -264,7 +284,7 @@ export default function Avatar() {
     let status
     if (mine) status = active ? <><i className="bi bi-check-circle-fill"></i> Indossato</> : "Tocca per indossare"
     else if (it.unlock_level) status = <><i className="bi bi-lock-fill"></i> Si sblocca al Lv {it.unlock_level}</>
-    else if (it.price != null) status = <><i className="bi bi-shop"></i> Nel negozio · <Coins value={it.price} /></>
+    else if (it.price != null) status = <><i className="bi bi-shop"></i> Nel negozio · <Price it={it} /></>
     else status = <><i className="bi bi-award"></i> {data.achievement_items?.[it.key] || "Premio di un obiettivo"}</>
 
     return (
@@ -296,6 +316,11 @@ export default function Avatar() {
   // ------------------------------------------------------------ negozio
 
   const shopItems = catalog.filter((it) => it.price != null && (tab === "all" || it.slot === tab))
+  // In "Tutto" la vetrina sta in un riquadro a parte; nelle altre zone gli oggetti in vetrina restano nella lista con lo sconto.
+  const featured = tab === "all" ? shopItems.filter((it) => it.showcase) : []
+  const regular = shopItems
+    .filter((it) => !featured.includes(it))
+    .sort((a, b) => Number(b.exclusive) - Number(a.exclusive))
   const shopSlots = SLOTS.filter((s) => catalog.some((it) => it.price != null && it.slot === s.key))
 
   function shopCard(it) {
@@ -307,12 +332,17 @@ export default function Avatar() {
 
     return (
       <div key={it.key} className={`${styles.item} ${trying ? styles.itemActive : ""}`} style={{ "--rarity": rarity.color }}>
-        <span className={styles.rarity}>{rarity.label}</span>
+        <span className={styles.rarity}>
+          {rarity.label}
+          {it.discount > 0 && !it.exclusive && <span className={styles.saleTag}>-{it.discount}%</span>}
+          {it.exclusive && <span className={styles.exclusiveTag}>Esclusivo</span>}
+        </span>
         {it.slot === "frame" && <UserAvatar url={user?.avatar_url} name={user?.nickname} frame={it.key} size={44} className="my-1" />}
         <span className={styles.itemName}>{it.slot === "title" ? <UserTitle title={it.name} /> : it.name}</span>
         <span className={styles.itemLevel}>
-          <Coins value={it.price} />
+          <Price it={it} />
           {tooLow && <> · Lv {it.shop_min_level}</>}
+          {it.exclusive && it.until && <div>Solo per {timeLeft(it.until)}</div>}
         </span>
 
         {mine ? (
@@ -451,7 +481,31 @@ export default function Avatar() {
                   Le monete si guadagnano giocando: ogni partita ne dà un po&apos; e ogni livello raggiunto regala un bonus. Prova gli
                   oggetti sull&apos;avatar prima di comprarli.
                 </p>
-                <div className={styles.grid}>{shopItems.map(shopCard)}</div>
+                {data.promo && (
+                  <div className={styles.promoBanner}>
+                    <i className="bi bi-gift-fill"></i>
+                    <span>
+                      <strong>{data.promo.name}</strong>: -{data.promo.discount}%{" "}
+                      {data.promo.scope === "all" ? "su tutto il negozio" : "sugli oggetti in vetrina"} · finisce tra {timeLeft(data.promo.ends_at)}
+                    </span>
+                  </div>
+                )}
+                {featured.length > 0 && (
+                  <div className={styles.showcase}>
+                    <div className={styles.showcaseHead}>
+                      <strong>
+                        <i className="bi bi-stars"></i> In vetrina questa settimana
+                      </strong>
+                      <span>Sconto fino al {data.showcase?.discount ?? 30}% · cambia tra {timeLeft(data.showcase?.ends_at)}</span>
+                    </div>
+                    <div className={styles.grid}>{featured.map(shopCard)}</div>
+                    <p className={styles.showcaseNote}>
+                      La vetrina cambia ogni lunedì con nuovi oggetti scontati. Finita la settimana tornano al prezzo normale, ma restano
+                      nel negozio. A volte compaiono oggetti esclusivi: si comprano solo per un periodo limitato!
+                    </p>
+                  </div>
+                )}
+                <div className={styles.grid}>{regular.map(shopCard)}</div>
               </>
             ) : tab === "hair" ? (
               <div className="d-flex flex-column gap-3">

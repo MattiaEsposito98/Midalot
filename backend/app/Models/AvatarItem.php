@@ -22,6 +22,9 @@ class AvatarItem extends Model
         'unlock_level',
         'price',
         'shop_min_level',
+        'is_exclusive',
+        'exclusive_open',
+        'exclusive_until',
         'is_active',
         'sort_order',
     ];
@@ -30,8 +33,21 @@ class AvatarItem extends Model
         'unlock_level' => 'integer',
         'price' => 'integer',
         'shop_min_level' => 'integer',
+        'is_exclusive' => 'boolean',
+        'exclusive_open' => 'boolean',
+        'exclusive_until' => 'datetime',
         'is_active' => 'boolean',
     ];
+
+    /**
+     * Esclusivo in vendita adesso: aperto dall'admin e non scaduto.
+     */
+    public function exclusiveOnSale(): bool
+    {
+        return $this->is_exclusive
+            && $this->exclusive_open
+            && ($this->exclusive_until === null || $this->exclusive_until->isFuture());
+    }
 
     public function toCatalog(): array
     {

@@ -157,7 +157,10 @@ class AvatarController extends Controller
         return [
             'config' => $this->avatar->config($user, $owned),
             'owned' => $owned,
-            'catalog' => $this->avatar->catalog(),
+            'catalog' => $this->avatar->catalog($user),
+            // Vetrina della settimana: gli oggetti hanno gia' lo sconto nel catalogo.
+            'showcase' => \Illuminate\Support\Arr::only($this->avatar->showcase(), ['ends_at', 'discount', 'keys']),
+            'promo' => $this->avatar->promotion(),
             'coins' => (int) $user->fresh()->coins,
             'level' => XpService::info((int) $user->xp_total)['level'],
             'unseen' => $this->avatar->unseen($user)->pluck('key'),

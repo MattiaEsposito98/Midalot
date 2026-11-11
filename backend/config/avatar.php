@@ -31,6 +31,27 @@ return [
     ],
 
     /*
+    | Vetrina settimanale del negozio.
+    | Ogni lunedi' (00:00) cambiano gli oggetti in vetrina: `count` oggetti del negozio,
+    | scelti a rotazione in modo automatico, costano `discount`% in meno fino a domenica.
+    | Gli oggetti esclusivi non entrano mai nella rotazione. L'admin puo' scegliere
+    | a mano gli oggetti di una settimana (Avatar e negozio -> Vetrina).
+    */
+    'showcase' => [
+        'count' => 6,
+        'discount' => 30,
+    ],
+
+    // Prezzo proposto per rarita' quando un oggetto non ne ha uno (es. un esclusivo appena aperto).
+    'default_prices' => [
+        'base' => 100,
+        'comune' => 150,
+        'raro' => 400,
+        'epico' => 900,
+        'leggendario' => 2000,
+    ],
+
+    /*
     | Colori degli oggetti con tavolozza: [colore, livello, vecchio oggetto].
     | - livello: dal quale il colore e' disponibile (1 = subito, se si possiede l'oggetto).
     | - vecchio oggetto: key dell'oggetto separato che esisteva prima (es. maglietta
