@@ -28,6 +28,15 @@ export const SKY = {
   sfondo_leggenda: "#241a47",
   sfondo_spiaggia: "#9fe0ff",
   sfondo_spazio: "#0d1030",
+  sfondo_citta: "#1b2147",
+  sfondo_torre: "#2b1f55",
+  sfondo_torneo: "#bfe0ff",
+  sfondo_nave: "#8fd3ff",
+  sfondo_luna: "#090b22",
+  sfondo_tempio: "#ffd6c9",
+  sfondo_neve: "#bcd8f0",
+  sfondo_halloween: "#1e1633",
+  sfondo_carnevale: "#ffe9f4",
 }
 
 export const RARITY = {

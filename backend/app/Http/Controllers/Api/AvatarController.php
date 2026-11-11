@@ -164,7 +164,8 @@ class AvatarController extends Controller
             'coins' => (int) $user->fresh()->coins,
             'level' => XpService::info((int) $user->xp_total)['level'],
             'unseen' => $this->avatar->unseen($user)->pluck('key'),
-            'achievement_items' => AchievementService::itemSources(),
+            'achievement_items' => AchievementService::itemSources() + AvatarService::themeRewardSources(),
+            'themes' => $this->avatar->themes($user),
             // Colori degli oggetti con tavolozza e quali sono sbloccati per questo utente.
             'palettes' => $this->avatar->palettesFor($user),
         ];

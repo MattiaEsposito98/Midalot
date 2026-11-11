@@ -37,5 +37,10 @@ return [
     // volta sola) piu' un bonus a ogni livello raggiunto.
     'coins_per_xp' => 0.2,
     'level_up_coins' => 20,
+    // Monete per chi entra: ogni giorno, piu' un bonus a chi entra almeno
+    // `weekly_login_days` giorni nella stessa settimana (lunedi'-domenica).
+    'login_coins' => 3,
+    'weekly_login_days' => 3,
+    'weekly_login_coins' => 50,
     'level_up_coins_step' => 5, // bonus livello = level_up_coins + step * livello
 ];

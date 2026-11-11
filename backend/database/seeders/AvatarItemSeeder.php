@@ -17,7 +17,9 @@ class AvatarItemSeeder extends Seeder
         $existing = AvatarItem::pluck('key')->flip();
         $created = 0;
 
-        foreach ($rows as $i => [$key, $name, $slot, $rarity, $level, $price, $shopMinLevel]) {
+        foreach ($rows as $i => $row) {
+            [$key, $name, $slot, $rarity, $level, $price, $shopMinLevel] = $row;
+
             if (isset($existing[$key])) {
                 continue;
             }
@@ -26,6 +28,8 @@ class AvatarItemSeeder extends Seeder
                 'key' => $key,
                 'name' => $name,
                 'slot' => $slot,
+                'theme' => $row[7] ?? null,
+                'is_exclusive' => (bool) ($row[8] ?? false),
                 'rarity' => $rarity,
                 'unlock_level' => $level,
                 'price' => $price,

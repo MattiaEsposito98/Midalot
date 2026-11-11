@@ -521,3 +521,168 @@
 .promoBanner i {
   font-size: 1.3rem;
 }
+
+/* ------------------------------------------------------------ temi */
+
+.themeBox {
+  padding: 12px;
+  border: 2px solid rgba(24, 32, 51, 0.15);
+  border-radius: 14px;
+  background: #fbfaff;
+}
+
+.themeHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 1.05rem;
+}
+
+.themeProgress {
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 1px 10px;
+  border-radius: 999px;
+  background: #6c4bd8;
+  color: #fff;
+}
+
+.themeBar {
+  height: 8px;
+  margin: 8px 0;
+  border-radius: 999px;
+  background: #e6e2f7;
+  overflow: hidden;
+}
+
+.themeBar span {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #6c4bd8, #2fbfa0);
+}
+
+.themeReward {
+  margin-bottom: 10px;
+  font-size: 0.85rem;
+}
+
+/* ------------------------------------------------------------ filtri del negozio */
+
+.filterBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.searchBox {
+  flex: 1 1 200px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 2px solid rgba(24, 32, 51, 0.15);
+  border-radius: 999px;
+  background: #fff;
+}
+
+.searchBox input {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  outline: none;
+  background: transparent;
+  font-size: 0.9rem;
+}
+
+.sortSelect {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  border: 2px solid rgba(24, 32, 51, 0.15);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.pills {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: thin;
+}
+
+.pill {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border: 1px solid rgba(24, 32, 51, 0.18);
+  border-radius: 999px;
+  background: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+  color: #182033;
+}
+
+.pillActive {
+  border-color: #6c4bd8;
+  background: #6c4bd8;
+  color: #fff;
+}
+
+.pillReset {
+  border-color: #e23b3b;
+  color: #e23b3b;
+}
+
+.rarityDot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--rarity);
+}
+
+.pillActive .rarityDot {
+  box-shadow: 0 0 0 2px #fff;
+}
+
+.resultCount {
+  margin-bottom: 8px;
+  font-size: 0.8rem;
+  opacity: 0.7;
+}
+
+.emptyShop {
+  padding: 18px;
+  border: 2px dashed rgba(24, 32, 51, 0.15);
+  border-radius: 12px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+/* Telefono: zone in una riga che scorre e oggetti su due colonne */
+@media (max-width: 575px) {
+  .tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+  }
+
+  .tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+}

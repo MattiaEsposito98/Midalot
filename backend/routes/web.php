@@ -139,6 +139,8 @@ Route::middleware(['auth', 'admin'])
             ->name('avatar.showcase.save');
         Route::put('avatar/vetrina/impostazioni', [AdminAvatarController::class, 'saveSettings'])
             ->name('avatar.settings.save');
+        Route::post('avatar/temi/{theme}/vendita', [AdminAvatarController::class, 'themeSale'])
+            ->name('avatar.theme.sale');
         Route::post('avatar/promozioni', [AdminAvatarController::class, 'storePromotion'])
             ->name('avatar.promo.store');
         Route::post('avatar/promozioni/{promotion}/toggle', [AdminAvatarController::class, 'togglePromotion'])

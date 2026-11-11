@@ -105,6 +105,12 @@ export default function Avatar() {
   const [tab, setTab] = useState(vista === "negozio" ? "all" : "look")
   const [tryOn, setTryOn] = useState(null) // oggetto del negozio in prova
   const [confirmBuy, setConfirmBuy] = useState(null)
+  // Filtri del negozio
+  const [shopQuery, setShopQuery] = useState("")
+  const [shopFlags, setShopFlags] = useState([])
+  const [shopRarity, setShopRarity] = useState("")
+  const [shopSort, setShopSort] = useState("default")
+  const [themeSel, setThemeSel] = useState("")
   const [busy, setBusy] = useState(false)
   const [message, setMessage] = useState(null)
   const [loadError, setLoadError] = useState(null)
@@ -315,9 +321,42 @@ export default function Avatar() {
 
   // ------------------------------------------------------------ negozio
 
-  const shopItems = catalog.filter((it) => it.price != null && (tab === "all" || it.slot === tab))
-  // In "Tutto" la vetrina sta in un riquadro a parte; nelle altre zone gli oggetti in vetrina restano nella lista con lo sconto.
-  const featured = tab === "all" ? shopItems.filter((it) => it.showcase) : []
+  const catalogByKey = Object.fromEntries(catalog.map((it) => [it.key, it]))
+  const query = shopQuery.trim().toLowerCase()
+  const filtering = query !== "" || shopFlags.length > 0 || shopRarity !== "" || shopSort !== "default"
+  const RARITY_ORDER = { base: 0, comune: 1, raro: 2, epico: 3, leggendario: 4 }
+
+  // Ricerca, filtri e ordinamento (valgono anche dentro i temi).
+  function applyShopFilters(list) {
+    const out = list.filter((it) => {
+      if (query && !it.name.toLowerCase().includes(query)) return false
+      if (shopRarity && it.rarity !== shopRarity) return false
+      if (shopFlags.includes("notMine") && owned.has(it.key)) return false
+      if (shopFlags.includes("affordable") && (it.price > data.coins || level < it.shop_min_level)) return false
+      if (shopFlags.includes("sale") && !(it.discount > 0)) return false
+      if (shopFlags.includes("exclusive") && !it.exclusive) return false
+      return true
+    })
+    if (shopSort === "priceAsc") out.sort((a, b) => a.price - b.price)
+    if (shopSort === "priceDesc") out.sort((a, b) => b.price - a.price)
+    if (shopSort === "rarity") out.sort((a, b) => (RARITY_ORDER[b.rarity] ?? 0) - (RARITY_ORDER[a.rarity] ?? 0))
+    return out
+  }
+
+  function toggleFlag(flag) {
+    setShopFlags((prev) => (prev.includes(flag) ? prev.filter((f) => f !== flag) : [...prev, flag]))
+  }
+
+  function resetShopFilters() {
+    setShopQuery("")
+    setShopFlags([])
+    setShopRarity("")
+    setShopSort("default")
+  }
+
+  const shopItems = applyShopFilters(catalog.filter((it) => it.price != null && (tab === "all" || it.slot === tab)))
+  // In "Tutto" (senza filtri) la vetrina sta in un riquadro a parte; altrimenti gli oggetti in vetrina restano nella lista con lo sconto.
+  const featured = tab === "all" && !filtering ? shopItems.filter((it) => it.showcase) : []
   const regular = shopItems
     .filter((it) => !featured.includes(it))
     .sort((a, b) => Number(b.exclusive) - Number(a.exclusive))
@@ -465,6 +504,11 @@ export default function Avatar() {
                 <button type="button" className={`${styles.tab} ${tab === "all" ? styles.tabActive : ""}`} onClick={() => setTab("all")}>
                   Tutto
                 </button>
+                {data.themes?.length > 0 && (
+                  <button type="button" className={`${styles.tab} ${tab === "temi" ? styles.tabActive : ""}`} onClick={() => setTab("temi")}>
+                    <i className="bi bi-collection-fill"></i> Temi
+                  </button>
+                )}
                 {shopSlots.map((s) => (
                   <button key={s.key} type="button" className={`${styles.tab} ${tab === s.key ? styles.tabActive : ""}`} onClick={() => setTab(s.key)}>
                     <i className={`bi ${s.icon}`}></i> {s.label}
@@ -478,7 +522,7 @@ export default function Avatar() {
             {mode === "shop" ? (
               <>
                 <p className={styles.hint}>
-                  Le monete si guadagnano giocando: ogni partita ne dà un po&apos; e ogni livello raggiunto regala un bonus. Prova gli
+                  Le monete si guadagnano giocando: ogni partita ne dà un po&apos;, ogni livello raggiunto regala un bonus e anche solo entrare ogni giorno ne vale qualcuna (con un premio extra se entri almeno 3 giorni a settimana). Prova gli
                   oggetti sull&apos;avatar prima di comprarli.
                 </p>
                 {data.promo && (
@@ -488,6 +532,63 @@ export default function Avatar() {
                       <strong>{data.promo.name}</strong>: -{data.promo.discount}%{" "}
                       {data.promo.scope === "all" ? "su tutto il negozio" : "sugli oggetti in vetrina"} · finisce tra {timeLeft(data.promo.ends_at)}
                     </span>
+                  </div>
+                )}
+                <div className={styles.filterBar}>
+                  <div className={styles.searchBox}>
+                    <i className="bi bi-search"></i>
+                    <input
+                      type="search"
+                      placeholder="Cerca un oggetto..."
+                      value={shopQuery}
+                      maxLength={40}
+                      onChange={(e) => setShopQuery(e.target.value)}
+                      aria-label="Cerca un oggetto"
+                    />
+                  </div>
+                  <select className={styles.sortSelect} value={shopSort} onChange={(e) => setShopSort(e.target.value)} aria-label="Ordina">
+                    <option value="default">Consigliati</option>
+                    <option value="priceAsc">Prezzo: dal più basso</option>
+                    <option value="priceDesc">Prezzo: dal più alto</option>
+                    <option value="rarity">Più rari prima</option>
+                  </select>
+                </div>
+                <div className={styles.pills}>
+                  {[
+                    ["notMine", "bi-bag", "Da comprare"],
+                    ["affordable", "bi-coin", "Posso permettermelo"],
+                    ["sale", "bi-percent", "In saldo"],
+                    ["exclusive", "bi-gem", "Esclusivi"],
+                  ].map(([key, icon, label]) => (
+                    <button
+                      key={key}
+                      type="button"
+                      className={`${styles.pill} ${shopFlags.includes(key) ? styles.pillActive : ""}`}
+                      onClick={() => toggleFlag(key)}
+                    >
+                      <i className={`bi ${icon}`}></i> {label}
+                    </button>
+                  ))}
+                  {["comune", "raro", "epico", "leggendario"].map((r) => (
+                    <button
+                      key={r}
+                      type="button"
+                      className={`${styles.pill} ${shopRarity === r ? styles.pillActive : ""}`}
+                      style={{ "--rarity": (RARITY[r] || RARITY.comune).color }}
+                      onClick={() => setShopRarity(shopRarity === r ? "" : r)}
+                    >
+                      <span className={styles.rarityDot}></span> {(RARITY[r] || RARITY.comune).label}
+                    </button>
+                  ))}
+                  {filtering && (
+                    <button type="button" className={`${styles.pill} ${styles.pillReset}`} onClick={resetShopFilters}>
+                      <i className="bi bi-x-circle"></i> Azzera
+                    </button>
+                  )}
+                </div>
+                {tab !== "temi" && (
+                  <div className={styles.resultCount}>
+                    {shopItems.length} {shopItems.length === 1 ? "oggetto" : "oggetti"}
                   </div>
                 )}
                 {featured.length > 0 && (
@@ -505,7 +606,73 @@ export default function Avatar() {
                     </p>
                   </div>
                 )}
-                <div className={styles.grid}>{regular.map(shopCard)}</div>
+                {tab === "temi" ? (
+                  <div className="d-flex flex-column gap-3">
+                    <p className={styles.hint}>
+                      Ogni tema è un personaggio completo. Collezionali tutti: chi completa un tema riceve in regalo un titolo
+                      speciale che non si può comprare!
+                    </p>
+                    <div className={styles.pills}>
+                      <button type="button" className={`${styles.pill} ${themeSel === "" ? styles.pillActive : ""}`} onClick={() => setThemeSel("")}>
+                        Tutti i temi
+                      </button>
+                      {data.themes.map((th) => (
+                        <button
+                          key={th.key}
+                          type="button"
+                          className={`${styles.pill} ${themeSel === th.key ? styles.pillActive : ""}`}
+                          onClick={() => setThemeSel(th.key)}
+                        >
+                          <i className={`bi ${th.icon}`}></i> {th.name}
+                        </button>
+                      ))}
+                    </div>
+                    {data.themes.filter((th) => !themeSel || th.key === themeSel).map((th) => {
+                      const items = applyShopFilters(th.items.map((k) => catalogByKey[k]).filter(Boolean))
+                      if (filtering && items.length === 0) return null
+                      return (
+                        <div key={th.key} className={styles.themeBox}>
+                          <div className={styles.themeHead}>
+                            <strong>
+                              <i className={`bi ${th.icon}`}></i> {th.name}
+                            </strong>
+                            <span className={styles.themeProgress}>
+                              {th.owned}/{th.items.length}
+                            </span>
+                          </div>
+                          <div className={styles.themeBar}>
+                            <span style={{ width: `${(th.owned / th.items.length) * 100}%` }}></span>
+                          </div>
+                          {th.reward && (
+                            <div className={styles.themeReward}>
+                              {th.complete ? (
+                                <>
+                                  <i className="bi bi-trophy-fill"></i> Tema completato! Hai ricevuto il titolo <UserTitle title={th.reward.name} />
+                                </>
+                              ) : (
+                                <>
+                                  <i className="bi bi-gift"></i> Completa il tema per ricevere il titolo <UserTitle title={th.reward.name} />
+                                </>
+                              )}
+                            </div>
+                          )}
+                          <div className={styles.grid}>{items.map(shopCard)}</div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : regular.length > 0 ? (
+                  <div className={styles.grid}>{regular.map(shopCard)}</div>
+                ) : (
+                  featured.length === 0 && (
+                    <div className={styles.emptyShop}>
+                      Nessun oggetto con questi filtri.{" "}
+                      <button type="button" className="btn btn-link btn-sm p-0" onClick={resetShopFilters}>
+                        Azzera i filtri
+                      </button>
+                    </div>
+                  )
+                )}
               </>
             ) : tab === "hair" ? (
               <div className="d-flex flex-column gap-3">

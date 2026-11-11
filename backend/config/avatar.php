@@ -42,6 +42,26 @@ return [
         'discount' => 30,
     ],
 
+    /*
+    | Temi: oggetti che insieme fanno un personaggio completo. Gli oggetti hanno
+    | la colonna `theme` (database/data/avatar_items.php, 8a colonna). Chi possiede
+    | tutti gli oggetti attivi di un tema riceve in regalo l'oggetto `reward`
+    | (un titolo che non si compra). Solo generi e archetipi con nomi e grafica
+    | nostri: mai nomi, personaggi, loghi o design di marchi esistenti.
+    */
+    'themes' => [
+        'supereroi' => ['name' => 'Supereroi', 'icon' => 'bi-lightning-charge-fill', 'reward' => 'titolo_set_eroe'],
+        'magia' => ['name' => 'Scuola di magia', 'icon' => 'bi-magic', 'reward' => 'titolo_set_magia'],
+        'cavalieri' => ['name' => 'Cavalieri e draghi', 'icon' => 'bi-shield-fill', 'reward' => 'titolo_set_cavaliere'],
+        'pirati' => ['name' => 'Pirati', 'icon' => 'bi-compass-fill', 'reward' => 'titolo_set_pirata'],
+        'spazio' => ['name' => 'Spazio', 'icon' => 'bi-rocket-takeoff-fill', 'reward' => 'titolo_set_spazio'],
+        'ninja' => ['name' => 'Ninja', 'icon' => 'bi-wind', 'reward' => 'titolo_set_ninja'],
+        // Stagionali: oggetti esclusivi, nascosti finche' l'admin non li apre (con scadenza).
+        'natale' => ['name' => 'Natale', 'icon' => 'bi-snow', 'reward' => 'titolo_set_natale'],
+        'halloween' => ['name' => 'Halloween', 'icon' => 'bi-moon-stars-fill', 'reward' => 'titolo_set_halloween'],
+        'carnevale' => ['name' => 'Carnevale', 'icon' => 'bi-balloon-fill', 'reward' => 'titolo_set_carnevale'],
+    ],
+
     // Prezzo proposto per rarita' quando un oggetto non ne ha uno (es. un esclusivo appena aperto).
     'default_prices' => [
         'base' => 100,

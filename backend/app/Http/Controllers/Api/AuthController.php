@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\DailyLoginBonus;
 use App\Models\User;
 use App\Models\UserLogin;
+use App\Services\AvatarService;
 use App\Services\XpService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
@@ -160,6 +161,18 @@ class AuthController extends Controller
             (int) now()->format('Ymd'),
             (int) config('xp.games.login')
         );
+
+        // Monete per l'accesso (idempotenti: una volta al giorno e una a settimana).
+        $avatar = app(AvatarService::class);
+        $avatar->addCoins($userId, 'login_day', (int) now()->format('Ymd'), (int) config('xp.login_coins', 0));
+
+        $weekStart = now()->startOfWeek();
+        $daysThisWeek = DailyLoginBonus::where('user_id', $userId)
+            ->whereBetween('bonus_date', [$weekStart->toDateString(), $weekStart->copy()->endOfWeek()->toDateString()])
+            ->count();
+        if ($daysThisWeek >= (int) config('xp.weekly_login_days', 3)) {
+            $avatar->addCoins($userId, 'login_week', (int) $weekStart->format('Ymd'), (int) config('xp.weekly_login_coins', 0));
+        }
 
         return $inserted > 0;
     }

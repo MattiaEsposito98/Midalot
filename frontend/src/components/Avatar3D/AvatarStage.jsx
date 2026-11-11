@@ -5,6 +5,9 @@ import { OrbitControls, Sparkles } from "@react-three/drei"
 import AvatarModel from "./AvatarModel"
 import { Ball, Box, Cone, Cyl, M, Ring } from "./parts"
 import { SKY } from "./catalog"
+import { SfondoCitta, SfondoTorre } from "./themeModels"
+import { SfondoLuna, SfondoNave, SfondoTempio, SfondoTorneo } from "./themeModels2"
+import { SfondoCarnevale, SfondoHalloween, SfondoNeve } from "./themeModels3"
 
 const PI = Math.PI
 
@@ -193,6 +196,15 @@ function Background({ name }) {
   if (name === "sfondo_leggenda") return <Legend />
   if (name === "sfondo_spiaggia") return <Beach />
   if (name === "sfondo_spazio") return <Space />
+  if (name === "sfondo_citta") return <SfondoCitta />
+  if (name === "sfondo_torre") return <SfondoTorre />
+  if (name === "sfondo_torneo") return <SfondoTorneo />
+  if (name === "sfondo_nave") return <SfondoNave />
+  if (name === "sfondo_luna") return <SfondoLuna />
+  if (name === "sfondo_tempio") return <SfondoTempio />
+  if (name === "sfondo_neve") return <SfondoNeve />
+  if (name === "sfondo_halloween") return <SfondoHalloween />
+  if (name === "sfondo_carnevale") return <SfondoCarnevale />
 
   return (
     <group>

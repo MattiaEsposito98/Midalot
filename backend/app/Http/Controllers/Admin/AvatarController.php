@@ -156,6 +156,18 @@ class AvatarController extends Controller
             'discount' => $avatar->settings()['discount'],
             'defaults' => config('avatar.showcase'),
             'activePromo' => $avatar->promotion(),
+            // Temi con oggetti esclusivi (stagionali): si aprono/chiudono tutti insieme.
+            'seasonal' => collect(config('avatar.themes', []))->map(function ($def, $key) {
+                $items = AvatarItem::where('theme', $key)->where('is_exclusive', true)->get();
+
+                return $items->isEmpty() ? null : [
+                    'key' => $key,
+                    'name' => $def['name'],
+                    'count' => $items->count(),
+                    'open' => $items->filter->exclusiveOnSale()->count(),
+                    'until' => $items->max('exclusive_until'),
+                ];
+            })->filter()->values(),
             'promotions' => DB::table('avatar_promotions')->orderByDesc('starts_at')->get()->map(function ($p) {
                 $p->starts_at = \Illuminate\Support\Carbon::parse($p->starts_at);
                 $p->ends_at = \Illuminate\Support\Carbon::parse($p->ends_at);
@@ -180,6 +192,29 @@ class AvatarController extends Controller
         }
 
         return redirect()->route('admin.avatar.showcase')->with('success', 'Impostazioni della vetrina salvate.');
+    }
+
+    /**
+     * Apre o chiude tutti gli oggetti esclusivi di un tema stagionale.
+     */
+    public function themeSale(Request $request, string $theme)
+    {
+        abort_unless(isset(config('avatar.themes')[$theme]), 404);
+
+        $data = $request->validate([
+            'action' => ['required', Rule::in(['open', 'close'])],
+            'until' => ['nullable', 'date', 'after:now'],
+        ]);
+
+        $open = $data['action'] === 'open';
+        AvatarItem::where('theme', $theme)->where('is_exclusive', true)->update([
+            'exclusive_open' => $open,
+            'exclusive_until' => $open ? ($data['until'] ?? null) : null,
+        ]);
+
+        $name = config('avatar.themes')[$theme]['name'];
+
+        return redirect()->route('admin.avatar.showcase')->with('success', $open ? "Tema {$name} in vendita." : "Tema {$name} chiuso.");
     }
 
     /**

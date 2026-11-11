@@ -115,7 +115,89 @@ class AvatarService
 
     public function syncUnlocks(User $user): Collection
     {
-        return $this->grantLevelItems($user->id, XpService::info((int) $user->xp_total)['level']);
+        $items = $this->grantLevelItems($user->id, XpService::info((int) $user->xp_total)['level']);
+        $this->grantThemeRewards($user);
+
+        return $items;
+    }
+
+    // ------------------------------------------------------------ temi
+
+    /**
+     * Temi con i loro oggetti e quanti ne possiede l'utente.
+     *
+     * @return array<int, array{key: string, name: string, icon: string, reward: ?array, items: string[], owned: int, complete: bool}>
+     */
+    public function themes(User $user): array
+    {
+        $themes = config('avatar.themes', []);
+        if (! $themes) {
+            return [];
+        }
+
+        $items = AvatarItem::where('is_active', true)->whereIn('theme', array_keys($themes))
+            ->orderBy('sort_order')->get();
+        $rewards = AvatarItem::whereIn('key', array_column($themes, 'reward'))->pluck('name', 'key');
+        $owned = UserAvatarItem::where('user_id', $user->id)->pluck('avatar_item_id')->flip();
+
+        $out = [];
+        foreach ($themes as $key => $def) {
+            $list = $items->where('theme', $key);
+
+            // Tema stagionale chiuso: si vede solo se l'utente ne possiede gia' qualcosa.
+            $visible = $list->filter(fn (AvatarItem $i) => ! $i->is_exclusive || $i->exclusiveOnSale() || isset($owned[$i->id]));
+            if ($visible->isEmpty()) {
+                continue;
+            }
+
+            $have = $list->filter(fn ($i) => isset($owned[$i->id]))->count();
+            $out[] = [
+                'key' => $key,
+                'name' => $def['name'],
+                'icon' => $def['icon'] ?? 'bi-stars',
+                'reward' => isset($rewards[$def['reward'] ?? '']) ? ['key' => $def['reward'], 'name' => $rewards[$def['reward']]] : null,
+                'items' => $list->pluck('key')->values()->all(),
+                'owned' => $have,
+                'complete' => $have === $list->count(),
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
+     * Regala il titolo del set a chi possiede tutti gli oggetti di un tema.
+     */
+    public function grantThemeRewards(User $user): void
+    {
+        foreach ($this->themes($user) as $theme) {
+            if (! $theme['complete'] || ! $theme['reward']) {
+                continue;
+            }
+
+            $reward = AvatarItem::where('key', $theme['reward']['key'])->value('id');
+            UserAvatarItem::insertOrIgnore([
+                'user_id' => $user->id,
+                'avatar_item_id' => $reward,
+                'source' => 'theme',
+                'seen_at' => null,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+    }
+
+    /**
+     * Testo "come si ottiene" dei titoli dei set.
+     *
+     * @return array<string, string>
+     */
+    public static function themeRewardSources(): array
+    {
+        return collect(config('avatar.themes', []))
+            ->filter(fn ($def) => ! empty($def['reward']))
+            ->mapWithKeys(fn ($def) => [$def['reward'] => 'Completa il tema '.$def['name']])
+            ->all();
     }
 
     /**
@@ -360,6 +442,10 @@ class AvatarService
                 $this->addCoins($user->id, 'shop', $owned->id, -$price);
             }
         });
+
+        if ($item->theme) {
+            $this->grantThemeRewards($user);
+        }
     }
 
     /**

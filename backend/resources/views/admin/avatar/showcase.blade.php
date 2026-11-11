@@ -55,6 +55,49 @@
         </div>
     </section>
 
+    @if ($seasonal->isNotEmpty())
+        <section class="admin-card mb-4">
+            <div class="admin-card-header">
+                <div>
+                    <h2 class="admin-section-title">Temi stagionali</h2>
+                    <p class="admin-muted mb-0">
+                        Gli oggetti dei temi stagionali sono <b>esclusivi</b>: gli utenti non li vedono finché non apri il tema.
+                        Aprilo con una scadenza (es. Natale fino al 6/1): passata la data spariscono da soli.
+                        Chi li ha comprati li tiene, e chi completa il tema riceve il titolo premio.
+                    </p>
+                </div>
+            </div>
+            <div class="admin-card-body">
+                @foreach ($seasonal as $t)
+                    <form method="POST" action="{{ route('admin.avatar.theme.sale', $t['key']) }}" class="row g-2 align-items-end border-bottom pb-3 mb-3">
+                        @csrf
+                        <div class="col-md-3">
+                            <div class="fw-bold">{{ $t['name'] }}</div>
+                            @if ($t['open'] > 0)
+                                <span class="badge bg-success">In vendita ({{ $t['open'] }}/{{ $t['count'] }})</span>
+                                @if ($t['until'])
+                                    <div class="small admin-muted">fino al {{ \Illuminate\Support\Carbon::parse($t['until'])->format('d/m/Y H:i') }}</div>
+                                @endif
+                            @else
+                                <span class="badge bg-secondary">Chiuso · {{ $t['count'] }} oggetti</span>
+                            @endif
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label mb-1">Scadenza (opzionale)</label>
+                            <input type="datetime-local" name="until" class="form-control">
+                        </div>
+                        <div class="col-md-5 d-flex gap-2">
+                            <button name="action" value="open" class="btn btn-success">Apri il tema</button>
+                            @if ($t['open'] > 0)
+                                <button name="action" value="close" class="btn btn-outline-secondary">Chiudi</button>
+                            @endif
+                        </div>
+                    </form>
+                @endforeach
+            </div>
+        </section>
+    @endif
+
     <section class="admin-card mb-4">
         <div class="admin-card-header">
             <div>
