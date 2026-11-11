@@ -18,6 +18,8 @@ import QuizOneShot from "./pages/QuizOneShot/QuizOneShot"
 import Quiz from "./pages/Quiz/Quiz"
 import QuizReview from "./pages/QuizReview/QuizReview"
 import Profilo from "./pages/Profilo/Profilo"
+import Invita from "./pages/Invita/Invita"
+import SfidaAmico from "./pages/Sfide/SfidaAmico"
 import ForgotPassword from "./pages/ForgotPassword/ForgotPassword"
 import ResetPassword from "./pages/ResetPassword/ResetPassword"
 import VerificaEmail from "./pages/VerificaEmail/VerificaEmail"
@@ -81,6 +83,7 @@ function App() {
           <Route path="/termini" element={<LegalPage type="terms" />} />
           <Route path="/cookie" element={<LegalPage type="cookies" />} />
           <Route path="/regolamento" element={<Regolamento />} />
+          <Route path="/sfida-amico/:token" element={<SfidaAmico />} />
         </Route>
 
         {/* TRAINING PUBBLICO / UTENTI */}
@@ -104,6 +107,7 @@ function App() {
           <Route path="/quiz/:id" element={<Quiz />} />
           <Route path="/storico" element={<Storico />} />
           <Route path="/profilo" element={<Profilo />} />
+          <Route path="/invita" element={<Invita />} />
           <Route
             path="/avatar"
             element={

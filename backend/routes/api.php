@@ -8,10 +8,12 @@ use App\Http\Controllers\Api\CookieConsentController;
 use App\Http\Controllers\Api\EventRequestController;
 use App\Http\Controllers\Api\EmailVerificationController;
 use App\Http\Controllers\Api\ForgotPasswordController;
+use App\Http\Controllers\Api\GuestChallengeController;
 use App\Http\Controllers\Api\MidalarioController;
 use App\Http\Controllers\Api\MinigiocoPlayController;
 use App\Http\Controllers\Api\PeriodLeaderboardController;
 use App\Http\Controllers\Api\QuizPlayController;
+use App\Http\Controllers\Api\ReferralController;
 use App\Http\Controllers\Api\ResetPasswordController;
 use App\Http\Controllers\Api\ShowcaseController;
 use App\Http\Controllers\Api\TrainingController;
@@ -48,6 +50,12 @@ Route::post('/event-requests', [EventRequestController::class, 'store'])
 
 Route::get('/audio-proxy', [AudioProxyController::class, 'stream'])
     ->name('audio.proxy');
+
+// Sfida a un amico non registrato (link)
+Route::get('/guest-challenges/{token}', [GuestChallengeController::class, 'show'])->middleware('throttle:60,1');
+Route::post('/guest-challenges/{token}/start', [GuestChallengeController::class, 'start'])->middleware('throttle:20,1');
+Route::post('/guest-challenges/{token}/answer', [GuestChallengeController::class, 'answer'])->middleware('throttle:120,1');
+Route::post('/guest-challenges/{token}/finish', [GuestChallengeController::class, 'finish'])->middleware('throttle:20,1');
 
 Route::get('/midalario/announcement', [MidalarioController::class, 'announcement']);
 
@@ -148,6 +156,10 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/avatar/news/seen', [AvatarController::class, 'seen']);
     Route::post('/avatar/shop/{key}', [AvatarController::class, 'buy'])->middleware('throttle:20,1');
 
+    // Invita un amico
+    Route::get('/referrals', [ReferralController::class, 'show']);
+    Route::post('/referrals/email', [ReferralController::class, 'email'])->middleware('throttle:10,1');
+
     Route::get('/challenges', [ChallengeController::class, 'index']);
     Route::get('/challenges/summary', [ChallengeController::class, 'summaryCount']);
     Route::get('/challenges/categories', [ChallengeController::class, 'categories']);
@@ -159,6 +171,7 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/challenges', [ChallengeController::class, 'store'])
         ->middleware('throttle:20,1');
     Route::get('/challenges/{challenge}', [ChallengeController::class, 'show']);
+    Route::post('/challenges/{challenge}/guest-email', [GuestChallengeController::class, 'email'])->middleware('throttle:10,1');
     Route::post('/challenges/{challenge}/decline', [ChallengeController::class, 'decline']);
     Route::post('/challenges/{challenge}/start', [ChallengeController::class, 'start']);
     Route::post('/challenges/{challenge}/answer', [ChallengeController::class, 'answer']);

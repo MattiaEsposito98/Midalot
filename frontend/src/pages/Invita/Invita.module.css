@@ -1,0 +1,143 @@
+.page {
+  max-width: 720px;
+  padding: 8px 0 48px;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.9rem;
+  font-weight: 950;
+  color: #182033;
+}
+
+.subtitle {
+  margin: 4px 0 18px;
+  color: #647084;
+}
+
+.card {
+  margin-bottom: 16px;
+  padding: 18px;
+  background: #fff;
+  border: 2px solid #182033;
+  border-radius: 12px;
+  box-shadow: 0 4px 0 rgba(24, 32, 51, 0.12);
+}
+
+.cardTitle {
+  margin: 0 0 10px;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: #182033;
+}
+
+.steps {
+  margin: 0 0 8px;
+  padding-left: 20px;
+  line-height: 1.7;
+}
+
+.note {
+  margin: 6px 0 0;
+  font-size: 0.82rem;
+  color: #647084;
+}
+
+.linkRow,
+.emailRow {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.linkInput {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 12px;
+  border: 2px solid rgba(24, 32, 51, 0.15);
+  border-radius: 10px;
+  font-size: 0.9rem;
+}
+
+.copyBtn,
+.shareBtn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border: 2px solid #182033;
+  border-radius: 10px;
+  background: #fff4bf;
+  font-weight: 800;
+  color: #182033;
+}
+
+.shareRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.whatsapp {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  background: #25d366;
+  color: #fff;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.whatsapp:hover {
+  color: #fff;
+  background: #1eb957;
+}
+
+.ok,
+.err {
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 0.88rem;
+}
+
+.ok {
+  background: #e3f6ec;
+}
+
+.err {
+  background: #ffe6e2;
+}
+
+.earned {
+  font-weight: 800;
+  color: #8a6d00;
+}
+
+.friends {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.friend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid rgba(24, 32, 51, 0.15);
+  border-radius: 10px;
+}
+
+.friendName {
+  flex: 1;
+  min-width: 0;
+}
+
+.friendCoins {
+  font-weight: 900;
+  color: #2f9b5a;
+}

@@ -9,6 +9,7 @@ import QuestionCategory from "./QuestionCategory"
 import styles from "./Sfide.module.css"
 import UserAvatar from "../../components/UserAvatar/UserAvatar"
 import UserTitle from "../../components/UserAvatar/UserTitle"
+import GuestShare from "./GuestShare"
 
 const CLOSED_LABEL = {
   expired: "Sfida scaduta: nessuno può più giocarla.",
@@ -105,7 +106,8 @@ function PlayerRow({ player, closed }) {
         ) : null}
         <UserAvatar url={player.avatar_url} frame={player.avatar_frame} name={player.nickname} size={34} />
         <span>
-          {player.is_me ? "Tu" : player.nickname} <UserTitle title={player.avatar_title} /> <span className={styles.meta}>Lv {player.level}</span>
+          {player.is_me ? "Tu" : player.nickname} <UserTitle title={player.avatar_title} />{" "}
+          {player.is_guest ? <span className={styles.guestTag}>non ancora iscritto</span> : <span className={styles.meta}>Lv {player.level}</span>}
           {player.is_challenger && <span className={styles.meta}> · ha lanciato la sfida</span>}
         </span>
       </span>
@@ -212,6 +214,10 @@ function SfidaDettaglio() {
             <PlayerRow key={p.id} player={p} closed={closed} />
           ))}
         </div>
+
+        {challenge.guest_url && status === "open" && (
+          <GuestShare challengeId={challenge.id} url={challenge.guest_url} guestPlayed={others.some((p) => p.is_guest && p.completed)} />
+        )}
 
         {status === "completed" && <XpGain awarded={challenge.xp_awarded} xp={challenge.xp} />}
 

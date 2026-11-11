@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use App\Models\User;
+use App\Models\ChallengeGuestAttempt;
 use App\Models\Challenge;
 use App\Models\ChallengeAnswer;
 use App\Models\ChallengeAttempt;
@@ -227,6 +229,60 @@ class ChallengeService
         }
 
         $this->completeIfReady($challenge);
+    }
+
+    /**
+     * L'ospite si e' registrato: la sua partita diventa un tentativo normale
+     * del nuovo account e la sfida si chiude con il risultato. Vale anche se
+     * la sfida e' scaduta nel frattempo, purche' l'ospite avesse finito in tempo.
+     */
+    public function claimGuest(string $token, string $key, User $user): bool
+    {
+        $guest = ChallengeGuestAttempt::where('guest_key', $key)->whereNull('claimed_by')->whereNotNull('finished_at')->first();
+        $challenge = $guest ? Challenge::where('guest_token', $token)->find($guest->challenge_id) : null;
+
+        if (! $guest || ! $challenge || $challenge->challenger_id === $user->id) {
+            return false;
+        }
+
+        DB::transaction(function () use ($guest, $challenge, $user) {
+            if ($challenge->status === 'expired' && $guest->finished_at->lte($challenge->expires_at)) {
+                $challenge->update(['status' => 'open']);
+            }
+
+            if ($challenge->status !== 'open') {
+                $guest->update(['claimed_by' => $user->id]);
+
+                return;
+            }
+
+            $challenge->update(['opponent_id' => $user->id]);
+            $challenge->participants()->firstOrCreate(
+                ['user_id' => $user->id],
+                ['status' => 'accepted', 'accepted_at' => $guest->started_at ?? now()]
+            );
+
+            $attempt = ChallengeAttempt::firstOrCreate(
+                ['challenge_id' => $challenge->id, 'user_id' => $user->id],
+                ['started_at' => $guest->started_at ?? now()]
+            );
+
+            foreach ($guest->answers ?? [] as $a) {
+                ChallengeAnswer::firstOrCreate(
+                    ['challenge_attempt_id' => $attempt->id, 'question_id' => $a['question_id']],
+                    collect($a)->only(['answer_id', 'time_taken', 'is_correct', 'is_timeout', 'is_wrong', 'score'])->all()
+                );
+            }
+
+            $this->closeAttempt($attempt);
+            $attempt->update(['finished_at' => $guest->finished_at]);
+            $guest->update(['claimed_by' => $user->id]);
+        });
+
+        // Se anche chi ha sfidato ha gia' giocato, la sfida si chiude ora.
+        $this->completeIfReady($challenge);
+
+        return true;
     }
 
     /**

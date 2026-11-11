@@ -24,6 +24,8 @@ class Challenge extends Model
         'live_started_at',
         'completed_at',
         'winner_id',
+        'guest_token',
+        'guest_name',
     ];
 
     protected $casts = [

@@ -256,6 +256,7 @@ export const ITEM_MODELS = {
   titolo_secchione: { slot: "title" },
   titolo_veterano_midalario: { slot: "title" },
   cornice_costanza: { slot: "frame" },
+  titolo_ambasciatore: { slot: "title" },
   guanti_duellante: { slot: "hands", look: { gloves: "#c42828" } },
   mantello_maratoneta: { slot: "back", Model: () => <Mantello color="#2f9b5a" inner="#f4f4f6" height={0.74} collar="#f2c230" /> },
 

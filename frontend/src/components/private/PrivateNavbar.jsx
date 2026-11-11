@@ -132,6 +132,13 @@ function PrivateNavbar() {
                 </li>
 
                 <li>
+                  <Link className="dropdown-item" to="/invita">
+                    <i className="bi bi-people-fill me-2"></i>
+                    Invita un amico
+                  </Link>
+                </li>
+
+                <li>
                   <Link className="dropdown-item" to="/storico">
                     <i className="bi bi-clock-history me-2"></i>
                     Storico

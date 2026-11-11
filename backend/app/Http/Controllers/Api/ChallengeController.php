@@ -246,7 +246,10 @@ class ChallengeController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'opponent_ids' => ['required', 'array', 'min:1', 'max:'.(Challenge::MAX_PARTICIPANTS - 1)],
+            // guest = sfida a un amico non registrato (link da mandare su WhatsApp o via email)
+            'guest' => ['nullable', 'boolean'],
+            'guest_name' => ['nullable', 'string', 'max:40'],
+            'opponent_ids' => ['exclude_if:guest,true', 'required', 'array', 'min:1', 'max:'.(Challenge::MAX_PARTICIPANTS - 1)],
             'opponent_ids.*' => ['integer', 'distinct', 'exists:users,id'],
             'category_ids' => ['nullable', 'array'],
             'category_ids.*' => ['integer', 'exists:training_categories,id'],
@@ -260,7 +263,11 @@ class ChallengeController extends Controller
         $mode = $validated['mode'] ?? 'async';
         $user = $request->user();
 
-        $opponents = User::whereIn('id', $validated['opponent_ids'])->get();
+        $guest = (bool) ($validated['guest'] ?? false);
+        if ($guest) {
+            $mode = 'async'; // niente live con chi non e' registrato
+        }
+        $opponents = $guest ? collect() : User::whereIn('id', $validated['opponent_ids'])->get();
 
         foreach ($opponents as $opponent) {
             if ($opponent->id === $user->id) {
@@ -321,10 +328,13 @@ class ChallengeController extends Controller
             ], 422);
         }
 
-        $challenge = DB::transaction(function () use ($user, $opponents, $categoryIds, $subcategoryIds, $quizIds, $questionIds, $mode) {
+        $challenge = DB::transaction(function () use ($user, $opponents, $categoryIds, $subcategoryIds, $quizIds, $questionIds, $mode, $guest, $validated) {
             $challenge = Challenge::create([
                 'challenger_id' => $user->id,
-                'opponent_id' => $opponents->first()->id,
+                // Ospite: il campo storico punta a chi sfida finche' l'amico non si registra.
+                'opponent_id' => $guest ? $user->id : $opponents->first()->id,
+                'guest_token' => $guest ? \Illuminate\Support\Str::random(32) : null,
+                'guest_name' => $guest ? (trim((string) ($validated['guest_name'] ?? '')) ?: null) : null,
                 'mode' => $mode,
                 'status' => 'open',
                 'category_ids' => $categoryIds,
@@ -362,7 +372,10 @@ class ChallengeController extends Controller
 
         $this->sendInvites($challenge, $user, $opponents->all());
 
-        return response()->json(['id' => $challenge->id], 201);
+        return response()->json([
+            'id' => $challenge->id,
+            'guest_url' => $guest ? GuestChallengeController::url($challenge) : null,
+        ], 201);
     }
 
     /**
@@ -975,6 +988,11 @@ class ChallengeController extends Controller
             ->map(fn (ChallengeParticipant $p) => [...$this->playerPayload($p->user), 'status' => $p->status])
             ->values();
 
+        $guest = $this->guestPlayer($challenge);
+        if ($guest) {
+            $others->push($guest);
+        }
+
         $result = null;
         $myRank = null;
 
@@ -1009,6 +1027,31 @@ class ChallengeController extends Controller
             'result' => $closed ? $result : null,
             'my_rank' => $myRank,
             'categories' => $this->categoryNames($challenge),
+            'guest_url' => $challenge->guest_token && $challenge->isChallenger($userId) && $guest ? GuestChallengeController::url($challenge) : null,
+        ];
+    }
+
+    /**
+     * Amico invitato con il link che non si e' ancora registrato.
+     */
+    private function guestPlayer(Challenge $challenge): ?array
+    {
+        if (! $challenge->guest_token || $challenge->participants->count() > 1) {
+            return null;
+        }
+
+        $attempt = \App\Models\ChallengeGuestAttempt::where('challenge_id', $challenge->id)->first();
+
+        return [
+            'id' => 0,
+            'nickname' => $challenge->guest_name ?: 'Amico invitato',
+            'level' => null,
+            'avatar_url' => null,
+            'avatar_frame' => null,
+            'avatar_title' => null,
+            'status' => $attempt?->finished_at ? 'accepted' : 'invited',
+            'is_guest' => true,
+            'guest_played' => (bool) $attempt?->finished_at,
         ];
     }
 
@@ -1041,6 +1084,11 @@ class ChallengeController extends Controller
 
             return $row;
         })->values();
+
+        $guest = $this->guestPlayer($challenge);
+        if ($guest) {
+            $players->push([...$guest, 'is_me' => false, 'is_challenger' => false, 'started' => $guest['guest_played'], 'completed' => $guest['guest_played']]);
+        }
 
         $payload['players'] = $closed
             ? $players->sortBy(fn ($p) => $p['rank'] ?? 99)->values()

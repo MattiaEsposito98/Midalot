@@ -99,6 +99,12 @@ class XpService
             } catch (\Throwable $e) {
                 report($e);
             }
+
+            try {
+                app(ReferralService::class)->check($userId, $result['xp']['level']);
+            } catch (\Throwable $e) {
+                report($e);
+            }
         }
 
         return $result;

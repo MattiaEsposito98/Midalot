@@ -1,13 +1,40 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import axios from "axios"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import css from "./Register.module.css"
 import LoaderButton from "../../components/LoaderButton"
 import { logError } from "../../utils/logger"
 import { API_BASE } from "../../service/api"
+import { readGuestKey } from "../../utils/guestChallenge"
+
+const REF_KEY = "midalot_ref"
+
 
 function Register() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const [refCode, setRefCode] = useState(() => {
+    try {
+      return localStorage.getItem(REF_KEY) || ""
+    } catch {
+      return ""
+    }
+  })
+
+  // Sfida giocata da ospite: /register?ref=CODICE&sfida=TOKEN (la chiave e' nel browser)
+  const guestToken = searchParams.get("sfida") || ""
+
+  // Link di invito di un amico: /register?ref=CODICE
+  useEffect(() => {
+    const ref = (searchParams.get("ref") || "").trim().toUpperCase()
+    if (!/^[A-Z0-9]{4,16}$/.test(ref)) return
+    setRefCode(ref)
+    try {
+      localStorage.setItem(REF_KEY, ref)
+    } catch {
+      // archivio non disponibile: il codice resta valido per questa visita
+    }
+  }, [searchParams])
 
   const [form, setForm] = useState({
     first_name: "",
@@ -220,6 +247,11 @@ function Register() {
     return Object.keys(newErrors).length === 0
   }
 
+  function guestPayload() {
+    const key = readGuestKey(guestToken)
+    return guestToken && key ? { guest_token: guestToken, guest_key: key } : {}
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
@@ -232,7 +264,12 @@ function Register() {
       const { first_name, last_name, ...rest } = form
       const name = `${first_name.trim()} ${last_name.trim()}`
 
-      await axios.post(`${API_BASE}/api/register`, { ...rest, name })
+      await axios.post(`${API_BASE}/api/register`, { ...rest, name, ref: refCode || undefined, ...guestPayload() })
+      try {
+        localStorage.removeItem(REF_KEY)
+      } catch {
+        // niente da fare
+      }
 
       alert("Registrazione completata! Controlla la tua email, anche nella cartella spam, per verificare l'account.")
       navigate("/")

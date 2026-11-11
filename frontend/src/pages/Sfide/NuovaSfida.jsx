@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useSearchParams } from "react-router-dom"
 import api from "../../service/api"
 import { logError } from "../../utils/logger"
 import { notifyChallengesChanged } from "../../hooks/useChallengeCount"
@@ -22,6 +22,10 @@ function NuovaSfida() {
   const [selectedQuizzes, setSelectedQuizzes] = useState([])
   const [expanded, setExpanded] = useState([])
   const [mode, setMode] = useState("async")
+  // Sfida a un amico non registrato: niente avversari da cercare, si crea un link.
+  const [searchParams] = useSearchParams()
+  const [guestMode, setGuestMode] = useState(() => searchParams.get("amico") === "1")
+  const [guestName, setGuestName] = useState("")
   const [sending, setSending] = useState(false)
   const [error, setError] = useState("")
   const searchSeq = useRef(0)
@@ -174,21 +178,21 @@ function NuovaSfida() {
   const visibleResults = results.filter((u) => !opponents.some((o) => o.id === u.id))
 
   async function submit() {
-    if (opponents.length === 0 || sending) return
+    if ((!guestMode && opponents.length === 0) || sending) return
 
     setSending(true)
     setError("")
 
     try {
       const res = await api.post("/challenges", {
-        opponent_ids: opponents.map((o) => o.id),
+        ...(guestMode ? { guest: true, guest_name: guestName.trim() || null } : { opponent_ids: opponents.map((o) => o.id) }),
         category_ids: selected.length ? selected : null,
         subcategory_ids: selectedSubs.length ? selectedSubs : null,
         quiz_ids: selectedQuizzes.length ? selectedQuizzes : null,
-        mode,
+        mode: guestMode ? "async" : mode,
       })
       notifyChallengesChanged()
-      navigate(mode === "live" ? `/sfide/${res.data.id}/live` : `/sfide/${res.data.id}`, { replace: true })
+      navigate(!guestMode && mode === "live" ? `/sfide/${res.data.id}/live` : `/sfide/${res.data.id}`, { replace: true })
     } catch (err) {
       logError(err)
       setError(err.response?.data?.message || "Impossibile creare la sfida")
@@ -231,7 +235,37 @@ function NuovaSfida() {
           </div>
         )}
 
-        {full ? (
+        <div className={styles.guestBox}>
+          <button
+            type="button"
+            className={`${styles.membersToggle} ${guestMode ? styles.guestActive : ""}`}
+            onClick={() => {
+              setGuestMode((v) => !v)
+              setOpponents([])
+              setMode("async")
+            }}
+          >
+            <i className="bi bi-person-plus-fill"></i> {guestMode ? "Torna a sfidare un membro" : "Il tuo amico non è su Midalot? Sfidalo con un link"}
+          </button>
+          {guestMode && (
+            <div className={styles.hint}>
+              <i className="bi bi-gift-fill"></i>
+              <div>
+                Ti diamo un link da mandare su <strong>WhatsApp</strong> o via email: il tuo amico gioca subito, senza
+                registrarsi. Per scoprire chi ha vinto si registra, e così <strong>ricevete entrambi monete extra</strong>.
+                <input
+                  className="form-control form-control-sm mt-2"
+                  placeholder="Nome del tuo amico (facoltativo)"
+                  value={guestName}
+                  maxLength={40}
+                  onChange={(e) => setGuestName(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
+        {guestMode ? null : full ? (
           <div className={styles.meta}>Hai raggiunto il massimo di {maxInvitees} avversari.</div>
         ) : (
           <>
@@ -379,7 +413,8 @@ function NuovaSfida() {
 
         <h2 className={`${styles.sectionTitle} mt-4`}>3. Modalità</h2>
 
-        <div className={styles.categoryGrid}>
+        {guestMode && <div className={styles.meta}>Con un amico non registrato la sfida è differita: ha 72 ore per giocare.</div>}
+        <div className={styles.categoryGrid} hidden={guestMode}>
           <button
             type="button"
             className={`${styles.categoryChip} ${mode === "async" ? styles.categoryChipActive : ""}`}
@@ -403,12 +438,14 @@ function NuovaSfida() {
         <div className="d-flex gap-2 mt-4">
           <button
             className="btn btn-warning fw-bold"
-            disabled={opponents.length === 0 || sending || availableQuestions < 7}
+            disabled={(!guestMode && opponents.length === 0) || sending || availableQuestions < 7}
             onClick={submit}
           >
             {sending
               ? "Invio..."
-              : mode === "live"
+              : guestMode
+                ? "Crea il link della sfida"
+                : mode === "live"
                 ? "Lancia la sfida live"
                 : opponents.length > 1
                   ? "Lancia la sfida di gruppo"

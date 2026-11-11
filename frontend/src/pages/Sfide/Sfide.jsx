@@ -113,9 +113,14 @@ function Sfide() {
             Sfida un altro giocatore su 7 domande dei Training: vince chi fa più punti.
           </p>
         </div>
-        <Link to="/sfide/nuova" className="btn btn-warning fw-bold">
-          <i className="bi bi-plus-lg"></i> Nuova sfida
-        </Link>
+        <div className="d-flex flex-wrap gap-2 align-items-center">
+          <Link to="/sfide/nuova" className="btn btn-warning fw-bold">
+            <i className="bi bi-plus-lg"></i> Nuova sfida
+          </Link>
+          <Link to="/sfide/nuova?amico=1" className="btn btn-outline-dark fw-bold" title="Se si registra ricevete entrambi monete extra">
+            <i className="bi bi-person-plus-fill"></i> Sfida un amico non iscritto <span className="badge bg-warning text-dark">+ monete</span>
+          </Link>
+        </div>
       </div>
 
       {error && <div className="alert alert-danger">{error}</div>}

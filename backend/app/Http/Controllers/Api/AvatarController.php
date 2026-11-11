@@ -164,7 +164,8 @@ class AvatarController extends Controller
             'coins' => (int) $user->fresh()->coins,
             'level' => XpService::info((int) $user->xp_total)['level'],
             'unseen' => $this->avatar->unseen($user)->pluck('key'),
-            'achievement_items' => AchievementService::itemSources() + AvatarService::themeRewardSources(),
+            'achievement_items' => AchievementService::itemSources() + AvatarService::themeRewardSources()
+                + [config('referral.ambassador_item') => 'Invita '.config('referral.ambassador_friends').' amici che arrivano al livello '.array_key_first(config('referral.level_rewards'))],
             'themes' => $this->avatar->themes($user),
             // Colori degli oggetti con tavolozza e quali sono sbloccati per questo utente.
             'palettes' => $this->avatar->palettesFor($user),

@@ -83,6 +83,18 @@ class AuthController extends Controller
             'rules_accepted_at' => now(),
         ]);
 
+        // Invitato da un amico (link /register?ref=CODICE).
+        app(\App\Services\ReferralService::class)->attach($user, $request->input('ref'));
+
+        // Ha giocato una sfida da ospite: la partita passa sul nuovo account.
+        if ($request->filled('guest_token') && $request->filled('guest_key')) {
+            try {
+                app(\App\Services\ChallengeService::class)->claimGuest((string) $request->input('guest_token'), (string) $request->input('guest_key'), $user);
+            } catch (\Throwable $e) {
+                report($e);
+            }
+        }
+
         event(new Registered($user));
 
         return response()->json([

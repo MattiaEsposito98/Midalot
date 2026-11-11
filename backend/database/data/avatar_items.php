@@ -151,6 +151,7 @@ return [
     ['guanti_duellante', 'Guanti da duellante', 'hands', 'epico', null, null, 1],
     ['cornice_costanza', 'Cornice della costanza', 'frame', 'raro', null, null, 1],
     ['mantello_maratoneta', 'Mantello del maratoneta', 'back', 'epico', null, null, 1],
+    ['titolo_ambasciatore', 'Ambasciatore', 'title', 'epico', null, null, 1],
 
     // ---------------------------------------------------- Temi (config/avatar.php -> themes), 8a colonna = tema
     // Supereroi

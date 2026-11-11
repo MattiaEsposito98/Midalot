@@ -6,6 +6,7 @@ import { logError } from "../../utils/logger"
 import QuestionAudio from "../../components/QuestionAudio/QuestionAudio"
 import { notifyChallengesChanged } from "../../hooks/useChallengeCount"
 import QuestionCategory from "./QuestionCategory"
+import { ensureGuestKey } from "../../utils/guestChallenge"
 
 // Reti mobili instabili: si riprova qualche volta prima di dare errore. Se la
 // prima richiesta era in realta' arrivata, il "gia' risposto" conta come successo.
@@ -19,7 +20,7 @@ async function postWithRetry(path, body) {
       lastError = err
       const status = err.response?.status
 
-      if (status === 403 && /gia risposto/.test(err.response?.data?.message || "")) return null
+      if (status === 403 && /gi(a|à) risposto/.test(err.response?.data?.message || "")) return null
       if (status && status < 500) throw err
 
       await new Promise((resolve) => setTimeout(resolve, 600))
@@ -31,9 +32,13 @@ async function postWithRetry(path, body) {
 
 // Gioco di una sfida: come il Training ma senza mai mostrare se la risposta
 // e' giusta, cosi' le soluzioni non escono prima della chiusura della sfida.
-function SfidaPlay() {
+// Con guestToken gioca un ospite non registrato (pagina /sfida-amico/:token).
+function SfidaPlay({ guestToken, onGuestFinished }) {
   const { id } = useParams()
   const navigate = useNavigate()
+  const base = guestToken ? `/guest-challenges/${guestToken}` : `/challenges/${id}`
+  const keyRef = useRef(null)
+  const withKey = (body = {}) => (guestToken ? { ...body, key: keyRef.current } : body)
 
   const [questions, setQuestions] = useState([])
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -62,7 +67,8 @@ function SfidaPlay() {
 
     async function init() {
       try {
-        const res = await api.post(`/challenges/${id}/start`)
+        if (guestToken) keyRef.current = ensureGuestKey(guestToken)
+        const res = await api.post(`${base}/start`, guestToken ? { key: keyRef.current } : undefined)
         if (cancelled) return
 
         const list = res.data.questions
@@ -85,7 +91,9 @@ function SfidaPlay() {
       cancelled = true
       clearInterval(timerRef.current)
     }
-  }, [id])
+    // base dipende solo da id e guestToken
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id, guestToken])
 
   async function finishChallenge() {
     if (finishingRef.current) return
@@ -94,7 +102,11 @@ function SfidaPlay() {
     setFinishing(true)
 
     try {
-      await api.post(`/challenges/${id}/finish`)
+      const res = await api.post(`${base}/finish`, withKey())
+      if (guestToken) {
+        onGuestFinished?.(res.data)
+        return
+      }
       notifyChallengesChanged()
       navigate(`/sfide/${id}`, { replace: true })
     } catch (err) {
@@ -113,11 +125,14 @@ function SfidaPlay() {
     clearInterval(timerRef.current)
 
     try {
-      await postWithRetry(`/challenges/${id}/answer`, {
-        question_id: question.id,
-        answer_id: answerId,
-        time_taken: timeTaken,
-      })
+      await postWithRetry(
+        `${base}/answer`,
+        withKey({
+          question_id: question.id,
+          answer_id: answerId,
+          time_taken: timeTaken,
+        })
+      )
 
       await new Promise((resolve) => setTimeout(resolve, 350))
 
@@ -196,8 +211,8 @@ function SfidaPlay() {
         <div className={styles.errorCard}>
           <h2 className={styles.errorTitle}>Attenzione</h2>
           <p className={styles.errorText}>{error}</p>
-          <button className="btn btn-primary" onClick={() => navigate("/sfide")}>
-            Torna alle sfide
+          <button className="btn btn-primary" onClick={() => navigate(guestToken ? "/" : "/sfide")}>
+            {guestToken ? "Vai a Midalot" : "Torna alle sfide"}
           </button>
         </div>
       </div>
