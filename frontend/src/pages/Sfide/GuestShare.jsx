@@ -5,8 +5,10 @@ import styles from "./Sfide.module.css"
 
 /**
  * Link della sfida per un amico non registrato: WhatsApp, copia, email.
+ * Il sito sa che l'amico e' stato invitato solo se l'invito parte via email:
+ * con WhatsApp o "copia link" il messaggio lo manda chi sfida, quindi va detto chiaro.
  */
-export default function GuestShare({ challengeId, url, guestPlayed }) {
+export default function GuestShare({ challengeId, url, guestPlayed, invited: invitedByEmail, onInvited }) {
   const [copied, setCopied] = useState(false)
   const [email, setEmail] = useState("")
   const [sending, setSending] = useState(false)
@@ -32,6 +34,7 @@ export default function GuestShare({ challengeId, url, guestPlayed }) {
       const res = await api.post(`/challenges/${challengeId}/guest-email`, { email })
       setMessage({ ok: true, text: res.data.message })
       setEmail("")
+      onInvited?.()
     } catch (err) {
       logError(err)
       setMessage({ ok: false, text: err?.response?.data?.message || err?.response?.data?.errors?.email?.[0] || "Invio non riuscito." })
@@ -46,9 +49,7 @@ export default function GuestShare({ challengeId, url, guestPlayed }) {
         <strong>
           <i className="bi bi-check-circle-fill text-success"></i> Il tuo amico ha giocato!
         </strong>
-        <div className={styles.meta}>
-          Il risultato arriva quando si registra: a quel punto ricevete entrambi monete extra.
-        </div>
+        <div className={styles.meta}>Il risultato arriva quando si registra: a quel punto ricevete entrambi monete extra.</div>
       </div>
     )
   }
@@ -58,32 +59,61 @@ export default function GuestShare({ challengeId, url, guestPlayed }) {
       <strong>
         <i className="bi bi-send-fill"></i> Manda la sfida al tuo amico
       </strong>
-      <div className={styles.meta}>
-        Gioca subito senza registrarsi. Per vedere chi ha vinto si registra, e così ricevete entrambi monete extra.
-      </div>
+
+      {invitedByEmail ? (
+        <div className={`${styles.shareNotice} ${styles.shareNoticeOk}`}>
+          <i className="bi bi-envelope-check-fill"></i> <strong>Invito inviato via email.</strong> Il tuo amico ha ricevuto il link e ha
+          tempo fino alla scadenza della sfida per giocare.
+        </div>
+      ) : (
+        <div className={`${styles.shareNotice} ${styles.shareNoticeWarn}`}>
+          <i className="bi bi-exclamation-triangle-fill"></i>
+          <span>
+            <strong>Il tuo amico non è ancora stato invitato.</strong> La sfida è creata, ma lui non sa nulla finché non gli mandi il link:
+            invialo su WhatsApp (o copialo) oppure fallo partire via email da qui sotto.
+          </span>
+        </div>
+      )}
+
+      {!invitedByEmail && (
+      <ol className={styles.shareSteps}>
+        <li>
+          <strong>WhatsApp o copia link:</strong> il messaggio lo mandi tu, quindi il sito non può sapere se l&apos;hai inviato (lo stato
+          resta &quot;Da invitare&quot; finché il tuo amico non gioca).
+        </li>
+        <li>
+          <strong>Email:</strong> la mandiamo noi al suo indirizzo e lo stato diventa subito <strong>&quot;Invitato&quot;</strong>.
+        </li>
+      </ol>
+      )}
+
       <div className={styles.shareRow}>
         <a className={styles.whatsapp} href={`https://wa.me/?text=${encodeURIComponent(text)}`} target="_blank" rel="noopener noreferrer">
-          <i className="bi bi-whatsapp"></i> WhatsApp
+          <i className="bi bi-whatsapp"></i> Invia su WhatsApp
         </a>
         <button type="button" className={styles.membersToggle} onClick={copy}>
           <i className={`bi ${copied ? "bi-check2" : "bi-link-45deg"}`}></i> {copied ? "Copiato!" : "Copia link"}
         </button>
       </div>
+
       <form className="d-flex gap-2" onSubmit={send}>
         <input
           type="email"
           className="form-control form-control-sm"
-          placeholder="oppure la sua email"
+          placeholder="Email del tuo amico"
           value={email}
           maxLength={255}
           onChange={(e) => setEmail(e.target.value)}
           required
+          aria-label="Email del tuo amico"
         />
         <button type="submit" className="btn btn-sm btn-primary" disabled={sending}>
-          {sending ? "Invio..." : "Invia"}
+          <i className="bi bi-envelope-fill"></i> {sending ? "Invio..." : "Invia email"}
         </button>
       </form>
       {message && <div className={`small mt-1 ${message.ok ? "text-success" : "text-danger"}`}>{message.text}</div>}
+
+      <div className={styles.meta}>Quando si registra ricevete entrambi monete extra. L&apos;email serve solo per questo invito e non viene salvata.</div>
     </div>
   )
 }

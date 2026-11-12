@@ -18,6 +18,7 @@ const CLOSED_LABEL = {
 }
 
 const STATUS_TAG = {
+  not_sent: { label: "Da invitare", cls: styles.statusWarn },
   invited: { label: "Invitato", cls: "" },
   accepted: { label: "In gioco", cls: styles.statusOk },
   declined: { label: "Ha rifiutato", cls: styles.statusOut },
@@ -216,7 +217,13 @@ function SfidaDettaglio() {
         </div>
 
         {challenge.guest_url && status === "open" && (
-          <GuestShare challengeId={challenge.id} url={challenge.guest_url} guestPlayed={others.some((p) => p.is_guest && p.completed)} />
+          <GuestShare
+            challengeId={challenge.id}
+            url={challenge.guest_url}
+            guestPlayed={others.some((p) => p.is_guest && p.completed)}
+            invited={challenge.guest_invited}
+            onInvited={() => setChallenge((c) => ({ ...c, guest_invited: true, players: c.players.map((pl) => (pl.is_guest ? { ...pl, status: "invited" } : pl)) }))}
+          />
         )}
 
         {status === "completed" && <XpGain awarded={challenge.xp_awarded} xp={challenge.xp} />}

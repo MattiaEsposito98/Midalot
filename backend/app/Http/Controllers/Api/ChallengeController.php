@@ -1028,6 +1028,7 @@ class ChallengeController extends Controller
             'my_rank' => $myRank,
             'categories' => $this->categoryNames($challenge),
             'guest_url' => $challenge->guest_token && $challenge->isChallenger($userId) && $guest ? GuestChallengeController::url($challenge) : null,
+            'guest_invited' => (bool) $challenge->guest_invited_at,
         ];
     }
 
@@ -1049,7 +1050,8 @@ class ChallengeController extends Controller
             'avatar_url' => null,
             'avatar_frame' => null,
             'avatar_title' => null,
-            'status' => $attempt?->finished_at ? 'accepted' : 'invited',
+            // not_sent = nessuna email partita: con WhatsApp o "copia link" il sito non puo' saperlo.
+            'status' => $attempt?->finished_at ? 'accepted' : ($challenge->guest_invited_at || $attempt ? 'invited' : 'not_sent'),
             'is_guest' => true,
             'guest_played' => (bool) $attempt?->finished_at,
         ];

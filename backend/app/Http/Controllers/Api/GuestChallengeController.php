@@ -259,6 +259,8 @@ class GuestChallengeController extends Controller
 
         Mail::to($email)->send(new GuestChallengeMail($challenge, $user, $this->url($challenge)));
 
+        $challenge->update(['guest_invited_at' => now()]);
+
         DB::table('invite_emails')->insert([
             'user_id' => $user->id,
             'email_hash' => hash('sha256', $email),
@@ -267,7 +269,7 @@ class GuestChallengeController extends Controller
             'updated_at' => now(),
         ]);
 
-        return response()->json(['message' => 'Sfida inviata!']);
+        return response()->json(['message' => 'Sfida inviata! Il tuo amico riceverà un\'email con il link.', 'invited' => true]);
     }
 
     public static function url(Challenge $challenge): string

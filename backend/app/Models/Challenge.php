@@ -26,10 +26,12 @@ class Challenge extends Model
         'winner_id',
         'guest_token',
         'guest_name',
+        'guest_invited_at',
     ];
 
     protected $casts = [
         'category_ids' => 'array',
+        'guest_invited_at' => 'datetime',
         'subcategory_ids' => 'array',
         'quiz_ids' => 'array',
         'expires_at' => 'datetime',
