@@ -16,14 +16,59 @@ export function initAnalytics() {
   document.head.appendChild(script)
 }
 
-export function trackPageview(path) {
-  if (!GA_ID || typeof window.gtag !== "function") return
+// Il titolo di molte pagine arriva dopo il primo rendering (es. il nome della
+// categoria si conosce solo quando i dati sono caricati): se la visualizzazione
+// partisse subito, Analytics registrerebbe il titolo della pagina precedente.
+const TITLE_MIN_WAIT_MS = 1200
+const TITLE_SETTLE_MS = 400
+const TITLE_MAX_WAIT_MS = 3000
 
-  window.gtag("event", "page_view", {
-    page_path: path,
-    page_location: window.location.href,
-    page_title: document.title,
-  })
+/**
+ * Registra la visualizzazione di pagina quando il titolo si e' assestato:
+ * dopo almeno 1,2 s e 400 ms senza modifiche del titolo, al massimo dopo 3 s.
+ * Ritorna la funzione che annulla l'invio, da usare come pulizia dell'effetto
+ * quando si cambia pagina.
+ */
+export function trackPageview(path) {
+  if (!GA_ID || typeof window === "undefined" || typeof window.gtag !== "function") return () => {}
+
+  const startedAt = Date.now()
+  const location = window.location.href
+  let settleTimer = null
+  let observer = null
+
+  function stop() {
+    observer?.disconnect()
+    clearTimeout(settleTimer)
+    clearTimeout(maxTimer)
+  }
+
+  function send() {
+    stop()
+
+    window.gtag("event", "page_view", {
+      page_path: path,
+      page_location: location,
+      page_title: document.title,
+    })
+  }
+
+  function schedule() {
+    clearTimeout(settleTimer)
+    const delay = Math.max(TITLE_SETTLE_MS, TITLE_MIN_WAIT_MS - (Date.now() - startedAt))
+    settleTimer = setTimeout(send, delay)
+  }
+
+  const maxTimer = setTimeout(send, TITLE_MAX_WAIT_MS)
+  schedule()
+
+  const titleTag = document.querySelector("title")
+  if (titleTag && typeof MutationObserver !== "undefined") {
+    observer = new MutationObserver(schedule)
+    observer.observe(titleTag, { childList: true, characterData: true, subtree: true })
+  }
+
+  return stop
 }
 
 /**

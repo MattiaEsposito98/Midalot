@@ -60,9 +60,10 @@ function App() {
   }, [consent])
 
   useEffect(() => {
-    if (consent === "accepted") {
-      trackPageview(location.pathname + location.search)
-    }
+    if (consent !== "accepted") return undefined
+
+    // Parte quando il titolo della pagina si e' stabilizzato; cambiando pagina prima, si annulla.
+    return trackPageview(location.pathname + location.search)
   }, [location, consent])
 
   return (
