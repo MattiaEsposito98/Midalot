@@ -31,10 +31,17 @@ function QuestionAudio({ src, startSeconds, endSeconds, className }) {
     return { start, end, span: end - start }
   }, [startSeconds, endSeconds])
 
-  useEffect(() => {
+  // Cambia l'audio o l'intervallo: stato da capo. Si fa durante il rendering
+  // (schema consigliato da React) invece che in un effetto, che causerebbe un
+  // rendering in piu' con i valori vecchi.
+  const resetKey = `${src}|${range?.start}|${range?.end}`
+  const [prevResetKey, setPrevResetKey] = useState(resetKey)
+
+  if (prevResetKey !== resetKey) {
+    setPrevResetKey(resetKey)
     setPlaying(false)
     setElapsed(0)
-  }, [src, range])
+  }
 
   // Avvio automatico: appena arriva l'audio della domanda, parte da solo
   // (dall'inizio dell'intervallo scelto, se c'è) senza che l'utente debba

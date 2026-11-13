@@ -14,14 +14,27 @@ function setMetaDescription(content) {
   tag.setAttribute("content", content)
 }
 
-export function useSEO({ title, description } = {}) {
+export function useSEO({ title, description, jsonLd } = {}) {
+  // Serializzato, cosi' l'effetto non riparte a ogni rendering con un oggetto nuovo.
+  const jsonLdText = jsonLd ? JSON.stringify(jsonLd) : ""
+
   useEffect(() => {
     document.title = title || DEFAULT_TITLE
     setMetaDescription(description || DEFAULT_DESCRIPTION)
 
+    let script = null
+    if (jsonLdText) {
+      script = document.createElement("script")
+      script.type = "application/ld+json"
+      script.dataset.seo = "page"
+      script.text = jsonLdText
+      document.head.appendChild(script)
+    }
+
     return () => {
       document.title = DEFAULT_TITLE
       setMetaDescription(DEFAULT_DESCRIPTION)
+      script?.remove()
     }
-  }, [title, description])
+  }, [title, description, jsonLdText])
 }

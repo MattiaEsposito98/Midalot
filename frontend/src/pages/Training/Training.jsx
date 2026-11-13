@@ -120,6 +120,20 @@ function Training() {
     categoryData
       ? {
           title: `Quiz ${categoryData.category.name} | Training Gratis su Midalot`,
+          jsonLd: {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Midalot", item: "https://midalot.live/" },
+              { "@type": "ListItem", position: 2, name: "Training", item: "https://midalot.live/training" },
+              {
+                "@type": "ListItem",
+                position: 3,
+                name: `Quiz ${categoryData.category.name}`,
+                item: `https://midalot.live/training/${categoryData.category.slug}`,
+              },
+            ],
+          },
           description: (
             categoryData.category.description ||
             `Allenati con i quiz di ${categoryData.category.name} su Midalot: giocabile gratis anche senza registrazione.`
@@ -156,7 +170,7 @@ function Training() {
           <i className="bi bi-lightning-charge-fill"></i>
           Allenamento
         </span>
-        <h1 className={styles.title}>Training</h1>
+        <h1 className={styles.title}>{categoryData ? `Quiz ${categoryData.category.name}` : "Training"}</h1>
         <p className={styles.subtitle}>
           Allenati per categoria con quiz casuali. Gli ospiti possono provare liberamente; gli utenti registrati salvano progressi e classifiche.
         </p>
