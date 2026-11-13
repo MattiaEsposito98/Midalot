@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom"
 import { useAuth } from "../context/useAuth"
 import { logError } from "../utils/logger"
 import { API_BASE } from "../service/api"
+import { trackEvent } from "../utils/analytics"
 
 /**
  * Stato e logica condivisa da tutti i tipi di minigioco: caricamento,
@@ -316,6 +317,7 @@ export function useMinigiocoAttempt(id, { retryOnWrong = false, getAdvanceDelayM
         return
       }
 
+      trackEvent("game_complete", { game_type: "minigioco" })
       setResult({ score: data.score, xpAwarded: data.xp_awarded, xp: data.xp })
     } catch (err) {
       logError(err)

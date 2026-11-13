@@ -6,6 +6,7 @@ import { notifyChallengesChanged } from "../../hooks/useChallengeCount"
 import styles from "./Sfide.module.css"
 import UserAvatar from "../../components/UserAvatar/UserAvatar"
 import MembersBrowser from "./MembersBrowser"
+import { trackEvent } from "../../utils/analytics"
 
 function NuovaSfida() {
   const navigate = useNavigate()
@@ -191,6 +192,7 @@ function NuovaSfida() {
         quiz_ids: selectedQuizzes.length ? selectedQuizzes : null,
         mode: guestMode ? "async" : mode,
       })
+      trackEvent(guestMode ? "challenge_guest_create" : "challenge_create", { mode: guestMode ? "async" : mode })
       notifyChallengesChanged()
       navigate(!guestMode && mode === "live" ? `/sfide/${res.data.id}/live` : `/sfide/${res.data.id}`, { replace: true })
     } catch (err) {

@@ -23,6 +23,7 @@ import { ITEM_MODELS } from "../../components/Avatar3D/items"
 import { PALETTES, swatchColor, variantFor } from "../../components/Avatar3D/palettes"
 import { RARITY, SLOTS } from "../../components/Avatar3D/catalog"
 import styles from "./Avatar.module.css"
+import { trackEvent } from "../../utils/analytics"
 
 const EMBLEM_SYMBOLS = [
   { key: "star", label: "Stella" },
@@ -219,6 +220,7 @@ export default function Avatar() {
     setMessage(null)
     try {
       const res = await api.post(`/avatar/shop/${it.key}`)
+      trackEvent("avatar_purchase", { item_slot: it.slot, rarity: it.rarity, price: it.price })
       setData(res.data)
       // Lo indossa subito (resta da salvare).
       setDraft((prev) => ({ ...prev, equipped: { ...prev.equipped, [it.slot]: it.key } }))

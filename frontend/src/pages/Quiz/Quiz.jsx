@@ -7,6 +7,7 @@ import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import { API_BASE } from "../../service/api"
 import QuestionAudio from "../../components/QuestionAudio/QuestionAudio"
+import { trackEvent } from "../../utils/analytics"
 
 function shuffleArray(array) {
   const copy = [...array]
@@ -364,6 +365,7 @@ function Quiz() {
         return
       }
 
+      trackEvent("game_complete", { game_type: "quiz_one_shot" })
       setResult({
         score: data.score,
         xpAwarded: data.xp_awarded,

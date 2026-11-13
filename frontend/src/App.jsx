@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from "react"
 import { Routes, Route, Navigate, useLocation } from "react-router-dom"
 
 import { initAnalytics, trackPageview } from "./utils/analytics"
+import { useRouteSeo } from "./hooks/useRouteSeo"
 import { useCookieConsent } from "./hooks/useCookieConsent"
 import CookieBanner from "./components/CookieBanner/CookieBanner"
 import AvatarNews from "./components/AvatarNews/AvatarNews"
@@ -50,6 +51,7 @@ const Avatar = lazy(() => import("./pages/Avatar/Avatar"))
 function App() {
   const location = useLocation()
   const { consent } = useCookieConsent()
+  useRouteSeo(location.pathname)
 
   useEffect(() => {
     if (consent === "accepted") {

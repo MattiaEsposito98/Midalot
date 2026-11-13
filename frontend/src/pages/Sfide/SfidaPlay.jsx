@@ -7,6 +7,7 @@ import QuestionAudio from "../../components/QuestionAudio/QuestionAudio"
 import { notifyChallengesChanged } from "../../hooks/useChallengeCount"
 import QuestionCategory from "./QuestionCategory"
 import { ensureGuestKey } from "../../utils/guestChallenge"
+import { trackEvent } from "../../utils/analytics"
 
 // Reti mobili instabili: si riprova qualche volta prima di dare errore. Se la
 // prima richiesta era in realta' arrivata, il "gia' risposto" conta come successo.
@@ -103,6 +104,7 @@ function SfidaPlay({ guestToken, onGuestFinished }) {
 
     try {
       const res = await api.post(`${base}/finish`, withKey())
+      trackEvent(guestToken ? "guest_challenge_finish" : "challenge_complete", {})
       if (guestToken) {
         onGuestFinished?.(res.data)
         return

@@ -6,6 +6,7 @@ import { useAuth } from "../../context/useAuth"
 import LoaderButton from "../../components/LoaderButton"
 import { logError } from "../../utils/logger"
 import { API_BASE } from "../../service/api"
+import { trackEvent } from "../../utils/analytics"
 
 function Login() {
   const navigate = useNavigate()
@@ -61,6 +62,7 @@ function Login() {
       const { token, user } = res.data
 
       authLogin(user, token)
+      trackEvent("login", { method: "email" })
       navigate("/")
     } catch (err) {
       logError("ERRORE LOGIN:", err)

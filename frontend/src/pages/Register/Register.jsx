@@ -6,6 +6,8 @@ import LoaderButton from "../../components/LoaderButton"
 import { logError } from "../../utils/logger"
 import { API_BASE } from "../../service/api"
 import { readGuestKey } from "../../utils/guestChallenge"
+import { trackEvent } from "../../utils/analytics"
+
 
 const REF_KEY = "midalot_ref"
 
@@ -270,6 +272,11 @@ function Register() {
       } catch {
         // niente da fare
       }
+
+      trackEvent("sign_up", {
+        method: "email",
+        source: guestPayload().guest_token ? "guest_challenge" : refCode ? "invite_link" : "direct",
+      })
 
       alert("Registrazione completata! Controlla la tua email, anche nella cartella spam, per verificare l'account.")
       navigate("/")

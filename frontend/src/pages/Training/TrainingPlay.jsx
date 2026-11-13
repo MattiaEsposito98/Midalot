@@ -7,6 +7,7 @@ import { logError } from "../../utils/logger"
 import { formatQuizScore } from "../../utils/quizScore"
 import { API_BASE } from "../../service/api"
 import QuestionAudio from "../../components/QuestionAudio/QuestionAudio"
+import { trackEvent } from "../../utils/analytics"
 
 function shuffleArray(array) {
   const copy = [...array]
@@ -340,6 +341,7 @@ function TrainingPlay() {
         return
       }
 
+      trackEvent("game_complete", { game_type: token ? "training" : "training_guest" })
       setResult({ ...data, xpAwarded: data.xp_awarded, xp: data.xp })
     } catch (err) {
       logError(err)

@@ -25,3 +25,16 @@ export function trackPageview(path) {
     page_title: document.title,
   })
 }
+
+/**
+ * Evento di conversione (solo se l'utente ha accettato i cookie analitici:
+ * senza consenso gtag non esiste e non parte nulla). Nomi in minuscolo con
+ * underscore; sign_up, login e share sono eventi raccomandati da GA4.
+ * Per vederli come "eventi chiave" vanno segnati in Analytics
+ * (Amministrazione -> Eventi -> "Segna come evento chiave").
+ */
+export function trackEvent(name, params = {}) {
+  if (!GA_ID || typeof window === "undefined" || typeof window.gtag !== "function") return
+
+  window.gtag("event", name, params)
+}

@@ -7,6 +7,7 @@ import UserAvatar from "../../components/UserAvatar/UserAvatar"
 import SfidaPlay from "./SfidaPlay"
 import { readGuestKey } from "../../utils/guestChallenge"
 import styles from "./Sfide.module.css"
+import { trackEvent } from "../../utils/analytics"
 
 function isLoggedIn() {
   try {
@@ -31,6 +32,7 @@ export default function SfidaAmico() {
     api
       .get(`/guest-challenges/${token}`, { params: { key: readGuestKey(token) || undefined } })
       .then((res) => {
+        trackEvent("guest_challenge_view", {})
         setInfo(res.data)
         if (res.data.result) setResult(res.data.result)
       })
@@ -85,7 +87,7 @@ export default function SfidaAmico() {
             </div>
           </div>
 
-          <Link to={registerUrl} className="btn btn-warning btn-lg fw-bold mt-2">
+          <Link to={registerUrl} className="btn btn-warning btn-lg fw-bold mt-2" onClick={() => trackEvent("guest_challenge_register_click", {})}>
             Registrati e scopri il risultato
           </Link>
           <p className={`${styles.meta} mt-3`}>La tua partita resta salvata: la ritrovi nel tuo account appena ti registri.</p>
@@ -121,7 +123,10 @@ export default function SfidaAmico() {
                 ricevi <strong>{info.welcome_coins} monete di benvenuto</strong>.
               </div>
             </div>
-            <button type="button" className="btn btn-warning btn-lg fw-bold mt-2" onClick={() => setPlaying(true)}>
+            <button type="button" className="btn btn-warning btn-lg fw-bold mt-2" onClick={() => {
+                trackEvent("guest_challenge_start", {})
+                setPlaying(true)
+              }}>
               Accetta la sfida
             </button>
           </>

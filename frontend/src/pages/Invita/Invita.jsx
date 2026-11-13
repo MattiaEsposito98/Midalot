@@ -4,6 +4,7 @@ import { logError } from "../../utils/logger"
 import UserAvatar from "../../components/UserAvatar/UserAvatar"
 import UserTitle from "../../components/UserAvatar/UserTitle"
 import css from "./Invita.module.css"
+import { trackEvent } from "../../utils/analytics"
 
 /**
  * Invita un amico: link personale (copia / WhatsApp / email), premi e amici invitati.
@@ -34,6 +35,7 @@ export default function Invita() {
   async function copy() {
     try {
       await navigator.clipboard.writeText(data.link)
+      trackEvent("share", { method: "copy_link", content_type: "invite_friend" })
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
@@ -47,6 +49,7 @@ export default function Invita() {
     setMessage(null)
     try {
       const res = await api.post("/referrals/email", { email })
+      trackEvent("share", { method: "email", content_type: "invite_friend" })
       setMessage({ ok: true, text: res.data.message })
       setEmail("")
     } catch (err) {
@@ -94,7 +97,7 @@ export default function Invita() {
           </button>
         </div>
         <div className={css.shareRow}>
-          <a className={css.whatsapp} href={`https://wa.me/?text=${encodeURIComponent(shareText)}`} target="_blank" rel="noopener noreferrer">
+          <a className={css.whatsapp} href={`https://wa.me/?text=${encodeURIComponent(shareText)}`} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("share", { method: "whatsapp", content_type: "invite_friend" })}>
             <i className="bi bi-whatsapp"></i> Invia su WhatsApp
           </a>
           {navigator.share && (

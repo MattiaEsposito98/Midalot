@@ -2,6 +2,7 @@ import { useState } from "react"
 import api from "../../service/api"
 import { logError } from "../../utils/logger"
 import styles from "./Sfide.module.css"
+import { trackEvent } from "../../utils/analytics"
 
 /**
  * Link della sfida per un amico non registrato: WhatsApp, copia, email.
@@ -19,6 +20,7 @@ export default function GuestShare({ challengeId, url, guestPlayed, invited: inv
   async function copy() {
     try {
       await navigator.clipboard.writeText(url)
+      trackEvent("share", { method: "copy_link", content_type: "guest_challenge" })
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     } catch {
@@ -34,6 +36,7 @@ export default function GuestShare({ challengeId, url, guestPlayed, invited: inv
       const res = await api.post(`/challenges/${challengeId}/guest-email`, { email })
       setMessage({ ok: true, text: res.data.message })
       setEmail("")
+      trackEvent("share", { method: "email", content_type: "guest_challenge" })
       onInvited?.()
     } catch (err) {
       logError(err)
@@ -88,7 +91,7 @@ export default function GuestShare({ challengeId, url, guestPlayed, invited: inv
       )}
 
       <div className={styles.shareRow}>
-        <a className={styles.whatsapp} href={`https://wa.me/?text=${encodeURIComponent(text)}`} target="_blank" rel="noopener noreferrer">
+        <a className={styles.whatsapp} href={`https://wa.me/?text=${encodeURIComponent(text)}`} target="_blank" rel="noopener noreferrer" onClick={() => trackEvent("share", { method: "whatsapp", content_type: "guest_challenge" })}>
           <i className="bi bi-whatsapp"></i> Invia su WhatsApp
         </a>
         <button type="button" className={styles.membersToggle} onClick={copy}>
