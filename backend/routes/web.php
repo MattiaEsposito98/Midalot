@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\MidalarioController;
 use App\Http\Controllers\Admin\MinigiocoController;
 use App\Http\Controllers\Admin\MinigiocoRoundController;
 use App\Http\Controllers\Admin\PeriodLeaderboardController;
+use App\Http\Controllers\Admin\PrizeAwardController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\ShowcaseImageController;
@@ -231,6 +232,9 @@ Route::middleware(['auth', 'admin'])
 
         Route::get('classifica-premi', [PeriodLeaderboardController::class, 'index'])
             ->name('period-leaderboard.index');
+
+        Route::get('premi-monete', [PrizeAwardController::class, 'index'])
+            ->name('prize-awards.index');
     });
 
 Route::get('/cities/search', [CityController::class, 'search'])

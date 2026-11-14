@@ -45,6 +45,7 @@
                         'icon' => 'bi-trophy',
                         'items' => [
                             ['admin.period-leaderboard.index', Route::is('admin.period-leaderboard.*'), 'bi-trophy', 'Classifica premi', 0],
+                            ['admin.prize-awards.index', Route::is('admin.prize-awards.*'), 'bi-coin', 'Premi in monete', 0],
                             ['admin.avatar.index', Route::is('admin.avatar.*'), 'bi-person-badge', 'Avatar e negozio', 0],
                         ],
                     ],

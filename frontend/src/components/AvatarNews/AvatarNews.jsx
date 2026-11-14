@@ -13,7 +13,7 @@ export default function AvatarNews() {
   const { user, token, refreshUser } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
-  const [news, setNews] = useState({ items: [], achievements: [] })
+  const [news, setNews] = useState({ items: [], achievements: [], prizes: [] })
   const prevXp = useRef(null)
 
   const xpTotal = user?.xp_info?.total
@@ -27,10 +27,10 @@ export default function AvatarNews() {
       .get("/avatar/news")
       .then((res) => {
         if (!alive) return
-        const next = { items: res.data.items || [], achievements: res.data.achievements || [] }
+        const next = { items: res.data.items || [], achievements: res.data.achievements || [], prizes: res.data.prizes || [] }
         setNews(next)
-        // Obiettivi e livelli portano monete: aggiorna il saldo in navbar.
-        if (next.achievements.length) refreshUser?.()
+        // Obiettivi, livelli e premi portano monete: aggiorna il saldo in navbar.
+        if (next.achievements.length || next.prizes.length) refreshUser?.()
       })
       .catch(() => {})
 
@@ -43,21 +43,23 @@ export default function AvatarNews() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token, user?.id, xpTotal])
 
-  const { items, achievements } = news
-  if ((!items.length && !achievements.length) || onAvatarPage) return null
+  const { items, achievements, prizes } = news
+  if ((!items.length && !achievements.length && !prizes.length) || onAvatarPage) return null
 
   const markSeen = () => {
-    setNews({ items: [], achievements: [] })
+    setNews({ items: [], achievements: [], prizes: [] })
     api.post("/avatar/news/seen").catch(() => {})
   }
 
   const open = () => {
     markSeen()
-    navigate(achievements.length && !items.length ? "/avatar?vista=obiettivi" : "/avatar")
+    navigate(achievements.length && !items.length && !prizes.length ? "/avatar?vista=obiettivi" : "/avatar")
   }
 
   const shownItems = items.slice(0, 5)
-  const title = achievements.length
+  const title = prizes.length
+    ? "Hai vinto un premio!"
+    : achievements.length
     ? achievements.length === 1
       ? "Obiettivo raggiunto!"
       : `${achievements.length} obiettivi raggiunti!`
@@ -69,11 +71,28 @@ export default function AvatarNews() {
     <div className={css.backdrop} role="dialog" aria-modal="true" aria-labelledby="avatar-news-title">
       <div className={css.box}>
         <div className={css.gift}>
-          <i className={`bi ${achievements.length ? "bi-award-fill" : "bi-gift-fill"}`}></i>
+          <i className={`bi ${prizes.length ? "bi-trophy-fill" : achievements.length ? "bi-award-fill" : "bi-gift-fill"}`}></i>
         </div>
         <h2 id="avatar-news-title" className={css.title}>
           {title}
         </h2>
+
+        {prizes.length > 0 && (
+          <ul className={css.list}>
+            {prizes.map((p) => (
+              <li key={`${p.kind}-${p.ref}`} style={{ "--rarity": "#e0a800" }}>
+                <i className={`bi bi-trophy-fill ${css.goalIcon}`} style={{ color: "#e0a800" }}></i>
+                <span>
+                  <strong>{p.label}</strong>
+                  <span className={css.goalDesc}>{p.position}° posto</span>
+                  <span className={css.goalReward}>
+                    <i className="bi bi-coin"></i> +{p.coins} monete
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
 
         {achievements.length > 0 && (
           <ul className={css.list}>
@@ -117,7 +136,7 @@ export default function AvatarNews() {
 
         <div className={css.actions}>
           <button type="button" className={css.primary} onClick={open}>
-            {items.length ? "Indossali ora" : "Vedi i tuoi obiettivi"}
+            {items.length ? "Indossali ora" : prizes.length && !achievements.length ? "Vai al negozio" : "Vedi i tuoi obiettivi"}
           </button>
           <button type="button" className={css.secondary} onClick={markSeen}>
             Più tardi

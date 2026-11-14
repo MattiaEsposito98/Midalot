@@ -15,8 +15,10 @@ use Illuminate\Support\Str;
  */
 class MonthlyBadgeAssigner
 {
-    public function __construct(private PeriodLeaderboardService $leaderboard)
-    {
+    public function __construct(
+        private PeriodLeaderboardService $leaderboard,
+        private PrizeService $prizes,
+    ) {
     }
 
     /**
@@ -69,7 +71,10 @@ class MonthlyBadgeAssigner
      * decide (il pannello admin blocca prima di arrivare qui, il comando
      * da console accetta `--month` per forzare un mese specifico).
      *
-     * @return array{topScore: int, winners: array}
+     * Oltre al badge, accredita le monete ai primi della classifica (scala in
+     * config/prizes.php, una sola volta per utente e mese grazie a CoinEvent).
+     *
+     * @return array{topScore: int, winners: array, prizes: array}
      */
     public function assign(Carbon $month, ?int $triggeredBy = null): array
     {
@@ -92,6 +97,67 @@ class MonthlyBadgeAssigner
             ['triggered_by' => $triggeredBy, 'top_score' => $summary['topScore']]
         );
 
+        $summary['prizes'] = $this->assignCoinPrizes($month, $monthKey, $monthLabel);
+
         return $summary;
+    }
+
+    /**
+     * Monete ai primi classificati del mese (pari merito = stessa posizione).
+     *
+     * @return array<int, array{user_id:int, position:int, coins:int}>
+     */
+    private function assignCoinPrizes(Carbon $month, string $monthKey, string $monthLabel): array
+    {
+        $ranked = array_map(
+            fn ($row) => ['user_id' => $row['user_id'], 'position' => $row['position']],
+            $this->rankedMonth($month)
+        );
+
+        return $this->prizes->awardRanked(
+            'monthly',
+            $monthKey,
+            (int) $month->format('Ym'),
+            "Classifica di {$monthLabel}",
+            $ranked
+        );
+    }
+
+    /**
+     * Anteprima (senza scrivere nulla) dei premi in monete del mese: solo chi
+     * ha un premio previsto dalla scala.
+     *
+     * @return array<int, array{user_id:int, nickname:string, score:int, position:int, coins:int}>
+     */
+    public function prizePreview(Carbon $month): array
+    {
+        return array_values(array_filter(
+            array_map(fn ($row) => $row + ['coins' => PrizeService::coinsFor('monthly', $row['position'])], $this->rankedMonth($month)),
+            fn ($row) => $row['coins'] > 0
+        ));
+    }
+
+    /**
+     * Classifica del mese con posizioni (pari merito = stessa posizione).
+     *
+     * @return array<int, array{user_id:int, nickname:string, score:int, position:int}>
+     */
+    private function rankedMonth(Carbon $month): array
+    {
+        $rows = $this->leaderboard
+            ->aggregate($month->copy()->startOfMonth()->startOfDay(), $month->copy()->endOfMonth()->endOfDay())
+            ->filter(fn ($row) => $row['total_score'] > 0)
+            ->values();
+
+        $ranked = PrizeService::rank(
+            $rows->map(fn ($row) => ['user_id' => $row['user_id'], 'key' => [$row['total_score']]])->all()
+        );
+
+        return $rows->map(fn ($row, $i) => [
+            'user_id' => $row['user_id'],
+            'nickname' => $row['nickname'],
+            'score' => $row['total_score'],
+            'position' => $ranked[$i]['position'],
+        ])->all();
     }
 }

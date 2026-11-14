@@ -19,7 +19,8 @@
                 <h2 class="admin-section-title">Premio "Vincitore del mese"</h2>
                 <p class="admin-muted mb-0">
                     Assegnato automaticamente da un cron: ogni 1° del mese alle 00:10 viene premiato chi ha totalizzato
-                    più punti nel mese appena concluso.
+                    più punti nel mese appena concluso. Nello stesso momento i primi 5 ricevono monete
+                    ({{ implode(' / ', config('prizes.monthly')) }}; pari merito = stessa posizione) e vedono un avviso.
                 </p>
             </div>
         </div>

@@ -20,7 +20,7 @@ class AssignMonthlyBadges extends Command
      *
      * @var string
      */
-    protected $description = 'Assegna il badge "Vincitore del mese" ai primi classificati della classifica premi mensile appena conclusa.';
+    protected $description = 'Assegna il badge "Vincitore del mese" al primo classificato della classifica premi mensile appena conclusa e le monete ai primi 5 (config/prizes.php).';
 
     public function handle(MonthlyBadgeAssigner $assigner): int
     {
@@ -31,6 +31,10 @@ class AssignMonthlyBadges extends Command
         $monthKey = $month->format('Y-m');
 
         $summary = $assigner->assign($month);
+
+        foreach ($summary['prizes'] as $prize) {
+            $this->info("Premio di {$prize['coins']} monete a user_id {$prize['user_id']} ({$prize['position']}° posto) per {$monthKey}.");
+        }
 
         if (empty($summary['winners'])) {
             $this->info("Nessun vincitore per {$monthKey} (nessuna attivita' o punteggio a 0), nessun badge assegnato.");

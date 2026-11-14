@@ -14,8 +14,11 @@ use Illuminate\Validation\Rule;
 
 class AvatarController extends Controller
 {
-    public function __construct(private AvatarService $avatar, private AchievementService $achievements)
-    {
+    public function __construct(
+        private AvatarService $avatar,
+        private AchievementService $achievements,
+        private \App\Services\PrizeService $prizes,
+    ) {
     }
 
     /**
@@ -123,6 +126,7 @@ class AvatarController extends Controller
 
         return response()->json([
             'achievements' => $this->achievements->unseen($user),
+            'prizes' => $this->prizes->unseen($user),
             'items' => $this->avatar->unseen($user)->map->toCatalog()->values(),
             'level' => XpService::info((int) $user->xp_total)['level'],
         ]);
@@ -132,6 +136,7 @@ class AvatarController extends Controller
     {
         $this->avatar->markSeen($request->user());
         $this->achievements->markSeen($request->user());
+        $this->prizes->markSeen($request->user());
 
         return response()->json(['ok' => true]);
     }

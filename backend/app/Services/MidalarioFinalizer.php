@@ -109,6 +109,41 @@ class MidalarioFinalizer
         $quiz->update(['midalario_status' => 'finished']);
 
         $this->assignWinnerBadges($quiz);
+
+        // Un errore nei premi non deve mai rimettere in discussione la
+        // chiusura della partita (XP e badge sono gia' assegnati); l'accredito
+        // e' idempotente, quindi si puo' ripetere.
+        try {
+            $this->assignCoinPrizes($quiz);
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    /**
+     * Monete ai primi 5 della sessione (scala in config/prizes.php).
+     * Classifica come quella mostrata: punteggio piu' alto, a parita' tempo
+     * totale minore; solo chi ha lo stesso punteggio E lo stesso tempo
+     * condivide la posizione.
+     */
+    public function assignCoinPrizes(Quiz $quiz): array
+    {
+        $attempts = QuizAttempt::where('quiz_id', $quiz->id)
+            ->where('completed', true)
+            ->where('score', '>', 0)
+            ->orderByDesc('score')
+            ->orderBy('total_time')
+            ->get()
+            ->map(fn ($a) => ['user_id' => (int) $a->user_id, 'key' => [(int) $a->score, (int) $a->total_time]])
+            ->all();
+
+        return app(PrizeService::class)->awardRanked(
+            'midalario',
+            (string) $quiz->id,
+            (int) $quiz->id,
+            "Midalario: {$quiz->title}",
+            PrizeService::rank($attempts)
+        );
     }
 
     /**

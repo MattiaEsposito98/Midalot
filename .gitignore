@@ -9,3 +9,7 @@ backups/
 
 # Pacchetti 3D originali (Quaternius, CC0): solo materiale di lavoro, nel sito vanno i modelli convertiti
 assets-src/
+
+# Documentazione interna del progetto: privata, non deve finire su GitHub.
+docs/
+CLAUDE.md
