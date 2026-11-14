@@ -97,10 +97,8 @@ class UserMinigiocoController extends Controller
             ], 403);
         }
 
-        $minigioco->load(['rounds' => function ($q) {
-            $q->inRandomOrder();
-        }, 'rounds.items']);
-
+        // I round NON si mandano qui: arrivano con /minigiochi/{id}/start, quando
+        // parte il tempo. Prima chiunque poteva studiarli con calma.
         return response()->json([
             'minigioco' => [
                 'id' => $minigioco->id,
@@ -108,12 +106,24 @@ class UserMinigiocoController extends Controller
                 'description' => $minigioco->description,
                 'tipo' => $minigioco->tipo,
                 'max_score' => $minigioco->max_score,
-                'total_rounds' => $minigioco->rounds->count(),
-                'total_time_seconds' => $minigioco->rounds->sum('time_limit_seconds'),
+                'total_rounds' => $minigioco->rounds()->count(),
+                'total_time_seconds' => (int) $minigioco->rounds()->sum('time_limit_seconds'),
                 'leaderboard_visible' => (bool) $minigioco->leaderboard_visible,
-                'rounds' => $minigioco->rounds->map(fn ($round) => $this->roundPlayPayload($round, $minigioco->tipo, $user->id)),
             ],
         ]);
+    }
+
+    /**
+     * Round del minigioco per il gioco, in ordine casuale (mai la soluzione).
+     * Usata dall'avvio del tentativo.
+     */
+    public function playRounds(Minigioco $minigioco, int $userId): array
+    {
+        $minigioco->load(['rounds' => function ($q) {
+            $q->inRandomOrder();
+        }, 'rounds.items']);
+
+        return $minigioco->rounds->map(fn ($round) => $this->roundPlayPayload($round, $minigioco->tipo, $userId))->values()->all();
     }
 
     /**

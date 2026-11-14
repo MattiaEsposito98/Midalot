@@ -63,7 +63,8 @@ function App() {
     if (consent !== "accepted") return undefined
 
     // Parte quando il titolo della pagina si e' stabilizzato; cambiando pagina prima, si annulla.
-    return trackPageview(location.pathname + location.search)
+    // Solo il percorso: la query string puo' contenere token ed email (es. reset password).
+    return trackPageview(location.pathname)
   }, [location, consent])
 
   return (

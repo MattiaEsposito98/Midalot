@@ -1,5 +1,33 @@
 const GA_ID = import.meta.env.VITE_GA_MEASUREMENT_ID
 
+// Percorsi con segreti nel percorso stesso: il pezzo segreto si sostituisce.
+const SECRET_PATHS = [[/^\/sfida-amico\/[^/]+/, "/sfida-amico/:token"]]
+
+/**
+ * Percorso da mandare a Google: mai la query string (token di reset, email,
+ * codici d'invito...) e mai i token dentro il percorso. Google vieta di
+ * inviargli dati personali e questi link danno accesso a qualcosa.
+ */
+export function safePath(pathname) {
+  let path = String(pathname || "/").split("?")[0].split("#")[0] || "/"
+  for (const [pattern, replacement] of SECRET_PATHS) {
+    path = path.replace(pattern, replacement)
+  }
+  return path
+}
+
+function safeLocation(path) {
+  return window.location.origin + path
+}
+
+/**
+ * Indirizzo "ripulito" per tutto cio' che Google invia da qui in avanti:
+ * senza questo gtag allega a ogni evento l'URL completo della pagina.
+ */
+function setSafePage(path) {
+  window.gtag("set", { page_location: safeLocation(path), page_path: path })
+}
+
 export function initAnalytics() {
   if (!GA_ID || typeof window === "undefined") return
 
@@ -8,7 +36,9 @@ export function initAnalytics() {
     window.dataLayer.push(arguments)
   }
   window.gtag("js", new Date())
-  window.gtag("config", GA_ID, { send_page_view: false })
+  const startPath = safePath(window.location.pathname)
+  setSafePage(startPath)
+  window.gtag("config", GA_ID, { send_page_view: false, page_location: safeLocation(startPath), page_path: startPath })
 
   const script = document.createElement("script")
   script.async = true
@@ -33,7 +63,9 @@ export function trackPageview(path) {
   if (!GA_ID || typeof window === "undefined" || typeof window.gtag !== "function") return () => {}
 
   const startedAt = Date.now()
-  const location = window.location.href
+  const cleanPath = safePath(path)
+  const location = safeLocation(cleanPath)
+  setSafePage(cleanPath) // subito: anche gli eventi di questa pagina usano l'indirizzo ripulito
   let settleTimer = null
   let observer = null
 
@@ -47,7 +79,7 @@ export function trackPageview(path) {
     stop()
 
     window.gtag("event", "page_view", {
-      page_path: path,
+      page_path: cleanPath,
       page_location: location,
       page_title: document.title,
     })

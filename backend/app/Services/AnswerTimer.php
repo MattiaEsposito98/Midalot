@@ -37,6 +37,26 @@ class AnswerTimer
      *                                    o inizio del tentativo alla prima domanda)
      * @param  int  $maxTimeMs  limite di tempo della domanda
      */
+    /**
+     * Tolleranza oltre il limite della domanda prima di considerare una risposta
+     * "fuori tempo": copre le pause tra una domanda e l'altra (spiegazioni dei
+     * minigiochi fino a 7 s), il caricamento dei media e la rete.
+     */
+    public const LATE_TOLERANCE_MS = 15000;
+
+    /**
+     * Risposta arrivata molto oltre il tempo della domanda (es. chi si ferma a
+     * cercare la soluzione): va trattata come tempo scaduto, non come risposta.
+     */
+    public static function isLate(?Carbon $lastEventAt, int $maxTimeMs): bool
+    {
+        if (! $lastEventAt || $maxTimeMs <= 0) {
+            return false;
+        }
+
+        return $lastEventAt->diffInMilliseconds(now()) > $maxTimeMs + self::LATE_TOLERANCE_MS;
+    }
+
     public static function resolve(?int $clientTimeMs, ?Carbon $lastEventAt, int $maxTimeMs): int
     {
         $claimedMs = max(0, (int) $clientTimeMs);

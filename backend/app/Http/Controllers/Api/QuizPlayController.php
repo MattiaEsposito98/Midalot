@@ -73,6 +73,8 @@ class QuizPlayController extends Controller
             'message' => 'Quiz avviato',
             'attempt_id' => $attempt->id,
             'completed' => false,
+            // Le domande arrivano solo adesso, a tempo avviato.
+            'questions' => UserQuizController::playQuestions($quiz),
         ], 201);
     }
 
@@ -93,6 +95,14 @@ class QuizPlayController extends Controller
             return response()->json([
                 'message' => 'Tentativo non valido',
             ], 403);
+        }
+
+        // Solo Quiz One Shot: i tentativi del Midalario hanno le loro rotte con la
+        // finestra di tempo live; da qui si potrebbe rispondere fuori finestra.
+        if ($attempt->quiz?->type !== 'assigned') {
+            return response()->json([
+                'message' => 'Tentativo non valido',
+            ], 404);
         }
 
         if ((bool) $attempt->completed === true) {
@@ -127,6 +137,11 @@ class QuizPlayController extends Controller
         $lastEventAt = $lastAnsweredAt ? Carbon::parse($lastAnsweredAt) : $attempt->started_at;
 
         $timeTaken = AnswerTimer::resolve((int) $request->time_taken, $lastEventAt, $maxTimeMs);
+
+        // Fuori tempo (oltre il limite + tolleranza): vale come tempo scaduto.
+        if (AnswerTimer::isLate($lastEventAt, $maxTimeMs)) {
+            $request->merge(['answer_id' => null]);
+        }
 
         $answerId = null;
         $isCorrect = false;
@@ -206,6 +221,14 @@ class QuizPlayController extends Controller
             return response()->json([
                 'message' => 'Tentativo non valido',
             ], 403);
+        }
+
+        // Solo Quiz One Shot: i tentativi del Midalario hanno le loro rotte con la
+        // finestra di tempo live; da qui si potrebbe rispondere fuori finestra.
+        if ($attempt->quiz?->type !== 'assigned') {
+            return response()->json([
+                'message' => 'Tentativo non valido',
+            ], 404);
         }
 
         if ($attempt->completed) {

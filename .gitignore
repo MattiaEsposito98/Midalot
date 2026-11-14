@@ -13,3 +13,6 @@ assets-src/
 # Documentazione interna del progetto: privata, non deve finire su GitHub.
 docs/
 CLAUDE.md
+
+# Credenziali locali (es. statistiche ISPConfig): mai su GitHub.
+.env

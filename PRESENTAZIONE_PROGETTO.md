@@ -114,7 +114,7 @@ Il frontend include una base SEO pronta per essere completata quando sara dispon
 - Manifest web app.
 - `robots.txt`.
 - Template sitemap in `frontend/docs/sitemap.template.xml`.
-- Checklist SEO in `frontend/SEO_PRODUCTION_CHECKLIST.md`.
+- SEO: canonical per pagina, `noindex` sulle aree private, sitemap e dati strutturati (Schema.org).
 
 Quando il dominio sara deciso, andranno aggiornati sitemap, canonical URL, immagini social pubbliche e Google Search Console.
 

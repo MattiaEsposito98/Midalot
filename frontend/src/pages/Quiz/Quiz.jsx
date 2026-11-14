@@ -106,8 +106,6 @@ function Quiz() {
           return
         }
 
-        setQuiz(quizData.quiz)
-
         const startRes = await fetch(`${API_BASE}/api/quiz/${id}/start`, {
           method: "POST",
           headers: {
@@ -123,6 +121,9 @@ function Quiz() {
           return
         }
 
+        // Le domande arrivano con l'avvio (a tempo partito); "|| quizData" serve
+        // solo finche' il backend non e' aggiornato.
+        setQuiz({ ...quizData.quiz, questions: startData.questions || quizData.quiz.questions || [] })
         setAttemptId(startData.attempt_id)
       } catch (err) {
         logError(err)

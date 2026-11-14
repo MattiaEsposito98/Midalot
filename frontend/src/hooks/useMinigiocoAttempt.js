@@ -102,8 +102,6 @@ export function useMinigiocoAttempt(id, { retryOnWrong = false, getAdvanceDelayM
           return
         }
 
-        setMinigioco(data.minigioco)
-
         const startRes = await fetch(`${API_BASE}/api/minigiochi/${id}/start`, {
           method: "POST",
           headers: {
@@ -119,6 +117,9 @@ export function useMinigiocoAttempt(id, { retryOnWrong = false, getAdvanceDelayM
           return
         }
 
+        // I round arrivano con l'avvio (a tempo partito); "|| data" serve solo
+        // finche' il backend non e' aggiornato.
+        setMinigioco({ ...data.minigioco, rounds: startData.rounds || data.minigioco.rounds || [] })
         setAttemptId(startData.attempt_id)
       } catch (err) {
         logError(err)

@@ -522,6 +522,11 @@ class TrainingController extends Controller
             ->value('id');
         $maxTimeMs = (int) $question->time_limit_seconds * 1000;
         $timeTaken = AnswerTimer::resolve((int) $data['time_taken'], $lastEventAt, $maxTimeMs);
+
+        // Fuori tempo (oltre il limite + tolleranza): vale come tempo scaduto.
+        if (AnswerTimer::isLate($lastEventAt, $maxTimeMs)) {
+            $data['answer_id'] = null;
+        }
         $answerId = null;
         $isCorrect = false;
         $isTimeout = false;

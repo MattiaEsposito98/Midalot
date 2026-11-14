@@ -64,6 +64,8 @@ class MinigiocoPlayController extends Controller
             'message' => 'Minigioco avviato',
             'attempt_id' => $attempt->id,
             'completed' => false,
+            // I round arrivano solo adesso, a tempo avviato.
+            'rounds' => app(UserMinigiocoController::class)->playRounds($minigioco, (int) $user->id),
         ], 201);
     }
 
@@ -203,6 +205,11 @@ class MinigiocoPlayController extends Controller
         $maxTimeMs = (int) $round->time_limit_seconds * 1000;
         $timeTaken = AnswerTimer::resolve((int) $request->time_taken, $this->roundStartedAt($attempt, $round), $maxTimeMs);
 
+        // Fuori tempo (oltre il limite + tolleranza): vale come tempo scaduto.
+        if (AnswerTimer::isLate($this->roundStartedAt($attempt, $round), $maxTimeMs)) {
+            $request->merge(['risposta' => null]);
+        }
+
         if ($request->risposta === null) {
             $penalty = $this->calculatePenalty($currentRunningTotal, self::TIMEOUT_PENALTY_RATE);
 
@@ -280,11 +287,18 @@ class MinigiocoPlayController extends Controller
         $maxTimeMs = (int) $round->time_limit_seconds * 1000;
         $timeTaken = AnswerTimer::resolve((int) $request->time_taken, $this->roundStartedAt($attempt, $round), $maxTimeMs);
 
+        // Fuori tempo (oltre il limite + tolleranza): vale come tempo scaduto.
+        if (AnswerTimer::isLate($this->roundStartedAt($attempt, $round), $maxTimeMs)) {
+            $request->merge(['risposta' => null]);
+        }
+
         if ($request->risposta === null) {
             $row->is_timeout = true;
             $row->time_taken = $maxTimeMs;
             $row->score = 0;
-            $row->save();
+            if (! $this->saveOnce($row)) {
+                return response()->json(['message' => 'Hai già risolto questa domanda'], 403);
+            }
 
             return response()->json(['correct' => false, 'timeout' => true, 'score' => 0]);
         }
@@ -312,7 +326,9 @@ class MinigiocoPlayController extends Controller
             $row->tentativi_falliti = 1;
         }
 
-        $row->save();
+        if (! $this->saveOnce($row)) {
+            return response()->json(['message' => 'Hai già risolto questa domanda'], 403);
+        }
 
         return response()->json(['correct' => $isCorrect, 'timeout' => false, 'score' => $row->score]);
     }
@@ -341,11 +357,18 @@ class MinigiocoPlayController extends Controller
         $maxTimeMs = (int) $round->time_limit_seconds * 1000;
         $timeTaken = AnswerTimer::resolve((int) $request->time_taken, $this->roundStartedAt($attempt, $round), $maxTimeMs);
 
+        // Fuori tempo (oltre il limite + tolleranza): vale come tempo scaduto.
+        if (AnswerTimer::isLate($this->roundStartedAt($attempt, $round), $maxTimeMs)) {
+            $request->merge(['risposta' => null]);
+        }
+
         if ($request->risposta === null) {
             $row->is_timeout = true;
             $row->time_taken = $maxTimeMs;
             $row->score = 0;
-            $row->save();
+            if (! $this->saveOnce($row)) {
+                return response()->json(['message' => 'Hai già risolto questa domanda'], 403);
+            }
 
             return response()->json([
                 'correct' => false,
@@ -370,7 +393,9 @@ class MinigiocoPlayController extends Controller
             $row->tentativi_falliti = 1;
         }
 
-        $row->save();
+        if (! $this->saveOnce($row)) {
+            return response()->json(['message' => 'Hai già risolto questa domanda'], 403);
+        }
 
         return response()->json([
             'correct' => $isCorrect,
@@ -400,11 +425,18 @@ class MinigiocoPlayController extends Controller
         $maxTimeMs = (int) $round->time_limit_seconds * 1000;
         $timeTaken = AnswerTimer::resolve((int) $request->time_taken, $this->roundStartedAt($attempt, $round), $maxTimeMs);
 
+        // Fuori tempo (oltre il limite + tolleranza): vale come tempo scaduto.
+        if (AnswerTimer::isLate($this->roundStartedAt($attempt, $round), $maxTimeMs)) {
+            $request->merge(['risposta' => null]);
+        }
+
         if ($request->risposta === null) {
             $row->is_timeout = true;
             $row->time_taken = $maxTimeMs;
             $row->score = 0;
-            $row->save();
+            if (! $this->saveOnce($row)) {
+                return response()->json(['message' => 'Hai già risolto questa domanda'], 403);
+            }
 
             return response()->json([
                 'correct' => false,
@@ -428,7 +460,9 @@ class MinigiocoPlayController extends Controller
             $row->tentativi_falliti = 1;
         }
 
-        $row->save();
+        if (! $this->saveOnce($row)) {
+            return response()->json(['message' => 'Hai già risolto questa domanda'], 403);
+        }
 
         return response()->json([
             'correct' => $isCorrect,
@@ -436,6 +470,33 @@ class MinigiocoPlayController extends Controller
             'score' => $row->score,
             'spiegazione' => $round->spiegazione,
         ]);
+    }
+
+    /**
+     * Salva la prima risposta a un round dei minigiochi a tentativo unico
+     * (Salto Temporale, Trova l'Intruso, Vero/Falso). L'aggiornamento e'
+     * condizionato: passa solo se la riga e' ancora "intatta", cosi' risposte
+     * mandate nello stesso istante (es. tutte le opzioni insieme per prendere
+     * di sicuro quella giusta) non possono sommarsi. Le altre ricevono un rifiuto.
+     */
+    private function saveOnce(MinigiocoRoundRisposta $row): bool
+    {
+        $changes = $row->getDirty();
+        $changes['updated_at'] = now();
+
+        $updated = MinigiocoRoundRisposta::whereKey($row->id)
+            ->where('is_correct', false)
+            ->where('is_timeout', false)
+            ->where('tentativi_falliti', 0)
+            ->update($changes);
+
+        if ($updated === 1) {
+            $row->syncOriginal();
+
+            return true;
+        }
+
+        return false;
     }
 
     /**

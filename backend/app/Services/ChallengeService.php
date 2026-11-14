@@ -396,6 +396,11 @@ class ChallengeService
         $timeTaken = AnswerTimer::resolve($clientTimeMs, $lastEventAt, $maxTimeMs);
         $currentScore = max(0, $currentScore);
 
+        // Fuori tempo (oltre il limite + tolleranza): vale come tempo scaduto.
+        if ($answerId !== null && AnswerTimer::isLate($lastEventAt, $maxTimeMs)) {
+            $answerId = null;
+        }
+
         if ($answerId === null) {
             return [
                 'answer_id' => null,

@@ -124,6 +124,26 @@ class UserQuizController extends Controller
             ], 403);
         }
 
+        // Le domande NON si mandano qui: arrivano con /quiz/{id}/start, quando parte
+        // il tempo. Prima chiunque poteva leggerle e cercare le risposte con calma.
+        return response()->json([
+            'quiz' => [
+                'id' => $quiz->id,
+                'title' => $quiz->title,
+                'description' => $quiz->description,
+                'total_questions' => $quiz->questions()->count(),
+                'total_time_seconds' => (int) $quiz->questions()->sum('time_limit_seconds'),
+                'leaderboard_visible' => (bool) $quiz->leaderboard_visible,
+            ],
+        ]);
+    }
+
+    /**
+     * Domande del quiz per il gioco (senza mai l'indicazione della risposta giusta),
+     * in ordine casuale. Usata dall'avvio del tentativo.
+     */
+    public static function playQuestions(Quiz $quiz): array
+    {
         $quiz->load([
             'questions' => function ($q) {
                 $q->inRandomOrder()
@@ -144,15 +164,7 @@ class UserQuizController extends Controller
             'questions.answers:id,question_id,answer_text'
         ]);
 
-        return response()->json([
-            'quiz' => [
-                'id' => $quiz->id,
-                'title' => $quiz->title,
-                'description' => $quiz->description,
-                'total_questions' => $quiz->questions->count(),
-                'total_time_seconds' => $quiz->questions->sum('time_limit_seconds'),
-                'leaderboard_visible' => (bool) $quiz->leaderboard_visible,
-                'questions' => $quiz->questions->map(function ($question) {
+        return $quiz->questions->map(function ($question) {
                     return [
                         'id' => $question->id,
                         'question_text' => $question->question_text,
@@ -169,9 +181,7 @@ class UserQuizController extends Controller
                             ];
                         }),
                     ];
-                }),
-            ]
-        ]);
+                })->values()->all();
     }
 
     public function review(Request $request, Quiz $quiz)
