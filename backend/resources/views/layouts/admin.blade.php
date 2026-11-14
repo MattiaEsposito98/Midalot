@@ -54,7 +54,7 @@
                         'icon' => 'bi-inbox',
                         'items' => [
                             ['admin.reports.index', Route::is('admin.reports.*'), 'bi-flag', 'Segnalazioni', $openReportsCount],
-                            ['admin.event-requests.index', Route::is('admin.event-requests.*'), 'bi-stars', 'Richieste eventi', $newEventRequestsCount],
+                            ['admin.event-requests.index', Route::is('admin.event-requests.*'), 'bi-stars', 'Richieste contatto', $newEventRequestsCount],
                             ['admin.showcase.index', Route::is('admin.showcase.*'), 'bi-images', 'Vetrina', 0],
                         ],
                     ],

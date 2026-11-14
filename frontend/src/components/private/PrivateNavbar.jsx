@@ -5,7 +5,7 @@ import XpBar from "../XpBar/XpBar"
 import UserAvatar from "../UserAvatar/UserAvatar"
 import { useChallengeCount } from "../../hooks/useChallengeCount"
 import NavMenu from "../NavMenu/NavMenu"
-import { GAME_ITEMS, AVATAR_ITEMS, PROFILE_ITEMS } from "../NavMenu/menuItems"
+import { GAME_ITEMS, AVATAR_ITEMS, PROFILE_ITEMS, SERVICE_ITEMS } from "../NavMenu/menuItems"
 
 function PrivateNavbar() {
   const { logout, user } = useAuth()
@@ -73,10 +73,7 @@ function PrivateNavbar() {
             </li>
 
             <li className="nav-item">
-              <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/crea-il-tuo-evento">
-                <i className="bi bi-stars"></i>
-                Crea il tuo evento
-              </NavLink>
+              <NavMenu label="Servizi" icon="bi-stars" items={SERVICE_ITEMS} triggerClass={css.navLink} activeClass={css.activeLink} />
             </li>
 
             <li className="nav-item ms-xl-3">

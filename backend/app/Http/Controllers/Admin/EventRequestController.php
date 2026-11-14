@@ -11,8 +11,11 @@ class EventRequestController extends Controller
     public function index(Request $request)
     {
         $status = $request->get('status', 'active');
+        // Filtro per pagina di provenienza: quiz per eventi o servizi digitali.
+        $kind = in_array($request->get('kind'), EventRequest::KINDS, true) ? $request->get('kind') : null;
 
         $eventRequests = EventRequest::with(['user', 'handler'])
+            ->when($kind, fn($query) => $query->where('kind', $kind))
             ->when($status === 'active', fn($query) => $query->whereIn('status', [
                 EventRequest::STATUS_NEW,
                 EventRequest::STATUS_CONTACTED,
@@ -22,6 +25,9 @@ class EventRequestController extends Controller
             ->latest()
             ->paginate(20)
             ->withQueryString();
+
+        $kindCounts = EventRequest::whereIn('status', [EventRequest::STATUS_NEW, EventRequest::STATUS_CONTACTED])
+            ->selectRaw('kind, count(*) as total')->groupBy('kind')->pluck('total', 'kind');
 
         $counts = [
             'active' => EventRequest::whereIn('status', [
@@ -33,7 +39,7 @@ class EventRequestController extends Controller
             'closed' => EventRequest::where('status', EventRequest::STATUS_CLOSED)->count(),
         ];
 
-        return view('admin.event-requests.index', compact('eventRequests', 'counts', 'status'));
+        return view('admin.event-requests.index', compact('eventRequests', 'counts', 'status', 'kind', 'kindCounts'));
     }
 
     public function update(Request $request, EventRequest $eventRequest)

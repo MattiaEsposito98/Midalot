@@ -14,6 +14,12 @@ export const AVATAR_ITEMS = [
   { to: "/invita", icon: "bi-people-fill", title: "Invita un amico", text: "Ricevi monete per ogni amico", test: (p) => p.startsWith("/invita") },
 ]
 
+// Tendina "Servizi": quiz per eventi e servizi digitali (anche per chi non e' collegato).
+export const SERVICE_ITEMS = [
+  { to: "/crea-il-tuo-evento", icon: "bi-stars", title: "Quiz per il tuo evento", text: "Feste, lauree, serate tra amici", test: (p) => p.startsWith("/crea-il-tuo-evento") },
+  { to: "/servizi-digitali", icon: "bi-code-slash", title: "Siti e gestionali", text: "Siti web, e-commerce e software su misura", test: (p) => p.startsWith("/servizi-digitali") },
+]
+
 export const PROFILE_ITEMS = [
   { to: "/profilo", icon: "bi-person-lines-fill", title: "Il mio profilo", text: "I tuoi dati e le impostazioni", test: (p) => p.startsWith("/profilo") },
   { to: "/storico", icon: "bi-clock-history", title: "Storico", text: "Le tue partite", test: (p) => p.startsWith("/storico") },

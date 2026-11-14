@@ -5,6 +5,7 @@ import { useSEO } from "../../hooks/useSEO"
 import api from "../../service/api"
 import LoaderButton from "../../components/LoaderButton"
 import { logError } from "../../utils/logger"
+import { trackEvent } from "../../utils/analytics"
 import styles from "./CreaEvento.module.css"
 
 const EVENT_TYPES = [
@@ -57,8 +58,9 @@ function CreaEvento() {
     setError("")
 
     try {
-      await api.post("/event-requests", form)
+      await api.post("/event-requests", { ...form, kind: "evento" })
       setSuccess(true)
+      trackEvent("generate_lead", { lead_type: "quiz_evento", event_type: form.event_type || "non_indicato" })
     } catch (err) {
       logError(err)
       setError(
@@ -261,6 +263,15 @@ function CreaEvento() {
             </form>
           )}
         </div>
+
+        <aside className={styles.crossLink}>
+          <i className="bi bi-code-slash"></i>
+          <div>
+            <strong>Hai un'attività? Realizziamo anche siti web, e-commerce e gestionali</strong>
+            <span>Soluzioni digitali su misura, pensate per lo smartphone e per Google.</span>
+          </div>
+          <Link to="/servizi-digitali">Scopri i servizi digitali <i className="bi bi-arrow-right"></i></Link>
+        </aside>
       </div>
     </section>
   )

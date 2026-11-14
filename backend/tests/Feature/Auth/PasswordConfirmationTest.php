@@ -15,7 +15,7 @@ class PasswordConfirmationTest extends TestCase
     {
         $admin = $this->createAdmin();
 
-        $response = $this->actingAs($admin)->get('/confirm-password');
+        $response = $this->actingAs($admin)->get('/admin/confirm-password');
 
         $response->assertStatus(200);
     }
@@ -24,7 +24,7 @@ class PasswordConfirmationTest extends TestCase
     {
         $user = $this->createUser();
 
-        $response = $this->actingAs($user)->get('/confirm-password');
+        $response = $this->actingAs($user)->get('/admin/confirm-password');
 
         $response->assertForbidden();
     }
@@ -33,7 +33,7 @@ class PasswordConfirmationTest extends TestCase
     {
         $admin = $this->createAdmin();
 
-        $response = $this->actingAs($admin)->post('/confirm-password', [
+        $response = $this->actingAs($admin)->post('/admin/confirm-password', [
             'password' => 'password',
         ]);
 

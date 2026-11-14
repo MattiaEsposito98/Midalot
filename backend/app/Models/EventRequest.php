@@ -12,8 +12,16 @@ class EventRequest extends Model
 
     public const STATUS_CLOSED = 'closed';
 
+    // Da quale pagina arriva la richiesta.
+    public const KIND_EVENTO = 'evento';
+
+    public const KIND_SERVIZI = 'servizi';
+
+    public const KINDS = [self::KIND_EVENTO, self::KIND_SERVIZI];
+
     protected $fillable = [
         'user_id',
+        'kind',
         'handled_by',
         'name',
         'contact',

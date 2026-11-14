@@ -205,19 +205,20 @@ class AntiCheatTest extends TestCase
             ]);
         }
 
-        // Ordine reale del gioco: prima si leggono i round, poi si avvia il
-        // tentativo (per questo la permutazione degli id dipende dall'utente
-        // e non dal tentativo, che a quel punto non esiste ancora).
-        $play = $this->actingAs($user, 'sanctum')
+        // Ordine reale del gioco: la scheda del minigioco non contiene i round;
+        // arrivano solo con l'avvio del tentativo, quando parte il tempo.
+        $this->actingAs($user, 'sanctum')
             ->getJson("/api/minigiochi/{$minigioco->id}")
-            ->assertOk();
+            ->assertOk()
+            ->assertJsonMissingPath('minigioco.rounds');
 
-        $attemptId = $this->actingAs($user, 'sanctum')
+        $start = $this->actingAs($user, 'sanctum')
             ->postJson("/api/minigiochi/{$minigioco->id}/start")
-            ->assertCreated()
-            ->json('attempt_id');
+            ->assertCreated();
 
-        $itemsMostrati = collect($play->json('minigioco.rounds.0.items'));
+        $attemptId = $start->json('attempt_id');
+        $itemsMostrati = collect($start->json('rounds.0.items'));
+        $this->assertCount(4, $itemsMostrati);
 
         // Il client deve poter risolvere il round usando solo cio' che riceve:
         // le etichette dicono l ordine, gli id no.

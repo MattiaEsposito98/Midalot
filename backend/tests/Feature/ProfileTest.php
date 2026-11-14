@@ -18,7 +18,7 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($admin)
-            ->get('/profile');
+            ->get('/admin/profile');
 
         $response->assertOk();
     }
@@ -29,7 +29,7 @@ class ProfileTest extends TestCase
 
         $response = $this
             ->actingAs($user)
-            ->get('/profile');
+            ->get('/admin/profile');
 
         $response->assertForbidden();
     }

@@ -291,3 +291,15 @@
     justify-content: flex-start;
   }
 }
+
+/* Menu a scomparsa (ospiti, sotto i 992px): la tendina "Servizi" si apre
+   dentro il menu e spinge giu' le voci, invece di coprire Accedi/Registrati. */
+@media (max-width: 991.98px) {
+  .publicActions :global(.dropdown-menu) {
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+    width: 100%;
+    margin: 6px 0 4px !important;
+  }
+}

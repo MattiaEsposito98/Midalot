@@ -1,36 +1,49 @@
 @extends('layouts.admin')
 
-@section('title', 'Richieste eventi')
-@section('kicker', 'Quiz personalizzati')
-@section('page-title', 'Richieste "Crea il tuo evento"')
+@section('title', 'Richieste contatto')
+@section('kicker', 'Eventi e servizi digitali')
+@section('page-title', 'Richieste di contatto')
 
 @section('content')
     <section class="admin-card mb-3">
         <div class="admin-card-header">
             <div>
                 <h2 class="admin-section-title">Richieste di preventivo</h2>
-                <p class="admin-muted mb-0">Lead ricevuti dal form "Crea il tuo evento": rispondi al contatto indicato e aggiorna lo stato qui.</p>
+                <p class="admin-muted mb-0">Contatti ricevuti dai form "Crea il tuo evento" (quiz per eventi) e "Servizi digitali" (siti, e-commerce, gestionali): rispondi al contatto indicato e aggiorna lo stato qui.</p>
             </div>
         </div>
         <div class="admin-card-body">
+            @php $q = fn ($extra) => array_filter(array_merge(['status' => $status, 'kind' => $kind], $extra), fn ($v) => $v !== null); @endphp
+            <div class="admin-page-actions mb-2">
+                <a href="{{ route('admin.event-requests.index', $q(['kind' => null])) }}"
+                    class="btn btn-sm {{ ! $kind ? 'btn-dark' : 'btn-outline-dark' }}">Tutte le pagine</a>
+                <a href="{{ route('admin.event-requests.index', $q(['kind' => 'evento'])) }}"
+                    class="btn btn-sm {{ $kind === 'evento' ? 'btn-dark' : 'btn-outline-dark' }}">
+                    <i class="bi bi-stars"></i> Quiz per eventi <span class="badge bg-danger ms-1">{{ $kindCounts['evento'] ?? 0 }}</span>
+                </a>
+                <a href="{{ route('admin.event-requests.index', $q(['kind' => 'servizi'])) }}"
+                    class="btn btn-sm {{ $kind === 'servizi' ? 'btn-dark' : 'btn-outline-dark' }}">
+                    <i class="bi bi-code-slash"></i> Servizi digitali <span class="badge bg-danger ms-1">{{ $kindCounts['servizi'] ?? 0 }}</span>
+                </a>
+            </div>
             <div class="admin-page-actions">
-                <a href="{{ route('admin.event-requests.index', ['status' => 'active']) }}"
+                <a href="{{ route('admin.event-requests.index', $q(['status' => 'active'])) }}"
                     class="btn btn-sm {{ $status === 'active' ? 'btn-primary' : 'btn-outline-secondary' }}">
                     Da gestire <span class="badge bg-danger ms-1">{{ $counts['active'] }}</span>
                 </a>
-                <a href="{{ route('admin.event-requests.index', ['status' => 'new']) }}"
+                <a href="{{ route('admin.event-requests.index', $q(['status' => 'new'])) }}"
                     class="btn btn-sm {{ $status === 'new' ? 'btn-primary' : 'btn-outline-secondary' }}">
                     Nuove <span class="badge bg-secondary ms-1">{{ $counts['new'] }}</span>
                 </a>
-                <a href="{{ route('admin.event-requests.index', ['status' => 'contacted']) }}"
+                <a href="{{ route('admin.event-requests.index', $q(['status' => 'contacted'])) }}"
                     class="btn btn-sm {{ $status === 'contacted' ? 'btn-primary' : 'btn-outline-secondary' }}">
                     Contattate <span class="badge bg-secondary ms-1">{{ $counts['contacted'] }}</span>
                 </a>
-                <a href="{{ route('admin.event-requests.index', ['status' => 'closed']) }}"
+                <a href="{{ route('admin.event-requests.index', $q(['status' => 'closed'])) }}"
                     class="btn btn-sm {{ $status === 'closed' ? 'btn-primary' : 'btn-outline-secondary' }}">
                     Chiuse <span class="badge bg-secondary ms-1">{{ $counts['closed'] }}</span>
                 </a>
-                <a href="{{ route('admin.event-requests.index', ['status' => 'all']) }}"
+                <a href="{{ route('admin.event-requests.index', $q(['status' => 'all'])) }}"
                     class="btn btn-sm {{ $status === 'all' ? 'btn-primary' : 'btn-outline-secondary' }}">
                     Tutte
                 </a>
@@ -53,11 +66,16 @@
                     <div>
                         <div class="d-flex align-items-center flex-wrap gap-2 mb-1">
                             <span class="badge {{ $statusConfig['class'] }}">{{ $statusConfig['label'] }}</span>
+                            @if ($eventRequest->kind === 'servizi')
+                                <span class="badge bg-primary"><i class="bi bi-code-slash"></i> Servizi digitali</span>
+                            @else
+                                <span class="badge bg-warning text-dark"><i class="bi bi-stars"></i> Quiz per evento</span>
+                            @endif
                             <span class="small admin-muted">#{{ $eventRequest->id }} · {{ $eventRequest->created_at->format('d/m/Y H:i') }}</span>
                         </div>
                         <h2 class="admin-section-title">{{ $eventRequest->name }}</h2>
                         <p class="admin-muted mb-0">
-                            {{ $eventRequest->event_type ?: 'Tipo evento non specificato' }}
+                            {{ $eventRequest->event_type ?: ($eventRequest->kind === 'servizi' ? 'Servizio non specificato' : 'Tipo evento non specificato') }}
                             @if ($eventRequest->event_date)
                                 · {{ $eventRequest->event_date->format('d/m/Y') }}
                             @endif
@@ -69,7 +87,7 @@
                     <div class="row g-3">
                         <div class="col-lg-8">
                             <div class="mb-3">
-                                <div class="small text-uppercase fw-bold admin-muted mb-1">Idea per il quiz</div>
+                                <div class="small text-uppercase fw-bold admin-muted mb-1">{{ $eventRequest->kind === 'servizi' ? 'Progetto' : 'Idea per il quiz' }}</div>
                                 <div class="border rounded p-3 bg-light" style="white-space: pre-wrap;">{{ $eventRequest->message }}</div>
                             </div>
 

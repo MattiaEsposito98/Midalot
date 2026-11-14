@@ -14,6 +14,7 @@ class EventRequestController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'kind' => ['nullable', 'in:'.implode(',', EventRequest::KINDS)],
             'name' => ['required', 'string', 'max:255'],
             'contact' => ['required', 'string', 'max:255'],
             'event_type' => ['nullable', 'string', 'max:100'],
@@ -26,6 +27,12 @@ class EventRequestController extends Controller
         // qui per evitare "Undefined array key" nella vista dell'email.
         $validated['event_type'] ??= null;
         $validated['event_date'] ??= null;
+        $validated['kind'] ??= EventRequest::KIND_EVENTO;
+
+        // Per i servizi digitali la data dell'evento non ha senso.
+        if ($validated['kind'] === EventRequest::KIND_SERVIZI) {
+            $validated['event_date'] = null;
+        }
 
         $user = Auth::guard('sanctum')->user();
 
@@ -41,7 +48,9 @@ class EventRequestController extends Controller
         ]));
 
         return response()->json([
-            'message' => 'Richiesta inviata! Ti risponderemo il prima possibile con un preventivo gratuito.',
+            'message' => $validated['kind'] === EventRequest::KIND_SERVIZI
+                ? 'Richiesta inviata! Ti ricontatteremo il prima possibile per parlare del tuo progetto.'
+                : 'Richiesta inviata! Ti risponderemo il prima possibile con un preventivo gratuito.',
             'id' => $eventRequest->id,
         ], 201);
     }

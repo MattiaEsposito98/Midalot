@@ -15,7 +15,7 @@ class RegistrationTest extends TestCase
 
     public function test_backend_registration_redirects_to_react(): void
     {
-        $response = $this->get('/register');
+        $response = $this->get('/admin/register');
 
         $response->assertRedirect(rtrim(config('app.frontend_url'), '/') . '/register');
     }

@@ -13,7 +13,7 @@ class AdminAccessTest extends TestCase
 
     public function test_guest_is_redirected_from_admin_area(): void
     {
-        $this->get('/admin')->assertRedirect('/login');
+        $this->get('/admin')->assertRedirect('/admin/login');
     }
 
     public function test_normal_user_is_forbidden_from_admin_area(): void

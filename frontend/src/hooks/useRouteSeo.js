@@ -4,7 +4,7 @@ const SITE = "https://midalot.live"
 
 // Pagine pubbliche che devono comparire su Google. Tutto il resto (area
 // personale, sfide, avatar, link con token...) e' noindex.
-const INDEXABLE = [/^\/$/, /^\/chi-siamo$/, /^\/crea-il-tuo-evento$/, /^\/classifiche$/, /^\/training(\/[^/]+)?$/, /^\/register$/, /^\/login$/, /^\/privacy$/, /^\/termini$/, /^\/cookie$/, /^\/regolamento$/]
+const INDEXABLE = [/^\/$/, /^\/chi-siamo$/, /^\/crea-il-tuo-evento$/, /^\/servizi-digitali$/, /^\/classifiche$/, /^\/training(\/[^/]+)?$/, /^\/register$/, /^\/login$/, /^\/privacy$/, /^\/termini$/, /^\/cookie$/, /^\/regolamento$/]
 
 function setLink(rel, href) {
   let tag = document.querySelector(`link[rel="${rel}"]`)

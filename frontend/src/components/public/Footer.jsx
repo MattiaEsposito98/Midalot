@@ -26,6 +26,8 @@ function Footer() {
 
           <div className={css.legalLinks}>
             <Link to="/chi-siamo" className={css.footerLink}>Chi siamo</Link>
+            <Link to="/crea-il-tuo-evento" className={css.footerLink}>Quiz per eventi</Link>
+            <Link to="/servizi-digitali" className={css.footerLink}>Siti e gestionali</Link>
             <Link to="/privacy" className={css.footerLink}>Privacy</Link>
             <Link to="/termini" className={css.footerLink}>Termini</Link>
             <Link to="/cookie" className={css.footerLink}>Cookie</Link>

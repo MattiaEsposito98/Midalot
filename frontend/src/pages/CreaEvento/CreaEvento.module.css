@@ -291,3 +291,52 @@
     padding: 22px;
   }
 }
+
+/* Rimando alla pagina dei servizi digitali */
+.crossLink {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 22px;
+  background: #182033;
+  color: #ffffff;
+  border-radius: 8px;
+  padding: 18px 22px;
+  box-shadow: 6px 6px 0 #0f8b8d;
+}
+
+.crossLink > i {
+  font-size: 1.6rem;
+  color: #ffc107;
+}
+
+.crossLink div {
+  display: grid;
+  flex: 1;
+}
+
+.crossLink span {
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 0.92rem;
+}
+
+.crossLink a {
+  font-weight: 900;
+  color: #ffc107;
+  white-space: nowrap;
+}
+
+.crossLink a:hover {
+  color: #ffffff;
+}
+
+@media (max-width: 640px) {
+  .crossLink {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .crossLink a {
+    white-space: normal;
+  }
+}

@@ -97,9 +97,15 @@ class VeroFalsoTest extends TestCase
         [$minigioco] = $this->minigiocoConDomanda();
         $utente = User::factory()->create(['is_admin' => false]);
 
-        $risposta = $this->actingAs($utente, 'sanctum')
+        // La scheda del minigioco non mostra i round; arrivano all'avvio.
+        $scheda = $this->actingAs($utente, 'sanctum')
             ->getJson("/api/minigiochi/{$minigioco->id}")
             ->assertOk();
+        $this->assertStringNotContainsString("Roma e'", json_encode($scheda->json()));
+
+        $risposta = $this->actingAs($utente, 'sanctum')
+            ->postJson("/api/minigiochi/{$minigioco->id}/start")
+            ->assertCreated();
 
         $payload = json_encode($risposta->json());
         $this->assertStringContainsString("Roma e'", $payload);

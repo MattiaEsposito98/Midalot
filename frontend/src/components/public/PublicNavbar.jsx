@@ -6,7 +6,7 @@ import XpBar from "../XpBar/XpBar"
 import UserAvatar from "../UserAvatar/UserAvatar"
 import { useChallengeCount } from "../../hooks/useChallengeCount"
 import NavMenu from "../NavMenu/NavMenu"
-import { GAME_ITEMS, AVATAR_ITEMS, PROFILE_ITEMS } from "../NavMenu/menuItems"
+import { GAME_ITEMS, AVATAR_ITEMS, PROFILE_ITEMS, SERVICE_ITEMS } from "../NavMenu/menuItems"
 
 function PublicNavbar() {
   const { user, token, logout } = useAuth()
@@ -76,10 +76,7 @@ function PublicNavbar() {
 
                 <NavMenu label="Avatar" icon="bi-person-badge" items={AVATAR_ITEMS} triggerClass={css.navPill} activeClass={css.navPillActive} />
 
-                <NavLink to="/crea-il-tuo-evento" className={css.navPill}>
-                  <i className="bi bi-stars"></i>
-                  Crea il tuo evento
-                </NavLink>
+                <NavMenu label="Servizi" icon="bi-stars" items={SERVICE_ITEMS} triggerClass={css.navPill} activeClass={css.navPillActive} />
 
                 <NavMenu
                   items={PROFILE_ITEMS}
@@ -108,10 +105,8 @@ function PublicNavbar() {
                   Chi siamo
                 </NavLink>
 
-                <NavLink to="/crea-il-tuo-evento" className={css.navPill}>
-                  <i className="bi bi-stars"></i>
-                  Crea il tuo evento
-                </NavLink>
+                {/* Navbar ospiti aperta da 992px: tendina vera a ogni larghezza (il modo "elenco fisso" vale sotto i 1200px). */}
+                <NavMenu label="Servizi" icon="bi-stars" items={SERVICE_ITEMS} triggerClass={css.navPill} activeClass={css.navPillActive} staticOnMobile={false} />
 
                 <Link to="/login" className={`btn ${css.loginBtn}`}>
                   <i className="bi bi-box-arrow-in-right"></i>

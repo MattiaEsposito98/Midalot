@@ -13,7 +13,7 @@ class AuthenticationTest extends TestCase
 
     public function test_admin_login_screen_can_be_rendered(): void
     {
-        $response = $this->get('/login');
+        $response = $this->get('/admin/login');
 
         $response->assertStatus(200);
     }
@@ -22,7 +22,7 @@ class AuthenticationTest extends TestCase
     {
         $admin = $this->createAdmin();
 
-        $response = $this->post('/login', [
+        $response = $this->post('/admin/login', [
             'login' => $admin->email,
             'password' => 'password',
         ]);
@@ -35,14 +35,14 @@ class AuthenticationTest extends TestCase
     {
         $user = $this->createUser();
 
-        $response = $this->from('/login')->post('/login', [
+        $response = $this->from('/admin/login')->post('/admin/login', [
             'login' => $user->email,
             'password' => 'password',
         ]);
 
         $this->assertGuest();
         $response
-            ->assertRedirect('/login')
+            ->assertRedirect('/admin/login')
             ->assertSessionHasErrors('login');
     }
 
@@ -50,7 +50,7 @@ class AuthenticationTest extends TestCase
     {
         $admin = $this->createAdmin();
 
-        $this->post('/login', [
+        $this->post('/admin/login', [
             'login' => $admin->email,
             'password' => 'wrong-password',
         ]);
@@ -62,7 +62,7 @@ class AuthenticationTest extends TestCase
     {
         $admin = $this->createAdmin();
 
-        $response = $this->actingAs($admin)->post('/logout');
+        $response = $this->actingAs($admin)->post('/admin/logout');
 
         $this->assertGuest();
         $response->assertRedirect('/');
