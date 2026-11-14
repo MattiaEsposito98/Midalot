@@ -5,6 +5,8 @@ import UserBadge from "../UserBadge/UserBadge"
 import XpBar from "../XpBar/XpBar"
 import UserAvatar from "../UserAvatar/UserAvatar"
 import { useChallengeCount } from "../../hooks/useChallengeCount"
+import NavMenu from "../NavMenu/NavMenu"
+import { GAME_ITEMS, AVATAR_ITEMS, PROFILE_ITEMS } from "../NavMenu/menuItems"
 
 function PublicNavbar() {
   const { user, token, logout } = useAuth()
@@ -62,25 +64,7 @@ function PublicNavbar() {
 
             {isLoggedIn ? (
               <>
-                <NavLink to="/midalario" className={css.navPill}>
-                  <i className="bi bi-broadcast"></i>
-                  Il Midalario
-                </NavLink>
-
-                <NavLink to="/quiz-one-shot" className={css.navPill}>
-                  <i className="bi bi-grid-1x2-fill"></i>
-                  Quiz One Shot
-                </NavLink>
-
-                <NavLink to="/training" className={css.navPill}>
-                  <i className="bi bi-lightning-charge-fill"></i>
-                  Training
-                </NavLink>
-
-                <NavLink to="/minigiochi" className={css.navPill}>
-                  <i className="bi bi-joystick"></i>
-                  Minigiochi
-                </NavLink>
+                <NavMenu label="Gioca" icon="bi-controller" items={GAME_ITEMS} triggerClass={css.navPill} activeClass={css.navPillActive} />
 
                 <NavLink to="/sfide" className={css.navPill}>
                   <i className="bi bi-lightning-charge"></i>
@@ -90,89 +74,27 @@ function PublicNavbar() {
                   )}
                 </NavLink>
 
+                <NavMenu label="Avatar" icon="bi-person-badge" items={AVATAR_ITEMS} triggerClass={css.navPill} activeClass={css.navPillActive} />
+
                 <NavLink to="/crea-il-tuo-evento" className={css.navPill}>
                   <i className="bi bi-stars"></i>
                   Crea il tuo evento
                 </NavLink>
 
-                <div className="dropdown">
-                  <a
-                    className={`${css.profileBtn} dropdown-toggle`}
-                    href="#"
-                    role="button"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                  >
-                    <UserAvatar url={user?.avatar_url} frame={user?.avatar_frame} name={user?.nickname || user?.name} size={26} />
-                    {user?.name || user?.nickname || "Profilo"}
-                    <UserBadge badges={user?.badges} />
-                  </a>
-
-                  <ul className={`dropdown-menu dropdown-menu-end shadow-sm border-0 ${css.profileMenu}`}>
-                    <li>
-                      <Link className="dropdown-item" to="/profilo">
-                        <i className="bi bi-person-lines-fill me-2"></i>
-                        Il mio profilo
-                      </Link>
-                    </li>
-
-                    <li>
-                      <Link className="dropdown-item" to="/avatar">
-                        <i className="bi bi-person-badge me-2"></i>
-                        Il mio avatar
-                      </Link>
-                    </li>
-
-                    <li>
-                      <Link className="dropdown-item" to="/avatar?vista=negozio">
-                        <i className="bi bi-shop me-2"></i>
-                        Negozio
-                      </Link>
-                    </li>
-
-                    <li>
-                      <Link className="dropdown-item" to="/invita">
-                        <i className="bi bi-people-fill me-2"></i>
-                        Invita un amico
-                      </Link>
-                    </li>
-
-                    <li>
-                      <Link className="dropdown-item" to="/storico">
-                        <i className="bi bi-clock-history me-2"></i>
-                        Storico
-                      </Link>
-                    </li>
-
-                    <li>
-                      <Link className="dropdown-item" to="/chi-siamo">
-                        <i className="bi bi-info-circle-fill me-2"></i>
-                        Chi siamo
-                      </Link>
-                    </li>
-
-                    <li>
-                      <Link className="dropdown-item" to="/regolamento">
-                        <i className="bi bi-journal-check me-2"></i>
-                        Regolamento
-                      </Link>
-                    </li>
-
-                    <li>
-                      <hr className="dropdown-divider" />
-                    </li>
-
-                    <li>
-                      <button
-                        onClick={handleLogout}
-                        className="dropdown-item text-danger"
-                      >
-                        <i className="bi bi-box-arrow-right me-2"></i>
-                        Logout
-                      </button>
-                    </li>
-                  </ul>
-                </div>
+                <NavMenu
+                  items={PROFILE_ITEMS}
+                  triggerClass={css.profileBtn}
+                  staticOnMobile={false}
+                  alignEnd
+                  triggerContent={
+                    <>
+                      <UserAvatar url={user?.avatar_url} frame={user?.avatar_frame} name={user?.nickname || user?.name} size={26} />
+                      {user?.name || user?.nickname || "Profilo"}
+                      <UserBadge badges={user?.badges} />
+                    </>
+                  }
+                  footerItem={{ icon: "bi-box-arrow-right", title: "Logout", onClick: handleLogout, danger: true }}
+                />
               </>
             ) : (
               <>

@@ -56,7 +56,8 @@
   text-decoration: none;
 }
 
-.navPill:hover {
+.navPill:hover,
+.navPillActive {
   background: rgba(24, 32, 51, 0.12);
   color: #182033;
 }
@@ -281,5 +282,12 @@
 
   .loggedIn .publicActions > .dropdown {
     width: 100%;
+  }
+}
+
+/* Utente collegato, menu a scomparsa: tutte le voci allineate a sinistra, come le tendine. */
+@media (max-width: 1199.98px) {
+  .loggedIn .navPill {
+    justify-content: flex-start;
   }
 }

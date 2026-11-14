@@ -4,6 +4,8 @@ import css from "./PrivateNavbar.module.css"
 import XpBar from "../XpBar/XpBar"
 import UserAvatar from "../UserAvatar/UserAvatar"
 import { useChallengeCount } from "../../hooks/useChallengeCount"
+import NavMenu from "../NavMenu/NavMenu"
+import { GAME_ITEMS, AVATAR_ITEMS, PROFILE_ITEMS } from "../NavMenu/menuItems"
 
 function PrivateNavbar() {
   const { logout, user } = useAuth()
@@ -53,31 +55,7 @@ function PrivateNavbar() {
 
           <ul className="navbar-nav align-items-xl-center gap-xl-2">
             <li className="nav-item">
-              <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/midalario">
-                <i className="bi bi-broadcast"></i>
-                Il Midalario
-              </NavLink>
-            </li>
-
-            <li className="nav-item">
-              <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/quiz-one-shot">
-                <i className="bi bi-grid-1x2-fill"></i>
-                Quiz One Shot
-              </NavLink>
-            </li>
-
-            <li className="nav-item">
-              <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/training">
-                <i className="bi bi-lightning-charge-fill"></i>
-                Training
-              </NavLink>
-            </li>
-
-            <li className="nav-item">
-              <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/minigiochi">
-                <i className="bi bi-joystick"></i>
-                Minigiochi
-              </NavLink>
+              <NavMenu label="Gioca" icon="bi-controller" items={GAME_ITEMS} triggerClass={css.navLink} activeClass={css.activeLink} />
             </li>
 
             <li className="nav-item">
@@ -91,88 +69,30 @@ function PrivateNavbar() {
             </li>
 
             <li className="nav-item">
+              <NavMenu label="Avatar" icon="bi-person-badge" items={AVATAR_ITEMS} triggerClass={css.navLink} activeClass={css.activeLink} />
+            </li>
+
+            <li className="nav-item">
               <NavLink className={({ isActive }) => `${css.navLink} ${isActive ? css.activeLink : ""}`} to="/crea-il-tuo-evento">
                 <i className="bi bi-stars"></i>
                 Crea il tuo evento
               </NavLink>
             </li>
 
-            <li className="nav-item dropdown ms-xl-3">
-              <a
-                className={`${css.profileBtn} dropdown-toggle`}
-                href="#"
-                role="button"
-                data-bs-toggle="dropdown"
-                aria-expanded="false"
-              >
-                <UserAvatar url={user?.avatar_url} frame={user?.avatar_frame} name={user?.nickname || user?.name} size={26} />
-                {user?.name || user?.username || "Profilo"}
-              </a>
-
-              <ul className={`dropdown-menu dropdown-menu-end shadow-sm border-0 ${css.profileMenu}`}>
-                <li>
-                  <Link className="dropdown-item" to="/profilo">
-                    <i className="bi bi-person-lines-fill me-2"></i>
-                    Il mio profilo
-                  </Link>
-                </li>
-
-                <li>
-                  <Link className="dropdown-item" to="/avatar">
-                    <i className="bi bi-person-badge me-2"></i>
-                    Il mio avatar
-                  </Link>
-                </li>
-
-                <li>
-                  <Link className="dropdown-item" to="/avatar?vista=negozio">
-                    <i className="bi bi-shop me-2"></i>
-                    Negozio
-                  </Link>
-                </li>
-
-                <li>
-                  <Link className="dropdown-item" to="/invita">
-                    <i className="bi bi-people-fill me-2"></i>
-                    Invita un amico
-                  </Link>
-                </li>
-
-                <li>
-                  <Link className="dropdown-item" to="/storico">
-                    <i className="bi bi-clock-history me-2"></i>
-                    Storico
-                  </Link>
-                </li>
-
-                <li>
-                  <Link className="dropdown-item" to="/chi-siamo">
-                    <i className="bi bi-info-circle-fill me-2"></i>
-                    Chi siamo
-                  </Link>
-                </li>
-
-                <li>
-                  <Link className="dropdown-item" to="/regolamento">
-                    <i className="bi bi-journal-check me-2"></i>
-                    Regolamento
-                  </Link>
-                </li>
-
-                <li>
-                  <hr className="dropdown-divider" />
-                </li>
-
-                <li>
-                  <button
-                    onClick={handleLogout}
-                    className="dropdown-item text-danger"
-                  >
-                    <i className="bi bi-box-arrow-right me-2"></i>
-                    Logout
-                  </button>
-                </li>
-              </ul>
+            <li className="nav-item ms-xl-3">
+              <NavMenu
+                items={PROFILE_ITEMS}
+                triggerClass={css.profileBtn}
+                staticOnMobile={false}
+                alignEnd
+                triggerContent={
+                  <>
+                    <UserAvatar url={user?.avatar_url} frame={user?.avatar_frame} name={user?.nickname || user?.name} size={26} />
+                    {user?.name || user?.username || "Profilo"}
+                  </>
+                }
+                footerItem={{ icon: "bi-box-arrow-right", title: "Logout", onClick: handleLogout, danger: true }}
+              />
             </li>
           </ul>
         </div>

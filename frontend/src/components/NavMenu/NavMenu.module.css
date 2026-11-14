@@ -1,0 +1,123 @@
+.wrap {
+  position: relative;
+}
+
+.trigger {
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.triggerBare {
+  border: 0;
+  font: inherit;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.itemDanger strong,
+.itemDanger .icon {
+  color: #dc3545;
+}
+
+.itemDanger:hover,
+.itemDanger:focus {
+  background: #ffe9ec;
+}
+
+.menu {
+  min-width: 280px;
+  margin-top: 10px !important;
+  padding: 6px;
+  border-radius: 8px;
+  border: 2px solid #182033 !important;
+  box-shadow: 4px 4px 0 rgba(24, 32, 51, 0.18) !important;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  white-space: normal;
+}
+
+.item strong {
+  display: block;
+  color: #182033;
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.item small {
+  display: block;
+  color: #647084;
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: #fff4bf;
+  border: 2px solid #182033;
+  color: #182033;
+  font-size: 1.05rem;
+}
+
+.item:hover,
+.item:focus {
+  background: #fff8d6;
+}
+
+.itemActive {
+  background: #fff4bf;
+}
+
+/* Menu a scomparsa (sotto i 1200 px): niente tendina, le voci sono sempre visibili. */
+@media (max-width: 1199.98px) {
+  .static .trigger {
+    pointer-events: none;
+    width: 100%;
+    justify-content: flex-start !important;
+    opacity: 0.8;
+  }
+
+  .static .trigger::after {
+    display: none !important;
+  }
+
+  .static .menu {
+    display: block !important;
+    position: static !important;
+    transform: none !important;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 0 0 0 10px;
+    background: transparent;
+    border: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .static .item {
+    padding: 7px 8px;
+  }
+
+  .static .item small {
+    display: none;
+  }
+
+  .static .icon {
+    width: 30px;
+    height: 30px;
+    font-size: 0.95rem;
+  }
+}

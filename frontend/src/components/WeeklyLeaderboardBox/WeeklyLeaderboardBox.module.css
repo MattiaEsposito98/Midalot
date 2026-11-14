@@ -71,7 +71,7 @@
 .leaderboardRow {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px;
   padding: 14px 0;
   border-bottom: 1px solid #eef1f5;
 }
@@ -81,18 +81,27 @@
 }
 
 .leaderboardRank {
-  min-width: 34px;
+  flex: 0 0 auto;
+  min-width: 30px;
   font-weight: 950;
   color: #7a5400;
 }
 
 .leaderboardName {
-  flex: 1;
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
   font-weight: 900;
   color: #182033;
 }
 
 .leaderboardScore {
+  flex: 0 0 auto;
+  margin-left: auto;
+  white-space: nowrap;
   font-weight: 950;
   color: #0f8b8d;
 }
@@ -129,4 +138,20 @@
 .seeMoreLink:hover {
   color: #0b6a6b;
   text-decoration: underline;
+}
+
+/* Badge e avatar non si schiacciano; se manca spazio si accorcia solo il nome */
+.leaderboardRow > :not(.leaderboardName):not(.leaderboardScore) {
+  flex-shrink: 0;
+}
+
+@media (max-width: 420px) {
+  .leaderboardBox {
+    padding: 18px 16px 16px;
+    box-shadow: 8px 8px 0 #ffc107, 0 18px 42px rgba(24, 32, 51, 0.15);
+  }
+
+  .leaderboardRow {
+    gap: 8px;
+  }
 }
