@@ -474,6 +474,8 @@ export function Ali() {
 }
 
 // ---------------------------------------------------------------- compagno, aure
+// Compagni "da spalla" (gufo, pulcino, civetta, pappagallo, panda): a x = +-0.44.
+// Piu' vicino (era 0.24) finiscono dietro la testa, larga fino a ~0.30 all'altezza delle spalle.
 
 export function Gufo() {
   const owl = useRef()
@@ -485,7 +487,7 @@ export function Gufo() {
   })
 
   return (
-    <group ref={owl} position={[0.24, 1.07, -0.02]}>
+    <group ref={owl} position={[0.44, 1.07, 0.04]}>
       <Ball r={0.1} scale={[1, 1.15, 0.95]} color="#8a5a34" />
       <Ball r={0.07} scale={[1, 1.1, 0.5]} position={[0, -0.02, 0.06]} color="#e9cfa4" outline={false} />
       {[-1, 1].map((s) => (
@@ -698,7 +700,7 @@ export function Pulcino() {
   })
 
   return (
-    <group ref={ref} position={[0.24, 1.03, 0]}>
+    <group ref={ref} position={[0.44, 1.03, 0.04]}>
       <Ball r={0.075} color="#ffd93b" />
       <Ball r={0.05} position={[0, 0.08, 0.02]} color="#ffd93b" />
       {[-1, 1].map((s) => (

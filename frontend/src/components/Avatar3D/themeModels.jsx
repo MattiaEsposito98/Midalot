@@ -242,7 +242,7 @@ export function Civetta() {
   })
 
   return (
-    <group ref={owl} position={[-0.24, 1.07, -0.02]}>
+    <group ref={owl} position={[-0.44, 1.07, 0.04]}>
       <Ball r={0.1} scale={[1, 1.15, 0.95]} color="#f4f4f6" />
       {[[-0.04, 0.0], [0.05, -0.05], [-0.02, -0.07]].map(([x, y]) => (
         <Ball key={`${x}${y}`} r={0.012} position={[x, y, 0.09]} color="#8a8fa3" outline={false} />

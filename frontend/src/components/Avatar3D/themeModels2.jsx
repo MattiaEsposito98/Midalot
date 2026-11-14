@@ -185,7 +185,7 @@ export function Pappagallo() {
   })
 
   return (
-    <group ref={bird} position={[0.24, 1.08, -0.02]}>
+    <group ref={bird} position={[0.44, 1.08, 0.04]}>
       <Ball r={0.08} scale={[0.9, 1.2, 0.9]} color="#e23b3b" />
       <Ball r={0.065} position={[0, 0.11, 0.02]} color="#e23b3b" />
       {[-1, 1].map((s) => (
@@ -487,7 +487,7 @@ export function Panda() {
   })
 
   return (
-    <group ref={panda} position={[0.24, 1.08, -0.02]}>
+    <group ref={panda} position={[0.44, 1.08, 0.04]}>
       <Ball r={0.085} scale={[1, 0.95, 0.95]} color="#f4f4f6" />
       {[-1, 1].map((s) => (
         <group key={s}>
