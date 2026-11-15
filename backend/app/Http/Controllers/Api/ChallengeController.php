@@ -262,8 +262,83 @@ class ChallengeController extends Controller
             'mode' => ['nullable', 'in:async,live'],
         ]);
 
-        $mode = $validated['mode'] ?? 'async';
+        return $this->createChallenge($request->user(), $validated);
+    }
+
+    /**
+     * Rivincita: ricrea una sfida conclusa con gli stessi giocatori, la stessa modalita'
+     * e gli stessi argomenti, ma con domande nuove (pickQuestions premia quelle meno usate).
+     * Passa dalle stesse regole di una sfida normale: massimo 5 sfide aperte, una sola
+     * sfida aperta per coppia, chi non accetta sfide, pool di domande sufficiente.
+     */
+    public function rematch(Request $request, Challenge $challenge)
+    {
         $user = $request->user();
+        $this->authorizeParticipant($challenge, $user->id);
+
+        $challenge->loadMissing('participants');
+        $plan = $this->rematchPlan($challenge, $user->id);
+
+        if ($plan === null) {
+            return response()->json(['message' => 'La rivincita si puo chiedere solo per una sfida conclusa'], 422);
+        }
+
+        return $this->createChallenge($user, [
+            'guest' => $plan['guest'],
+            'guest_name' => $challenge->guest_name,
+            'opponent_ids' => $plan['opponent_ids'],
+            'category_ids' => $challenge->category_ids,
+            'subcategory_ids' => $challenge->subcategory_ids,
+            'quiz_ids' => $challenge->quiz_ids,
+            'mode' => $challenge->mode,
+        ]);
+    }
+
+    /**
+     * Chi puo' chiedere la rivincita e contro chi: solo sfide concluse, solo chi ha giocato
+     * (partecipante "accepted"). Gli avversari sono gli altri che hanno giocato; se l'unico
+     * avversario e' un amico non ancora registrato, solo lo sfidante puo' ripetere il link.
+     *
+     * @return array{guest: bool, opponent_ids: int[]}|null
+     */
+    private function rematchPlan(Challenge $challenge, int $userId): ?array
+    {
+        if ($challenge->status !== 'completed') {
+            return null;
+        }
+
+        $me = $challenge->participants->firstWhere('user_id', $userId);
+        if (! $me || $me->status !== 'accepted') {
+            return null;
+        }
+
+        $opponentIds = $challenge->participants
+            ->where('user_id', '!=', $userId)
+            ->where('status', 'accepted')
+            ->pluck('user_id')
+            ->map(fn ($id) => (int) $id)
+            ->values()
+            ->all();
+
+        if ($opponentIds) {
+            return ['guest' => false, 'opponent_ids' => $opponentIds];
+        }
+
+        if ($challenge->guest_token && $challenge->isChallenger($userId)) {
+            return ['guest' => true, 'opponent_ids' => []];
+        }
+
+        return null;
+    }
+
+    /**
+     * Crea la sfida (comune a "nuova sfida" e "rivincita").
+     *
+     * @param  array<string, mixed>  $validated
+     */
+    private function createChallenge(User $user, array $validated)
+    {
+        $mode = $validated['mode'] ?? 'async';
 
         $guest = (bool) ($validated['guest'] ?? false);
         if ($guest) {
@@ -1105,6 +1180,8 @@ class ChallengeController extends Controller
             && ($iAmChallenger
                 ? $challenge->live_started_at === null && ! $challenge->attempts->where('user_id', '!=', $userId)->count()
                 : ($payload['me']['status'] ?? null) === 'invited' && ! $payload['me']['started']);
+
+        $payload['can_rematch'] = $this->rematchPlan($challenge, $userId) !== null;
 
         if ($closed) {
             $payload['xp_awarded'] = (int) XpEvent::where('user_id', $userId)

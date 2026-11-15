@@ -133,6 +133,7 @@ function SfidaDettaglio() {
   const [review, setReview] = useState(null)
   const [error, setError] = useState("")
   const [busy, setBusy] = useState(false)
+  const [rematchError, setRematchError] = useState("")
 
   useEffect(() => {
     let cancelled = false
@@ -171,6 +172,24 @@ function SfidaDettaglio() {
     } catch (err) {
       logError(err)
       setError(err.response?.data?.message || "Operazione non riuscita")
+      setBusy(false)
+    }
+  }
+
+  // Rivincita: stessa sfida (giocatori, argomenti, modalita') con domande nuove.
+  async function rematch() {
+    setBusy(true)
+    setRematchError("")
+
+    try {
+      const res = await api.post(`/challenges/${id}/rematch`)
+      notifyChallengesChanged()
+      // Con l'amico non registrato si torna alla schermata del link; in live si entra nella sala.
+      const goLive = challenge.mode === "live" && !res.data.guest_url
+      navigate(goLive ? `/sfide/${res.data.id}/live` : `/sfide/${res.data.id}`)
+    } catch (err) {
+      logError(err)
+      setRematchError(err.response?.data?.message || "Non è stato possibile creare la rivincita")
       setBusy(false)
     }
   }
@@ -263,6 +282,20 @@ function SfidaDettaglio() {
                 </button>
               </div>
             )}
+          </div>
+        )}
+
+        {challenge.can_rematch && (
+          <div className="text-center mt-3">
+            <button className="btn btn-warning btn-lg fw-bold" disabled={busy} onClick={rematch}>
+              <i className="bi bi-arrow-repeat"></i> Rivincita
+              {others.length === 1 ? ` con ${others[0].nickname}` : ""}
+            </button>
+            <p className={`${styles.meta} mt-2 mb-0`}>
+              {others.length === 1 ? "Stessi argomenti" : "Stessi giocatori e argomenti"}, domande nuove.
+              {challenge.mode === "live" ? " Sfida live: l'invito resta valido 10 minuti." : ""}
+            </p>
+            {rematchError && <div className="alert alert-warning mt-2 mb-0">{rematchError}</div>}
           </div>
         )}
 

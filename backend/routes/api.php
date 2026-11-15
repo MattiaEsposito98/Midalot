@@ -171,6 +171,8 @@ Route::middleware(['auth:sanctum', 'verified'])->group(function () {
     Route::post('/challenges', [ChallengeController::class, 'store'])
         ->middleware('throttle:20,1');
     Route::get('/challenges/{challenge}', [ChallengeController::class, 'show']);
+    Route::post('/challenges/{challenge}/rematch', [ChallengeController::class, 'rematch'])
+        ->middleware('throttle:20,1');
     Route::post('/challenges/{challenge}/guest-email', [GuestChallengeController::class, 'email'])->middleware('throttle:10,1');
     Route::post('/challenges/{challenge}/decline', [ChallengeController::class, 'decline']);
     Route::post('/challenges/{challenge}/start', [ChallengeController::class, 'start']);
