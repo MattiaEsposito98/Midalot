@@ -67,6 +67,16 @@
                     <span>Dashboard</span>
                 </a>
 
+                <a href="{{ route('admin.question-drafts.index') }}"
+                    class="admin-nav-link {{ Route::is('admin.question-drafts.*') ? 'active' : '' }}"
+                    title="Domande generate dall'AI in attesa di conferma">
+                    <i class="bi bi-patch-question"></i>
+                    <span>Domande da confermare</span>
+                    @if ($pendingQuestionsCount > 0)
+                        <span class="admin-nav-count">{{ $pendingQuestionsCount }}</span>
+                    @endif
+                </a>
+
                 @foreach ($navGroups as $groupKey => $group)
                     @php
                         $groupActive = collect($group['items'])->contains(fn ($item) => $item[1]);

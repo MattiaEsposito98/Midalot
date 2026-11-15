@@ -141,7 +141,14 @@
                                 <td>{{ $quiz->trainingCategory?->name ?? '-' }}</td>
                                 <td>{{ $quiz->trainingSubcategory?->name ?? '-' }}</td>
                                 <td>{{ $quiz->training_question_mode === 'all' ? 'Tutte' : $quiz->training_question_mode }}</td>
-                                <td>{{ $quiz->questions_count }}</td>
+                                <td>
+                                    {{ $quiz->questions_count }}
+                                    @if ($quiz->pending_questions_count > 0)
+                                        <a href="{{ route('admin.quizzes.questions.index', $quiz->id) }}" class="badge text-bg-warning text-decoration-none" title="Domande generate dall'AI da rivedere">
+                                            +{{ $quiz->pending_questions_count }} bozze AI
+                                        </a>
+                                    @endif
+                                </td>
                                 <td>
                                     <span class="badge {{ $quiz->is_active ? 'bg-success' : 'bg-secondary' }}">
                                         {{ $quiz->is_active ? 'Attivo' : 'Non attivo' }}

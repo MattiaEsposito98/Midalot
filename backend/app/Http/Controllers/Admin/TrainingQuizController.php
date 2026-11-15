@@ -23,6 +23,9 @@ class TrainingQuizController extends Controller
         $quizzes = Quiz::where('type', 'training')
             ->with(['trainingCategory', 'trainingSubcategory'])
             ->withCount('questions')
+            ->withCount(['questions as pending_questions_count' => fn ($q) => $q
+                ->withoutGlobalScope('approved')
+                ->where('review_status', 'pending')])
             ->when($search, function ($query) use ($search) {
                 $query->where(function ($query) use ($search) {
                     $query->where('title', 'like', "%{$search}%")

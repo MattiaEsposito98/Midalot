@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\MinigiocoRoundController;
 use App\Http\Controllers\Admin\PeriodLeaderboardController;
 use App\Http\Controllers\Admin\PrizeAwardController;
 use App\Http\Controllers\Admin\QuestionController;
+use App\Http\Controllers\Admin\QuestionDraftController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\ShowcaseImageController;
 use App\Http\Controllers\Admin\TrainingCategoryController;
@@ -171,6 +172,12 @@ Route::middleware(['auth', 'admin'])
         Route::resource('quizzes', QuizController::class);
 
         // CRUD Domande
+        Route::get('domande-da-confermare', [QuestionDraftController::class, 'index'])
+            ->name('question-drafts.index');
+        Route::post('quizzes/{quiz}/questions/approve-all',[QuestionController::class, 'approveAll'])
+            ->name('quizzes.questions.approve-all');
+        Route::post('quizzes/{quiz}/questions/{question}/approve', [QuestionController::class, 'approve'])
+            ->name('quizzes.questions.approve');
         Route::resource('quizzes.questions', QuestionController::class);
 
         /*

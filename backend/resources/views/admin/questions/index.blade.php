@@ -50,6 +50,24 @@
                 </div>
             </div>
         @else
+            @php $pendingCount = $questions->where('review_status', 'pending')->count(); @endphp
+            @if ($pendingCount > 0)
+                <div class="alert alert-warning d-flex flex-wrap align-items-center justify-content-between gap-2">
+                    <div>
+                        <i class="bi bi-stars"></i>
+                        <strong>{{ $pendingCount }}</strong> {{ $pendingCount === 1 ? 'domanda generata dall\'AI è in bozza' : 'domande generate dall\'AI sono in bozza' }}:
+                        non sono visibili agli utenti finché non le attivi. Controllale, modificale o eliminale.
+                    </div>
+                    <form action="{{ route('admin.quizzes.questions.approve-all', $quiz->id) }}" method="POST">
+                        @csrf
+                        <button type="submit" class="btn btn-sm btn-success"
+                            onclick="return confirm('Attivare tutte le {{ $pendingCount }} bozze di questo quiz? Diventeranno subito visibili agli utenti.')">
+                            <i class="bi bi-check2-all"></i>
+                            Attiva tutte
+                        </button>
+                    </form>
+                </div>
+            @endif
             <div class="table-responsive">
                 <table class="table admin-table">
                     <thead>
@@ -62,8 +80,30 @@
                     </thead>
                     <tbody>
                         @foreach ($questions as $question)
-                            <tr>
-                                <td>{{ \Illuminate\Support\Str::limit($question->question_text, 90) }}</td>
+                            <tr @class(['table-warning' => $question->isPending()])>
+                                <td>
+                                    @if ($question->isPending())
+                                        <span class="badge text-bg-warning">Bozza AI · non attiva</span>
+                                    @elseif ($question->isAi())
+                                        <span class="badge text-bg-info">AI</span>
+                                    @endif
+                                    @if ($question->isAi())
+                                        {{ $question->question_text }}
+                                        <ul class="list-unstyled small mb-0 mt-1">
+                                            @foreach ($question->answers as $answer)
+                                                <li>
+                                                    <i class="bi {{ $answer->is_correct ? 'bi-check-circle-fill text-success' : 'bi-circle text-muted' }}"></i>
+                                                    {{ $answer->answer_text }}
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                        @if ($question->ai_note)
+                                            <div class="small admin-muted mt-1"><i class="bi bi-info-circle"></i> Da verificare: {{ $question->ai_note }}</div>
+                                        @endif
+                                    @else
+                                        {{ \Illuminate\Support\Str::limit($question->question_text, 90) }}
+                                    @endif
+                                </td>
                                 <td>
                                     <div class="admin-actions">
                                         @if ($question->image_path)
@@ -92,6 +132,15 @@
                                 <td>{{ $question->time_limit_seconds }} sec</td>
                                 <td>
                                     <div class="admin-actions">
+                                        @if ($question->isPending())
+                                            <form action="{{ route('admin.quizzes.questions.approve', [$quiz->id, $question->id]) }}" method="POST">
+                                                @csrf
+                                                <button type="submit" class="btn btn-sm btn-success">
+                                                    <i class="bi bi-check-lg"></i>
+                                                    Attiva
+                                                </button>
+                                            </form>
+                                        @endif
                                         <a href="{{ route('admin.quizzes.questions.edit', [$quiz->id, $question->id]) }}" class="btn btn-sm btn-warning">
                                             <i class="bi bi-pencil"></i>
                                             Modifica

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Models\EventRequest;
+use App\Models\Question;
 use App\Models\TrainingQuestionReport;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\View;
@@ -32,6 +33,14 @@ class AppServiceProvider extends ServiceProvider
                     TrainingQuestionReport::STATUS_OPEN,
                     TrainingQuestionReport::STATUS_IN_PROGRESS,
                 ])->count()
+            );
+
+            // Bozze AI da rivedere (nel gioco sono nascoste dallo scope 'approved').
+            $view->with(
+                'pendingQuestionsCount',
+                Question::withoutGlobalScope('approved')
+                    ->where('review_status', Question::STATUS_PENDING)
+                    ->count()
             );
 
             $view->with(

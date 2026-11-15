@@ -18,11 +18,44 @@ class QuestionController extends Controller
     {
         $quiz = Quiz::findOrFail($quiz);
 
+        // Qui l'admin vede anche le bozze AI (nel gioco sono nascoste).
         $questions = $quiz->questions()
+            ->withoutGlobalScope('approved')
+            ->with('answers')
+            ->orderByRaw("review_status = 'pending' desc")
             ->orderBy('id')
             ->get();
 
         return view('admin.questions.index', compact('quiz', 'questions'));
+    }
+
+    /**
+     * Rende disponibile (in gioco) una bozza AI.
+     */
+    public function approve(string $quiz, string $question)
+    {
+        $question = Question::withoutGlobalScope('approved')
+            ->where('quiz_id', $quiz)
+            ->findOrFail($question);
+
+        $question->update(['review_status' => Question::STATUS_APPROVED]);
+
+        return back()->with('success', 'Domanda attivata: ora e\' disponibile.');
+    }
+
+    /**
+     * Rende disponibili tutte le bozze AI di un quiz.
+     */
+    public function approveAll(string $quiz)
+    {
+        $quiz = Quiz::findOrFail($quiz);
+
+        $count = Question::withoutGlobalScope('approved')
+            ->where('quiz_id', $quiz->id)
+            ->where('review_status', Question::STATUS_PENDING)
+            ->update(['review_status' => Question::STATUS_APPROVED]);
+
+        return back()->with('success', "Attivate {$count} domande.");
     }
 
     /**
@@ -128,7 +161,8 @@ class QuestionController extends Controller
     {
         $quiz = Quiz::findOrFail($quiz);
 
-        $question = Question::where('quiz_id', $quiz->id)
+        $question = Question::withoutGlobalScope('approved')
+            ->where('quiz_id', $quiz->id)
             ->findOrFail($question);
 
         return view('admin.questions.edit', compact('quiz', 'question'));
@@ -142,7 +176,8 @@ class QuestionController extends Controller
         $quiz = Quiz::findOrFail($quiz);
         $isTraining = $quiz->type === 'training';
 
-        $question = Question::where('quiz_id', $quiz->id)
+        $question = Question::withoutGlobalScope('approved')
+            ->where('quiz_id', $quiz->id)
             ->findOrFail($question);
 
         if ($isTraining) {
@@ -283,7 +318,8 @@ class QuestionController extends Controller
     {
         $quiz = Quiz::findOrFail($quiz);
 
-        $question = Question::where('quiz_id', $quiz->id)
+        $question = Question::withoutGlobalScope('approved')
+            ->where('quiz_id', $quiz->id)
             ->findOrFail($question);
 
         // Cancella file collegati

@@ -8,6 +8,7 @@ use App\Models\Challenge;
 use App\Models\ChallengeAnswer;
 use App\Models\ChallengeAttempt;
 use App\Models\ChallengeParticipant;
+use App\Models\Question;
 use App\Models\Quiz;
 use App\Models\TrainingCategory;
 use App\Models\TrainingSubcategory;
@@ -82,6 +83,7 @@ class ChallengeController extends Controller
             ->join('quizzes as z', 'z.id', '=', 'q.quiz_id')
             ->where('z.type', 'training')
             ->where('z.is_active', true)
+            ->where('q.review_status', Question::STATUS_APPROVED)
             ->whereExists(fn ($e) => $e->select(DB::raw(1))
                 ->from('answers as a')
                 ->whereColumn('a.question_id', 'q.id')
