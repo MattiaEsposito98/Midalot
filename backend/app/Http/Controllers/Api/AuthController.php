@@ -83,6 +83,8 @@ class AuthController extends Controller
             'rules_accepted_at' => now(),
         ]);
 
+        $this->saveSignupSource($user, $request);
+
         // Invitato da un amico (link /register?ref=CODICE).
         app(\App\Services\ReferralService::class)->attach($user, $request->input('ref'));
 
@@ -101,6 +103,50 @@ class AuthController extends Controller
             'message' => 'Utente registrato correttamente',
             'user' => $user->load('city'),
         ], 201);
+    }
+
+    /**
+     * Da dove arriva l'iscritto. Una sfida a un amico o un invito valgono piu' di un
+     * parametro del link; altrimenti si usa l'origine (utm o provenienza) raccolta dal sito.
+     * Mai bloccante: valori strani vengono ripuliti, un errore non ferma la registrazione.
+     */
+    private function saveSignupSource(User $user, Request $request): void
+    {
+        try {
+            if ($request->filled('guest_token')) {
+                [$source, $medium, $campaign] = ['sfida_amico', 'ospite', null];
+            } elseif ($request->filled('ref')) {
+                [$source, $medium, $campaign] = ['invito_amico', 'link', null];
+            } else {
+                [$source, $medium, $campaign] = [
+                    $this->cleanTag($request->input('acq_source')),
+                    $this->cleanTag($request->input('acq_medium')),
+                    $this->cleanTag($request->input('acq_campaign')),
+                ];
+            }
+
+            if ($source) {
+                $user->forceFill([
+                    'signup_source' => $source,
+                    'signup_medium' => $medium,
+                    'signup_campaign' => $campaign,
+                ])->save();
+            }
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    /** Etichetta di marketing: minuscole, solo lettere, numeri e _ . -, massimo 40 caratteri. */
+    private function cleanTag(mixed $value): ?string
+    {
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $clean = substr(preg_replace('/[^a-z0-9_.-]/', '', strtolower($value)), 0, 40);
+
+        return $clean !== '' ? $clean : null;
     }
 
     public function login(Request $request)

@@ -7,6 +7,7 @@ import { logError } from "../../utils/logger"
 import { API_BASE } from "../../service/api"
 import { readGuestKey } from "../../utils/guestChallenge"
 import { trackEvent } from "../../utils/analytics"
+import { acquisitionPayload } from "../../utils/acquisition"
 
 
 const REF_KEY = "midalot_ref"
@@ -266,7 +267,13 @@ function Register() {
       const { first_name, last_name, ...rest } = form
       const name = `${first_name.trim()} ${last_name.trim()}`
 
-      await axios.post(`${API_BASE}/api/register`, { ...rest, name, ref: refCode || undefined, ...guestPayload() })
+      await axios.post(`${API_BASE}/api/register`, {
+        ...rest,
+        name,
+        ref: refCode || undefined,
+        ...guestPayload(),
+        ...acquisitionPayload(), // da dove arriva (utm / provenienza), per le statistiche delle iscrizioni
+      })
       try {
         localStorage.removeItem(REF_KEY)
       } catch {
@@ -276,6 +283,7 @@ function Register() {
       trackEvent("sign_up", {
         method: "email",
         source: guestPayload().guest_token ? "guest_challenge" : refCode ? "invite_link" : "direct",
+        ...acquisitionPayload(),
       })
 
       alert("Registrazione completata! Controlla la tua email, anche nella cartella spam, per verificare l'account.")

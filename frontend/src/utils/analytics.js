@@ -1,3 +1,5 @@
+import { sessionCampaignQuery } from "./acquisition"
+
 const GA_ID = import.meta.env.VITE_GA_MEASUREMENT_ID
 
 // Percorsi con segreti nel percorso stesso: il pezzo segreto si sostituisce.
@@ -16,8 +18,10 @@ export function safePath(pathname) {
   return path
 }
 
+// All'indirizzo ripulito si accodano solo gli utm_* della visita (non token, email o codici):
+// Google li legge da page_location per attribuire la campagna (es. Instagram / bio).
 function safeLocation(path) {
-  return window.location.origin + path
+  return window.location.origin + path + sessionCampaignQuery()
 }
 
 /**

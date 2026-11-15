@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from "react"
 import { Routes, Route, Navigate, useLocation } from "react-router-dom"
 
 import { initAnalytics, trackPageview } from "./utils/analytics"
+import { captureAcquisition, persistAcquisition } from "./utils/acquisition"
 import { useRouteSeo } from "./hooks/useRouteSeo"
 import { useCookieConsent } from "./hooks/useCookieConsent"
 import CookieBanner from "./components/CookieBanner/CookieBanner"
@@ -54,8 +55,14 @@ function App() {
   const { consent } = useCookieConsent()
   useRouteSeo(location.pathname)
 
+  // Da dove arriva la visita (utm o provenienza): letta una volta all'apertura del sito.
+  useEffect(() => {
+    captureAcquisition()
+  }, [])
+
   useEffect(() => {
     if (consent === "accepted") {
+      persistAcquisition() // con il consenso la prima origine si conserva 30 giorni
       initAnalytics()
     }
   }, [consent])

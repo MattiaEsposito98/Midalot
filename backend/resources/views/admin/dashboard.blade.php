@@ -473,6 +473,34 @@
                     @endforelse
                 </div>
             </section>
+
+            <section class="admin-card">
+                <div class="admin-card-header">
+                    <div>
+                        <h2 class="admin-section-title">Iscrizioni per origine</h2>
+                        <p class="admin-muted mb-0 small">Da dove arrivano i nuovi utenti. Conteggio dal 15/11/2026: prima l'origine non veniva registrata.</p>
+                    </div>
+                </div>
+                <div class="list-group list-group-flush">
+                    @foreach ($signupSources as $row)
+                        <div class="list-group-item d-flex justify-content-between align-items-center gap-2">
+                            <span>
+                                @if ($row->signup_source)
+                                    <strong>{{ $row->signup_source }}</strong>
+                                    @if ($row->signup_medium) <span class="admin-muted">/ {{ $row->signup_medium }}</span> @endif
+                                    @if ($row->signup_campaign) <span class="admin-muted">/ {{ $row->signup_campaign }}</span> @endif
+                                @else
+                                    Diretto / non tracciato
+                                @endif
+                            </span>
+                            <span class="text-nowrap">
+                                <span class="badge bg-primary" title="Totale">{{ $row->total }}</span>
+                                <span class="badge bg-secondary" title="Ultimi 30 giorni">{{ (int) $row->recent }} negli ultimi 30 gg</span>
+                            </span>
+                        </div>
+                    @endforeach
+                </div>
+            </section>
         </div>
     </div>
 @endsection

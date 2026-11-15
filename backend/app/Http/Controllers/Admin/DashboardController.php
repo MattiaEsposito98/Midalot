@@ -82,6 +82,15 @@ class DashboardController extends Controller
             ->limit(6)
             ->get();
 
+        // Iscrizioni per origine (da dove arrivano i nuovi utenti). Chi si e' iscritto
+        // prima del tracciamento, o senza origine nota, finisce in "Diretto / non tracciato".
+        $signupSources = DB::table('users')
+            ->where('is_admin', false)
+            ->selectRaw('signup_source, signup_medium, signup_campaign, COUNT(*) as total, SUM(created_at >= ?) as recent', [now()->subDays(30)])
+            ->groupBy('signup_source', 'signup_medium', 'signup_campaign')
+            ->orderByDesc('total')
+            ->get();
+
         $recentQuizzes = Quiz::where('type', 'assigned')
             ->withCount(['questions', 'users', 'attempts'])
             ->latest()
@@ -110,6 +119,7 @@ class DashboardController extends Controller
             'cookieConsent',
             'latestLogins',
             'topCities',
+            'signupSources',
             'recentQuizzes',
             'recentTrainings',
             'recentMidalarios',
