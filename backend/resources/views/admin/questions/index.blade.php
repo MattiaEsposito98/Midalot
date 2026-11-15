@@ -30,6 +30,12 @@
                 <p class="admin-muted mb-0">Ordina e modifica le domande del quiz.</p>
             </div>
             <div class="admin-page-actions">
+                @if ($quiz->type !== 'training')
+                    <a href="{{ route('admin.quizzes.questions.picker', $quiz->id) }}" class="btn btn-outline-primary btn-sm">
+                        <i class="bi bi-lightning-charge"></i>
+                        Pesca dai Training
+                    </a>
+                @endif
                 <a href="{{ route('admin.quizzes.questions.create', $quiz->id) }}" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-lg"></i>
                     Aggiungi domanda
