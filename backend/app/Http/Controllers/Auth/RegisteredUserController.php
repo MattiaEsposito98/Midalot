@@ -34,6 +34,7 @@ class RegisteredUserController extends Controller
                 'min:3',
                 'max:30',
                 'unique:users,nickname',
+                new \App\Rules\AllowedNickname(),
                 'regex:/^(?!.*\.\.)(?!.*\.$)(?!^\.)[a-z0-9._]+$/'
             ],
 

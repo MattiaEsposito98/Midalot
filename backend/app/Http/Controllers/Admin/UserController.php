@@ -4,7 +4,11 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Rules\AllowedNickname;
+use App\Support\NicknameFilter;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\Rule;
 
 class UserController extends Controller
 {
@@ -85,6 +89,68 @@ class UserController extends Controller
             'last_login' => $user->logins()->latest('logged_in_at')->first()?->logged_in_at,
         ];
 
-        return view('admin.users.show', compact('user', 'quizAttempts', 'trainingAttempts', 'logins', 'stats'));
+        // Nickname con parolacce o bestemmie: avviso e proposta di sostituzione.
+        $nicknameProblem = NicknameFilter::reason($user->nickname);
+        $suggestedNickname = self::suggestNickname($user);
+
+        return view('admin.users.show', compact('user', 'quizAttempts', 'trainingAttempts', 'logins', 'stats', 'nicknameProblem', 'suggestedNickname'));
+    }
+
+    /**
+     * L'admin cambia il nickname di un utente (es. uno offensivo). Stesse regole della
+     * registrazione. Chi entrava con il vecchio nickname ora entra con il nuovo o con l'email.
+     */
+    public function updateNickname(Request $request, User $user)
+    {
+        abort_if($user->is_admin, 404);
+
+        $request->merge(['nickname' => strtolower(trim((string) $request->input('nickname')))]);
+        $data = $request->validate([
+            'nickname' => [
+                'required', 'string', 'min:3', 'max:30',
+                Rule::unique('users', 'nickname')->ignore($user->id),
+                'regex:/^(?!.*\.\.)(?!.*\.$)(?!^\.)[a-z0-9._]+$/',
+                new AllowedNickname(),
+            ],
+        ], [
+            'nickname.regex' => 'Solo lettere minuscole, numeri, punto e trattino basso (niente punti doppi o finali).',
+            'nickname.unique' => 'Questo nickname è già usato da un altro utente.',
+        ]);
+
+        $old = $user->nickname;
+        $user->forceFill(['nickname' => $data['nickname']])->save();
+
+        Log::info('Nickname cambiato dall\'admin', [
+            'user_id' => $user->id,
+            'da' => $old,
+            'a' => $data['nickname'],
+            'admin_id' => $request->user()->id,
+        ]);
+
+        return back()->with('success', "Nickname cambiato da {$old} a {$data['nickname']}.");
+    }
+
+    /**
+     * Proposta di nickname ricavata dall'email (la parte prima della @), valida e libera;
+     * se è già presa si aggiunge un numero.
+     */
+    public static function suggestNickname(User $user): string
+    {
+        $base = strtolower((string) strstr((string) $user->email, '@', true));
+        $base = preg_replace('/[^a-z0-9._]+/', '.', $base);
+        $base = preg_replace('/\.{2,}/', '.', $base);
+        $base = substr(trim($base, '.'), 0, 26);
+        $base = rtrim($base, '.');
+
+        if (strlen($base) < 3 || ! NicknameFilter::isAllowed($base)) {
+            $base = 'utente';
+        }
+
+        $candidate = $base;
+        for ($i = 2; User::where('nickname', $candidate)->where('id', '!=', $user->id)->exists(); $i++) {
+            $candidate = $base.$i;
+        }
+
+        return $candidate;
     }
 }

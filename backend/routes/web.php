@@ -62,6 +62,8 @@ Route::middleware(['auth', 'admin'])
             ->name('users.index');
         Route::get('users/{user}', [UserController::class, 'show'])
             ->name('users.show');
+        Route::patch('users/{user}/nickname', [UserController::class, 'updateNickname'])
+            ->name('users.nickname.update');
 
         Route::get('training/categories', [TrainingCategoryController::class, 'index'])
             ->name('training.categories.index');

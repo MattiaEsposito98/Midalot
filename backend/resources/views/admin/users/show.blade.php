@@ -27,6 +27,9 @@
                 <div class="col-md-3">
                     <div class="small text-uppercase fw-bold admin-muted mb-1">Nickname</div>
                     <div><x-nickname-badge :user="$user" /></div>
+                    @if ($nicknameProblem)
+                        <span class="badge text-bg-danger mt-1" title="Contiene: {{ $nicknameProblem }}">Nickname non consentito</span>
+                    @endif
                 </div>
                 <div class="col-md-3">
                     <div class="small text-uppercase fw-bold admin-muted mb-1">Email</div>
@@ -59,6 +62,31 @@
                     </div>
                 </div>
             </div>
+
+            <hr class="my-3">
+            <form method="POST" action="{{ route('admin.users.nickname.update', $user) }}" class="row g-2 align-items-end"
+                onsubmit="return confirm('Cambiare il nickname di questo utente? Se entrava con il nickname, da ora entrerà con il nuovo o con l\'email.')">
+                @csrf
+                @method('PATCH')
+                <div class="col-sm-6 col-lg-4">
+                    <label for="nickname" class="form-label small text-uppercase fw-bold admin-muted mb-1">Cambia nickname</label>
+                    <input type="text" id="nickname" name="nickname" class="form-control" maxlength="30"
+                        value="{{ old('nickname', $nicknameProblem ? $suggestedNickname : $user->nickname) }}">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-warning">
+                        <i class="bi bi-pencil"></i>
+                        Salva nickname
+                    </button>
+                </div>
+                <div class="col-12 small admin-muted">
+                    @if ($nicknameProblem)
+                        Proposta ricavata dall'email: <strong>{{ $suggestedNickname }}</strong>. Puoi cambiarla prima di salvare.
+                    @else
+                        Stesse regole della registrazione: minuscole, numeri, punto e trattino basso, niente parole vietate.
+                    @endif
+                </div>
+            </form>
         </div>
     </section>
 

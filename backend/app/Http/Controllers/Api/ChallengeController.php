@@ -250,7 +250,7 @@ class ChallengeController extends Controller
         $validated = $request->validate([
             // guest = sfida a un amico non registrato (link da mandare su WhatsApp o via email)
             'guest' => ['nullable', 'boolean'],
-            'guest_name' => ['nullable', 'string', 'max:40'],
+            'guest_name' => ['nullable', 'string', 'max:40', new \App\Rules\AllowedNickname('Questo nome non è consentito: scrivine un altro.')],
             'opponent_ids' => ['exclude_if:guest,true', 'required', 'array', 'min:1', 'max:'.(Challenge::MAX_PARTICIPANTS - 1)],
             'opponent_ids.*' => ['integer', 'distinct', 'exists:users,id'],
             'category_ids' => ['nullable', 'array'],
