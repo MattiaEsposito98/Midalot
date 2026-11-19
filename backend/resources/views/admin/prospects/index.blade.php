@@ -57,10 +57,6 @@
                     <i class="bi bi-file-earmark-excel"></i>
                     Esporta Excel{{ $hasFilters ? ' (' . $prospects->total() . ' filtrati)' : '' }}
                 </a>
-                <a href="{{ route('admin.prospects.export', $exportParams + ['formato' => 'csv']) }}" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-filetype-csv"></i>
-                    CSV
-                </a>
                 <a href="{{ route('admin.prospects.create') }}" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-lg"></i>
                     Aggiungi profilo
