@@ -1,29 +1,39 @@
-{{-- Copia il messaggio negli appunti e poi apre la chat/profilo in una nuova scheda. Nessun invio automatico. --}}
+{{-- Copia il messaggio negli appunti e apre la chat/profilo in una nuova scheda. Nessun invio automatico. --}}
+<div id="copy-toast" class="position-fixed bottom-0 end-0 m-3" style="z-index: 2000; max-width: 360px; display: none;" role="status" aria-live="polite"></div>
 <script>
     (function () {
-        function copyText(text) {
-            if (navigator.clipboard && window.isSecureContext) {
-                return navigator.clipboard.writeText(text);
-            }
-            return new Promise(function (resolve, reject) {
-                var ta = document.createElement('textarea');
-                ta.value = text;
-                ta.style.position = 'fixed';
-                ta.style.opacity = '0';
-                document.body.appendChild(ta);
-                ta.select();
-                var ok = false;
-                try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
-                document.body.removeChild(ta);
-                ok ? resolve() : reject(new Error('copy failed'));
-            });
+        // Copia in modo sincrono (dentro il clic): non dipende da permessi, focus o attese.
+        function copySync(text) {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.setAttribute('readonly', '');
+            ta.style.position = 'fixed';
+            ta.style.top = '0';
+            ta.style.left = '0';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.focus();
+            ta.select();
+            ta.setSelectionRange(0, text.length);
+            var ok = false;
+            try { ok = document.execCommand('copy'); } catch (e) { ok = false; }
+            document.body.removeChild(ta);
+            return ok;
         }
 
-        function flash(btn, label) {
-            var original = btn.dataset.label || btn.innerHTML;
-            btn.dataset.label = original;
-            btn.innerHTML = label;
-            setTimeout(function () { btn.innerHTML = original; }, 2200);
+        var toastTimer = null;
+        function toast(html, kind) {
+            var el = document.getElementById('copy-toast');
+            el.innerHTML = '<div class="alert alert-' + kind + ' shadow mb-0">' + html + '</div>';
+            el.style.display = 'block';
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(function () { el.style.display = 'none'; }, kind === 'success' ? 5000 : 12000);
+        }
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, function (c) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+            });
         }
 
         document.addEventListener('click', function (event) {
@@ -35,13 +45,31 @@
             var text = source ? source.value : btn.dataset.copyMessage;
             var url = btn.dataset.openUrl;
 
-            copyText(text).then(function () {
-                flash(btn, '<i class="bi bi-check2"></i> Copiato');
-                if (url) { window.open(url, '_blank', 'noopener'); }
-            }).catch(function () {
-                flash(btn, 'Copia non riuscita');
+            // 1) copia subito; 2) se serve apre la scheda, sempre dentro il clic (cosi' il browser non la blocca).
+            var copied = copySync(text);
+            if (!copied && navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(function () {
+                    toast('<i class="bi bi-check2-circle"></i> Messaggio copiato. Incollalo con Ctrl+V.', 'success');
+                }).catch(function () {
+                    toast('<i class="bi bi-exclamation-triangle"></i> Copia non riuscita: seleziona il testo e copialo a mano.', 'danger');
+                });
+                copied = null; // esito mostrato dalla promessa
+            }
+
+            var win = url ? window.open(url, '_blank') : undefined;
+            if (win) { try { win.opener = null; } catch (e) { /* ignora */ } }
+
+            if (copied === null) { return; }
+            if (!copied) {
                 if (source) { source.focus(); source.select(); }
-            });
+                toast('<i class="bi bi-exclamation-triangle"></i> Copia non riuscita: seleziona il testo e copialo a mano.', 'danger');
+            } else if (url && !win) {
+                toast('<i class="bi bi-exclamation-triangle"></i> Messaggio copiato, ma il browser ha bloccato la nuova scheda. '
+                    + '<a href="' + escapeHtml(url) + '" target="_blank" rel="noopener noreferrer" class="alert-link">Apri la chat</a> '
+                    + 'oppure consenti i popup per questo sito.', 'warning');
+            } else {
+                toast('<i class="bi bi-check2-circle"></i> Messaggio copiato. Incollalo nella chat con Ctrl+V.', 'success');
+            }
         });
     })();
 </script>

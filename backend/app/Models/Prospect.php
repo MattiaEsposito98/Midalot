@@ -25,6 +25,7 @@ class Prospect extends Model
         'none' => 'Nessun sito',
         'link_only' => 'Solo link (Linktree ecc.)',
         'outdated' => 'Sito datato',
+        'broken' => 'Sito non funziona',
         'yes' => 'Ha un sito',
     ];
 

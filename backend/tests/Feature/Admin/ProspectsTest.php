@@ -363,6 +363,11 @@ class ProspectsTest extends TestCase
         $this->assertStringContainsString('negozio a Napoli', $msg);
         $this->assertStringContainsString('gli ordini li gestisci direttamente in messaggio', $msg);
         $this->assertStringContainsString('Midalot', $msg);
+        $this->assertStringContainsString('midalot.live', $msg);              // esempio del nostro lavoro
+        $this->assertStringContainsString('dedicato ai quiz', $msg);          // specificato che e' un sito di quiz
+        $this->assertStringContainsString('siti web', $msg);
+        $this->assertStringNotContainsString('marketing', mb_strtolower($msg)); // solo siti, nessun marketing
+        $this->assertStringNotContainsString('gestionali', $msg);
         $this->assertStringContainsString('non ti scrivo più', $msg);   // via d'uscita sempre presente
         $this->assertStringNotContainsString("e'", $msg);               // accenti veri, non apostrofi
 
@@ -381,6 +386,11 @@ class ProspectsTest extends TestCase
 
         $datato = $this->prospect(['website_status' => 'outdated']);
         $this->assertStringContainsString('potrebbe essere rinnovato', $datato->outreach_message);
+
+        $rotto = $this->prospect(['website_status' => 'broken']);
+        $this->assertStringContainsString('non si apre correttamente', $rotto->outreach_message);
+        $this->assertStringNotContainsString('hai già un sito', $rotto->outreach_message);
+        $this->assertSame('Sito non funziona', Prospect::WEBSITE_STATUSES['broken']);
     }
 
     public function test_le_aperture_variano_tra_profili_ma_sono_stabili(): void

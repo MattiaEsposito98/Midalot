@@ -235,7 +235,7 @@
                                     @endif
                                 </td>
                                 <td class="small">
-                                    <span class="badge {{ $p->website_status === 'none' || $p->website_status === 'link_only' ? 'bg-success' : 'bg-secondary' }}">
+                                    <span class="badge {{ in_array($p->website_status, ['none', 'link_only', 'broken'], true) ? 'bg-success' : 'bg-secondary' }}">
                                         {{ Prospect::WEBSITE_STATUSES[$p->website_status] ?? $p->website_status }}
                                     </span>
                                     @if ($p->activity === 'active')
