@@ -209,7 +209,7 @@ class ProspectController extends Controller
         return [
             'prospect' => $prospect,
             'regions' => Prospect::REGIONS,
-            'sectors' => Prospect::whereNotNull('sector')->distinct()->orderBy('sector')->pluck('sector'),
+            'sectors' => Prospect::sectorOptions(),
             'searches' => ProspectSearch::orderByDesc('id')->get(['id', 'name']),
         ];
     }

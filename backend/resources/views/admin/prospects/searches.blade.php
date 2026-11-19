@@ -46,16 +46,16 @@
                 </div>
                 <div class="col-auto">
                     <label class="form-label small mb-1" for="s_city">Città</label>
-                    <input type="text" id="s_city" name="city" class="form-control" maxlength="80" value="{{ old('city') }}">
+                    <input type="text" id="s_city" name="city" class="form-control" maxlength="80" value="{{ old('city') }}" placeholder="Scrivi 3 lettere">
                 </div>
                 <div class="col-auto">
                     <label class="form-label small mb-1" for="s_sector">Settore</label>
-                    <input type="text" id="s_sector" name="sector" class="form-control" maxlength="60" required list="s-sector-list" value="{{ old('sector') }}">
-                    <datalist id="s-sector-list">
+                    <select id="s_sector" name="sector" class="form-select" required>
+                        <option value="">-</option>
                         @foreach ($sectors as $sector)
-                            <option value="{{ $sector }}"></option>
+                            <option value="{{ $sector }}" @selected(old('sector') === $sector)>{{ $sector }}</option>
                         @endforeach
-                    </datalist>
+                    </select>
                 </div>
                 <div class="col-auto">
                     <label class="form-label small mb-1" for="s_status">Stato</label>
@@ -254,4 +254,6 @@
             @endif
         @endif
     </section>
+
+    @include('admin.prospects._city-autocomplete', ['cityId' => 's_city', 'regionId' => 's_region'])
 @endsection

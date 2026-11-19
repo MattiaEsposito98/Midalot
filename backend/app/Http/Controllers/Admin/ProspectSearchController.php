@@ -42,7 +42,7 @@ class ProspectSearchController extends Controller
             'searches' => $searches,
             'coverage' => $coverage,
             'regions' => Prospect::REGIONS,
-            'sectors' => ProspectSearch::whereNotNull('sector')->distinct()->orderBy('sector')->pluck('sector'),
+            'sectors' => Prospect::sectorOptions(),
             'filters' => compact('region', 'status'),
         ]);
     }

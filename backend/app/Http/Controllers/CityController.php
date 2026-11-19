@@ -22,7 +22,7 @@ class CityController extends Controller
         $cities = City::where('name', 'like', $q . '%')
             ->orderBy('name')
             ->limit(10)
-            ->get(['id', 'name']);
+            ->get(['id', 'name', 'province', 'region']);
 
         return response()->json($cities);
     }

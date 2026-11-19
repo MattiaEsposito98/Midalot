@@ -109,12 +109,12 @@
 
                     <div>
                         <label class="form-label" for="sector">Settore</label>
-                        <input type="text" id="sector" name="sector" class="form-control" maxlength="60" list="sector-list" value="{{ old('sector', $prospect->sector) }}">
-                        <datalist id="sector-list">
+                        <select id="sector" name="sector" class="form-select">
+                            <option value="">-</option>
                             @foreach ($sectors as $sector)
-                                <option value="{{ $sector }}"></option>
+                                <option value="{{ $sector }}" @selected(old('sector', $prospect->sector) === $sector)>{{ $sector }}</option>
                             @endforeach
-                        </datalist>
+                        </select>
                     </div>
 
                     <div class="full">
@@ -268,4 +268,6 @@
     @if ($isEdit)
         @include('admin.prospects._copy-script')
     @endif
+
+    @include('admin.prospects._city-autocomplete', ['cityId' => 'city', 'regionId' => 'region'])
 @endsection

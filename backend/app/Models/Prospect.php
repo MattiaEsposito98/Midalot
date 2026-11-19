@@ -44,6 +44,22 @@ class Prospect extends Model
 
     public const PRIORITIES = ['A' => 'A (alta)', 'B' => 'B (media)', 'C' => 'C (bassa)'];
 
+    /** Settori proposti nei menu a tendina (si aggiungono a quelli gia' usati nel DB). */
+    public const SECTORS = [
+        'Abbigliamento', 'Calzature', 'Gioielleria', 'Ottica', 'Parrucchieri e barbieri', 'Estetica e benessere',
+        'Palestre e sport', 'Ristoranti e pizzerie', 'Pasticcerie e bar', 'Fiorai', 'B&B e strutture ricettive',
+        'Arredamento e casa', 'Auto e officine', 'Animali', 'Fotografia ed eventi', 'Altro',
+    ];
+
+    /** Elenco dei settori per i menu: quelli fissi piu' quelli gia' presenti in profili e ricerche. */
+    public static function sectorOptions(): array
+    {
+        $used = static::whereNotNull('sector')->where('sector', '!=', '')->distinct()->pluck('sector')
+            ->merge(ProspectSearch::whereNotNull('sector')->where('sector', '!=', '')->distinct()->pluck('sector'));
+
+        return collect(self::SECTORS)->merge($used)->unique()->sort(SORT_NATURAL | SORT_FLAG_CASE)->values()->all();
+    }
+
     public const REGIONS = [
         'Abruzzo', 'Basilicata', 'Calabria', 'Campania', 'Emilia-Romagna', 'Friuli-Venezia Giulia',
         'Lazio', 'Liguria', 'Lombardia', 'Marche', 'Molise', 'Piemonte', 'Puglia', 'Sardegna',
