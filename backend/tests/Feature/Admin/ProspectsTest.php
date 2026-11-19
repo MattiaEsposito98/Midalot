@@ -293,13 +293,36 @@ class ProspectsTest extends TestCase
 
     // --- export ----------------------------------------------------------
 
+    public function test_export_excel_rispetta_i_filtri_e_dimensiona_le_colonne(): void
+    {
+        $admin = $this->createAdmin();
+        $this->prospect(['instagram_handle' => 'in_campania', 'name' => 'Nome molto molto lungo per la colonna', 'region' => 'Campania']);
+        $this->prospect(['instagram_handle' => 'in_lazio', 'name' => 'Altro', 'region' => 'Lazio']);
+
+        $response = $this->actingAs($admin)->get(route('admin.prospects.export', ['region' => 'Campania']));
+        $response->assertOk();
+        $this->assertStringContainsString('spreadsheetml.sheet', $response->headers->get('Content-Type'));
+
+        $file = tempnam(sys_get_temp_dir(), 'x');
+        file_put_contents($file, $response->streamedContent());
+        $zip = new \ZipArchive();
+        $this->assertTrue($zip->open($file) === true);
+        $sheet = $zip->getFromName('xl/worksheets/sheet1.xml');
+        $zip->close();
+        @unlink($file);
+
+        $this->assertStringContainsString('@in_campania', $sheet);
+        $this->assertStringNotContainsString('in_lazio', $sheet);
+        $this->assertMatchesRegularExpression('/<col min="3" max="3" width="3[0-9]" customWidth="1"\/>/', $sheet);
+    }
+
     public function test_export_csv_rispetta_i_filtri(): void
     {
         $admin = $this->createAdmin();
         $this->prospect(['instagram_handle' => 'in_campania', 'region' => 'Campania', 'name' => 'Moda; "Napoli"']);
         $this->prospect(['instagram_handle' => 'in_lazio', 'region' => 'Lazio']);
 
-        $response = $this->actingAs($admin)->get(route('admin.prospects.export', ['region' => 'Campania']));
+        $response = $this->actingAs($admin)->get(route('admin.prospects.export', ['region' => 'Campania', 'formato' => 'csv']));
         $response->assertOk();
         $this->assertStringContainsString('text/csv', $response->headers->get('Content-Type'));
 

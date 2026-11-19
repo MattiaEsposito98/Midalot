@@ -52,9 +52,14 @@
                     <i class="bi bi-map"></i>
                     Ricerche e copertura
                 </a>
-                <a href="{{ route('admin.prospects.export', $exportParams) }}" class="btn btn-outline-secondary btn-sm">
-                    <i class="bi bi-download"></i>
-                    Esporta CSV
+                <a href="{{ route('admin.prospects.export', $exportParams) }}" class="btn btn-outline-secondary btn-sm"
+                    title="Esporta in Excel solo i profili che vedi con i filtri attuali">
+                    <i class="bi bi-file-earmark-excel"></i>
+                    Esporta Excel{{ $hasFilters ? ' (' . $prospects->total() . ' filtrati)' : '' }}
+                </a>
+                <a href="{{ route('admin.prospects.export', $exportParams + ['formato' => 'csv']) }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-filetype-csv"></i>
+                    CSV
                 </a>
                 <a href="{{ route('admin.prospects.create') }}" class="btn btn-primary btn-sm">
                     <i class="bi bi-plus-lg"></i>

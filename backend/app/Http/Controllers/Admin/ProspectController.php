@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Prospect;
+use App\Support\XlsxWriter;
 use App\Models\ProspectSearch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -131,32 +132,50 @@ class ProspectController extends Controller
         return redirect()->route('admin.prospects.index')->with('success', "Profilo {$handle} eliminato.");
     }
 
-    /** Esporta in CSV (apribile in Excel) i profili del filtro corrente. */
+    private const EXPORT_HEADERS = ['Profilo', 'Link Instagram', 'Nome', 'Follower', 'Regione', 'Citta', 'Settore', 'Sito web', 'Email', 'Telefono',
+        'Negozio fisico', 'Ordini in DM', 'Stato sito', 'Attivita', 'Proposta', 'Priorita', 'Stato', 'Contattato il', 'Promemoria', 'Ricerca', 'Segnali', 'Note'];
+
+    /** Esporta i profili del filtro corrente: Excel (.xlsx, colonne dimensionate sul contenuto) o CSV con ?formato=csv. */
     public function export(Request $request): StreamedResponse
     {
         $query = $this->filteredQuery($this->filters($request))->with('search:id,name')->orderBy('id');
+        $base = 'clienti-da-contattare-' . now()->format('Y-m-d');
 
-        return response()->streamDownload(function () use ($query) {
-            $out = fopen('php://output', 'w');
-            fwrite($out, "\xEF\xBB\xBF"); // BOM: Excel legge bene le lettere accentate
-            fputcsv($out, ['Profilo', 'Link Instagram', 'Nome', 'Follower', 'Regione', 'Citta', 'Settore', 'Sito web', 'Email', 'Telefono',
-                'Negozio fisico', 'Ordini in DM', 'Stato sito', 'Attivita', 'Proposta', 'Priorita', 'Stato', 'Contattato il', 'Promemoria', 'Ricerca', 'Segnali', 'Note'], ';');
-            $query->chunk(500, function ($rows) use ($out) {
-                foreach ($rows as $p) {
-                    fputcsv($out, [
-                        '@' . $p->instagram_handle, $p->instagram_url, $p->name, $p->followers, $p->region, $p->city, $p->sector,
-                        $p->website_url, $p->email, $p->phone,
-                        $p->has_physical_store === null ? '' : ($p->has_physical_store ? 'si' : 'no'),
-                        $p->orders_in_dm === null ? '' : ($p->orders_in_dm ? 'si' : 'no'),
-                        Prospect::WEBSITE_STATUSES[$p->website_status] ?? '', Prospect::ACTIVITIES[$p->activity] ?? '',
-                        Prospect::PROPOSALS[$p->proposal] ?? '', $p->priority, Prospect::STATUSES[$p->status] ?? '',
-                        optional($p->contacted_at)->format('d/m/Y'), optional($p->follow_up_at)->format('d/m/Y'),
-                        optional($p->search)->name, $p->signals, $p->notes,
-                    ], ';');
-                }
-            });
-            fclose($out);
-        }, 'clienti-da-contattare-' . now()->format('Y-m-d') . '.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        if ($request->query('formato') === 'csv') {
+            return response()->streamDownload(function () use ($query) {
+                $out = fopen('php://output', 'w');
+                fwrite($out, "\xEF\xBB\xBF"); // BOM: Excel legge bene le lettere accentate
+                fputcsv($out, self::EXPORT_HEADERS, ';');
+                $query->chunk(500, function ($rows) use ($out) {
+                    foreach ($rows as $p) {
+                        fputcsv($out, $this->exportRow($p), ';');
+                    }
+                });
+                fclose($out);
+            }, $base . '.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        }
+
+        $path = XlsxWriter::build(self::EXPORT_HEADERS, $query->lazyById(500)->map(fn (Prospect $p) => $this->exportRow($p)), 'Clienti');
+
+        return response()->streamDownload(function () use ($path) {
+            readfile($path);
+            @unlink($path);
+        }, $base . '.xlsx', ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
+    }
+
+    /** @return array<int, string|int|null> */
+    private function exportRow(Prospect $p): array
+    {
+        return [
+            '@' . $p->instagram_handle, $p->instagram_url, $p->name, $p->followers, $p->region, $p->city, $p->sector,
+            $p->website_url, $p->email, $p->phone,
+            $p->has_physical_store === null ? '' : ($p->has_physical_store ? 'si' : 'no'),
+            $p->orders_in_dm === null ? '' : ($p->orders_in_dm ? 'si' : 'no'),
+            Prospect::WEBSITE_STATUSES[$p->website_status] ?? '', Prospect::ACTIVITIES[$p->activity] ?? '',
+            Prospect::PROPOSALS[$p->proposal] ?? '', $p->priority, Prospect::STATUSES[$p->status] ?? '',
+            optional($p->contacted_at)->format('d/m/Y'), optional($p->follow_up_at)->format('d/m/Y'),
+            optional($p->search)->name, $p->signals, $p->notes,
+        ];
     }
 
     // ---------------------------------------------------------------------
