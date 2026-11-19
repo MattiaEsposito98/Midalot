@@ -19,6 +19,9 @@ class ProspectController extends Controller
 {
     private const PER_PAGE = 50;
 
+    /** Profili per pagina selezionabili da ?per_page= (solo questi valori). */
+    private const PER_PAGE_OPTIONS = [25, 50, 100];
+
     /** Colonne ordinabili da ?sort= (chiave = parametro, valore = colonna reale). */
     private const SORTABLE = [
         'followers' => 'followers',
@@ -39,11 +42,13 @@ class ProspectController extends Controller
         $sort = array_key_exists($request->query('sort'), self::SORTABLE) ? $request->query('sort') : 'created_at';
         $direction = $request->query('direction') === 'asc' ? 'asc' : 'desc';
 
+        $perPage = in_array((int) $request->query('per_page'), self::PER_PAGE_OPTIONS, true) ? (int) $request->query('per_page') : self::PER_PAGE;
+
         $prospects = (clone $query)
             ->with(['search:id,name', 'contactedBy:id,name'])
             ->orderBy(self::SORTABLE[$sort], $direction)
             ->orderByDesc('id')
-            ->paginate(self::PER_PAGE)
+            ->paginate($perPage)
             ->withQueryString();
 
         // Contatori per stato (una sola query, indipendenti dal filtro di stato).
@@ -58,6 +63,8 @@ class ProspectController extends Controller
             'filters' => $filters,
             'sort' => $sort,
             'direction' => $direction,
+            'perPage' => $perPage,
+            'perPageOptions' => self::PER_PAGE_OPTIONS,
             'statusCounts' => $statusCounts,
             'totalAll' => Prospect::count(),
             'dueCount' => $this->dueQuery()->count(),

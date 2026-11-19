@@ -135,6 +135,22 @@ class ProspectsTest extends TestCase
 
         $page2 = $this->actingAs($admin)->get(route('admin.prospects.index', ['sort' => 'followers', 'direction' => 'asc', 'page' => 2]));
         $this->assertCount(5, $page2->viewData('prospects'));
+        $response->assertSee('Mostrati 1-50 di 55 profili', false)->assertSee('pagina 1 di 2');
+
+        // Profili per pagina: solo 25/50/100, qualsiasi altro valore torna a 50; la scelta resta nei link.
+        $r25 = $this->actingAs($admin)->get(route('admin.prospects.index', ['per_page' => 25]));
+        $this->assertCount(25, $r25->viewData('prospects'));
+        $this->assertSame(3, $r25->viewData('prospects')->lastPage());
+        $r25->assertSee('per_page=25', false);
+
+        $r100 = $this->actingAs($admin)->get(route('admin.prospects.index', ['per_page' => 100]));
+        $this->assertCount(55, $r100->viewData('prospects'));
+        $r100->assertSee('Mostrati 1-55 di 55 profili', false);
+
+        foreach (['7', '5000', 'abc', '-1'] as $bad) {
+            $rBad = $this->actingAs($admin)->get(route('admin.prospects.index', ['per_page' => $bad]));
+            $this->assertCount(50, $rBad->viewData('prospects'));
+        }
     }
 
     public function test_ordinamento_solo_su_colonne_in_whitelist(): void

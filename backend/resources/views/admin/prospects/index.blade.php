@@ -9,7 +9,7 @@
 
     // Link che mantiene i filtri attuali e cambia solo alcuni parametri.
     $keep = fn (array $extra = []) => array_filter(
-        array_merge($filters, ['sort' => $sort, 'direction' => $direction], $extra),
+        array_merge($filters, ['sort' => $sort, 'direction' => $direction, 'per_page' => $perPage === 50 ? null : $perPage], $extra),
         fn ($v) => $v !== null && $v !== ''
     );
     $sortLink = function (string $col, string $label) use ($keep, $sort, $direction) {
@@ -177,6 +177,13 @@
                     <input type="number" name="max_followers" value="{{ $filters['max_followers'] }}" min="0" class="form-control" style="width: 130px;" placeholder="Follower max">
                 </div>
                 <div class="col-auto">
+                    <select class="form-select" name="per_page" aria-label="Profili per pagina">
+                        @foreach ($perPageOptions as $option)
+                            <option value="{{ $option }}" @selected($perPage === $option)>{{ $option }} per pagina</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="col-auto">
                     <button type="submit" class="btn btn-outline-primary">
                         <i class="bi bi-search"></i>
                         Filtra
@@ -321,11 +328,17 @@
                 </table>
             </div>
 
-            @if ($prospects->hasPages())
-                <div class="admin-card-body">
-                    {{ $prospects->links() }}
+            <div class="admin-card-body d-flex flex-wrap align-items-center justify-content-between gap-2">
+                <div class="small admin-muted">
+                    Mostrati {{ $prospects->firstItem() }}-{{ $prospects->lastItem() }} di {{ $prospects->total() }} profili
+                    @if ($prospects->hasPages())
+                        · pagina {{ $prospects->currentPage() }} di {{ $prospects->lastPage() }}
+                    @endif
                 </div>
-            @endif
+                @if ($prospects->hasPages())
+                    <div>{{ $prospects->links() }}</div>
+                @endif
+            </div>
         @endif
     </section>
 
