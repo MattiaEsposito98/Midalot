@@ -348,6 +348,70 @@ class ProspectsTest extends TestCase
         $this->assertNull($p->fresh()->prospect_search_id);
     }
 
+    // --- messaggio personalizzato ------------------------------------------
+
+    public function test_il_messaggio_usa_i_dati_veri_del_profilo(): void
+    {
+        $p = $this->prospect([
+            'instagram_handle' => 'moda_dna', 'name' => 'DNA Moda (donna, Napoli)', 'city' => 'Napoli',
+            'has_physical_store' => true, 'orders_in_dm' => true, 'website_status' => 'none',
+        ]);
+
+        $msg = $p->outreach_message;
+        $this->assertStringContainsString('DNA Moda', $msg);
+        $this->assertStringNotContainsString('(donna', $msg);          // niente testo tra parentesi nel saluto
+        $this->assertStringContainsString('negozio a Napoli', $msg);
+        $this->assertStringContainsString('gli ordini li gestisci direttamente in messaggio', $msg);
+        $this->assertStringContainsString('Midalot', $msg);
+        $this->assertStringContainsString('non ti scrivo più', $msg);   // via d'uscita sempre presente
+        $this->assertStringNotContainsString("e'", $msg);               // accenti veri, non apostrofi
+
+        $this->assertSame('https://ig.me/m/moda_dna', $p->instagram_chat_url);
+    }
+
+    public function test_il_messaggio_cambia_con_la_situazione_del_sito_e_non_inventa_nulla(): void
+    {
+        $conSito = $this->prospect(['website_status' => 'yes', 'has_physical_store' => null, 'city' => 'Napoli']);
+        $this->assertStringContainsString('hai già un sito', $conSito->outreach_message);
+        $this->assertStringNotContainsString('negozio a', $conSito->outreach_message); // negozio non verificato
+
+        $senzaNome = $this->prospect(['instagram_handle' => 'solo_handle', 'name' => null, 'website_status' => 'none', 'proposal' => 'prenotazioni']);
+        $this->assertStringContainsString('solo_handle', $senzaNome->outreach_message);
+        $this->assertStringContainsString('prenotazioni online', $senzaNome->outreach_message);
+
+        $datato = $this->prospect(['website_status' => 'outdated']);
+        $this->assertStringContainsString('potrebbe essere rinnovato', $datato->outreach_message);
+    }
+
+    public function test_le_aperture_variano_tra_profili_ma_sono_stabili(): void
+    {
+        $openings = [];
+        foreach (range(1, 30) as $i) {
+            $p = $this->prospect(['instagram_handle' => "profilo_{$i}", 'name' => 'Negozio']);
+            $first = explode("\n\n", $p->outreach_message)[0];
+            $this->assertSame($first, explode("\n\n", $p->outreach_message)[0]); // stabile
+            $openings[$first] = true;
+        }
+
+        $this->assertGreaterThan(1, count($openings));
+    }
+
+    public function test_pulsanti_copia_e_apri_in_elenco_e_nel_form(): void
+    {
+        $admin = $this->createAdmin();
+        $aperto = $this->prospect(['instagram_handle' => 'da_scrivere']);
+        $cliente = $this->prospect(['instagram_handle' => 'gia_cliente', 'status' => 'client']);
+
+        $html = $this->actingAs($admin)->get(route('admin.prospects.index'))->getContent();
+        $this->assertStringContainsString('https://ig.me/m/da_scrivere', $html);
+        $this->assertStringNotContainsString('https://ig.me/m/gia_cliente', $html); // chiusi: nessun pulsante
+
+        $this->actingAs($admin)->get(route('admin.prospects.edit', $aperto))
+            ->assertOk()->assertSee('Messaggio per questo profilo')->assertSee('outreach-message', false);
+        $this->actingAs($admin)->get(route('admin.prospects.create'))
+            ->assertOk()->assertDontSee('outreach-message', false);
+    }
+
     // --- comando di importazione -----------------------------------------
 
     private function writeJson(array $data): string

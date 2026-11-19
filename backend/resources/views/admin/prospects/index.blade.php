@@ -293,6 +293,14 @@
                                 </td>
                                 <td>
                                     <div class="admin-actions">
+                                        @unless (in_array($p->status, Prospect::CLOSED_STATUSES, true))
+                                            <button type="button" class="btn btn-sm btn-success"
+                                                data-copy-message="{{ $p->outreach_message }}" data-open-url="{{ $p->instagram_chat_url }}"
+                                                title="Copia il messaggio personalizzato e apre la chat Instagram in una nuova scheda">
+                                                <i class="bi bi-clipboard"></i>
+                                                Copia e apri chat
+                                            </button>
+                                        @endunless
                                         <a href="{{ route('admin.prospects.edit', $p) }}" class="btn btn-sm btn-warning">
                                             <i class="bi bi-pencil"></i>
                                             Modifica
@@ -320,4 +328,6 @@
             @endif
         @endif
     </section>
+
+    @include('admin.prospects._copy-script')
 @endsection

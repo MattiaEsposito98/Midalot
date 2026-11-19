@@ -11,6 +11,35 @@
 @section('activeNav', 'prospects')
 
 @section('content')
+    @if ($isEdit)
+        <section class="admin-card mb-3">
+            <div class="admin-card-header">
+                <div>
+                    <h2 class="admin-section-title">Messaggio per questo profilo</h2>
+                    <p class="admin-muted mb-0">Bozza costruita sui dati del profilo: ritoccala come vuoi prima di copiarla (le modifiche qui non vengono salvate). Il messaggio lo invii tu, a mano.</p>
+                </div>
+            </div>
+            <div class="admin-card-body">
+                <textarea id="outreach-message" class="form-control mb-2" rows="9">{{ $prospect->outreach_message }}</textarea>
+                <div class="admin-page-actions">
+                    <button type="button" class="btn btn-success" data-copy-message="" data-copy-source="outreach-message" data-open-url="{{ $prospect->instagram_chat_url }}">
+                        <i class="bi bi-clipboard"></i>
+                        Copia e apri chat
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary" data-copy-message="" data-copy-source="outreach-message">
+                        <i class="bi bi-clipboard"></i>
+                        Solo copia
+                    </button>
+                    <a href="{{ $prospect->instagram_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-outline-secondary">
+                        <i class="bi bi-instagram"></i>
+                        Apri profilo
+                    </a>
+                </div>
+                <p class="small admin-muted mt-2 mb-0">Dopo l'invio, segna lo stato "Contattato" (e se serve un promemoria) qui sotto o dall'elenco.</p>
+            </div>
+        </section>
+    @endif
+
     <section class="admin-card">
         <div class="admin-card-header">
             <div>
@@ -235,4 +264,8 @@
             @endif
         </div>
     </section>
+
+    @if ($isEdit)
+        @include('admin.prospects._copy-script')
+    @endif
 @endsection

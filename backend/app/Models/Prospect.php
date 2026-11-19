@@ -109,6 +109,18 @@ class Prospect extends Model
         return 'https://www.instagram.com/' . $this->instagram_handle . '/';
     }
 
+    /** Link che apre direttamente la chat Instagram con questo profilo (se non funziona, resta il link al profilo). */
+    public function getInstagramChatUrlAttribute(): string
+    {
+        return 'https://ig.me/m/' . $this->instagram_handle;
+    }
+
+    /** Bozza del primo messaggio personalizzato (da inviare a mano, mai in automatico). */
+    public function getOutreachMessageAttribute(): string
+    {
+        return \App\Support\ProspectMessage::for($this);
+    }
+
     public function isFollowUpDue(): bool
     {
         return $this->follow_up_at !== null
