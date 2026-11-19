@@ -316,23 +316,6 @@ class ProspectsTest extends TestCase
         $this->assertMatchesRegularExpression('/<col min="3" max="3" width="3[0-9]" customWidth="1"\/>/', $sheet);
     }
 
-    public function test_export_csv_rispetta_i_filtri(): void
-    {
-        $admin = $this->createAdmin();
-        $this->prospect(['instagram_handle' => 'in_campania', 'region' => 'Campania', 'name' => 'Moda; "Napoli"']);
-        $this->prospect(['instagram_handle' => 'in_lazio', 'region' => 'Lazio']);
-
-        $response = $this->actingAs($admin)->get(route('admin.prospects.export', ['region' => 'Campania', 'formato' => 'csv']));
-        $response->assertOk();
-        $this->assertStringContainsString('text/csv', $response->headers->get('Content-Type'));
-
-        $csv = $response->streamedContent();
-        $this->assertStringStartsWith("\xEF\xBB\xBF", $csv);
-        $this->assertStringContainsString('@in_campania', $csv);
-        $this->assertStringContainsString('"Moda; ""Napoli"""', $csv);
-        $this->assertStringNotContainsString('in_lazio', $csv);
-    }
-
     // --- ricerche --------------------------------------------------------
 
     public function test_ricerche_nome_di_default_stato_e_copertura(): void

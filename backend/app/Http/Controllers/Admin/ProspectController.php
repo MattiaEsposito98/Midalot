@@ -135,32 +135,16 @@ class ProspectController extends Controller
     private const EXPORT_HEADERS = ['Profilo', 'Link Instagram', 'Nome', 'Follower', 'Regione', 'Citta', 'Settore', 'Sito web', 'Email', 'Telefono',
         'Negozio fisico', 'Ordini in DM', 'Stato sito', 'Attivita', 'Proposta', 'Priorita', 'Stato', 'Contattato il', 'Promemoria', 'Ricerca', 'Segnali', 'Note'];
 
-    /** Esporta i profili del filtro corrente: Excel (.xlsx, colonne dimensionate sul contenuto) o CSV con ?formato=csv. */
+    /** Esporta i profili del filtro corrente: Excel (.xlsx, colonne dimensionate sul contenuto). */
     public function export(Request $request): StreamedResponse
     {
         $query = $this->filteredQuery($this->filters($request))->with('search:id,name')->orderBy('id');
-        $base = 'clienti-da-contattare-' . now()->format('Y-m-d');
-
-        if ($request->query('formato') === 'csv') {
-            return response()->streamDownload(function () use ($query) {
-                $out = fopen('php://output', 'w');
-                fwrite($out, "\xEF\xBB\xBF"); // BOM: Excel legge bene le lettere accentate
-                fputcsv($out, self::EXPORT_HEADERS, ';');
-                $query->chunk(500, function ($rows) use ($out) {
-                    foreach ($rows as $p) {
-                        fputcsv($out, $this->exportRow($p), ';');
-                    }
-                });
-                fclose($out);
-            }, $base . '.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
-        }
-
         $path = XlsxWriter::build(self::EXPORT_HEADERS, $query->lazyById(500)->map(fn (Prospect $p) => $this->exportRow($p)), 'Clienti');
 
         return response()->streamDownload(function () use ($path) {
             readfile($path);
             @unlink($path);
-        }, $base . '.xlsx', ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
+        }, 'clienti-da-contattare-' . now()->format('Y-m-d') . '.xlsx', ['Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet']);
     }
 
     /** @return array<int, string|int|null> */
