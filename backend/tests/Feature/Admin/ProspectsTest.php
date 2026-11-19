@@ -1,0 +1,460 @@
+<?php
+
+namespace Tests\Feature\Admin;
+
+use App\Models\Prospect;
+use App\Models\ProspectSearch;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\Support\CreatesQuizData;
+use Tests\TestCase;
+
+class ProspectsTest extends TestCase
+{
+    use CreatesQuizData;
+    use RefreshDatabase;
+
+    private function prospect(array $attrs = []): Prospect
+    {
+        static $n = 0;
+        $n++;
+
+        return Prospect::create(array_merge([
+            'instagram_handle' => 'negozio' . $n,
+            'followers' => 1000,
+            'website_status' => 'none',
+            'activity' => 'active',
+            'priority' => 'B',
+            'status' => 'to_contact',
+        ], $attrs));
+    }
+
+    private function payload(array $extra = []): array
+    {
+        return array_merge([
+            'instagram_handle' => '@Negozio_Nuovo',
+            'website_status' => 'none',
+            'activity' => 'unverified',
+            'priority' => 'B',
+            'status' => 'to_contact',
+        ], $extra);
+    }
+
+    // --- accesso ---------------------------------------------------------
+
+    public function test_le_pagine_sono_solo_per_admin(): void
+    {
+        $p = $this->prospect();
+        $user = $this->createUser();
+
+        $this->get(route('admin.prospects.index'))->assertRedirect();
+        $this->actingAs($user)->get(route('admin.prospects.index'))->assertStatus(403);
+        $this->actingAs($user)->get(route('admin.prospects.create'))->assertStatus(403);
+        $this->actingAs($user)->get(route('admin.prospects.export'))->assertStatus(403);
+        $this->actingAs($user)->get(route('admin.prospect-searches.index'))->assertStatus(403);
+        $this->actingAs($user)->post(route('admin.prospects.store'), $this->payload())->assertStatus(403);
+        $this->actingAs($user)->delete(route('admin.prospects.destroy', $p))->assertStatus(403);
+
+        $admin = $this->createAdmin();
+        $this->actingAs($admin)->get(route('admin.prospects.index'))->assertOk()->assertSee('Clienti da contattare');
+        $this->actingAs($admin)->get(route('admin.prospects.create'))->assertOk();
+        $this->actingAs($admin)->get(route('admin.prospects.edit', $p))->assertOk();
+        $this->actingAs($admin)->get(route('admin.prospect-searches.index'))->assertOk();
+    }
+
+    // --- filtri, paginazione, ordinamento --------------------------------
+
+    public function test_filtri_per_regione_citta_settore_e_stato(): void
+    {
+        $admin = $this->createAdmin();
+        $this->prospect(['instagram_handle' => 'napoli_moda', 'region' => 'Campania', 'city' => 'Napoli', 'sector' => 'Abbigliamento']);
+        $this->prospect(['instagram_handle' => 'roma_fiori', 'region' => 'Lazio', 'city' => 'Roma', 'sector' => 'Fiori', 'status' => 'contacted', 'contacted_at' => now()]);
+
+        $this->actingAs($admin)->get(route('admin.prospects.index', ['region' => 'Campania']))
+            ->assertSee('napoli_moda')->assertDontSee('roma_fiori');
+        $this->actingAs($admin)->get(route('admin.prospects.index', ['city' => 'Roma']))
+            ->assertSee('roma_fiori')->assertDontSee('napoli_moda');
+        $this->actingAs($admin)->get(route('admin.prospects.index', ['sector' => 'Abbigliamento']))
+            ->assertSee('napoli_moda')->assertDontSee('roma_fiori');
+        $this->actingAs($admin)->get(route('admin.prospects.index', ['status' => 'contacted']))
+            ->assertSee('roma_fiori')->assertDontSee('napoli_moda');
+        $this->actingAs($admin)->get(route('admin.prospects.index', ['q' => '@napoli']))
+            ->assertSee('napoli_moda')->assertDontSee('roma_fiori');
+        $this->actingAs($admin)->get(route('admin.prospects.index', ['contacted' => 'no']))
+            ->assertSee('napoli_moda')->assertDontSee('roma_fiori');
+    }
+
+    public function test_filtro_follower_minimi_e_massimi(): void
+    {
+        $admin = $this->createAdmin();
+        $this->prospect(['instagram_handle' => 'piccolo', 'followers' => 300]);
+        $this->prospect(['instagram_handle' => 'medio', 'followers' => 5000]);
+        $this->prospect(['instagram_handle' => 'grande', 'followers' => 90000]);
+
+        $this->actingAs($admin)->get(route('admin.prospects.index', ['min_followers' => 700, 'max_followers' => 40000]))
+            ->assertSee('medio')->assertDontSee('piccolo')->assertDontSee('grande');
+    }
+
+    public function test_filtro_promemoria_scaduti_ignora_i_profili_chiusi(): void
+    {
+        $admin = $this->createAdmin();
+        $this->prospect(['instagram_handle' => 'scaduto', 'status' => 'contacted', 'follow_up_at' => today()->subDays(3)]);
+        $this->prospect(['instagram_handle' => 'oggi', 'status' => 'contacted', 'follow_up_at' => today()]);
+        $this->prospect(['instagram_handle' => 'futuro', 'status' => 'contacted', 'follow_up_at' => today()->addDays(10)]);
+        $this->prospect(['instagram_handle' => 'chiuso', 'status' => 'client', 'follow_up_at' => today()->subDays(1)]);
+        $this->prospect(['instagram_handle' => 'senzadata']);
+
+        $this->actingAs($admin)->get(route('admin.prospects.index', ['follow_up' => 'due']))
+            ->assertSee('scaduto')->assertSee('oggi')
+            ->assertDontSee('futuro')->assertDontSee('chiuso')->assertDontSee('senzadata');
+        $this->actingAs($admin)->get(route('admin.prospects.index', ['follow_up' => 'upcoming']))
+            ->assertSee('futuro')->assertDontSee('scaduto');
+
+        $this->assertSame(2, \App\Http\Controllers\Admin\ProspectController::dueQuery()->count());
+    }
+
+    public function test_il_menu_mostra_il_contatore_dei_promemoria_scaduti(): void
+    {
+        $this->prospect(['status' => 'contacted', 'follow_up_at' => today()->subDay()]);
+
+        $this->actingAs($this->createAdmin())->get(route('admin.prospects.index'))
+            ->assertSee('Clienti da contattare')
+            ->assertSee('admin-nav-count', false);
+    }
+
+    public function test_paginazione_a_50_per_pagina(): void
+    {
+        $admin = $this->createAdmin();
+        for ($i = 1; $i <= 55; $i++) {
+            $this->prospect(['instagram_handle' => sprintf('profilo%03d', $i), 'followers' => $i]);
+        }
+
+        $response = $this->actingAs($admin)->get(route('admin.prospects.index', ['sort' => 'followers', 'direction' => 'asc']));
+        $this->assertCount(50, $response->viewData('prospects'));
+        $this->assertSame(55, $response->viewData('prospects')->total());
+        $response->assertSee('profilo001')->assertDontSee('profilo055');
+
+        $page2 = $this->actingAs($admin)->get(route('admin.prospects.index', ['sort' => 'followers', 'direction' => 'asc', 'page' => 2]));
+        $this->assertCount(5, $page2->viewData('prospects'));
+    }
+
+    public function test_ordinamento_solo_su_colonne_in_whitelist(): void
+    {
+        $admin = $this->createAdmin();
+        $this->prospect(['instagram_handle' => 'a_basso', 'followers' => 10]);
+        $this->prospect(['instagram_handle' => 'b_alto', 'followers' => 9000]);
+
+        $r = $this->actingAs($admin)->get(route('admin.prospects.index', ['sort' => 'followers', 'direction' => 'desc']));
+        $this->assertSame(['b_alto', 'a_basso'], $r->viewData('prospects')->pluck('instagram_handle')->all());
+        $this->assertSame('followers', $r->viewData('sort'));
+
+        // Colonna non ammessa (anche un tentativo di injection): si usa l'ordinamento di default.
+        $r = $this->actingAs($admin)->get(route('admin.prospects.index', ['sort' => 'id; DROP TABLE prospects', 'direction' => 'sideways']));
+        $r->assertOk();
+        $this->assertSame('created_at', $r->viewData('sort'));
+        $this->assertSame('desc', $r->viewData('direction'));
+        $this->assertSame(2, Prospect::count());
+    }
+
+    // --- creazione, handle, URL ------------------------------------------
+
+    public function test_handle_normalizzato_e_univoco(): void
+    {
+        $admin = $this->createAdmin();
+
+        $this->actingAs($admin)->post(route('admin.prospects.store'), $this->payload(['instagram_handle' => 'https://www.instagram.com/Negozio_Nuovo/?hl=it']))
+            ->assertRedirect();
+        $this->assertSame('negozio_nuovo', Prospect::firstOrFail()->instagram_handle);
+
+        $this->actingAs($admin)->post(route('admin.prospects.store'), $this->payload(['instagram_handle' => '@NEGOZIO_NUOVO']))
+            ->assertSessionHasErrors('instagram_handle');
+        $this->assertSame(1, Prospect::count());
+
+        $this->actingAs($admin)->post(route('admin.prospects.store'), $this->payload(['instagram_handle' => 'nome con spazi']))
+            ->assertSessionHasErrors('instagram_handle');
+    }
+
+    public function test_url_non_http_vengono_scartati(): void
+    {
+        $admin = $this->createAdmin();
+
+        $this->actingAs($admin)->post(route('admin.prospects.store'), $this->payload(['instagram_handle' => 'js', 'website_url' => 'javascript:alert(1)']));
+        $this->assertNull(Prospect::where('instagram_handle', 'js')->value('website_url'));
+
+        $this->actingAs($admin)->post(route('admin.prospects.store'), $this->payload(['instagram_handle' => 'ok', 'website_url' => 'www.esempio.it/negozio']));
+        $this->assertSame('https://www.esempio.it/negozio', Prospect::where('instagram_handle', 'ok')->value('website_url'));
+
+        $this->assertNull(Prospect::safeUrl('ftp://esempio.it'));
+        $this->assertNull(Prospect::safeUrl('data:text/html,x'));
+        $this->assertSame('http://esempio.it', Prospect::safeUrl('http://esempio.it'));
+    }
+
+    // --- stato e promemoria ----------------------------------------------
+
+    public function test_il_cambio_stato_salva_data_e_autore_una_sola_volta(): void
+    {
+        $admin = $this->createAdmin();
+        $altro = $this->createAdmin(['email' => 'altro@example.com', 'nickname' => 'altroadmin']);
+        $p = $this->prospect();
+
+        $this->actingAs($admin)->patch(route('admin.prospects.status', $p), ['status' => 'contacted'])->assertRedirect();
+        $p->refresh();
+        $this->assertSame('contacted', $p->status);
+        $this->assertNotNull($p->contacted_at);
+        $this->assertSame($admin->id, $p->contacted_by);
+        $firstDate = $p->contacted_at->toDateTimeString();
+
+        $this->travel(2)->days();
+        $this->actingAs($altro)->patch(route('admin.prospects.status', $p), ['status' => 'replied'])->assertRedirect();
+        $p->refresh();
+        $this->assertSame('replied', $p->status);
+        $this->assertSame($admin->id, $p->contacted_by);
+        $this->assertSame($firstDate, $p->contacted_at->toDateTimeString());
+    }
+
+    public function test_tornare_a_da_contattare_non_perde_lo_storico(): void
+    {
+        $admin = $this->createAdmin();
+        $p = $this->prospect();
+
+        $this->actingAs($admin)->patch(route('admin.prospects.status', $p), ['status' => 'contacted']);
+        $this->actingAs($admin)->patch(route('admin.prospects.status', $p), ['status' => 'to_contact']);
+
+        $p->refresh();
+        $this->assertSame('to_contact', $p->status);
+        $this->assertNotNull($p->contacted_at);
+    }
+
+    public function test_il_promemoria_si_imposta_dall_elenco_e_si_azzera_per_cliente_e_non_idoneo(): void
+    {
+        $admin = $this->createAdmin();
+        $p = $this->prospect();
+        $date = today()->addDays(14)->toDateString();
+
+        $this->actingAs($admin)->patch(route('admin.prospects.status', $p), ['status' => 'contacted', 'follow_up_at' => $date]);
+        $this->assertSame($date, $p->fresh()->follow_up_at->toDateString());
+
+        // Campo promemoria svuotato dall'elenco -> promemoria rimosso.
+        $this->actingAs($admin)->patch(route('admin.prospects.status', $p), ['status' => 'contacted', 'follow_up_at' => '']);
+        $this->assertNull($p->fresh()->follow_up_at);
+
+        foreach (['client', 'not_suitable'] as $closed) {
+            $this->actingAs($admin)->patch(route('admin.prospects.status', $p), ['status' => 'contacted', 'follow_up_at' => $date]);
+            $this->actingAs($admin)->patch(route('admin.prospects.status', $p), ['status' => $closed, 'follow_up_at' => $date]);
+            $this->assertSame($closed, $p->fresh()->status);
+            $this->assertNull($p->fresh()->follow_up_at, "promemoria da azzerare per {$closed}");
+        }
+    }
+
+    public function test_stato_non_valido_rifiutato(): void
+    {
+        $p = $this->prospect();
+
+        $this->actingAs($this->createAdmin())->patch(route('admin.prospects.status', $p), ['status' => 'inventato'])
+            ->assertSessionHasErrors('status');
+        $this->assertSame('to_contact', $p->fresh()->status);
+    }
+
+    public function test_modifica_ed_eliminazione(): void
+    {
+        $admin = $this->createAdmin();
+        $p = $this->prospect(['instagram_handle' => 'da_modificare']);
+
+        $this->actingAs($admin)->put(route('admin.prospects.update', $p), $this->payload([
+            'instagram_handle' => 'da_modificare', 'name' => 'Boutique Rosa', 'followers' => '2500', 'status' => 'interested',
+            'has_physical_store' => '1', 'orders_in_dm' => '',
+        ]))->assertRedirect();
+
+        $p->refresh();
+        $this->assertSame('Boutique Rosa', $p->name);
+        $this->assertSame(2500, $p->followers);
+        $this->assertTrue($p->has_physical_store);
+        $this->assertNull($p->orders_in_dm);
+        $this->assertNotNull($p->contacted_at);
+
+        $this->actingAs($admin)->delete(route('admin.prospects.destroy', $p))->assertRedirect(route('admin.prospects.index'));
+        $this->assertSame(0, Prospect::count());
+    }
+
+    // --- export ----------------------------------------------------------
+
+    public function test_export_csv_rispetta_i_filtri(): void
+    {
+        $admin = $this->createAdmin();
+        $this->prospect(['instagram_handle' => 'in_campania', 'region' => 'Campania', 'name' => 'Moda; "Napoli"']);
+        $this->prospect(['instagram_handle' => 'in_lazio', 'region' => 'Lazio']);
+
+        $response = $this->actingAs($admin)->get(route('admin.prospects.export', ['region' => 'Campania']));
+        $response->assertOk();
+        $this->assertStringContainsString('text/csv', $response->headers->get('Content-Type'));
+
+        $csv = $response->streamedContent();
+        $this->assertStringStartsWith("\xEF\xBB\xBF", $csv);
+        $this->assertStringContainsString('@in_campania', $csv);
+        $this->assertStringContainsString('"Moda; ""Napoli"""', $csv);
+        $this->assertStringNotContainsString('in_lazio', $csv);
+    }
+
+    // --- ricerche --------------------------------------------------------
+
+    public function test_ricerche_nome_di_default_stato_e_copertura(): void
+    {
+        $admin = $this->createAdmin();
+
+        $this->actingAs($admin)->post(route('admin.prospect-searches.store'), [
+            'region' => 'Campania', 'city' => 'Napoli', 'sector' => 'Abbigliamento', 'status' => 'planned', 'searched_at' => '2026-11-19',
+        ])->assertRedirect();
+        $this->actingAs($admin)->post(route('admin.prospect-searches.store'), [
+            'region' => 'Campania', 'sector' => 'Fiori', 'status' => 'in_progress', 'name' => 'Giro fiorai',
+        ]);
+
+        $search = ProspectSearch::where('sector', 'Abbigliamento')->firstOrFail();
+        $this->assertSame('Campania · Napoli · Abbigliamento · 19/11/2026', $search->name);
+
+        $this->prospect(['prospect_search_id' => $search->id, 'contacted_at' => now(), 'status' => 'contacted']);
+        $this->prospect(['prospect_search_id' => $search->id]);
+
+        // Segnare "fatta" imposta la data se mancava.
+        $fiorai = ProspectSearch::where('name', 'Giro fiorai')->firstOrFail();
+        $this->actingAs($admin)->patch(route('admin.prospect-searches.update', $fiorai), ['status' => 'done']);
+        $this->assertSame('done', $fiorai->fresh()->status);
+        $this->assertNotNull($fiorai->fresh()->searched_at);
+
+        $r = $this->actingAs($admin)->get(route('admin.prospect-searches.index'));
+        $r->assertOk()->assertSee('Giro fiorai');
+
+        $row = $r->viewData('coverage')->firstWhere('region', 'Campania');
+        $this->assertSame(2, (int) $row->searches);
+        $this->assertSame(1, (int) $row->done_searches);
+        $this->assertSame(2, (int) $row->prospects);
+        $this->assertSame(1, (int) $row->contacted);
+
+        // In corso e da fare vengono prima delle fatte.
+        $this->assertSame('planned', $r->viewData('searches')->first()->status);
+        $this->assertSame(2, $r->viewData('searches')->firstWhere('id', $search->id)->prospects_count);
+
+        $this->actingAs($admin)->get(route('admin.prospect-searches.index', ['status' => 'done']))
+            ->assertSee('Giro fiorai')->assertDontSee('Abbigliamento · 19/11/2026');
+    }
+
+    public function test_eliminando_una_ricerca_i_profili_restano(): void
+    {
+        $admin = $this->createAdmin();
+        $search = ProspectSearch::create(['name' => 'Da togliere', 'sector' => 'Bar']);
+        $p = $this->prospect(['prospect_search_id' => $search->id]);
+
+        $this->actingAs($admin)->delete(route('admin.prospect-searches.destroy', $search))->assertRedirect();
+
+        $this->assertNull(ProspectSearch::find($search->id));
+        $this->assertNull($p->fresh()->prospect_search_id);
+    }
+
+    // --- comando di importazione -----------------------------------------
+
+    private function writeJson(array $data): string
+    {
+        $path = tempnam(sys_get_temp_dir(), 'prs');
+        file_put_contents($path, json_encode($data));
+
+        return $path;
+    }
+
+    private function importData(array $prospects): array
+    {
+        return [
+            'search' => ['region' => 'Campania', 'city' => 'Napoli', 'sector' => 'Abbigliamento', 'searched_at' => '2026-11-19'],
+            'prospects' => $prospects,
+        ];
+    }
+
+    public function test_import_dry_run_non_scrive_nulla(): void
+    {
+        $file = $this->writeJson($this->importData([['handle' => '@Moda_Napoli', 'followers' => 1200]]));
+
+        $this->artisan('app:import-prospects', ['file' => $file, '--dry-run' => true])
+            ->expectsOutputToContain('DRY-RUN')
+            ->assertSuccessful();
+
+        $this->assertSame(0, Prospect::count());
+        $this->assertSame(0, ProspectSearch::count());
+    }
+
+    public function test_import_crea_ricerca_e_profili_collegati(): void
+    {
+        $file = $this->writeJson($this->importData([
+            ['handle' => '@Moda_Napoli', 'name' => 'Moda Napoli', 'followers' => 1200, 'website_url' => 'linktr.ee/moda', 'website_status' => 'link_only',
+                'email' => 'info@moda.example', 'has_physical_store' => true, 'priority' => 'A', 'proposal' => 'vetrina'],
+            ['handle' => 'https://www.instagram.com/scarpe.sud/', 'followers' => 900, 'sector' => 'Calzature'],
+        ]));
+
+        $this->artisan('app:import-prospects', ['file' => $file])->assertSuccessful();
+
+        $search = ProspectSearch::firstOrFail();
+        $this->assertSame('Campania · Napoli · Abbigliamento · 19/11/2026', $search->name);
+        $this->assertSame('in_progress', $search->status);
+        $this->assertSame(2, Prospect::where('prospect_search_id', $search->id)->count());
+
+        $moda = Prospect::where('instagram_handle', 'moda_napoli')->firstOrFail();
+        $this->assertSame('https://linktr.ee/moda', $moda->website_url);
+        $this->assertSame('link_only', $moda->website_status);
+        $this->assertSame('A', $moda->priority);
+        $this->assertSame('Campania', $moda->region);
+        $this->assertSame('Napoli', $moda->city);
+        $this->assertSame('Abbigliamento', $moda->sector);
+        $this->assertTrue($moda->has_physical_store);
+        $this->assertSame('to_contact', $moda->status);
+
+        $scarpe = Prospect::where('instagram_handle', 'scarpe.sud')->firstOrFail();
+        $this->assertSame('Calzature', $scarpe->sector);
+        $this->assertSame('unverified', $scarpe->activity);
+    }
+
+    public function test_import_scarta_doppioni_nel_file_e_in_elenco_e_riusa_la_ricerca(): void
+    {
+        $this->prospect(['instagram_handle' => 'gia_presente', 'followers' => 5555]);
+        $file = $this->writeJson($this->importData([
+            ['handle' => 'gia_presente', 'followers' => 1],
+            ['handle' => 'nuovo_uno'],
+            ['handle' => '@Nuovo_Uno'],
+        ]));
+
+        $this->artisan('app:import-prospects', ['file' => $file])
+            ->expectsOutputToContain('scartati come doppioni: 2')
+            ->assertSuccessful();
+
+        $this->assertSame(2, Prospect::count());
+        $this->assertSame(5555, Prospect::where('instagram_handle', 'gia_presente')->value('followers'));
+
+        // Secondo giro con lo stesso file: nessun nuovo profilo, ricerca riusata (non duplicata).
+        $this->artisan('app:import-prospects', ['file' => $file])->assertSuccessful();
+        $this->assertSame(2, Prospect::count());
+        $this->assertSame(1, ProspectSearch::count());
+    }
+
+    public function test_import_con_errori_non_scrive_nulla(): void
+    {
+        $file = $this->writeJson($this->importData([
+            ['handle' => 'valido'],
+            ['handle' => 'url_cattivo', 'website_url' => 'javascript:alert(1)'],
+            ['handle' => 'email_cattiva', 'email' => 'non-una-email'],
+            ['handle' => 'stato_strano', 'website_status' => 'boh'],
+            ['handle' => 'spazi non validi'],
+            ['name' => 'senza handle'],
+        ]));
+
+        $this->artisan('app:import-prospects', ['file' => $file])
+            ->expectsOutputToContain('nessuna scrittura')
+            ->assertFailed();
+
+        $this->assertSame(0, Prospect::count());
+        $this->assertSame(0, ProspectSearch::count());
+    }
+
+    public function test_import_file_mancante_o_json_non_valido(): void
+    {
+        $this->artisan('app:import-prospects', ['file' => '/non/esiste.json'])->assertFailed();
+
+        $path = tempnam(sys_get_temp_dir(), 'prs');
+        file_put_contents($path, '{non json');
+        $this->artisan('app:import-prospects', ['file' => $path])->assertFailed();
+    }
+}

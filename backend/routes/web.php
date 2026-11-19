@@ -10,6 +10,8 @@ use App\Http\Controllers\Admin\MinigiocoController;
 use App\Http\Controllers\Admin\MinigiocoRoundController;
 use App\Http\Controllers\Admin\PeriodLeaderboardController;
 use App\Http\Controllers\Admin\PrizeAwardController;
+use App\Http\Controllers\Admin\ProspectController;
+use App\Http\Controllers\Admin\ProspectSearchController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\QuestionDraftController;
 use App\Http\Controllers\Admin\QuestionPickerController;
@@ -170,6 +172,20 @@ Route::middleware(['auth', 'admin'])
             ->name('event-requests.update');
         Route::delete('event-requests/{eventRequest}', [EventRequestController::class, 'destroy'])
             ->name('event-requests.destroy');
+
+        // Clienti da contattare (profili Instagram di attivita' + operazioni di ricerca)
+        Route::get('clienti/ricerche', [ProspectSearchController::class, 'index'])->name('prospect-searches.index');
+        Route::post('clienti/ricerche', [ProspectSearchController::class, 'store'])->name('prospect-searches.store');
+        Route::patch('clienti/ricerche/{search}', [ProspectSearchController::class, 'update'])->name('prospect-searches.update');
+        Route::delete('clienti/ricerche/{search}', [ProspectSearchController::class, 'destroy'])->name('prospect-searches.destroy');
+        Route::get('clienti', [ProspectController::class, 'index'])->name('prospects.index');
+        Route::get('clienti/nuovo', [ProspectController::class, 'create'])->name('prospects.create');
+        Route::get('clienti/esporta', [ProspectController::class, 'export'])->name('prospects.export');
+        Route::post('clienti', [ProspectController::class, 'store'])->name('prospects.store');
+        Route::get('clienti/{prospect}/modifica', [ProspectController::class, 'edit'])->name('prospects.edit');
+        Route::put('clienti/{prospect}', [ProspectController::class, 'update'])->name('prospects.update');
+        Route::patch('clienti/{prospect}/stato', [ProspectController::class, 'status'])->name('prospects.status');
+        Route::delete('clienti/{prospect}', [ProspectController::class, 'destroy'])->name('prospects.destroy');
 
         // CRUD Quiz
         Route::resource('quizzes', QuizController::class);

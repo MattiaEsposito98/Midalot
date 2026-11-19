@@ -55,6 +55,7 @@
                         'items' => [
                             ['admin.reports.index', Route::is('admin.reports.*'), 'bi-flag', 'Segnalazioni', $openReportsCount],
                             ['admin.event-requests.index', Route::is('admin.event-requests.*'), 'bi-stars', 'Richieste contatto', $newEventRequestsCount],
+                            ['admin.prospects.index', Route::is('admin.prospects.*') || Route::is('admin.prospect-searches.*'), 'bi-person-lines-fill', 'Clienti da contattare', $prospectFollowUpsDue],
                             ['admin.showcase.index', Route::is('admin.showcase.*'), 'bi-images', 'Vetrina', 0],
                         ],
                     ],

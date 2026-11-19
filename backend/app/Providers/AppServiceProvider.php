@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Http\Controllers\Admin\ProspectController;
 use App\Models\EventRequest;
 use App\Models\Question;
 use App\Models\TrainingQuestionReport;
@@ -47,6 +48,9 @@ class AppServiceProvider extends ServiceProvider
                 'newEventRequestsCount',
                 EventRequest::where('status', EventRequest::STATUS_NEW)->count()
             );
+
+            // Clienti da contattare: promemoria scaduti o in scadenza oggi.
+            $view->with('prospectFollowUpsDue', ProspectController::dueQuery()->count());
         });
     }
 }
