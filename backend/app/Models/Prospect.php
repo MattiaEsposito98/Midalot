@@ -126,10 +126,10 @@ class Prospect extends Model
         return 'https://www.instagram.com/' . $this->instagram_handle . '/';
     }
 
-    /** Link che apre direttamente la chat Instagram con questo profilo (se non funziona, resta il link al profilo). */
+    /** Link che apre direttamente la chat Instagram con questo profilo. Usa instagram.com/m/: ig.me/m/ andava in timeout dalla rete dell utente (2026-11-20). */
     public function getInstagramChatUrlAttribute(): string
     {
-        return 'https://ig.me/m/' . $this->instagram_handle;
+        return 'https://www.instagram.com/m/' . $this->instagram_handle;
     }
 
     /** Bozza del primo messaggio personalizzato (da inviare a mano, mai in automatico). */

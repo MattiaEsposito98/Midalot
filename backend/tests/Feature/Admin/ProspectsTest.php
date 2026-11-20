@@ -437,7 +437,7 @@ class ProspectsTest extends TestCase
         $this->assertStringContainsString('non ti scrivo più', $msg);   // via d'uscita sempre presente
         $this->assertStringNotContainsString("e'", $msg);               // accenti veri, non apostrofi
 
-        $this->assertSame('https://ig.me/m/moda_dna', $p->instagram_chat_url);
+        $this->assertSame('https://www.instagram.com/m/moda_dna', $p->instagram_chat_url);
     }
 
     public function test_il_messaggio_cambia_con_la_situazione_del_sito_e_non_inventa_nulla(): void
@@ -479,8 +479,8 @@ class ProspectsTest extends TestCase
         $cliente = $this->prospect(['instagram_handle' => 'gia_cliente', 'status' => 'client']);
 
         $html = $this->actingAs($admin)->get(route('admin.prospects.index'))->getContent();
-        $this->assertStringContainsString('https://ig.me/m/da_scrivere', $html);
-        $this->assertStringNotContainsString('https://ig.me/m/gia_cliente', $html); // chiusi: nessun pulsante
+        $this->assertStringContainsString('https://www.instagram.com/m/da_scrivere', $html);
+        $this->assertStringNotContainsString('https://www.instagram.com/m/gia_cliente', $html); // chiusi: nessun pulsante
 
         $this->actingAs($admin)->get(route('admin.prospects.edit', $aperto))
             ->assertOk()->assertSee('Messaggio per questo profilo')->assertSee('outreach-message', false);
