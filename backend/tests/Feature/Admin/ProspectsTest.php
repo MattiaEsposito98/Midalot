@@ -291,6 +291,50 @@ class ProspectsTest extends TestCase
         $this->assertSame(0, Prospect::count());
     }
 
+    // --- aggiornamenti senza ricaricare la pagina --------------------------
+
+    public function test_elenco_ajax_restituisce_solo_le_parti_che_cambiano(): void
+    {
+        $admin = $this->createAdmin();
+        $this->prospect(['instagram_handle' => 'napoli_moda', 'region' => 'Campania']);
+        $this->prospect(['instagram_handle' => 'roma_fiori', 'region' => 'Lazio']);
+
+        $response = $this->actingAs($admin)
+            ->withHeaders(['X-Requested-With' => 'XMLHttpRequest'])
+            ->get(route('admin.prospects.index', ['region' => 'Campania']));
+
+        $response->assertOk()
+            ->assertSee('ajax-payload', false)
+            ->assertSee('data-has-filters="1"', false)
+            ->assertSee('data-total="1"', false)
+            ->assertSee('napoli_moda')
+            ->assertDontSee('roma_fiori')
+            ->assertDontSee('<html', false);
+    }
+
+    public function test_stato_e_promemoria_si_salvano_in_json_e_l_eliminazione_pure(): void
+    {
+        $admin = $this->createAdmin();
+        $p = $this->prospect(['instagram_handle' => 'da_salvare']);
+
+        $this->actingAs($admin)
+            ->patchJson(route('admin.prospects.status', $p), ['status' => 'contacted', 'follow_up_at' => now()->addDays(14)->toDateString()])
+            ->assertOk()
+            ->assertJsonStructure(['message']);
+
+        $p->refresh();
+        $this->assertSame('contacted', $p->status);
+        $this->assertNotNull($p->follow_up_at);
+        $this->assertNotNull($p->contacted_at);
+
+        $this->actingAs($admin)
+            ->patchJson(route('admin.prospects.status', $p), ['status' => 'non_esiste'])
+            ->assertStatus(422);
+
+        $this->actingAs($admin)->deleteJson(route('admin.prospects.destroy', $p))->assertOk()->assertJsonStructure(['message']);
+        $this->assertSame(0, Prospect::count());
+    }
+
     // --- export ----------------------------------------------------------
 
     public function test_export_excel_rispetta_i_filtri_e_dimensiona_le_colonne(): void

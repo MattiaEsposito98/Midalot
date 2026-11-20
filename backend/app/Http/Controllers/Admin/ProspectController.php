@@ -59,7 +59,10 @@ class ProspectController extends Controller
             ->groupBy('status')
             ->pluck('total', 'status');
 
-        return view('admin.prospects.index', [
+        // Chiamate in background (filtri senza ricaricare): solo le parti che cambiano.
+        $view = $request->ajax() ? 'admin.prospects._ajax' : 'admin.prospects.index';
+
+        return view($view, [
             'prospects' => $prospects,
             'filters' => $filters,
             'sort' => $sort,
@@ -121,13 +124,21 @@ class ProspectController extends Controller
 
         $prospect->fill($this->applyContactRules($changes, $prospect, $request))->save();
 
+        if ($request->expectsJson()) {
+            return response()->json(['message' => "{$prospect->instagram_handle}: salvato."]);
+        }
+
         return back()->with('success', "{$prospect->instagram_handle}: stato aggiornato.");
     }
 
-    public function destroy(Prospect $prospect)
+    public function destroy(Request $request, Prospect $prospect)
     {
         $handle = $prospect->instagram_handle;
         $prospect->delete();
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => "Profilo {$handle} eliminato."]);
+        }
 
         return redirect()->route('admin.prospects.index')->with('success', "Profilo {$handle} eliminato.");
     }
