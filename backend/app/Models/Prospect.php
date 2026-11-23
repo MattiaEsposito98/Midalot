@@ -132,6 +132,15 @@ class Prospect extends Model
         return 'https://www.instagram.com/m/' . $this->instagram_handle;
     }
 
+    /**
+     * Da telefono instagram.com/m/ apre l'app ma solo sulla home: li' funziona il link breve ig.me,
+     * che l'app riconosce e porta alla chat (da computer invece ig.me puo' essere bloccato).
+     */
+    public function getInstagramChatUrlMobileAttribute(): string
+    {
+        return 'https://ig.me/m/' . $this->instagram_handle;
+    }
+
     /** Bozza del primo messaggio personalizzato (da inviare a mano, mai in automatico). */
     public function getOutreachMessageAttribute(): string
     {

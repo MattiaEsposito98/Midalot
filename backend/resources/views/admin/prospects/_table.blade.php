@@ -123,7 +123,7 @@
                                     <div class="admin-actions">
                                         @unless (in_array($p->status, Prospect::CLOSED_STATUSES, true))
                                             <button type="button" class="btn btn-sm btn-success"
-                                                data-copy-message="{{ $p->outreach_message }}" data-open-url="{{ $p->instagram_chat_url }}"
+                                                data-copy-message="{{ $p->outreach_message }}" data-open-url="{{ $p->instagram_chat_url }}" data-open-url-mobile="{{ $p->instagram_chat_url_mobile }}"
                                                 title="Copia il messaggio personalizzato e apre la chat Instagram in una nuova scheda">
                                                 <i class="bi bi-clipboard"></i>
                                                 Copia e apri chat

@@ -43,7 +43,9 @@
             // Il messaggio sta nell'attributo oppure in una textarea (pagina di modifica: puo' essere ritoccato).
             var source = btn.dataset.copySource ? document.getElementById(btn.dataset.copySource) : null;
             var text = source ? source.value : btn.dataset.copyMessage;
-            var url = btn.dataset.openUrl;
+            // Da telefono il link breve ig.me porta alla chat nell'app; da computer si usa instagram.com/m/.
+            var isMobile = /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || '');
+            var url = (isMobile && btn.dataset.openUrlMobile) ? btn.dataset.openUrlMobile : btn.dataset.openUrl;
 
             // 1) copia subito; 2) se serve apre la scheda, sempre dentro il clic (cosi' il browser non la blocca).
             var copied = copySync(text);

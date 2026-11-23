@@ -22,7 +22,7 @@
             <div class="admin-card-body">
                 <textarea id="outreach-message" class="form-control mb-2" rows="9">{{ $prospect->outreach_message }}</textarea>
                 <div class="admin-page-actions">
-                    <button type="button" class="btn btn-success" data-copy-message="" data-copy-source="outreach-message" data-open-url="{{ $prospect->instagram_chat_url }}">
+                    <button type="button" class="btn btn-success" data-copy-message="" data-copy-source="outreach-message" data-open-url="{{ $prospect->instagram_chat_url }}" data-open-url-mobile="{{ $prospect->instagram_chat_url_mobile }}">
                         <i class="bi bi-clipboard"></i>
                         Copia e apri chat
                     </button>

@@ -3,13 +3,14 @@
 namespace App\Support;
 
 use App\Models\Prospect;
+use Illuminate\Support\Str;
 
 /**
  * Bozza del primo messaggio da mandare A MANO a un profilo ("Clienti da contattare").
  * Instagram non permette di precompilare un messaggio (a differenza di WhatsApp): si copia e si incolla.
  *
  * Posizionamento: facciamo SITI WEB su misura che possono aiutare le attività a vendere online.
- * Niente marketing, niente promesse di vendite. midalot.live è il nostro lavoro da mostrare (sito di quiz).
+ * Niente marketing, niente promesse di vendite. Il link porta alla pagina servizi di midalot.live con utm (vedi trackedLink).
  * Usa solo ciò che sappiamo del profilo (nome, città, negozio fisico, ordini in DM, stato del sito verificato),
  * mai cose non verificate. L'apertura cambia da profilo a profilo (in modo stabile) così non si manda
  * sempre lo stesso identico testo. Spiega chi siamo, perché scriviamo e come tirarsi fuori.
@@ -30,14 +31,30 @@ class ProspectMessage
 
         $parts = [
             $opening,
-            "Realizziamo siti web su misura per le attività, pensati per aiutarle a farsi trovare e a vendere online. "
-                . "Per farti un'idea di come lavoriamo, su midalot.live trovi un nostro sito: è dedicato ai quiz, ma lo stesso lavoro lo facciamo per negozi e attività come la tua.",
+            "Realizziamo siti web su misura per le attività, pensati per farsi trovare e vendere online. Qui vedi cosa facciamo: " . self::trackedLink($p),
             self::situation($p),
-            "Se ti va possiamo capire insieme cosa ti serve, senza impegno e con preventivo gratuito. "
-                . "Se invece non ti interessa nessun problema: dimmelo e non ti scrivo più. Grazie e buona giornata!",
+            "Se ti va ne parliamo, senza impegno e con preventivo gratuito. "
+                . "Se non ti interessa, dimmelo e non ti scrivo più. Grazie e buona giornata!",
         ];
 
         return implode("\n\n", array_filter($parts));
+    }
+
+    /**
+     * Link alla pagina dei servizi con i parametri per Google Analytics (sorgente instagram / mezzo dm).
+     * Il settore sta in utm_campaign perche' il sito invia a Google solo utm_source, utm_medium e utm_campaign.
+     * Nessun nome o profilo nell'indirizzo: solo l'etichetta del settore.
+     */
+    public static function trackedLink(Prospect $p): string
+    {
+        $sector = Str::slug((string) $p->sector, '_');
+        $campaign = 'clienti' . ($sector !== '' ? '_' . Str::limit($sector, 28, '') : '');
+
+        return 'https://midalot.live/servizi-digitali?' . http_build_query([
+            'utm_source' => 'instagram',
+            'utm_medium' => 'dm',
+            'utm_campaign' => $campaign,
+        ]);
     }
 
     /** Il pezzo "perché proprio te", in base a cosa abbiamo verificato. */

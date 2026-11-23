@@ -429,8 +429,7 @@ class ProspectsTest extends TestCase
         $this->assertStringContainsString('negozio a Napoli', $msg);
         $this->assertStringContainsString('gli ordini li gestisci direttamente in messaggio', $msg);
         $this->assertStringContainsString('Midalot', $msg);
-        $this->assertStringContainsString('midalot.live', $msg);              // esempio del nostro lavoro
-        $this->assertStringContainsString('dedicato ai quiz', $msg);          // specificato che e' un sito di quiz
+        $this->assertStringContainsString('midalot.live/servizi-digitali', $msg); // link alla pagina dei servizi
         $this->assertStringContainsString('siti web', $msg);
         $this->assertStringNotContainsString('marketing', mb_strtolower($msg)); // solo siti, nessun marketing
         $this->assertStringNotContainsString('gestionali', $msg);
@@ -438,6 +437,13 @@ class ProspectsTest extends TestCase
         $this->assertStringNotContainsString("e'", $msg);               // accenti veri, non apostrofi
 
         $this->assertSame('https://www.instagram.com/m/moda_dna', $p->instagram_chat_url);
+        $this->assertSame('https://ig.me/m/moda_dna', $p->instagram_chat_url_mobile); // da telefono apre la chat nell'app
+
+        // Link con parametri per Analytics: sorgente instagram / mezzo dm, settore in utm_campaign, nessun profilo nell'indirizzo.
+        $this->assertStringContainsString('https://midalot.live/servizi-digitali?utm_source=instagram&utm_medium=dm&utm_campaign=clienti', $msg);
+        $this->assertStringNotContainsString('moda_dna', explode('Qui vedi cosa facciamo: ', $msg)[1] ?? '');
+        $conSettore = $this->prospect(['instagram_handle' => 'gioie_rossi', 'sector' => 'Estetica e benessere']);
+        $this->assertStringContainsString('utm_campaign=clienti_estetica_e_benessere', $conSettore->outreach_message);
     }
 
     public function test_il_messaggio_cambia_con_la_situazione_del_sito_e_non_inventa_nulla(): void
