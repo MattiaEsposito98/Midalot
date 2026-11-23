@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\MinigiocoRoundController;
 use App\Http\Controllers\Admin\PeriodLeaderboardController;
 use App\Http\Controllers\Admin\PrizeAwardController;
 use App\Http\Controllers\Admin\ProspectController;
+use App\Http\Controllers\Admin\CampaignVisitController;
 use App\Http\Controllers\Admin\ProspectSearchController;
 use App\Http\Controllers\Admin\QuestionController;
 use App\Http\Controllers\Admin\QuestionDraftController;
@@ -178,6 +179,7 @@ Route::middleware(['auth', 'admin'])
         Route::post('clienti/ricerche', [ProspectSearchController::class, 'store'])->name('prospect-searches.store');
         Route::patch('clienti/ricerche/{search}', [ProspectSearchController::class, 'update'])->name('prospect-searches.update');
         Route::delete('clienti/ricerche/{search}', [ProspectSearchController::class, 'destroy'])->name('prospect-searches.destroy');
+        Route::get('clienti/aperture-link', [CampaignVisitController::class, 'index'])->name('campaign-visits.index');
         Route::get('clienti', [ProspectController::class, 'index'])->name('prospects.index');
         Route::get('clienti/nuovo', [ProspectController::class, 'create'])->name('prospects.create');
         Route::get('clienti/esporta', [ProspectController::class, 'export'])->name('prospects.export');

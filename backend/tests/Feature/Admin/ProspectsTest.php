@@ -429,7 +429,7 @@ class ProspectsTest extends TestCase
         $this->assertStringContainsString('negozio a Napoli', $msg);
         $this->assertStringContainsString('gli ordini li gestisci direttamente in messaggio', $msg);
         $this->assertStringContainsString('Midalot', $msg);
-        $this->assertStringContainsString('midalot.live/servizi-digitali', $msg); // link alla pagina dei servizi
+        $this->assertStringContainsString('midalot.live/ig', $msg); // indirizzo breve (porta ai servizi con origine instagram / dm)
         $this->assertStringContainsString('siti web', $msg);
         $this->assertStringNotContainsString('marketing', mb_strtolower($msg)); // solo siti, nessun marketing
         $this->assertStringNotContainsString('gestionali', $msg);
@@ -439,11 +439,12 @@ class ProspectsTest extends TestCase
         $this->assertSame('https://www.instagram.com/m/moda_dna', $p->instagram_chat_url);
         $this->assertSame('https://ig.me/m/moda_dna', $p->instagram_chat_url_mobile); // da telefono apre la chat nell'app
 
-        // Link con parametri per Analytics: sorgente instagram / mezzo dm, settore in utm_campaign, nessun profilo nell'indirizzo.
-        $this->assertStringContainsString('https://midalot.live/servizi-digitali?utm_source=instagram&utm_medium=dm&utm_campaign=clienti', $msg);
-        $this->assertStringNotContainsString('moda_dna', explode('Qui vedi cosa facciamo: ', $msg)[1] ?? '');
+        // Indirizzo breve e pulito (niente utm visibili): il sito lo porta ai servizi registrando instagram / dm; nessun profilo nell'indirizzo.
+        $this->assertStringContainsString('Qui vedi cosa facciamo: https://midalot.live/ig' . "\n", $msg);
+        $this->assertStringNotContainsString('utm_', $msg);
         $conSettore = $this->prospect(['instagram_handle' => 'gioie_rossi', 'sector' => 'Estetica e benessere']);
-        $this->assertStringContainsString('utm_campaign=clienti_estetica_e_benessere', $conSettore->outreach_message);
+        $this->assertStringContainsString('https://midalot.live/ig/estetica-e-benessere', $conSettore->outreach_message);
+        $this->assertStringNotContainsString('gioie_rossi', explode('Qui vedi cosa facciamo: ', $conSettore->outreach_message)[1]);
     }
 
     public function test_il_messaggio_cambia_con_la_situazione_del_sito_e_non_inventa_nulla(): void

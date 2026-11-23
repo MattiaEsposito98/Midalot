@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AudioProxyController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AvatarController;
 use App\Http\Controllers\Api\ChallengeController;
+use App\Http\Controllers\Api\CampaignVisitController;
 use App\Http\Controllers\Api\CookieConsentController;
 use App\Http\Controllers\Api\EventRequestController;
 use App\Http\Controllers\Api\EmailVerificationController;
@@ -43,6 +44,10 @@ Route::post('/reset-password', [ResetPasswordController::class, 'reset'])
 Route::get('/showcase', [ShowcaseController::class, 'index']);
 
 Route::post('/cookie-consent/track', [CookieConsentController::class, 'store'])
+    ->middleware('throttle:30,1');
+
+// Contatore anonimo delle aperture dei link di campagna (solo campagna + giorno, nessun dato personale).
+Route::post('/campaign-visit', [CampaignVisitController::class, 'store'])
     ->middleware('throttle:30,1');
 
 Route::post('/event-requests', [EventRequestController::class, 'store'])

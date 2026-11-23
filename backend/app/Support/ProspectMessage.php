@@ -41,20 +41,16 @@ class ProspectMessage
     }
 
     /**
-     * Link alla pagina dei servizi con i parametri per Google Analytics (sorgente instagram / mezzo dm).
-     * Il settore sta in utm_campaign perche' il sito invia a Google solo utm_source, utm_medium e utm_campaign.
-     * Nessun nome o profilo nell'indirizzo: solo l'etichetta del settore.
+     * Indirizzo breve e pulito per il messaggio (es. https://midalot.live/ig/gioielleria): il sito lo porta alla
+     * pagina dei servizi registrando l'origine "instagram / dm" con il settore come campagna (utm_campaign),
+     * cosi' nel messaggio non si vedono i parametri. Nessun nome o profilo nell'indirizzo, solo il settore.
+     * Frontend: pages/Campagna/CampagnaDm.jsx.
      */
     public static function trackedLink(Prospect $p): string
     {
-        $sector = Str::slug((string) $p->sector, '_');
-        $campaign = 'clienti' . ($sector !== '' ? '_' . Str::limit($sector, 28, '') : '');
+        $sector = Str::limit(Str::slug((string) $p->sector, '-'), 28, '');
 
-        return 'https://midalot.live/servizi-digitali?' . http_build_query([
-            'utm_source' => 'instagram',
-            'utm_medium' => 'dm',
-            'utm_campaign' => $campaign,
-        ]);
+        return 'https://midalot.live/ig' . ($sector !== '' ? '/' . $sector : '');
     }
 
     /** Il pezzo "perché proprio te", in base a cosa abbiamo verificato. */

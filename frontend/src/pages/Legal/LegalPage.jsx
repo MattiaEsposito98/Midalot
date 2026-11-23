@@ -8,7 +8,7 @@ const pages = {
   privacy: {
     eyebrow: "Informativa privacy",
     title: "Privacy Policy",
-    updated: "Ultimo aggiornamento: 26 agosto 2026",
+    updated: "Ultimo aggiornamento: 23 novembre 2026",
     intro:
       "Questa informativa descrive come Midalot tratta i dati personali degli utenti che usano il sito e le modalita' di gioco Quiz One Shot, Midalario e Training.",
     sections: [
@@ -25,6 +25,7 @@ const pages = {
           "Dati account: nome, nickname, email, password cifrata, eventuale telefono, data di nascita e citta'.",
           "Dati di utilizzo: partecipazione a Quiz One Shot, Midalario e Training, risposte, punteggi, tempi, classifiche degli utenti registrati.",
           "Dati tecnici: indirizzo IP, user agent, log di accesso e informazioni necessarie alla sicurezza del servizio.",
+          "Statistiche anonime: contiamo, in forma aggregata e per giorno, quante volte vengono aperti alcuni link di presentazione del sito (ad esempio quelli con cui presentiamo i servizi digitali alle attivita'). Per questo conteggio non salviamo indirizzo IP, cookie o altri dati che identifichino chi apre il link.",
           "Gli ospiti possono usare i training pubblici: i risultati degli ospiti non vengono salvati nei progressi o nelle classifiche."
         ],
       },

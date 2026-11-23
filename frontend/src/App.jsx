@@ -42,6 +42,7 @@ import ChiSiamo from "./pages/ChiSiamo/ChiSiamo"
 import CreaEvento from "./pages/CreaEvento/CreaEvento"
 import ServiziDigitali from "./pages/ServiziDigitali/ServiziDigitali"
 import Classifiche from "./pages/Classifiche/Classifiche"
+import CampagnaDm from "./pages/Campagna/CampagnaDm"
 import Midalario from "./pages/Midalario/Midalario"
 import MidalarioRoom from "./pages/Midalario/MidalarioRoom"
 import MinigiochiList from "./pages/Minigiochi/MinigiochiList"
@@ -80,6 +81,9 @@ function App() {
       <CookieBanner />
       <AvatarNews />
       <Routes>
+        {/* Indirizzo breve per i messaggi ai clienti: /ig/<settore> -> servizi digitali con origine instagram / dm */}
+        <Route path="/ig/:sector?" element={<CampagnaDm />} />
+
         {/* AREA PUBBLICA */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<Home />} />

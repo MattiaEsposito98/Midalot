@@ -104,6 +104,26 @@ export function captureAcquisition() {
   }
 }
 
+/**
+ * Visita che arriva da un indirizzo breve di campagna (es. /ig/gioielleria nei messaggi diretti):
+ * registra l'origine come se ci fossero gli utm, anche se in sessione c'era gia' qualcos'altro.
+ * Le etichette sono ripulite come tutti i tag (solo lettere, numeri, _ . -).
+ */
+export function captureCampaign({ source, medium, campaign }) {
+  const session = safeStorage("sessionStorage")
+  const cleanSource = cleanTag(source)
+  if (!session || !cleanSource) return
+
+  try {
+    session.setItem(
+      SESSION_KEY,
+      JSON.stringify({ source: cleanSource, medium: cleanTag(medium), campaign: cleanTag(campaign), utm: true })
+    )
+  } catch {
+    // niente da fare
+  }
+}
+
 /** Solo con il consenso ai cookie analitici: conserva la prima origine per 30 giorni. */
 export function persistAcquisition() {
   const local = safeStorage("localStorage")

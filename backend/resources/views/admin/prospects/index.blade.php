@@ -32,6 +32,11 @@
                     <i class="bi bi-map"></i>
                     Ricerche e copertura
                 </a>
+                <a href="{{ route('admin.campaign-visits.index') }}" class="btn btn-outline-secondary btn-sm"
+                    title="Quante volte è stato aperto il link nei messaggi (contatore anonimo)">
+                    <i class="bi bi-cursor"></i>
+                    Aperture link
+                </a>
                 <a href="{{ route('admin.prospects.export', $exportParams) }}" id="prospects-export" class="btn btn-outline-secondary btn-sm"
                     title="Esporta in Excel solo i profili che vedi con i filtri attuali">
                     <i class="bi bi-file-earmark-excel"></i>
