@@ -170,6 +170,32 @@ class Prospect extends Model
         return \App\Support\ProspectMessage::emailBody($this);
     }
 
+    /** Account Gmail da cui si scrivono le email alle aziende (quello del sito: MAIL_FROM_ADDRESS). */
+    public static function senderAccount(): string
+    {
+        return (string) config('mail.from.address');
+    }
+
+    /**
+     * Finestra "Nuovo messaggio" di Gmail gia' compilata e con l'account del sito selezionato (authuser):
+     * si apre in una nuova scheda e l'email la invii tu. Le risposte arrivano a quell'account. Null se manca l'email.
+     */
+    public function getGmailComposeUrlAttribute(): ?string
+    {
+        if (! $this->email) {
+            return null;
+        }
+
+        return 'https://mail.google.com/mail/?' . http_build_query([
+            'authuser' => self::senderAccount(),
+            'view' => 'cm',
+            'fs' => 1,
+            'to' => $this->email,
+            'su' => $this->email_subject,
+            'body' => $this->email_body,
+        ], '', '&', PHP_QUERY_RFC3986);
+    }
+
     /** Link mailto: con destinatario, oggetto e testo gia' compilati (null se manca l'email). */
     public function getMailtoUrlAttribute(): ?string
     {

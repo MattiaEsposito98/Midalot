@@ -134,11 +134,15 @@
                                                     <i class="bi bi-clipboard"></i>
                                                     Copia e apri chat
                                                 </button>
-                                            @elseif ($p->mailto_url)
-                                                <a href="{{ $p->mailto_url }}" class="btn btn-sm btn-success"
-                                                    title="Apre il tuo programma di posta con destinatario, oggetto e testo già compilati: lo invii tu">
+                                            @elseif ($p->gmail_compose_url)
+                                                <a href="{{ $p->gmail_compose_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-success"
+                                                    title="Apre Gmail ({{ \App\Models\Prospect::senderAccount() }}) con destinatario, oggetto e testo già compilati: lo invii tu">
                                                     <i class="bi bi-envelope"></i>
                                                     Scrivi email
+                                                </a>
+                                                <a href="{{ $p->mailto_url }}" class="btn btn-sm btn-outline-secondary"
+                                                    title="Apri invece nel programma di posta del computer o del telefono">
+                                                    <i class="bi bi-box-arrow-up-right"></i>
                                                 </a>
                                                 <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-message="{{ $p->email_subject }}&#10;&#10;{{ $p->email_body }}"
                                                     title="Copia oggetto e testo (se la posta non si apre)">

@@ -331,13 +331,21 @@ class ProspectsTest extends TestCase
         $this->assertStringContainsString('no grazie', $p->email_body); // via d'uscita
         $this->assertStringStartsWith('mailto:info@autoscuolapiave.net?subject=', $p->mailto_url);
 
+        // Gmail: nuovo messaggio gia' compilato con l'account del sito (MAIL_FROM_ADDRESS)
+        config(['mail.from.address' => 'mida72025@gmail.com']);
+        $gmail = $p->gmail_compose_url;
+        $this->assertStringStartsWith('https://mail.google.com/mail/?authuser=mida72025%40gmail.com&view=cm&fs=1&to=info%40autoscuolapiave.net&su=', $gmail);
+        $this->assertStringContainsString('body=Buongiorno%20Autoscuola%20Piave', $gmail);
+        $this->assertNull($this->prospect(['instagram_handle' => null, 'name' => 'Senza email'])->gmail_compose_url);
+
         $html = $this->actingAs($admin)->get(route('admin.prospects.index'))->assertOk()->getContent();
         $this->assertStringContainsString('Scrivi email', $html);
+        $this->assertStringContainsString('https://mail.google.com/mail/?authuser=mida72025%40gmail.com', $html);
         $this->assertStringContainsString('Azienda', $html);
         $this->assertStringNotContainsString('Copia e apri chat', $html);
 
         $this->actingAs($admin)->get(route('admin.prospects.edit', $p))->assertOk()
-            ->assertSee('Email per questa azienda')->assertSee('Apri nella mia email');
+            ->assertSee('Email per questa azienda')->assertSee('Apri in Gmail (mida72025@gmail.com)')->assertSee('Programma di posta');
 
         // Sito che non funziona -> oggetto dedicato; senza email ma con telefono -> pulsante telefono.
         $rotto = $this->prospect(['instagram_handle' => null, 'name' => 'Pit Stop', 'website_status' => 'broken', 'phone' => '02 123456']);

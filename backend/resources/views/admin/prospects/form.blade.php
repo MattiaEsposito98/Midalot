@@ -44,7 +44,7 @@
             <div class="admin-card-header">
                 <div>
                     <h2 class="admin-section-title">Email per questa azienda</h2>
-                    <p class="admin-muted mb-0">Oggetto e testo preparati sui dati dell'azienda: ritoccali come vuoi (le modifiche qui non vengono salvate). L'email la invii tu, dal tuo programma di posta.</p>
+                    <p class="admin-muted mb-0">Oggetto e testo preparati sui dati dell'azienda: ritoccali come vuoi (le modifiche qui non vengono salvate). L'email la invii tu: si apre Gmail con l'account del sito, già compilata.</p>
                 </div>
             </div>
             <div class="admin-card-body">
@@ -59,9 +59,13 @@
                 <textarea id="email-body" class="form-control mb-2" rows="12">{{ $prospect->email_body }}</textarea>
                 <div class="admin-page-actions">
                     @if ($prospect->email)
-                        <a href="#" id="email-open" class="btn btn-success" data-to="{{ $prospect->email }}">
+                        <a href="#" id="email-gmail" class="btn btn-success" data-to="{{ $prospect->email }}" data-account="{{ \App\Models\Prospect::senderAccount() }}">
                             <i class="bi bi-envelope"></i>
-                            Apri nella mia email
+                            Apri in Gmail ({{ \App\Models\Prospect::senderAccount() }})
+                        </a>
+                        <a href="#" id="email-open" class="btn btn-outline-secondary" data-to="{{ $prospect->email }}">
+                            <i class="bi bi-box-arrow-up-right"></i>
+                            Programma di posta
                         </a>
                     @endif
                     <button type="button" class="btn btn-outline-secondary" data-copy-message="" data-copy-source="email-body">
@@ -80,16 +84,37 @@
         </section>
         <script>
             (function () {
-                var link = document.getElementById('email-open');
-                if (!link) { return; }
-                link.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    var subject = document.getElementById('email-subject').value;
-                    var body = document.getElementById('email-body').value.replace(/
+                function fields() {
+                    return {
+                        subject: document.getElementById('email-subject').value,
+                        body: document.getElementById('email-body').value
+                    };
+                }
+
+                var gmail = document.getElementById('email-gmail');
+                if (gmail) {
+                    gmail.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        var f = fields();
+                        // Nuovo messaggio di Gmail con l'account del sito (authuser): lo invii tu dopo averlo riletto.
+                        var url = 'https://mail.google.com/mail/?authuser=' + encodeURIComponent(gmail.dataset.account)
+                            + '&view=cm&fs=1&to=' + encodeURIComponent(gmail.dataset.to)
+                            + '&su=' + encodeURIComponent(f.subject) + '&body=' + encodeURIComponent(f.body);
+                        window.open(url, '_blank', 'noopener');
+                    });
+                }
+
+                var mail = document.getElementById('email-open');
+                if (mail) {
+                    mail.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        var f = fields();
+                        window.location.href = 'mailto:' + mail.dataset.to + '?subject=' + encodeURIComponent(f.subject)
+                            + '&body=' + encodeURIComponent(f.body.replace(/
 /g, '
-');
-                    window.location.href = 'mailto:' + link.dataset.to + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
-                });
+'));
+                    });
+                }
             })();
         </script>
     @endif
