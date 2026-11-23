@@ -38,23 +38,24 @@ function countOpen(campaign) {
 }
 
 /**
- * Indirizzo breve da mettere nei messaggi diretti (es. midalot.live/ig/gioielleria):
- * registra l'origine "instagram / dm" con il settore come campagna e porta alla pagina dei servizi.
- * Cosi' nel messaggio non si vedono i parametri utm e il link non sembra sospetto.
+ * Indirizzo breve da mettere nei messaggi ai clienti, senza parametri visibili:
+ *  - /ig/gioielleria   (messaggi diretti Instagram)  -> origine "instagram / dm", campagna "clienti_gioielleria"
+ *  - /mail/gioielleria (email alle aziende)          -> origine "email / outreach", campagna "email_gioielleria"
+ * Registra l'origine, conta l'apertura in forma anonima e porta alla pagina dei servizi.
  * Non e' indicizzabile (vedi useRouteSeo: solo le pagine in elenco lo sono).
  */
-export default function CampagnaDm() {
+export default function CampagnaDm({ source = "instagram", medium = "dm", prefix = "clienti" }) {
   const { sector } = useParams()
 
   // Gli effetti dei figli partono prima di quelli di App: l'origine e' gia' registrata
   // quando App legge la provenienza, che quindi non la sovrascrive.
   useEffect(() => {
     const tag = sector ? String(sector).replace(/-/g, "_") : ""
-    const campaign = tag ? `clienti_${tag}` : "clienti"
+    const campaign = tag ? `${prefix}_${tag}` : prefix
 
-    captureCampaign({ source: "instagram", medium: "dm", campaign })
+    captureCampaign({ source, medium, campaign })
     countOpen(campaign.toLowerCase().replace(/[^a-z0-9_.-]/g, "").slice(0, 49))
-  }, [sector])
+  }, [sector, source, medium, prefix])
 
   return <Navigate to="/servizi-digitali" replace />
 }

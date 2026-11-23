@@ -46,11 +46,71 @@ class ProspectMessage
      * cosi' nel messaggio non si vedono i parametri. Nessun nome o profilo nell'indirizzo, solo il settore.
      * Frontend: pages/Campagna/CampagnaDm.jsx.
      */
-    public static function trackedLink(Prospect $p): string
+    public static function trackedLink(Prospect $p, string $channel = 'ig'): string
     {
         $sector = Str::limit(Str::slug((string) $p->sector, '-'), 28, '');
+        $channel = $channel === 'mail' ? 'mail' : 'ig';
 
-        return 'https://midalot.live/ig' . ($sector !== '' ? '/' . $sector : '');
+        return 'https://midalot.live/' . $channel . ($sector !== '' ? '/' . $sector : '');
+    }
+
+    /** Oggetto dell'email (azienda senza Instagram): breve e senza trucchi, cambia con la situazione del sito. */
+    public static function emailSubject(Prospect $p): string
+    {
+        $name = self::displayName($p);
+
+        return match ($p->website_status) {
+            'broken' => "Il sito di {$name} non si apre",
+            'outdated' => "Un sito più moderno per {$name}",
+            'yes' => "Una proposta per {$name}",
+            default => "Un sito web per {$name}",
+        };
+    }
+
+    /**
+     * Testo dell'email: chi siamo, perche' scriviamo, cosa potremmo fare (siti, prenotazioni, gestionali su misura)
+     * e come tirarsi fuori. Solo cose verificate; l'invio lo fa una persona, mai in automatico.
+     */
+    public static function emailBody(Prospect $p): string
+    {
+        $name = self::displayName($p);
+
+        $parts = [
+            "Buongiorno {$name},",
+            "ci chiamiamo Midalot (midalot.live): realizziamo siti web e piccoli gestionali su misura per attività e aziende, "
+                . "per farsi trovare online e lavorare con meno telefonate e meno carta.",
+            self::emailSituation($p),
+            self::emailNeed($p),
+            'Qui vedete cosa facciamo: ' . self::trackedLink($p, 'mail'),
+            "Se vi fa piacere ne parliamo, senza impegno e con preventivo gratuito. "
+                . "Se invece non siete interessati, rispondete semplicemente \"no grazie\" e non vi scriveremo più.",
+            "Grazie per l'attenzione e buona giornata,\nil team di Midalot",
+        ];
+
+        return implode("\n\n", array_filter($parts));
+    }
+
+    /** Il pezzo "perche' proprio voi" dell'email, in base a cio' che abbiamo verificato sul sito. */
+    private static function emailSituation(Prospect $p): ?string
+    {
+        return match ($p->website_status) {
+            'broken' => "Abbiamo provato ad aprire il sito indicato online per la vostra attività ma al momento non si apre correttamente: "
+                . "peccato, perché chi vi cerca si ferma lì. Possiamo sistemarlo o rifarlo da zero.",
+            'outdated' => "Il sito che avete potrebbe essere rinnovato: oggi la maggior parte dei clienti arriva dal telefono, "
+                . "e un sito moderno e veloce aiuta a convincerli e a farvi trovare su Google.",
+            'yes' => "Vediamo che avete già un sito: se in futuro volete rinnovarlo o aggiungere strumenti (prenotazioni, preventivi, gestione clienti), siamo a disposizione.",
+            'none', 'link_only' => "Online non abbiamo trovato un sito vostro (solo la scheda su Google o i social): "
+                . "un sito con contatti, orari e servizi aiuta a farsi trovare e a ricevere richieste.",
+            default => null,
+        };
+    }
+
+    /** Una frase sul bisogno specifico, solo se lo abbiamo annotato (es. "prenotazioni delle guide"). */
+    private static function emailNeed(Prospect $p): ?string
+    {
+        $need = trim((string) $p->need);
+
+        return $need === '' ? null : "Per un'attività come la vostra può essere utile anche uno strumento per gestire meglio: {$need}.";
     }
 
     /** Il pezzo "perché proprio te", in base a cosa abbiamo verificato. */
@@ -88,6 +148,6 @@ class ProspectMessage
     {
         $name = trim((string) preg_replace('/\s*\(.*?\)\s*/u', ' ', (string) $p->name));
 
-        return $name !== '' ? $name : $p->instagram_handle;
+        return $name !== '' ? $name : (string) ($p->instagram_handle ?: 'attività');
     }
 }

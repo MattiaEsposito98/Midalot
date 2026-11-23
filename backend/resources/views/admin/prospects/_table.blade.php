@@ -45,11 +45,16 @@
                         @foreach ($prospects as $p)
                             <tr>
                                 <td>
-                                    <a href="{{ $p->instagram_url }}" target="_blank" rel="noopener noreferrer" class="fw-bold">
-                                        <i class="bi bi-instagram"></i> {{ $p->instagram_handle }}
-                                    </a>
-                                    @if ($p->name)
-                                        <div class="small">{{ $p->name }}</div>
+                                    @if ($p->isCompany())
+                                        <span class="fw-bold"><i class="bi bi-building"></i> {{ $p->name }}</span>
+                                        <span class="badge bg-secondary ms-1">Azienda</span>
+                                    @else
+                                        <a href="{{ $p->instagram_url }}" target="_blank" rel="noopener noreferrer" class="fw-bold">
+                                            <i class="bi bi-instagram"></i> {{ $p->instagram_handle }}
+                                        </a>
+                                        @if ($p->name)
+                                            <div class="small">{{ $p->name }}</div>
+                                        @endif
                                     @endif
                                     @if ($p->search)
                                         <div class="small admin-muted">{{ $p->search->name }}</div>
@@ -97,13 +102,13 @@
                                     <form method="POST" action="{{ route('admin.prospects.status', $p) }}" class="d-grid gap-1 js-status-form">
                                         @csrf
                                         @method('PATCH')
-                                        <select name="status" class="form-select form-select-sm" aria-label="Stato di {{ $p->instagram_handle }}">
+                                        <select name="status" class="form-select form-select-sm" aria-label="Stato di {{ $p->display_label }}">
                                             @foreach (Prospect::STATUSES as $key => $label)
                                                 <option value="{{ $key }}" @selected($p->status === $key)>{{ $label }}</option>
                                             @endforeach
                                         </select>
                                         <input type="date" name="follow_up_at" value="{{ optional($p->follow_up_at)->format('Y-m-d') }}"
-                                            class="form-control form-control-sm" title="Promemoria: ricontattare entro" aria-label="Promemoria per {{ $p->instagram_handle }}">
+                                            class="form-control form-control-sm" title="Promemoria: ricontattare entro" aria-label="Promemoria per {{ $p->display_label }}">
                                     </form>
                                     @if ($p->isFollowUpDue())
                                         <span class="badge bg-danger mt-1"><i class="bi bi-alarm"></i> Da ricontattare</span>
@@ -122,12 +127,29 @@
                                 <td>
                                     <div class="admin-actions">
                                         @unless (in_array($p->status, Prospect::CLOSED_STATUSES, true))
-                                            <button type="button" class="btn btn-sm btn-success"
-                                                data-copy-message="{{ $p->outreach_message }}" data-open-url="{{ $p->instagram_chat_url }}" data-open-url-mobile="{{ $p->instagram_chat_url_mobile }}"
-                                                title="Copia il messaggio personalizzato e apre la chat Instagram in una nuova scheda">
-                                                <i class="bi bi-clipboard"></i>
-                                                Copia e apri chat
-                                            </button>
+                                            @if (! $p->isCompany())
+                                                <button type="button" class="btn btn-sm btn-success"
+                                                    data-copy-message="{{ $p->outreach_message }}" data-open-url="{{ $p->instagram_chat_url }}" data-open-url-mobile="{{ $p->instagram_chat_url_mobile }}"
+                                                    title="Copia il messaggio personalizzato e apre la chat Instagram in una nuova scheda">
+                                                    <i class="bi bi-clipboard"></i>
+                                                    Copia e apri chat
+                                                </button>
+                                            @elseif ($p->mailto_url)
+                                                <a href="{{ $p->mailto_url }}" class="btn btn-sm btn-success"
+                                                    title="Apre il tuo programma di posta con destinatario, oggetto e testo già compilati: lo invii tu">
+                                                    <i class="bi bi-envelope"></i>
+                                                    Scrivi email
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" data-copy-message="{{ $p->email_subject }}&#10;&#10;{{ $p->email_body }}"
+                                                    title="Copia oggetto e testo (se la posta non si apre)">
+                                                    <i class="bi bi-clipboard"></i>
+                                                </button>
+                                            @elseif ($p->phone)
+                                                <a href="tel:{{ preg_replace('/[^0-9+]/', '', $p->phone) }}" class="btn btn-sm btn-success" title="Nessuna email: chiama o scrivi su WhatsApp al numero pubblico">
+                                                    <i class="bi bi-telephone"></i>
+                                                    {{ $p->phone }}
+                                                </a>
+                                            @endif
                                         @endunless
                                         <a href="{{ route('admin.prospects.edit', $p) }}" class="btn btn-sm btn-warning">
                                             <i class="bi bi-pencil"></i>
@@ -137,7 +159,7 @@
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="btn btn-sm btn-danger"
-                                                onclick="return confirm('Eliminare definitivamente {{ $p->instagram_handle }} dall\'elenco?')">
+                                                onclick="return confirm('Eliminare definitivamente {{ addslashes(ltrim($p->display_label, '@')) }} dall\'elenco?')">
                                                 <i class="bi bi-trash"></i>
                                             </button>
                                         </form>

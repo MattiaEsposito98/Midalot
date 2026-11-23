@@ -11,7 +11,7 @@
 @section('activeNav', 'prospects')
 
 @section('content')
-    @if ($isEdit)
+    @if ($isEdit && ! $prospect->isCompany())
         <section class="admin-card mb-3">
             <div class="admin-card-header">
                 <div>
@@ -39,14 +39,70 @@
             </div>
         </section>
     @endif
+    @if ($isEdit && $prospect->isCompany())
+        <section class="admin-card mb-3">
+            <div class="admin-card-header">
+                <div>
+                    <h2 class="admin-section-title">Email per questa azienda</h2>
+                    <p class="admin-muted mb-0">Oggetto e testo preparati sui dati dell'azienda: ritoccali come vuoi (le modifiche qui non vengono salvate). L'email la invii tu, dal tuo programma di posta.</p>
+                </div>
+            </div>
+            <div class="admin-card-body">
+                @if ($prospect->email)
+                    <p class="small mb-2">Destinatario: <strong>{{ $prospect->email }}</strong></p>
+                @else
+                    <div class="alert alert-warning small">Manca l'indirizzo email di questa azienda: aggiungilo qui sotto (solo se è pubblico sul loro sito o su Google) per poter scrivere.</div>
+                @endif
+                <label class="form-label small mb-1" for="email-subject">Oggetto</label>
+                <input type="text" id="email-subject" class="form-control mb-2" value="{{ $prospect->email_subject }}">
+                <label class="form-label small mb-1" for="email-body">Testo</label>
+                <textarea id="email-body" class="form-control mb-2" rows="12">{{ $prospect->email_body }}</textarea>
+                <div class="admin-page-actions">
+                    @if ($prospect->email)
+                        <a href="#" id="email-open" class="btn btn-success" data-to="{{ $prospect->email }}">
+                            <i class="bi bi-envelope"></i>
+                            Apri nella mia email
+                        </a>
+                    @endif
+                    <button type="button" class="btn btn-outline-secondary" data-copy-message="" data-copy-source="email-body">
+                        <i class="bi bi-clipboard"></i>
+                        Copia il testo
+                    </button>
+                    @if ($prospect->phone)
+                        <a href="tel:{{ preg_replace('/[^0-9+]/', '', $prospect->phone) }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-telephone"></i>
+                            {{ $prospect->phone }}
+                        </a>
+                    @endif
+                </div>
+                <p class="small admin-muted mt-2 mb-0">Dopo l'invio, segna lo stato "Contattato" (e se serve un promemoria) qui sotto o dall'elenco.</p>
+            </div>
+        </section>
+        <script>
+            (function () {
+                var link = document.getElementById('email-open');
+                if (!link) { return; }
+                link.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    var subject = document.getElementById('email-subject').value;
+                    var body = document.getElementById('email-body').value.replace(/
+/g, '
+');
+                    window.location.href = 'mailto:' + link.dataset.to + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body);
+                });
+            })();
+        </script>
+    @endif
 
     <section class="admin-card">
         <div class="admin-card-header">
             <div>
-                <h2 class="admin-section-title">{{ $isEdit ? '@' . $prospect->instagram_handle : 'Aggiungi un profilo' }}</h2>
+                <h2 class="admin-section-title">{{ $isEdit ? $prospect->display_label : "Aggiungi un profilo o un'azienda" }}</h2>
                 <p class="admin-muted mb-0">
-                    @if ($isEdit)
+                    @if ($isEdit && ! $prospect->isCompany())
                         <a href="{{ $prospect->instagram_url }}" target="_blank" rel="noopener noreferrer"><i class="bi bi-instagram"></i> Apri il profilo su Instagram</a>
+                    @elseif ($isEdit)
+                        Azienda senza profilo Instagram: si contatta via email o telefono.
                     @else
                         Inserisci solo ciò che l'attività mostra pubblicamente nel profilo.
                     @endif
@@ -76,14 +132,14 @@
 
                 <div class="admin-form-grid">
                     <div>
-                        <label class="form-label" for="instagram_handle">Profilo Instagram</label>
-                        <input type="text" id="instagram_handle" name="instagram_handle" class="form-control" required maxlength="120"
+                        <label class="form-label" for="instagram_handle">Profilo Instagram <span class="admin-muted">(facoltativo per le aziende)</span></label>
+                        <input type="text" id="instagram_handle" name="instagram_handle" class="form-control" maxlength="120"
                             value="{{ old('instagram_handle', $prospect->instagram_handle) }}" placeholder="nomeprofilo (anche @nome o link)">
-                        <small class="admin-muted">Si salva in minuscolo, senza @. Deve essere unico.</small>
+                        <small class="admin-muted">Si salva in minuscolo, senza @. Deve essere unico. Se manca, serve il nome dell'azienda.</small>
                     </div>
 
                     <div>
-                        <label class="form-label" for="name">Nome dell'attività</label>
+                        <label class="form-label" for="name">Nome dell'attività <span class="admin-muted">(obbligatorio senza Instagram)</span></label>
                         <input type="text" id="name" name="name" class="form-control" maxlength="150" value="{{ old('name', $prospect->name) }}">
                     </div>
 
@@ -186,6 +242,11 @@
                                 <option value="{{ $key }}" @selected(old('proposal', $prospect->proposal) === $key)>{{ $label }}</option>
                             @endforeach
                         </select>
+                    </div>
+
+                    <div class="full">
+                        <label class="form-label" for="need">Di cosa potrebbe aver bisogno (per le aziende: prenotazioni, preventivi, iscritti, magazzino...)</label>
+                        <input type="text" id="need" name="need" class="form-control" maxlength="200" value="{{ old('need', $prospect->need) }}">
                     </div>
 
                     <div class="full">

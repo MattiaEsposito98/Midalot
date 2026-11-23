@@ -20,7 +20,8 @@ use Illuminate\Support\Facades\DB;
  *         "signals": "...", "proposal": "vetrina|ecommerce|prenotazioni|gestionale", "priority": "A|B|C" }
  *     ]
  *   }
- * Solo "handle" e' obbligatorio. Regione, citta' e settore mancanti si prendono dalla ricerca.
+ * Aziende senza Instagram: al posto di "handle" si da' "name" (+ "city", "email", "phone", "need"): si contattano via email/telefono.
+ * Serve "handle" oppure "name". Regione, citta' e settore mancanti si prendono dalla ricerca.
  * Doppioni (handle gia' presente o ripetuto nel file) scartati e elencati; con errori o --dry-run non si scrive nulla.
  * Nessun invio di messaggi: i contatti si fanno a mano.
  */
@@ -62,7 +63,7 @@ class ImportProspects extends Command
                 continue;
             }
             $handle = Prospect::normalizeHandle((string) ($item['handle'] ?? ''));
-            $label = $handle !== '' ? "#{$n} (@{$handle})" : "#{$n}";
+            $label = $handle !== '' ? "#{$n} (@{$handle})" : "#{$n} (" . ($this->str($item['name'] ?? null) ?? 'senza nome') . ')';
 
             [$row, $itemErrors] = $this->normalizeItem($item, $handle, $searchData);
             foreach ($itemErrors as $msg) {
@@ -72,12 +73,14 @@ class ImportProspects extends Command
                 continue;
             }
 
-            if (isset($seen[$handle])) {
-                $skipped[] = [$handle, 'ripetuto nello stesso file'];
+            // Chiave: profilo Instagram, oppure nome+citta' per le aziende senza profilo.
+            $key = $handle !== '' ? $handle : $this->companyKey($row['name'], $row['city']);
+            if (isset($seen[$key])) {
+                $skipped[] = [$key, 'ripetuto nello stesso file'];
                 continue;
             }
-            $seen[$handle] = true;
-            $rows[$handle] = $row;
+            $seen[$key] = true;
+            $rows[$key] = $row;
         }
 
         if ($errors) {
@@ -90,10 +93,15 @@ class ImportProspects extends Command
         }
 
         // Doppioni rispetto a cio' che e' gia' in elenco.
+        // Profili Instagram: per handle. Aziende senza profilo: per nome + citta'.
         $existing = $rows ? Prospect::whereIn('instagram_handle', array_keys($rows))->pluck('instagram_handle')->all() : [];
-        foreach ($existing as $handle) {
-            $skipped[] = [$handle, 'gia\' presente in elenco'];
-            unset($rows[$handle]);
+        $existing = array_merge($existing, Prospect::whereNull('instagram_handle')->get(['name', 'city'])
+            ->map(fn (Prospect $p) => $this->companyKey($p->name, $p->city))->all());
+        foreach ($existing as $key) {
+            if (isset($rows[$key])) {
+                $skipped[] = [$key, 'gia\' presente in elenco'];
+                unset($rows[$key]);
+            }
         }
 
         $searchExists = $searchData ? ProspectSearch::where('name', $searchData['name'])->exists() : false;
@@ -164,8 +172,13 @@ class ImportProspects extends Command
     {
         $errors = [];
 
-        if ($handle === '' || mb_strlen($handle) > 60 || ! preg_match('/^[a-z0-9._]+$/', $handle)) {
-            $errors[] = 'handle mancante o non valido (solo lettere, numeri, punto e trattino basso)';
+        if ($handle === '') {
+            // Azienda senza Instagram: serve almeno il nome.
+            if ($this->str($item['name'] ?? null) === null) {
+                $errors[] = 'serve "handle" (profilo Instagram) oppure "name" (azienda senza Instagram)';
+            }
+        } elseif (mb_strlen($handle) > 60 || ! preg_match('/^[a-z0-9._]+$/', $handle)) {
+            $errors[] = 'handle non valido (solo lettere, numeri, punto e trattino basso)';
         }
 
         $followers = $item['followers'] ?? null;
@@ -237,7 +250,7 @@ class ImportProspects extends Command
         };
 
         $row = [
-            'instagram_handle' => $handle,
+            'instagram_handle' => $handle !== '' ? $handle : null,
             'name' => $limited('name', 150),
             'followers' => $followers,
             'region' => $region,
@@ -253,11 +266,18 @@ class ImportProspects extends Command
             'activity' => $activity,
             'signals' => $limited('signals', 2000),
             'proposal' => $proposal,
+            'need' => $limited('need', 200),
             'priority' => $priority,
             'status' => 'to_contact',
         ];
 
         return [$row, $errors];
+    }
+
+    /** Chiave per riconoscere un'azienda senza Instagram: nome + citta' in minuscolo. */
+    private function companyKey(?string $name, ?string $city): string
+    {
+        return 'azienda:' . mb_strtolower(trim((string) $name)) . ' (' . mb_strtolower(trim((string) $city)) . ')';
     }
 
     private function str(mixed $value): ?string
@@ -280,9 +300,9 @@ class ImportProspects extends Command
         }
 
         $table = [];
-        foreach ($rows as $handle => $r) {
+        foreach ($rows as $key => $r) {
             $table[] = [
-                '@' . $handle,
+                $r['instagram_handle'] ? '@' . $r['instagram_handle'] : ($r['name'] . ' (azienda)'),
                 $r['followers'] ?? '-',
                 $r['city'] ?? '-',
                 $r['sector'] ?? '-',
@@ -296,8 +316,8 @@ class ImportProspects extends Command
         }
 
         $this->line('Nuovi profili: ' . count($rows) . ' | scartati come doppioni: ' . count($skipped));
-        foreach ($skipped as [$handle, $why]) {
-            $this->warn(" scartato @{$handle} -> {$why}");
+        foreach ($skipped as [$key, $why]) {
+            $this->warn(' scartato ' . (str_starts_with($key, 'azienda:') ? substr($key, 8) : '@' . $key) . " -> {$why}");
         }
     }
 }

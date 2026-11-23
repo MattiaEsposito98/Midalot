@@ -291,6 +291,119 @@ class ProspectsTest extends TestCase
         $this->assertSame(0, Prospect::count());
     }
 
+    // --- aziende senza Instagram (contatto via email o telefono) -------------
+
+    public function test_azienda_senza_instagram_si_crea_col_nome_e_il_profilo_e_facoltativo(): void
+    {
+        $admin = $this->createAdmin();
+
+        $this->actingAs($admin)->post(route('admin.prospects.store'), $this->payload(['instagram_handle' => '', 'name' => '']))
+            ->assertSessionHasErrors('name'); // senza profilo serve almeno il nome
+
+        $this->actingAs($admin)->post(route('admin.prospects.store'), $this->payload([
+            'instagram_handle' => '', 'name' => 'Autoscuola Piave', 'city' => 'Milano', 'email' => 'info@autoscuolapiave.net', 'need' => 'iscritti e guide',
+        ]))->assertSessionHasNoErrors();
+        $this->actingAs($admin)->post(route('admin.prospects.store'), $this->payload(['instagram_handle' => '', 'name' => 'Officina Rossi']))
+            ->assertSessionHasNoErrors(); // piu' aziende senza profilo convivono
+
+        $p = Prospect::where('name', 'Autoscuola Piave')->first();
+        $this->assertNull($p->instagram_handle);
+        $this->assertTrue($p->isCompany());
+        $this->assertNull($p->instagram_url);
+        $this->assertSame('Autoscuola Piave', $p->display_label);
+        $this->assertSame(2, Prospect::whereNull('instagram_handle')->count());
+    }
+
+    public function test_azienda_con_email_ha_il_pulsante_scrivi_email_con_oggetto_e_testo_pronti(): void
+    {
+        $admin = $this->createAdmin();
+        $p = $this->prospect([
+            'instagram_handle' => null, 'name' => 'Autoscuola Piave', 'city' => 'Milano', 'sector' => 'Autoscuole',
+            'email' => 'info@autoscuolapiave.net', 'website_status' => 'outdated', 'need' => 'iscritti e prenotazione delle guide',
+        ]);
+
+        $this->assertSame('Un sito più moderno per Autoscuola Piave', $p->email_subject);
+        $this->assertStringContainsString('Buongiorno Autoscuola Piave,', $p->email_body);
+        $this->assertStringContainsString('potrebbe essere rinnovato', $p->email_body);
+        $this->assertStringContainsString('iscritti e prenotazione delle guide', $p->email_body);
+        $this->assertStringContainsString('https://midalot.live/mail/autoscuole', $p->email_body);
+        $this->assertStringNotContainsString('utm_', $p->email_body);
+        $this->assertStringContainsString('no grazie', $p->email_body); // via d'uscita
+        $this->assertStringStartsWith('mailto:info@autoscuolapiave.net?subject=', $p->mailto_url);
+
+        $html = $this->actingAs($admin)->get(route('admin.prospects.index'))->assertOk()->getContent();
+        $this->assertStringContainsString('Scrivi email', $html);
+        $this->assertStringContainsString('Azienda', $html);
+        $this->assertStringNotContainsString('Copia e apri chat', $html);
+
+        $this->actingAs($admin)->get(route('admin.prospects.edit', $p))->assertOk()
+            ->assertSee('Email per questa azienda')->assertSee('Apri nella mia email');
+
+        // Sito che non funziona -> oggetto dedicato; senza email ma con telefono -> pulsante telefono.
+        $rotto = $this->prospect(['instagram_handle' => null, 'name' => 'Pit Stop', 'website_status' => 'broken', 'phone' => '02 123456']);
+        $this->assertSame('Il sito di Pit Stop non si apre', $rotto->email_subject);
+        $this->assertNull($rotto->mailto_url);
+        $this->actingAs($admin)->get(route('admin.prospects.index'))->assertSee('tel:02123456', false);
+    }
+
+    public function test_filtro_per_tipo_instagram_o_azienda(): void
+    {
+        $admin = $this->createAdmin();
+        $this->prospect(['instagram_handle' => 'solo_instagram']);
+        $this->prospect(['instagram_handle' => null, 'name' => 'Solo Azienda']);
+
+        $this->actingAs($admin)->get(route('admin.prospects.index', ['type' => 'company']))
+            ->assertSee('Solo Azienda')->assertDontSee('solo_instagram');
+        $this->actingAs($admin)->get(route('admin.prospects.index', ['type' => 'instagram']))
+            ->assertSee('solo_instagram')->assertDontSee('Solo Azienda');
+    }
+
+    public function test_import_di_aziende_senza_instagram_con_doppioni_per_nome_e_citta(): void
+    {
+        $this->prospect(['instagram_handle' => null, 'name' => 'Autoscuola Piave', 'city' => 'Milano']);
+
+        $file = $this->writeJson($this->importData([
+            ['handle' => null, 'name' => 'Autoscuola Piave', 'city' => 'Milano'],                       // gia' presente
+            ['name' => 'Pit Stop Milano', 'city' => 'Milano', 'email' => 'info@pitstop.example', 'need' => 'gestione interventi'],
+            ['name' => 'pit stop milano', 'city' => 'MILANO'],                                           // ripetuto nel file
+            ['name' => 'Pit Stop Milano', 'city' => 'Torino'],                                           // altra citta': ok
+            ['handle' => 'profilo_vero'],
+        ]));
+
+        $this->artisan('app:import-prospects', ['file' => $file])->assertSuccessful();
+
+        $this->assertSame(1, Prospect::where('name', 'Autoscuola Piave')->count());
+        $this->assertSame(2, Prospect::where('name', 'Pit Stop Milano')->count());
+        $this->assertSame('gestione interventi', Prospect::where('email', 'info@pitstop.example')->value('need'));
+        $this->assertNotNull(Prospect::where('instagram_handle', 'profilo_vero')->first());
+
+        // Senza handle e senza nome: errore, nessuna scrittura.
+        $count = Prospect::count();
+        $this->artisan('app:import-prospects', ['file' => $this->writeJson($this->importData([['city' => 'Roma']]))])->assertFailed();
+        $this->assertSame($count, Prospect::count());
+    }
+
+    public function test_export_include_le_aziende_e_il_bisogno(): void
+    {
+        $admin = $this->createAdmin();
+        $this->prospect(['instagram_handle' => null, 'name' => 'Autoscuola Piave', 'email' => 'info@autoscuolapiave.net', 'need' => 'iscritti']);
+
+        $response = $this->actingAs($admin)->get(route('admin.prospects.export'));
+        $response->assertOk();
+
+        $file = tempnam(sys_get_temp_dir(), 'x');
+        file_put_contents($file, $response->streamedContent());
+        $zip = new \ZipArchive();
+        $this->assertTrue($zip->open($file) === true);
+        $sheet = $zip->getFromName('xl/worksheets/sheet1.xml');
+        $zip->close();
+        @unlink($file);
+
+        $this->assertStringContainsString('Autoscuola Piave', $sheet);
+        $this->assertStringContainsString('Bisogno', $sheet);
+        $this->assertStringContainsString('iscritti', $sheet);
+    }
+
     // --- aggiornamenti senza ricaricare la pagina --------------------------
 
     public function test_elenco_ajax_restituisce_solo_le_parti_che_cambiano(): void

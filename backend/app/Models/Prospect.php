@@ -69,7 +69,7 @@ class Prospect extends Model
     protected $fillable = [
         'prospect_search_id', 'instagram_handle', 'name', 'followers', 'region', 'city', 'sector', 'bio',
         'website_url', 'email', 'phone', 'has_physical_store', 'orders_in_dm', 'website_status', 'activity',
-        'signals', 'proposal', 'priority', 'status', 'contacted_at', 'contacted_by', 'follow_up_at', 'notes',
+        'signals', 'proposal', 'need', 'priority', 'status', 'contacted_at', 'contacted_by', 'follow_up_at', 'notes',
     ];
 
     protected $casts = [
@@ -121,30 +121,64 @@ class Prospect extends Model
         return filter_var($url, FILTER_VALIDATE_URL) && preg_match('#^https?://#i', $url) ? $url : null;
     }
 
-    public function getInstagramUrlAttribute(): string
+    /** Azienda trovata fuori da Instagram: nessun profilo, si contatta via email o telefono. */
+    public function isCompany(): bool
     {
-        return 'https://www.instagram.com/' . $this->instagram_handle . '/';
+        return $this->instagram_handle === null || $this->instagram_handle === '';
+    }
+
+    /** Come chiamarla nei messaggi di servizio: "@profilo" oppure il nome dell'azienda. */
+    public function getDisplayLabelAttribute(): string
+    {
+        return $this->isCompany() ? (string) ($this->name ?: 'azienda') : '@' . $this->instagram_handle;
+    }
+
+    public function getInstagramUrlAttribute(): ?string
+    {
+        return $this->isCompany() ? null : 'https://www.instagram.com/' . $this->instagram_handle . '/';
     }
 
     /** Link che apre direttamente la chat Instagram con questo profilo. Usa instagram.com/m/: ig.me/m/ andava in timeout dalla rete dell utente (2026-11-20). */
-    public function getInstagramChatUrlAttribute(): string
+    public function getInstagramChatUrlAttribute(): ?string
     {
-        return 'https://www.instagram.com/m/' . $this->instagram_handle;
+        return $this->isCompany() ? null : 'https://www.instagram.com/m/' . $this->instagram_handle;
     }
 
     /**
      * Da telefono instagram.com/m/ apre l'app ma solo sulla home: li' funziona il link breve ig.me,
      * che l'app riconosce e porta alla chat (da computer invece ig.me puo' essere bloccato).
      */
-    public function getInstagramChatUrlMobileAttribute(): string
+    public function getInstagramChatUrlMobileAttribute(): ?string
     {
-        return 'https://ig.me/m/' . $this->instagram_handle;
+        return $this->isCompany() ? null : 'https://ig.me/m/' . $this->instagram_handle;
     }
 
     /** Bozza del primo messaggio personalizzato (da inviare a mano, mai in automatico). */
     public function getOutreachMessageAttribute(): string
     {
         return \App\Support\ProspectMessage::for($this);
+    }
+
+    /** Oggetto e testo dell'email pronta (per chi non ha Instagram): si apre nel programma di posta, si invia a mano. */
+    public function getEmailSubjectAttribute(): string
+    {
+        return \App\Support\ProspectMessage::emailSubject($this);
+    }
+
+    public function getEmailBodyAttribute(): string
+    {
+        return \App\Support\ProspectMessage::emailBody($this);
+    }
+
+    /** Link mailto: con destinatario, oggetto e testo gia' compilati (null se manca l'email). */
+    public function getMailtoUrlAttribute(): ?string
+    {
+        if (! $this->email) {
+            return null;
+        }
+
+        return 'mailto:' . $this->email . '?subject=' . rawurlencode($this->email_subject)
+            . '&body=' . rawurlencode(str_replace("\n", "\r\n", $this->email_body));
     }
 
     public function isFollowUpDue(): bool

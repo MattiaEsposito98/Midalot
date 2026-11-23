@@ -16,7 +16,7 @@ class CampaignVisit extends Model
     /** Solo etichette di campagna "clienti" o "clienti_<settore>": nient'altro puo' essere contato. */
     public static function isValidCampaign(string $campaign): bool
     {
-        return (bool) preg_match('/^clienti(_[a-z0-9_.-]{1,40})?$/', $campaign);
+        return (bool) preg_match('/^(clienti|email)(_[a-z0-9_.-]{1,40})?$/', $campaign);
     }
 
     /** Aggiunge un'apertura per la campagna nel giorno di oggi (ora italiana). */

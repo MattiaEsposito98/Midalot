@@ -83,6 +83,7 @@ function App() {
       <Routes>
         {/* Indirizzo breve per i messaggi ai clienti: /ig/<settore> -> servizi digitali con origine instagram / dm */}
         <Route path="/ig/:sector?" element={<CampagnaDm />} />
+        <Route path="/mail/:sector?" element={<CampagnaDm source="email" medium="outreach" prefix="email" />} />
 
         {/* AREA PUBBLICA */}
         <Route element={<PublicLayout />}>

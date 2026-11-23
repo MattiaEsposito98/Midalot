@@ -125,15 +125,15 @@ class ProspectController extends Controller
         $prospect->fill($this->applyContactRules($changes, $prospect, $request))->save();
 
         if ($request->expectsJson()) {
-            return response()->json(['message' => "{$prospect->instagram_handle}: salvato."]);
+            return response()->json(['message' => "{$prospect->display_label}: salvato."]);
         }
 
-        return back()->with('success', "{$prospect->instagram_handle}: stato aggiornato.");
+        return back()->with('success', "{$prospect->display_label}: stato aggiornato.");
     }
 
     public function destroy(Request $request, Prospect $prospect)
     {
-        $handle = $prospect->instagram_handle;
+        $handle = ltrim($prospect->display_label, '@');
         $prospect->delete();
 
         if ($request->expectsJson()) {
@@ -144,7 +144,7 @@ class ProspectController extends Controller
     }
 
     private const EXPORT_HEADERS = ['Profilo', 'Link Instagram', 'Nome', 'Follower', 'Regione', 'Citta', 'Settore', 'Sito web', 'Email', 'Telefono',
-        'Negozio fisico', 'Ordini in DM', 'Stato sito', 'Attivita', 'Proposta', 'Priorita', 'Stato', 'Contattato il', 'Promemoria', 'Ricerca', 'Segnali', 'Note'];
+        'Negozio fisico', 'Ordini in DM', 'Stato sito', 'Attivita', 'Proposta', 'Priorita', 'Stato', 'Contattato il', 'Promemoria', 'Ricerca', 'Bisogno', 'Segnali', 'Note'];
 
     /** Esporta i profili del filtro corrente: Excel (.xlsx, colonne dimensionate sul contenuto). */
     public function export(Request $request): StreamedResponse
@@ -162,14 +162,14 @@ class ProspectController extends Controller
     private function exportRow(Prospect $p): array
     {
         return [
-            '@' . $p->instagram_handle, $p->instagram_url, $p->name, $p->followers, $p->region, $p->city, $p->sector,
+            $p->isCompany() ? (string) $p->name : '@' . $p->instagram_handle, (string) $p->instagram_url, $p->name, $p->followers, $p->region, $p->city, $p->sector,
             $p->website_url, $p->email, $p->phone,
             $p->has_physical_store === null ? '' : ($p->has_physical_store ? 'si' : 'no'),
             $p->orders_in_dm === null ? '' : ($p->orders_in_dm ? 'si' : 'no'),
             Prospect::WEBSITE_STATUSES[$p->website_status] ?? '', Prospect::ACTIVITIES[$p->activity] ?? '',
             Prospect::PROPOSALS[$p->proposal] ?? '', $p->priority, Prospect::STATUSES[$p->status] ?? '',
             optional($p->contacted_at)->format('d/m/Y'), optional($p->follow_up_at)->format('d/m/Y'),
-            optional($p->search)->name, $p->signals, $p->notes,
+            optional($p->search)->name, $p->need, $p->signals, $p->notes,
         ];
     }
 
@@ -178,7 +178,7 @@ class ProspectController extends Controller
     /** @return array<string, string> */
     private function filters(Request $request): array
     {
-        $keys = ['q', 'region', 'city', 'sector', 'status', 'priority', 'proposal', 'website_status', 'activity', 'contacted', 'follow_up', 'search_id', 'min_followers', 'max_followers'];
+        $keys = ['q', 'region', 'city', 'sector', 'status', 'priority', 'proposal', 'website_status', 'activity', 'contacted', 'follow_up', 'search_id', 'min_followers', 'max_followers', 'type'];
         $filters = [];
         foreach ($keys as $key) {
             $value = $request->query($key);
@@ -198,6 +198,8 @@ class ProspectController extends Controller
             ->when($f['region'] !== '', fn (Builder $q) => $q->where('region', $f['region']))
             ->when($f['city'] !== '', fn (Builder $q) => $q->where('city', $f['city']))
             ->when($f['sector'] !== '', fn (Builder $q) => $q->where('sector', $f['sector']))
+            ->when($f['type'] === 'company', fn (Builder $q) => $q->whereNull('instagram_handle'))
+            ->when($f['type'] === 'instagram', fn (Builder $q) => $q->whereNotNull('instagram_handle'))
             ->when($f['status'] !== '', fn (Builder $q) => $q->where('status', $f['status']))
             ->when($f['priority'] !== '', fn (Builder $q) => $q->where('priority', $f['priority']))
             ->when($f['proposal'] !== '', fn (Builder $q) => $q->where('proposal', $f['proposal']))
@@ -230,11 +232,12 @@ class ProspectController extends Controller
 
     private function validated(Request $request, ?Prospect $prospect = null): array
     {
-        $request->merge(['instagram_handle' => Prospect::normalizeHandle((string) $request->input('instagram_handle'))]);
+        $handle = Prospect::normalizeHandle((string) $request->input('instagram_handle'));
+        $request->merge(['instagram_handle' => $handle === '' ? null : $handle]);
 
         $data = $request->validate([
-            'instagram_handle' => ['required', 'string', 'max:60', 'regex:/^[a-z0-9._]+$/', Rule::unique('prospects', 'instagram_handle')->ignore($prospect?->id)],
-            'name' => ['nullable', 'string', 'max:150'],
+            'instagram_handle' => ['nullable', 'string', 'max:60', 'regex:/^[a-z0-9._]+$/', Rule::unique('prospects', 'instagram_handle')->ignore($prospect?->id)],
+            'name' => ['required_without:instagram_handle', 'nullable', 'string', 'max:150'],
             'followers' => ['nullable', 'integer', 'min:0', 'max:100000000'],
             'region' => ['nullable', 'string', 'max:40'],
             'city' => ['nullable', 'string', 'max:80'],
@@ -249,6 +252,7 @@ class ProspectController extends Controller
             'activity' => ['required', Rule::in(array_keys(Prospect::ACTIVITIES))],
             'signals' => ['nullable', 'string', 'max:2000'],
             'proposal' => ['nullable', Rule::in(array_keys(Prospect::PROPOSALS))],
+            'need' => ['nullable', 'string', 'max:200'],
             'priority' => ['required', Rule::in(array_keys(Prospect::PRIORITIES))],
             'status' => ['required', Rule::in(array_keys(Prospect::STATUSES))],
             'follow_up_at' => ['nullable', 'date'],
@@ -257,6 +261,7 @@ class ProspectController extends Controller
         ], [
             'instagram_handle.regex' => 'Il nome del profilo puo\' contenere solo lettere minuscole, numeri, punto e trattino basso.',
             'instagram_handle.unique' => 'Questo profilo e\' gia\' nell\'elenco.',
+            'name.required_without' => 'Senza profilo Instagram serve almeno il nome dell\'azienda.',
         ]);
 
         $data['website_url'] = Prospect::safeUrl($data['website_url'] ?? null);

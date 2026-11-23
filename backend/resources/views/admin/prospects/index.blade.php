@@ -120,6 +120,13 @@
                     </select>
                 </div>
                 <div class="col-auto">
+                    <select class="form-select" name="type" aria-label="Tipo di contatto">
+                        <option value="">Tipo: tutti</option>
+                        <option value="instagram" @selected($filters['type'] === 'instagram')>Profili Instagram</option>
+                        <option value="company" @selected($filters['type'] === 'company')>Aziende (email/telefono)</option>
+                    </select>
+                </div>
+                <div class="col-auto">
                     <select class="form-select" name="contacted">
                         <option value="">Contatto: tutti</option>
                         <option value="no" @selected($filters['contacted'] === 'no')>Mai contattati</option>
