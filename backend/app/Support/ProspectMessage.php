@@ -20,14 +20,17 @@ class ProspectMessage
     public static function for(Prospect $p): string
     {
         $name = self::displayName($p);
-        $hook = ($p->has_physical_store && $p->city) ? " e il tuo negozio a {$p->city}" : '';
 
-        $openings = [
-            "Ciao {$name}, ti scrivo da Midalot (@mida.lot): ho visto il tuo profilo{$hook}.",
-            "Buongiorno {$name}, siamo Midalot (@mida.lot). Abbiamo visto il tuo profilo{$hook} e volevamo presentarci.",
-            "Ciao {$name}! Siamo Midalot (@mida.lot) e ci è capitato di vedere il tuo profilo{$hook}.",
+        // Il negozio fisico si cita SOLO se e' verificato (indirizzo in bio) e c'e' la citta': nel dubbio non se ne parla.
+        $hook = ($p->has_physical_store === true && $p->city) ? " e il tuo negozio a {$p->city}" : '';
+
+        // Si apre sempre cosi': "Ciao, sono Antonio di Midalot". Cambia solo la seconda frase (stabile per profilo).
+        $seconds = [
+            "Ho visto il tuo profilo{$hook} e volevo presentarmi.",
+            "Mi è capitato di vedere il tuo profilo{$hook}.",
+            "Ti scrivo dopo aver visto il tuo profilo{$hook}.",
         ];
-        $opening = $openings[crc32($p->instagram_handle) % count($openings)];
+        $opening = "Ciao {$name}, sono Antonio di Midalot (@mida.lot). " . $seconds[crc32((string) $p->instagram_handle) % count($seconds)];
 
         $parts = [
             $opening,
@@ -76,8 +79,8 @@ class ProspectMessage
         $name = self::displayName($p);
 
         $parts = [
-            "Buongiorno {$name},",
-            "ci chiamiamo Midalot (midalot.live): realizziamo siti web e piccoli gestionali su misura per attività e aziende, "
+            "Buongiorno {$name}, sono Antonio di Midalot (midalot.live).",
+            "Realizziamo siti web e piccoli gestionali su misura per attività e aziende, "
                 . "per farsi trovare online e lavorare con meno telefonate e meno carta.",
             self::emailSituation($p),
             self::emailNeed($p),

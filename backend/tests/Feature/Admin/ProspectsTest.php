@@ -323,7 +323,7 @@ class ProspectsTest extends TestCase
         ]);
 
         $this->assertSame('Un sito più moderno per Autoscuola Piave', $p->email_subject);
-        $this->assertStringContainsString('Buongiorno Autoscuola Piave,', $p->email_body);
+        $this->assertStringContainsString('Buongiorno Autoscuola Piave, sono Antonio di Midalot', $p->email_body);
         $this->assertStringContainsString('potrebbe essere rinnovato', $p->email_body);
         $this->assertStringContainsString('iscritti e prenotazione delle guide', $p->email_body);
         $this->assertStringContainsString('https://midalot.live/mail/autoscuole', $p->email_body);
@@ -335,7 +335,7 @@ class ProspectsTest extends TestCase
         config(['mail.from.address' => 'mida72025@gmail.com']);
         $gmail = $p->gmail_compose_url;
         $this->assertStringStartsWith('https://mail.google.com/mail/?authuser=mida72025%40gmail.com&view=cm&fs=1&to=info%40autoscuolapiave.net&su=', $gmail);
-        $this->assertStringContainsString('body=Buongiorno%20Autoscuola%20Piave', $gmail);
+        $this->assertStringContainsString('body=Buongiorno%20Autoscuola%20Piave%2C%20sono%20Antonio', $gmail);
         $this->assertNull($this->prospect(['instagram_handle' => null, 'name' => 'Senza email'])->gmail_compose_url);
 
         $html = $this->actingAs($admin)->get(route('admin.prospects.index'))->assertOk()->getContent();
@@ -548,6 +548,8 @@ class ProspectsTest extends TestCase
         $this->assertStringContainsString('DNA Moda', $msg);
         $this->assertStringNotContainsString('(donna', $msg);          // niente testo tra parentesi nel saluto
         $this->assertStringContainsString('negozio a Napoli', $msg);
+        $this->assertStringStartsWith('Ciao DNA Moda, sono Antonio di Midalot (@mida.lot).', $msg); // apertura fissa
+        $this->assertStringNotContainsString('negozio', $this->prospect(['instagram_handle' => 'forse_online', 'city' => 'Napoli', 'has_physical_store' => null])->outreach_message); // non verificato: non si cita
         $this->assertStringContainsString('gli ordini li gestisci direttamente in messaggio', $msg);
         $this->assertStringContainsString('Midalot', $msg);
         $this->assertStringContainsString('midalot.live/ig', $msg); // indirizzo breve (porta ai servizi con origine instagram / dm)
